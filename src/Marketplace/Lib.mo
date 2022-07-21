@@ -35,26 +35,26 @@ module {
     private var _nextSubAccount : Nat  = state._nextSubAccountState;
     
     public func toStable () : {
-      _transactionsState : [Types.Transaction];
-      _tokenSettlementState : [(Types.TokenIndex, Types.Settlement)];
-      _usedPaymentAddressessState : [(Types.AccountIdentifier, Principal, Types.SubAccount)];
-      _paymentsState : [(Principal, [Types.SubAccount])];
-      _tokenListingState : [(Types.TokenIndex, Types.Listing)];
-      _disbursementsState : [(Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)];
-      _nextSubAccountState : Nat
+      transactionsState : [Types.Transaction];
+      tokenSettlementState : [(Types.TokenIndex, Types.Settlement)];
+      usedPaymentAddressessState : [(Types.AccountIdentifier, Principal, Types.SubAccount)];
+      paymentsState : [(Principal, [Types.SubAccount])];
+      tokenListingState : [(Types.TokenIndex, Types.Listing)];
+      disbursementsState : [(Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)];
+      nextSubAccountState : Nat
     } {
       return {
-        _tokenSettlementState = Iter.toArray(_tokenSettlement.entries());
-        _transactionsState = _transactions.toArray();
-        _paymentsState = Iter.toArray(Iter.map<(Principal, Buffer.Buffer<Types.SubAccount>), (Principal, [Types.SubAccount])>(
+        tokenSettlementState = Iter.toArray(_tokenSettlement.entries());
+        transactionsState = _transactions.toArray();
+        paymentsState = Iter.toArray(Iter.map<(Principal, Buffer.Buffer<Types.SubAccount>), (Principal, [Types.SubAccount])>(
           _payments.entries(), 
           func (payment) {
             return (payment.0, payment.1.toArray());
         }));
-        _usedPaymentAddressessState = _usedPaymentAddressess.toArray();
-        _tokenListingState = Iter.toArray(_tokenListing.entries());
-        _disbursementsState = List.toArray(_disbursements);
-        _nextSubAccountState = _nextSubAccount;
+        usedPaymentAddressessState = _usedPaymentAddressess.toArray();
+        tokenListingState = Iter.toArray(_tokenListing.entries());
+        disbursementsState = List.toArray(_disbursements);
+        nextSubAccountState = _nextSubAccount;
       }
     };
     

@@ -25,24 +25,24 @@ module {
 
     
     public func toStable() : {
-      _tokenMetadataState : [(Types.TokenIndex, Types.Metadata)] ;
-      _ownersState : [(Types.AccountIdentifier, [Types.TokenIndex])];
-      _registryState : [(Types.TokenIndex, Types.AccountIdentifier)];
-      _nextTokenIdState : Types.TokenIndex;
-      _minterState : Principal;
-      _supplyState : Types.Balance;
+      tokenMetadataState : [(Types.TokenIndex, Types.Metadata)] ;
+      ownersState : [(Types.AccountIdentifier, [Types.TokenIndex])];
+      registryState : [(Types.TokenIndex, Types.AccountIdentifier)];
+      nextTokenIdState : Types.TokenIndex;
+      minterState : Principal;
+      supplyState : Types.Balance;
     } {
       return {
-        _tokenMetadataState = Iter.toArray(_tokenMetadata.entries());
-        _ownersState = Iter.toArray(Iter.map<(Types.AccountIdentifier, Buffer.Buffer<Types.TokenIndex>), (Types.AccountIdentifier, [Types.TokenIndex])>(
+        tokenMetadataState = Iter.toArray(_tokenMetadata.entries());
+        ownersState = Iter.toArray(Iter.map<(Types.AccountIdentifier, Buffer.Buffer<Types.TokenIndex>), (Types.AccountIdentifier, [Types.TokenIndex])>(
           _owners.entries(), 
           func (owner) {
             return (owner.0, owner.1.toArray());
         }));
-        _registryState = Iter.toArray(_registry.entries());
-        _nextTokenIdState = _nextTokenId;
-        _minterState = _minter;
-        _supplyState = _supply;
+        registryState = Iter.toArray(_registry.entries());
+        nextTokenIdState = _nextTokenId;
+        minterState = _minter;
+        supplyState = _supply;
       }
     };
 

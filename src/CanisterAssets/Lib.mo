@@ -19,10 +19,10 @@ module {
     private var _assets: Buffer.Buffer<Types.Asset> = Utils.bufferFromArray(state._assetsState);
 
     public func toStable() : {
-      _assetsState : [Types.Asset]; 
+      assetsState : [Types.Asset]; 
     } {
       return {
-        _assetsState = _assets.toArray();
+        assetsState = _assets.toArray();
       }
     };
 
