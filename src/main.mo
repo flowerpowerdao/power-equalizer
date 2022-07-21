@@ -82,8 +82,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
   private stable var _tokensForSaleState : [TokenTypes.TokenIndex] = [];
   private stable var _whitelistState : [AccountIdentifier] = [];
   private stable var _soldIcpState : Nat64 = 0;
-  private stable var _disbursementsState : [(TokenTypes.TokenIndex, AccountIdentifier, SubAccount, Nat64)] = [];
-  private stable var _nextSubAccountState : Nat = 0;
 
  // Marketplace
 	private stable var _transactionsState : [MarketplaceTypes.Transaction] = [];
@@ -91,6 +89,8 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
 	private stable var _usedPaymentAddressessState : [(AccountIdentifier, Principal, TokenTypes.SubAccount)] = [];
 	private stable var _paymentsState : [(Principal, [TokenTypes.SubAccount])] = [];
 	private stable var _tokenListingState : [(TokenTypes.TokenIndex, MarketplaceTypes.Listing)] = [];
+  private stable var _disbursementsState : [(TokenTypes.TokenIndex, AccountIdentifier, SubAccount, Nat64)] = [];
+  private stable var _nextSubAccountState : Nat = 0;
 
  // Assets
 	private stable var _assetsState : [AssetsTypes.Asset] = [];
@@ -105,39 +105,63 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
   system func preupgrade() {
    // Tokens  
     let {
-      _tokenMetadataState;
-      _ownersState;
-      _registryState;
-      _nextTokenIdState;
-      _minterState;
-      _supplyState;
+      tokenMetadataState;
+      ownersState;
+      registryState;
+      nextTokenIdState;
+      minterState;
+      supplyState;
     } = _Tokens.toStable();
+
+    _tokenMetadataState := tokenMetadataState;
+    _ownersState := ownersState;
+    _registryState := registryState;
+    _nextTokenIdState := nextTokenIdState;
+    _minterState := minterState;
+    _supplyState := supplyState;
 
    // Sale
     let { 
-      _saleTransactionsState; 
-      _salesSettlementsState;
-      _failedSalesState; 
-      _tokensForSaleState; 
-      _whitelistState;
-      _soldIcpState;
+      saleTransactionsState; 
+      salesSettlementsState;
+      failedSalesState; 
+      tokensForSaleState; 
+      whitelistState;
+      soldIcpState;
     } = _Sale.toStable();
+
+    _saleTransactionsState := saleTransactionsState;
+    _salesSettlementsState := salesSettlementsState;
+    _failedSalesState := failedSalesState;
+    _tokensForSaleState := tokensForSaleState;
+    _whitelistState := whitelistState;
+    _soldIcpState := soldIcpState;
   
    // Marketplace
     let { 
-      _transactionsState; 
-      _tokenSettlementState; 
-      _usedPaymentAddressessState; 
-      _paymentsState; 
-      _tokenListingState; 
-      _disbursementsState;
-      _nextSubAccountState;
+      transactionsState; 
+      tokenSettlementState; 
+      usedPaymentAddressessState; 
+      paymentsState; 
+      tokenListingState; 
+      disbursementsState;
+      nextSubAccountState;
     } = _Marketplace.toStable();
+
+    _transactionsState := transactionsState;
+    _tokenSettlementState := tokenSettlementState;
+    _usedPaymentAddressessState := usedPaymentAddressessState;
+    _paymentsState := paymentsState;
+    _tokenListingState := tokenListingState;
+    _disbursementsState := disbursementsState;
+    _nextSubAccountState := nextSubAccountState;
 
    // Assets
     let {
-      _assetsState;
+      assetsState;
     } = _Assets.toStable();
+
+    _assetsState := assetsState;
   };
 
   system func postupgrade() {
@@ -156,8 +180,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     _tokensForSaleState := [];
     _whitelistState := [];
     _soldIcpState := 0;
-    _disbursementsState := [];
-    _nextSubAccountState := 0;
 
    // Marketplace
     _transactionsState := [];
@@ -165,6 +187,8 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     _usedPaymentAddressessState := [];
     _paymentsState := [];
     _tokenListingState := [];
+    _disbursementsState := [];
+    _nextSubAccountState := 0;
 
    // Assets
     _assetsState := [];
@@ -274,7 +298,7 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     await _Marketplace.disburse();
   };
     
-  // queriues
+  // queries
   public query func details(token : MarketplaceTypes.TokenIdentifier) : async Result.Result<(MarketplaceTypes.AccountIdentifier, ?MarketplaceTypes.Listing), MarketplaceTypes.CommonError> {
     _Marketplace.details(token);
   };

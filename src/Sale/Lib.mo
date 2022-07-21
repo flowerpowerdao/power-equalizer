@@ -28,20 +28,20 @@ module {
     private var _soldIcp : Nat64 = state._soldIcpState;
 
     public func toStable() : {
-      _saleTransactionsState : [Types.SaleTransaction];
-      _salesSettlementsState : [(Types.AccountIdentifier, Types.Sale)];
-      _failedSalesState : [(Types.AccountIdentifier, Types.SubAccount)];
-      _tokensForSaleState : [Types.TokenIndex];
-      _whitelistState : [Types.AccountIdentifier];
-      _soldIcpState : Nat64;
+      saleTransactionsState : [Types.SaleTransaction];
+      salesSettlementsState : [(Types.AccountIdentifier, Types.Sale)];
+      failedSalesState : [(Types.AccountIdentifier, Types.SubAccount)];
+      tokensForSaleState : [Types.TokenIndex];
+      whitelistState : [Types.AccountIdentifier];
+      soldIcpState : Nat64;
     } {
       return {
-        _saleTransactionsState = _saleTransactions.toArray();
-        _salesSettlementsState = Iter.toArray(_salesSettlements.entries());
-        _failedSalesState = _failedSales.toArray();
-        _tokensForSaleState = _tokensForSale.toArray();
-        _whitelistState = _whitelist.toArray();
-        _soldIcpState = _soldIcp;
+        saleTransactionsState = _saleTransactions.toArray();
+        salesSettlementsState = Iter.toArray(_salesSettlements.entries());
+        failedSalesState = _failedSales.toArray();
+        tokensForSaleState = _tokensForSale.toArray();
+        whitelistState = _whitelist.toArray();
+        soldIcpState = _soldIcp;
       }
     };
 
