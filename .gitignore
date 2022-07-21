@@ -1,0 +1,8 @@
+.dfx
+.vessel
+assets
+*.pem
+.venv
+registry.json
+tokens.json
+__pycache__

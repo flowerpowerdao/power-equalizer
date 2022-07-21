@@ -1,0 +1,29 @@
+name: Example canister build using build.js 
+
+on:
+  push:
+    branches:
+      - production
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    container:
+      image: fleek/dfxrust
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build WASM
+          # HACK: set HOME to get github actions to execute correctly
+          export HOME=/root
+          export PATH="$HOME/.cargo/bin:${PATH}"
+          # Start build
+          yarn
+          MODE=PRODUCTION dfx build cover --check
+
+      - name: Cover Validator Plugin
+        uses: Psychedelic/cover/GithubActionPlugin@main
+        with:
+          canister_id: "iftvq-niaaa-aaaai-qasga-cai"
+          wasm_path: ".dfx/local/canisters/cover/cover.wasm"
