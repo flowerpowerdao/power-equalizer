@@ -1,5 +1,5 @@
 {
   dependencies = [ "base", "asset-storage", "sha", "cap" ],
-  compiler = Some "0.6.21"
+  compiler = Some "0.6.28"
 }
 
