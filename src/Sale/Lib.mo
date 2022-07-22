@@ -111,132 +111,116 @@ module {
       _hasBeenInitiated := true;
     };
 
-    public func reserve(amount : Nat64, quantity : Nat64, address : Types.AccountIdentifier, subaccount : Types.SubAccount) : Result.Result<(Types.AccountIdentifier, Nat64), Text> {
-      var c : Nat = 0;
-      var failed : Bool = true;
-      while(c < 29) {
-        if (failed) {
-          if (subaccount[c] > 0) { 
-            failed := false;
-          };
-        };
-        c += 1;
-      };
-      if (failed) {
-        return #err("Invalid subaccount");
-      };
-      var _wlr : Bool = false;
-      if (Time.now() < saleStart) {
+    public func reserve(amount : Nat64, quantity : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount) : Result.Result<(Types.AccountIdentifier, Nat64), Text> {
+      if (Time.now() < publicSaleStart) {
         return #err("The sale has not started yet");
       };
-      if (quantity != 1) {
-        return #err("Quantity error!");
+      if (isWhitelisted(address) == false) {
+        if (Time.now() < whitelistTime) {
+          return #err("The public sale has not started yet");
+        };            
       };
-      if (Time.now() >= whitelistEnd) {
-        if (_tokensForSale.size() == 0) {
-          return #err("No more NFTs available right now!");
-        };
-      } else {
-        if (isWhitelisted(address)) {
-          _wlr := true;
-        } else {
-          return #err("No more NFTs available right now for non whitelisted users. These will become available soon!");
-        };
+      if (availableTokens() == 0) {
+        return #err("No more NFTs available right now!");
       };
-      var total : Nat64 = (price * quantity);
-      if (_wlr == true) {
-        total := whitelistprice;
+      if (availableTokens() < Nat64.toNat(quantity)) {
+        return #err("Quantity error");
+      };
+      var total : Nat64 = (getAddressPrice(address) * quantity);
+      var bp = getAddressBulkPrice(address);
+      var lastq : Nat64 = 1;
+      for(a in bp.vals()){
+        if (a.0 == quantity) {
+          total := a.1;
+        };
+        lastq := a.0;
+      };
+      if (quantity > lastq){
+        return #err("Quantity error");
       };
       if (total > amount) {
         return #err("Price mismatch!");
       };
+      let subaccount = deps._Marketplace.getNextSubAccount();
+      let paymentAddress : Types.AccountIdentifier = AID.fromPrincipal(this, ?subaccount);
 
-      let paymentAddress : Types.AccountIdentifier = AID.fromPrincipal(Principal.fromText("jdfjg-amcja-wo3zr-6li5k-o4e5f-ymqfk-f4xk2-37o3d-2mezb-45y3t-5qe"), ?subaccount);
-      if (Option.isSome(deps._Marketplace.findUsedPaymentAddress(paymentAddress))) {
-        return #err("Payment address has been used");
-      };
-
-      let tokens : [Types.TokenIndex] = nextTokens(quantity);
+      let tokens : [Types.TokenIndex] = tempNextTokens(quantity);
       if (tokens.size() == 0) {
         return #err("Not enough NFTs available!");
       };
-      if (tokens.size() != Nat64.toNat(quantity)) {
-        _tokensForSale.append(Utils.bufferFromArray(tokens));
-        return #err("Quantity error");
+      if (whitelistOneTimeOnly == true){
+        if (isWhitelisted(address)) {
+          removeFromWhitelist(address);
+        };
       };
-      if (_wlr == true) {
-        removeFromWhitelist(address);
-      };
-      
-      deps._Marketplace.addUsedPaymentAddress(paymentAddress, Principal.fromText("jdfjg-amcja-wo3zr-6li5k-o4e5f-ymqfk-f4xk2-37o3d-2mezb-45y3t-5qe"), subaccount);
       _salesSettlements.put(paymentAddress, {
         tokens = tokens;
         price = total;
         subaccount = subaccount;
         buyer = address;
-        expires = (Time.now() + consts.ESCROWDELAY);
+        expires = Time.now() + consts.ESCROWDELAY;
       });
       #ok((paymentAddress, total));
     };
 
     public func retreive(caller : Principal, paymentaddress : Types.AccountIdentifier) : async Result.Result<(), Text> {
-      switch(_salesSettlements.get(paymentaddress)) {
-        case(?settlement){
-          let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({account = paymentaddress});
-          switch(_salesSettlements.get(paymentaddress)) {
-            case(?settlement){
-              if (response.e8s >= settlement.price){
-                deps._Marketplace.putPayments(Principal.fromText("jdfjg-amcja-wo3zr-6li5k-o4e5f-ymqfk-f4xk2-37o3d-2mezb-45y3t-5qe"), switch(deps._Marketplace.getPayments(Principal.fromText("jdfjg-amcja-wo3zr-6li5k-o4e5f-ymqfk-f4xk2-37o3d-2mezb-45y3t-5qe"))) {
-                  case(?p) { p.add(settlement.subaccount); p};
-                  case(_) Utils.bufferFromArray<Types.SubAccount>([settlement.subaccount]);
-                });
-                for (a in settlement.tokens.vals()){
-                  deps._Tokens.transferTokenToUser(a, settlement.buyer);
-                };
-                _saleTransactions.add({
-                  tokens = settlement.tokens;
-                  seller = Principal.fromText("jdfjg-amcja-wo3zr-6li5k-o4e5f-ymqfk-f4xk2-37o3d-2mezb-45y3t-5qe");
-                  price = settlement.price;
-                  buyer = settlement.buyer;
-                  time = Time.now();
-                });
-                _soldIcp += settlement.price;
-                _salesSettlements.delete(paymentaddress);
-                // start custom
-                let event : Root.IndefiniteEvent = {
-                  operation = "mint";
-                  details = [
-                    ("to", #Text(settlement.buyer)),
-                    ("price_decimals", #U64(8)),
-                    ("price_currency", #Text("ICP")),
-                    ("price", #U64(settlement.price)),
-                    // there can only be one token in tokens due to the reserve function
-                    ("token_id", #Text(Utils.indexToIdentifier(settlement.tokens[0], this))),
-                    ];
-                  caller;
-                };
-                ignore deps._Cap.insert(event);
-                // end custom
-                return #ok();
-              } else {
-                if (settlement.expires < Time.now()) {
-                  _failedSales.add((settlement.buyer, settlement.subaccount));
-                  _tokensForSale.append(Utils.bufferFromArray(settlement.tokens));
-                  _salesSettlements.delete(paymentaddress);
-                  if (settlement.price == whitelistprice) {
-                    addToWhitelist(settlement.buyer);
-                  };
-                  return #err("Expired");
-                } else {
+      // switch(_salesSettlements.get(paymentaddress)) {
+      //   case(?settlement){
+      //     let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({account = paymentaddress});
+      //     switch(_salesSettlements.get(paymentaddress)) {
+      //       case(?settlement){
+      //         if (response.e8s >= settlement.price){
+      //           deps._Marketplace.putPayments(Principal.fromText("jdfjg-amcja-wo3zr-6li5k-o4e5f-ymqfk-f4xk2-37o3d-2mezb-45y3t-5qe"), switch(deps._Marketplace.getPayments(Principal.fromText("jdfjg-amcja-wo3zr-6li5k-o4e5f-ymqfk-f4xk2-37o3d-2mezb-45y3t-5qe"))) {
+      //             case(?p) { p.add(settlement.subaccount); p};
+      //             case(_) Utils.bufferFromArray<Types.SubAccount>([settlement.subaccount]);
+      //           });
+      //           for (a in settlement.tokens.vals()){
+      //             deps._Tokens.transferTokenToUser(a, settlement.buyer);
+      //           };
+      //           _saleTransactions.add({
+      //             tokens = settlement.tokens;
+      //             seller = Principal.fromText("jdfjg-amcja-wo3zr-6li5k-o4e5f-ymqfk-f4xk2-37o3d-2mezb-45y3t-5qe");
+      //             price = settlement.price;
+      //             buyer = settlement.buyer;
+      //             time = Time.now();
+      //           });
+      //           _soldIcp += settlement.price;
+      //           _salesSettlements.delete(paymentaddress);
+      //           // start custom
+      //           let event : Root.IndefiniteEvent = {
+      //             operation = "mint";
+      //             details = [
+      //               ("to", #Text(settlement.buyer)),
+      //               ("price_decimals", #U64(8)),
+      //               ("price_currency", #Text("ICP")),
+      //               ("price", #U64(settlement.price)),
+      //               // there can only be one token in tokens due to the reserve function
+      //               ("token_id", #Text(Utils.indexToIdentifier(settlement.tokens[0], this))),
+      //               ];
+      //             caller;
+      //           };
+      //           ignore deps._Cap.insert(event);
+      //           // end custom
+      //           return #ok();
+      //         } else {
+      //           if (settlement.expires < Time.now()) {
+      //             _failedSales.add((settlement.buyer, settlement.subaccount));
+      //             _tokensForSale.append(Utils.bufferFromArray(settlement.tokens));
+      //             _salesSettlements.delete(paymentaddress);
+      //             if (settlement.price == whitelistprice) {
+      //               addToWhitelist(settlement.buyer);
+      //             };
+      //             return #err("Expired");
+      //           } else {
                   return #err("Insufficient funds sent");
-                }
-              };
-            };
-            case(_) return #err("Nothing to settle");
-          };
-        };
-        case(_) return #err("Nothing to settle");
-      };
+      //           }
+      //         };
+      //       };
+      //       case(_) return #err("Nothing to settle");
+      //     };
+      //   };
+      //   case(_) return #err("Nothing to settle");
+      // };
     };
 
     // queries
@@ -250,18 +234,6 @@ module {
 
     public func saleTransactions() : [Types.SaleTransaction] {
       _saleTransactions.toArray();
-    };
-
-    public func salesStats(address : Types.AccountIdentifier) : (Time.Time, Nat64, Nat) {
-      if (Time.now() >= whitelistEnd) {
-        (saleStart, price, _tokensForSale.size());
-      } else {
-        if (isWhitelisted(address)) {
-          (saleStart, whitelistprice, _tokensForSale.size());        
-        } else {
-          (saleStart, price, _tokensForSale.size());        
-        };
-      };
     };
 
     public func salesSettings(address : Types.AccountIdentifier) : Types.SaleSettings {
@@ -282,13 +254,13 @@ module {
 * INTERNAL METHODS *
 *******************/
 
-    func tempNextTokens(qty : Nat64) : Buffer.Buffer<Types.TokenIndex> {
+    func tempNextTokens(qty : Nat64) : [Types.TokenIndex] {
       //Custom: not pre-mint
       var ret : Buffer.Buffer<Types.TokenIndex> = Buffer.Buffer(Nat64.toNat(qty));
       while(ret.size() < Nat64.toNat(qty)) {        
         ret.add(0 );
       };
-      ret;
+      ret.toArray();
     };
 
     func getAddressPrice(address : Types.AccountIdentifier) : Nat64 {

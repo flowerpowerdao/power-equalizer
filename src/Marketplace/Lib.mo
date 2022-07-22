@@ -30,14 +30,12 @@ module {
     private var _tokenSettlement : HashMap.HashMap<Types.TokenIndex, Types.Settlement> = HashMap.fromIter(state._tokenSettlementState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _payments : HashMap.HashMap<Principal, Buffer.Buffer<Types.SubAccount>> = Utils.BufferHashMapFromIter(state._paymentsState.vals(), 0, Principal.equal, Principal.hash);
     private var _tokenListing : HashMap.HashMap<Types.TokenIndex, Types.Listing> = HashMap.fromIter(state._tokenListingState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-    private var _usedPaymentAddressess : Buffer.Buffer<(Types.AccountIdentifier, Principal, Types.SubAccount)> = Utils.bufferFromArray<(Types.AccountIdentifier, Principal, Types.SubAccount)>(state._usedPaymentAddressessState);
     private var _disbursements : List.List<(Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)> = List.fromArray(state._disbursementsState);
     private var _nextSubAccount : Nat  = state._nextSubAccountState;
     
     public func toStable () : {
       transactionsState : [Types.Transaction];
       tokenSettlementState : [(Types.TokenIndex, Types.Settlement)];
-      usedPaymentAddressessState : [(Types.AccountIdentifier, Principal, Types.SubAccount)];
       paymentsState : [(Principal, [Types.SubAccount])];
       tokenListingState : [(Types.TokenIndex, Types.Listing)];
       disbursementsState : [(Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)];
@@ -51,7 +49,6 @@ module {
           func (payment) {
             return (payment.0, payment.1.toArray());
         }));
-        usedPaymentAddressessState = _usedPaymentAddressess.toArray();
         tokenListingState = Iter.toArray(_tokenListing.entries());
         disbursementsState = List.toArray(_disbursements);
         nextSubAccountState = _nextSubAccount;
@@ -80,7 +77,7 @@ module {
       if (_isLocked(token)) {					
         return #err(#Other("Listing is locked"));				
       };
-      let subaccount = _getNextSubAccount();
+      let subaccount = getNextSubAccount();
       switch(_tokenListing.get(token)) {
         case (?listing) {
           if (listing.price != price) {
@@ -394,18 +391,6 @@ module {
       return _payments.get(principal);
     };
 
-    public func findUsedPaymentAddress(paymentAddress : Types.AccountIdentifier) : ?(Types.AccountIdentifier, Principal, Types.SubAccount) {
-      return _usedPaymentAddressess.find(
-        func (a : (Types.AccountIdentifier, Principal, Types.SubAccount)) : Bool { 
-          a.0 == paymentAddress
-        }
-      );
-    };
-
-    public func addUsedPaymentAddress(paymentAddress : Types.AccountIdentifier, principal: Principal, subaccount: Types.SubAccount) {
-      _usedPaymentAddressess.add((paymentAddress, principal, subaccount));
-    };
-
     func _isLocked(token : Types.TokenIndex) : Bool {
       switch(_tokenListing.get(token)) {
         case(?listing){
@@ -435,7 +420,7 @@ module {
       Array.tabulate<Nat8>(32, n_byte)
     };
 
-    func _getNextSubAccount() : Types.SubAccount {
+    public func getNextSubAccount() : Types.SubAccount {
       var _saOffset = 4294967296;
       _nextSubAccount += 1;
       return _natToSubAccount(_saOffset+_nextSubAccount);
