@@ -22,26 +22,38 @@ module {
 
     private var _saleTransactions: Buffer.Buffer<Types.SaleTransaction> = Utils.bufferFromArray<Types.SaleTransaction>(state._saleTransactionsState);
     private var _salesSettlements : HashMap.HashMap<Types.AccountIdentifier, Types.Sale> = HashMap.fromIter(state._salesSettlementsState.vals(), 0, AID.equal, AID.hash);
+    private var _salesPrincipals : HashMap.HashMap<Types.AccountIdentifier, Text> = HashMap.fromIter(state._salesPrincipalsState.vals(), 0, AID.equal, AID.hash);
     private var _failedSales : Buffer.Buffer<(Types.AccountIdentifier, Types.SubAccount)> = Utils.bufferFromArray<(Types.AccountIdentifier, Types.SubAccount)>(state._failedSalesState);
     private var _tokensForSale: Buffer.Buffer<Types.TokenIndex> = Utils.bufferFromArray<Types.TokenIndex>(state._tokensForSaleState);
     private var _whitelist : Buffer.Buffer<Types.AccountIdentifier> = Utils.bufferFromArray<Types.AccountIdentifier>(state._whitelistState);
     private var _soldIcp : Nat64 = state._soldIcpState;
+    private var _sold : Nat = state._soldState;
+    private var _totalToSell : Nat = state._totalToSellState;
+    private var _hasBeenInitiated : Bool = state._hasBeenInitiatedState;
 
     public func toStable() : {
       saleTransactionsState : [Types.SaleTransaction];
       salesSettlementsState : [(Types.AccountIdentifier, Types.Sale)];
+      salesPrincipalsState : [(Types.AccountIdentifier, Text)]; 
       failedSalesState : [(Types.AccountIdentifier, Types.SubAccount)];
       tokensForSaleState : [Types.TokenIndex];
       whitelistState : [Types.AccountIdentifier];
       soldIcpState : Nat64;
+      soldState : Nat;
+      totalToSellState : Nat;
+      hasBeenInitiatedState : Bool;
     } {
       return {
         saleTransactionsState = _saleTransactions.toArray();
         salesSettlementsState = Iter.toArray(_salesSettlements.entries());
+        salesPrincipalsState = Iter.toArray(_salesPrincipals.entries());
         failedSalesState = _failedSales.toArray();
         tokensForSaleState = _tokensForSale.toArray();
         whitelistState = _whitelist.toArray();
         soldIcpState = _soldIcp;
+        soldState = _sold;
+        totalToSellState = _totalToSell;
+        hasBeenInitiatedState = _hasBeenInitiated;
       }
     };
 

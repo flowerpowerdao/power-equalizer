@@ -78,10 +78,14 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
  // Sale
 	private stable var _saleTransactionsState : [SaleTypes.SaleTransaction] = [];
   private stable var _salesSettlementsState : [(AccountIdentifier, SaleTypes.Sale)] = [];
+  private stable var _salesPrincipalsState : [(AccountIdentifier, Text)] = [];
   private stable var _failedSalesState : [(AccountIdentifier, TokenTypes.SubAccount)] = [];
   private stable var _tokensForSaleState : [TokenTypes.TokenIndex] = [];
   private stable var _whitelistState : [AccountIdentifier] = [];
   private stable var _soldIcpState : Nat64 = 0;
+  private stable var _soldState : Nat = 0;
+  private stable var _totalToSellState : Nat = 0;
+  private stable var _hasBeenInitiatedState : Bool = false;
 
  // Marketplace
 	private stable var _transactionsState : [MarketplaceTypes.Transaction] = [];
@@ -336,15 +340,17 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
   let _Sale = Sale.Factory(
     cid,
     {
-      _minterState;
-      _whitelistState;
-      _tokensForSaleState;
-      _usedPaymentAddressessState;
       _saleTransactionsState;
-      _transactionsState;
-      _failedSalesState;
       _salesSettlementsState;
+      _salesPrincipalsState;
+      _minterState;
+      _failedSalesState;
+      _tokensForSaleState;
+      _whitelistState;
       _soldIcpState;
+      _soldState;
+      _totalToSellState;
+      _hasBeenInitiatedState;
     },
     {
       _Cap;
