@@ -394,6 +394,10 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     _Sale.salesStats(address);
   };
 
+  public query(msg) func salesSettings(address : AccountIdentifier) : async SaleTypes.SaleSettings {
+    _Sale.salesSettings();
+  };
+
  // Assets
   let _Assets = Assets.Factory(
     {

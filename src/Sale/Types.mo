@@ -68,4 +68,15 @@ module {
     buyer : AccountIdentifier;
     time : Time;
   };
+  public type SaleSettings = {
+    price : Nat64;
+    salePrice : Nat64;
+    sold : Nat;
+    remaining : Nat;
+    startTime : Time;
+    whitelistTime : Time;
+    whitelist : Bool;
+    totalToSell : Nat;
+    bulkPricing : [(Nat64, Nat64)];
+  };
 }

@@ -1,16 +1,15 @@
+import AID "../toniq-labs/util/AccountIdentifier";
+import Buffer "../Buffer";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
+import Nat "mo:base/Nat16";
 import Nat64 "mo:base/Nat64";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Random "mo:base/Random";
 import Result "mo:base/Result";
-import Time "mo:base/Time";
-
 import Root "mo:cap/Root";
-
-import AID "../toniq-labs/util/AccountIdentifier";
-import Buffer "../Buffer";
+import Time "mo:base/Time";
 import Types "Types";
 import Utils "../Utils";
 
@@ -66,8 +65,9 @@ module {
     let teamRoyaltyAddress : Types.AccountIdentifier = consts.TEAM_ADDRESS;
     let collectionSize : Nat32 = 7777;
     // prices
-    let ethFlowerWhitelistPrice : Nat64 =   350000000;
-    let modclubWhitelistPrice : Nat64 =     500000000;
+    // let ethFlowerWhitelistPrice : Nat64 =   350000000;
+    // let modclubWhitelistPrice : Nat64 =     500000000;
+    let whitelistPrice : Nat64 =            500000000;
     let salePrice : Nat64 =                 700000000;
 
     let publicSaleStart : Time.Time = 1659276000000000000; //Start of first purchase (WL or other)
@@ -264,9 +264,48 @@ module {
       };
     };
 
+    public func salesSettings(address : Types.AccountIdentifier) : Types.SaleSettings {
+      return {
+        price = getAddressPrice(address);
+        salePrice = salePrice;
+        remaining = availableTokens();
+        sold = _sold;
+        startTime = publicSaleStart;
+        whitelistTime = whitelistTime;
+        whitelist = isWhitelisted(address);
+        totalToSell = _totalToSell;
+        bulkPricing = getAddressBulkPrice(address);
+      } : Types.SaleSettings;
+    };
+
 /*******************
 * INTERNAL METHODS *
 *******************/
+
+    func tempNextTokens(qty : Nat64) : Buffer.Buffer<Types.TokenIndex> {
+      //Custom: not pre-mint
+      var ret : Buffer.Buffer<Types.TokenIndex> = Buffer.Buffer(Nat64.toNat(qty));
+      while(ret.size() < Nat64.toNat(qty)) {        
+        ret.add(0 );
+      };
+      ret;
+    };
+
+    func getAddressPrice(address : Types.AccountIdentifier) : Nat64 {
+      getAddressBulkPrice(address)[0].1;
+    };
+
+    func availableTokens() : Nat {
+      _tokensForSale.size();
+    };
+
+    //Set different price types here
+    func getAddressBulkPrice(address : Types.AccountIdentifier) : [(Nat64, Nat64)] {
+      if (isWhitelisted(address)){
+        return [(1, whitelistPrice)]
+      };
+      return [(1, salePrice)]
+    };
 
     public func setWhitelist(whitelistAddresses: [Types.AccountIdentifier]) {
       _whitelist := Utils.bufferFromArray<Types.AccountIdentifier>(whitelistAddresses);
@@ -287,6 +326,9 @@ module {
     };
 
     func isWhitelisted(address : Types.AccountIdentifier) : Bool {
+    if (whitelistDiscountLimited == true and Time.now() >= whitelistTime) {
+      return false;
+    };
       Option.isSome(_whitelist.find(func (a : Types.AccountIdentifier) : Bool { a == address }));
     };
 
