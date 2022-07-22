@@ -63,7 +63,7 @@ module {
     *************/
 
     let salesFees : [(Types.AccountIdentifier, Nat64)] = [
-      ("9dd5c70ada66e593cc5739c3177dc7a40530974f270607d142fc72fce91b1d25", 7500), //Royalty Fee 
+      (consts.TEAM_ADDRESS, 7500), //Royalty Fee 
       ("9dd5c70ada66e593cc5739c3177dc7a40530974f270607d142fc72fce91b1d25", 1000), //Entrepot Fee 
     ];
 

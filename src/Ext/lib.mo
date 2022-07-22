@@ -48,14 +48,14 @@ module {
     };
 
     public func tokens(aid : Types.AccountIdentifier) : Result.Result<[Types.TokenIndex], Types.CommonError> {
-      switch(deps._Tokens.getTokensFromOwners(aid)) {
+      switch(deps._Tokens.getTokensFromOwner(aid)) {
         case(?tokens) return #ok(tokens.toArray());
         case(_) return #err(#Other("No tokens"));
       };
     };
     
     public func tokens_ext(aid : Types.AccountIdentifier) : Result.Result<[(Types.TokenIndex, ?MarketplaceTypes.Listing, ?Blob)], Types.CommonError> {
-      switch(deps._Tokens.getTokensFromOwners(aid)) {
+      switch(deps._Tokens.getTokensFromOwner(aid)) {
         case(?tokens) {
           var resp : Buffer.Buffer<(Types.TokenIndex, ?Types.Listing, ?Blob)> = Buffer.Buffer(0);
           for (a in tokens.vals()){

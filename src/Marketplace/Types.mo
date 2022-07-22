@@ -82,6 +82,7 @@ module {
     account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
     send_dfx : shared SendArgs -> async Nat64; 
     };
+    TEAM_ADDRESS: AccountIdentifier;
   };
 
 }

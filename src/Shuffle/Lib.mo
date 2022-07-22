@@ -2,11 +2,12 @@ import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Random "mo:base/Random";
 
+import Buffer "../Buffer";
 import Types "Types";
 import Utils "../Utils";
 
 module {
-  public class Shuffle (state : Types.State, deps : Types.Dependencies) {
+  public class Factory(state : Types.State, deps : Types.Dependencies) {
 
 /*********
 * STATE *
@@ -60,5 +61,27 @@ module {
       _isShuffled := true;
     };
 
+/********************
+ * INTERNAL METHODS *
+ ********************/
+
+    public func shuffleTokens(tokens : Buffer.Buffer<Types.TokenIndex>, seed : Blob) : Buffer.Buffer<Types.TokenIndex> {
+      // use seed to generate a truly random number
+      var randomNumber : Nat8 = Random.byteFrom(seed);
+      var currentIndex : Nat = tokens.size();
+
+      while (currentIndex != 1){
+        // create a pseudo random number between 0-99
+        randomNumber := Utils.prng(randomNumber);
+        // use that number to calculate a random index between 0 and currentIndex
+        var randomIndex : Nat = Int.abs(Float.toInt(Float.floor(Float.fromInt(Utils.fromNat8ToInt(randomNumber)* currentIndex/100))));
+        assert(randomIndex < currentIndex);
+        currentIndex -= 1;
+        let temporaryValue = tokens.get(currentIndex);
+        tokens.put(currentIndex, tokens.get(randomIndex));
+        tokens.put(randomIndex,temporaryValue);
+      };
+      return tokens;
+    };
   };
 }

@@ -6,6 +6,7 @@ import Cap "mo:cap/Cap";
 import Assets "../CanisterAssets";
 import ExtCore "../toniq-labs/ext/Core";
 import Marketplace "../Marketplace";
+import Shuffle "../Shuffle";
 import Tokens "../Tokens";
 
 module {
@@ -27,11 +28,13 @@ module {
     _Cap : Cap.Cap;
     _Tokens : Tokens.Factory;
     _Marketplace: Marketplace.Factory;
+    _Shuffle : Shuffle.Factory;
   };
 
   public type Constants = {
     ESCROWDELAY: Time.Time;
     LEDGER_CANISTER : actor { account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs };
+    TEAM_ADDRESS: AccountIdentifier;
   };
 
   public type AccountIdentifier = ExtCore.AccountIdentifier;

@@ -208,6 +208,7 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     send_dfx : shared SendArgs -> async Nat64; 
   };
   let CREATION_CYCLES: Nat = 1_000_000_000_000;
+  let TEAM_ADDRESS = "979307078c971f6d82a302825ac07dc63a4f68ece99f24014d69d8ccec7b5d6f";
 
 /***********
 * CLASSES *
@@ -278,6 +279,7 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     {
       ESCROWDELAY;
       LEDGER_CANISTER;
+      TEAM_ADDRESS;
     }
   );
 
@@ -360,6 +362,7 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     {
       ESCROWDELAY;
       LEDGER_CANISTER;
+      TEAM_ADDRESS;
     }
   );
 

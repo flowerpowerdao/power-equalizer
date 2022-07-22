@@ -40,7 +40,7 @@ module {
 
   public type State = {
     _Assets : Assets.Factory;
-    _Shuffle : Shuffle.Shuffle;
+    _Shuffle : Shuffle.Factory;
     _Tokens : Tokens.Factory;
     _Marketplace : Marketplace.Factory;
   }

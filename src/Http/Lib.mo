@@ -192,7 +192,7 @@ module {
         status_code = 200;
         headers = [("content-type", "text/plain")];
         body = Text.encodeUtf8 (
-          "BTC Flower \n" #
+          "Punks\n" #
           "---\n" #
           "Cycle Balance:                            ~" # debug_show (Cycles.balance()/1000000000000) # "T\n" #
           "Minted NFTs:                              " # debug_show (state._Tokens.getNextTokenId()) # "\n" #
