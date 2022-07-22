@@ -164,63 +164,65 @@ module {
     };
 
     public func retreive(caller : Principal, paymentaddress : Types.AccountIdentifier) : async Result.Result<(), Text> {
-      // switch(_salesSettlements.get(paymentaddress)) {
-      //   case(?settlement){
-      //     let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({account = paymentaddress});
-      //     switch(_salesSettlements.get(paymentaddress)) {
-      //       case(?settlement){
-      //         if (response.e8s >= settlement.price){
-      //           deps._Marketplace.putPayments(Principal.fromText("jdfjg-amcja-wo3zr-6li5k-o4e5f-ymqfk-f4xk2-37o3d-2mezb-45y3t-5qe"), switch(deps._Marketplace.getPayments(Principal.fromText("jdfjg-amcja-wo3zr-6li5k-o4e5f-ymqfk-f4xk2-37o3d-2mezb-45y3t-5qe"))) {
-      //             case(?p) { p.add(settlement.subaccount); p};
-      //             case(_) Utils.bufferFromArray<Types.SubAccount>([settlement.subaccount]);
-      //           });
-      //           for (a in settlement.tokens.vals()){
-      //             deps._Tokens.transferTokenToUser(a, settlement.buyer);
-      //           };
-      //           _saleTransactions.add({
-      //             tokens = settlement.tokens;
-      //             seller = Principal.fromText("jdfjg-amcja-wo3zr-6li5k-o4e5f-ymqfk-f4xk2-37o3d-2mezb-45y3t-5qe");
-      //             price = settlement.price;
-      //             buyer = settlement.buyer;
-      //             time = Time.now();
-      //           });
-      //           _soldIcp += settlement.price;
-      //           _salesSettlements.delete(paymentaddress);
-      //           // start custom
-      //           let event : Root.IndefiniteEvent = {
-      //             operation = "mint";
-      //             details = [
-      //               ("to", #Text(settlement.buyer)),
-      //               ("price_decimals", #U64(8)),
-      //               ("price_currency", #Text("ICP")),
-      //               ("price", #U64(settlement.price)),
-      //               // there can only be one token in tokens due to the reserve function
-      //               ("token_id", #Text(Utils.indexToIdentifier(settlement.tokens[0], this))),
-      //               ];
-      //             caller;
-      //           };
-      //           ignore deps._Cap.insert(event);
-      //           // end custom
-      //           return #ok();
-      //         } else {
-      //           if (settlement.expires < Time.now()) {
-      //             _failedSales.add((settlement.buyer, settlement.subaccount));
-      //             _tokensForSale.append(Utils.bufferFromArray(settlement.tokens));
-      //             _salesSettlements.delete(paymentaddress);
-      //             if (settlement.price == whitelistprice) {
-      //               addToWhitelist(settlement.buyer);
-      //             };
-      //             return #err("Expired");
-      //           } else {
+      switch(_salesSettlements.get(paymentaddress)) {
+        case(?settlement){
+          let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({account = paymentaddress});
+          switch(_salesSettlements.get(paymentaddress)) {
+            case(?settlement){
+              if (response.e8s >= settlement.price){
+                if (settlement.tokens.size() > availableTokens()){
+                  //Issue refund
+                  deps._Marketplace.addDisbursement((0, settlement.buyer, settlement.subaccount, (response.e8s-10000)));
+                  _salesSettlements.delete(paymentaddress);
+                  return #err("Not enough NFTs - a refund will be sent automatically very soon");
+                } else {
+                  var tokens = nextTokens(Nat64.fromNat(settlement.tokens.size()));
+                  for (a in tokens.vals()){
+                    deps._Tokens.transferTokenToUser(a, settlement.buyer);
+                  };
+                  _saleTransactions.add({
+                    tokens = tokens;
+                    seller = this;
+                    price = settlement.price;
+                    buyer = settlement.buyer;
+                    time = Time.now();
+                  });
+                  _soldIcp += settlement.price;
+                  _sold += tokens.size();
+                  _salesSettlements.delete(paymentaddress);
+                  let event : Root.IndefiniteEvent = {
+                    operation = "mint";
+                    details = [
+                      ("to", #Text(settlement.buyer)),
+                      ("price_decimals", #U64(8)),
+                      ("price_currency", #Text("ICP")),
+                      ("price", #U64(settlement.price)),
+                      // there can only be one token in tokens due to the reserve function
+                      ("token_id", #Text(Utils.indexToIdentifier(settlement.tokens[0], this))),
+                      ];
+                    caller;
+                  };
+                  ignore deps._Cap.insert(event);
+                  //Payout
+                  var bal : Nat64 = response.e8s - (10000 * 1); //Remove 2x tx fee
+                  deps._Marketplace.addDisbursement((0, consts.TEAM_ADDRESS, settlement.subaccount, bal));
+                  return #ok();
+                }
+              } else {
+                if (settlement.expires < Time.now()) {
+                  _failedSales.add((settlement.buyer, settlement.subaccount));
+                  _salesSettlements.delete(paymentaddress);
+                  return #err("Expired");
+                } else {
                   return #err("Insufficient funds sent");
-      //           }
-      //         };
-      //       };
-      //       case(_) return #err("Nothing to settle");
-      //     };
-      //   };
-      //   case(_) return #err("Nothing to settle");
-      // };
+                }
+              };
+            };
+            case(_) return #err("Nothing to settle");
+          };
+        };
+        case(_) return #err("Nothing to settle");
+      };
     };
 
     // queries

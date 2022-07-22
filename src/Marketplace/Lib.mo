@@ -136,10 +136,10 @@ module {
                     var rem = bal;
                     for(f in salesFees.vals()){
                       var _fee : Nat64 = bal * f.1 / 100000;
-                      _addDisbursement((token, f.0, settlement.subaccount, _fee));
+                      addDisbursement((token, f.0, settlement.subaccount, _fee));
                       rem := rem -  _fee : Nat64;
                     };
-                    _addDisbursement((token, token_owner, settlement.subaccount, rem));
+                    addDisbursement((token, token_owner, settlement.subaccount, rem));
                     let event : Root.IndefiniteEvent = {
                       operation = "sale";
                       details = [
@@ -426,7 +426,7 @@ module {
       return _natToSubAccount(_saOffset+_nextSubAccount);
     };
 
-    func _addDisbursement(d : (Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)) : () {
+    public func addDisbursement(d : (Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)) : () {
       _disbursements := List.push(d, _disbursements);
     };
 
