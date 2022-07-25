@@ -2,6 +2,8 @@ import Time "mo:base/Time";
 import ExtCore "../toniq-labs/ext/Core";
 
 module {
+    public let collectionName = "Punks";
+    public let placeholderContentLength = "3576448";
     public let teamAddress = "979307078c971f6d82a302825ac07dc63a4f68ece99f24014d69d8ccec7b5d6f";
     public let ecscrowDelay: Time.Time = 120_000_000_000; // 120 seconds
     public let teamRoyaltyAddress : ExtCore.AccountIdentifier = teamAddress;

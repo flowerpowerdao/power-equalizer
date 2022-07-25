@@ -11,6 +11,7 @@ import Text "mo:base/Text";
 
 import AssetTypes "../CanisterAssets/Types";
 import Buffer "../Buffer";
+import Env "../Env";
 import ExtCore "../toniq-labs/ext/Core";
 import MarketplaceTypes "../Marketplace/Types";
 import Types "Types";
@@ -18,7 +19,7 @@ import Utils "../Utils";
 
 module {
 
-  public class HttpHandler(this: Principal, state: Types.State) {
+  public class HttpHandler(this: Principal, deps: Types.Dependencies) {
     
 
 /*************
@@ -36,7 +37,7 @@ module {
       switch(Utils.natFromText(token.key)) {
         case null return {body = Blob.fromArray([]); token = null};
         case (?assetid) {
-          let asset : AssetTypes.Asset = state._Assets.get(assetid);
+          let asset : AssetTypes.Asset = deps._Assets.get(assetid);
           let res = _streamContent(token.key, token.index, asset.payload.data);
           return {
             body = res.0;
@@ -53,14 +54,14 @@ module {
           // start custom
           // we assume the seed animation video is stored in index 0
           // and thus uploaded first
-          if (not state._Shuffle.isShuffled()){
-            return _processFile(Nat.toText(0), state._Assets.get(0).payload);
+          if (not deps._Shuffle.isShuffled()){
+            return _processFile(Nat.toText(0), deps._Assets.get(0).payload);
           };
           // end custom
-          switch(state._Tokens.getTokenData(tokenid)) {
+          switch(deps._Tokens.getTokenData(tokenid)) {
             case(?metadata)  {
               let assetid : Nat = Nat32.toNat(Utils.blobToNat32(metadata));
-              let asset : AssetTypes.Asset = state._Assets.get(assetid);
+              let asset : AssetTypes.Asset = deps._Assets.get(assetid);
               switch(_getParam(request.url, "type")) {
                 case(?t) {
                   // start custom
@@ -109,7 +110,7 @@ module {
         case (?atext) {
           switch(Utils.natFromText(atext)){
             case(?assetid){
-              let asset : AssetTypes.Asset = state._Assets.get(assetid);
+              let asset : AssetTypes.Asset = deps._Assets.get(assetid);
               switch(_getParam(request.url, "type")) {
                 case(?t) {
                   // start custom
@@ -166,10 +167,10 @@ module {
           switch(Utils.natFromText(path[0])) {
             // if that works, use that
             case (?tokenIndex) {
-              switch (state._Tokens.getTokenDataFromIndex(Nat32.fromNat(tokenIndex))) {
+              switch (deps._Tokens.getTokenDataFromIndex(Nat32.fromNat(tokenIndex))) {
                 case (?assetIdBlob) {
                   let assetid : Nat = Nat32.toNat(Utils.blobToNat32(assetIdBlob));
-                  let asset : AssetTypes.Asset = state._Assets.get(assetid);
+                  let asset : AssetTypes.Asset = deps._Assets.get(assetid);
                   return _processFile(Nat.toText(assetid), asset.payload);
                 };
                 case (_) {};
@@ -182,9 +183,9 @@ module {
       };
       
       //Just show index
-      var soldValue : Nat = Nat64.toNat(Array.foldLeft<MarketplaceTypes.Transaction, Nat64>(state._Marketplace.getTransactions().toArray(), 0, func (b : Nat64, a : MarketplaceTypes.Transaction) : Nat64 { b + a.price }));
-      var avg : Nat = if (state._Marketplace.transactionsSize() > 0) {
-        soldValue/state._Marketplace.transactionsSize();
+      var soldValue : Nat = Nat64.toNat(Array.foldLeft<MarketplaceTypes.Transaction, Nat64>(deps._Marketplace.getTransactions().toArray(), 0, func (b : Nat64, a : MarketplaceTypes.Transaction) : Nat64 { b + a.price }));
+      var avg : Nat = if (deps._Marketplace.transactionsSize() > 0) {
+        soldValue/deps._Marketplace.transactionsSize();
       } else {
         0;
       };
@@ -192,15 +193,23 @@ module {
         status_code = 200;
         headers = [("content-type", "text/plain")];
         body = Text.encodeUtf8 (
-          "Punks\n" #
+          Env.collectionName # "\n" #
           "---\n" #
           "Cycle Balance:                            ~" # debug_show (Cycles.balance()/1000000000000) # "T\n" #
-          "Minted NFTs:                              " # debug_show (state._Tokens.getNextTokenId()) # "\n" #
-          "Marketplace Listings:                     " # debug_show (state._Marketplace.tokenListingSize()) # "\n" #
-          "Sold via Marketplace:                     " # debug_show (state._Marketplace.transactionsSize()) # "\n" #
+          "Minted NFTs:                              " # debug_show (deps._Tokens.getNextTokenId()) # "\n" #
+          "Assets:                                   " # debug_show (deps._Assets.size()) # "\n" #
+          "---\n" #
+          "Whitelist:                                " # debug_show (deps._Sale.whitelistSize() : Nat) # "\n" #
+          "Total to sell:                            " # debug_show (deps._Marketplace.getTotalToSell()) # "\n" #
+          "Remaining:                                " # debug_show (deps._Sale.availableTokens()) # "\n" #
+          "Sold:                                     " # debug_show(deps._Marketplace.getSold()) # "\n" #
+          "Sold (ICP):                               " # _displayICP(Nat64.toNat(deps._Sale.soldIcp())) # "\n" #
+          "---\n" #
+          "Marketplace Listings:                     " # debug_show (deps._Marketplace.tokenListingSize()) # "\n" #
+          "Sold via Marketplace:                     " # debug_show (deps._Marketplace.transactionsSize()) # "\n" #
           "Sold via Marketplace in ICP:              " # _displayICP(soldValue) # "\n" #
           "Average Price ICP Via Marketplace:        " # _displayICP(avg) # "\n" #
-          "Admin:                                    " # debug_show (state._Tokens.getMinter()) # "\n"
+          "Admin:                                    " # debug_show (deps._Tokens.getMinter()) # "\n"
         );
         streaming_strategy = null;
       };
@@ -228,7 +237,7 @@ module {
             ("Access-Control-Expose-Headers","Content-Length, Content-Range"),
             ("Access-Control-Allow-Methods", "GET, POST, HEAD, OPTIONS"),
             ("Access-Control-Allow-Origin", "*"),
-            ("Content-Length","3576448"),
+            ("Content-Length", Env.placeholderContentLength),
             ("Accept-Ranges","bytes"),
           ];
           // end custom

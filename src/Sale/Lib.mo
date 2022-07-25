@@ -236,6 +236,20 @@ module {
 * INTERNAL METHODS *
 *******************/
 
+    // getters & setters
+    public func whitelistSize() : Nat {
+      _whitelist.size()
+    };
+
+    public func availableTokens() : Nat {
+      _tokensForSale.size();
+    };
+
+    public func soldIcp() : Nat64 {
+      _soldIcp
+    };
+
+    // internals
     func tempNextTokens(qty : Nat64) : [Types.TokenIndex] {
       //Custom: not pre-mint
       var ret : Buffer.Buffer<Types.TokenIndex> = Buffer.Buffer(Nat64.toNat(qty));
@@ -247,10 +261,6 @@ module {
 
     func getAddressPrice(address : Types.AccountIdentifier) : Nat64 {
       getAddressBulkPrice(address)[0].1;
-    };
-
-    func availableTokens() : Nat {
-      _tokensForSale.size();
     };
 
     //Set different price types here
