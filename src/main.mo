@@ -78,10 +78,14 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
  // Sale
 	private stable var _saleTransactionsState : [SaleTypes.SaleTransaction] = [];
   private stable var _salesSettlementsState : [(AccountIdentifier, SaleTypes.Sale)] = [];
+  private stable var _salesPrincipalsState : [(AccountIdentifier, Text)] = [];
   private stable var _failedSalesState : [(AccountIdentifier, TokenTypes.SubAccount)] = [];
   private stable var _tokensForSaleState : [TokenTypes.TokenIndex] = [];
   private stable var _whitelistState : [AccountIdentifier] = [];
   private stable var _soldIcpState : Nat64 = 0;
+  private stable var _soldState : Nat = 0;
+  private stable var _totalToSellState : Nat = 0;
+  private stable var _hasBeenInitiatedState : Bool = false;
 
  // Marketplace
 	private stable var _transactionsState : [MarketplaceTypes.Transaction] = [];
@@ -141,7 +145,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     let { 
       transactionsState; 
       tokenSettlementState; 
-      usedPaymentAddressessState; 
       paymentsState; 
       tokenListingState; 
       disbursementsState;
@@ -150,7 +153,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
 
     _transactionsState := transactionsState;
     _tokenSettlementState := tokenSettlementState;
-    _usedPaymentAddressessState := usedPaymentAddressessState;
     _paymentsState := paymentsState;
     _tokenListingState := tokenListingState;
     _disbursementsState := disbursementsState;
@@ -198,7 +200,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
 * CONSTANTS *
 *************/
 
-  let ESCROWDELAY : Time.Time = 2 * 60 * 1_000_000_000;
   let LEDGER_CANISTER = actor "ryjl3-tyaaa-aaaaa-aaaba-cai" : actor { 
     account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
     send_dfx : shared SendArgs -> async Nat64; 
@@ -266,13 +267,14 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
       _usedPaymentAddressessState;
       _disbursementsState;
       _nextSubAccountState;
+      _soldState;
+      _totalToSellState;
     },
     {
       _Tokens;
       _Cap;
     },
     {
-      ESCROWDELAY;
       LEDGER_CANISTER;
     }
   );
@@ -294,10 +296,14 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     await _Marketplace.clearPayments(seller, payments);
   };
 
-  public shared(msg) func disburse() : async () {
-    await _Marketplace.disburse();
+  public shared(msg) func cronDisbursements() : async () {
+    await _Marketplace.cronDisbursements();
   };
-    
+
+  public shared(msg) func cronSettlements() : async () {
+    await _Marketplace.cronSettlements(msg.caller);
+  };
+
   // queries
   public query func details(token : MarketplaceTypes.TokenIdentifier) : async Result.Result<(MarketplaceTypes.AccountIdentifier, ?MarketplaceTypes.Listing), MarketplaceTypes.CommonError> {
     _Marketplace.details(token);
@@ -331,59 +337,18 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     _Marketplace.stats();
   };
 
-
- //Sale 
-  let _Sale = Sale.Factory(
-    cid,
-    {
-      _minterState;
-      _whitelistState;
-      _tokensForSaleState;
-      _usedPaymentAddressessState;
-      _saleTransactionsState;
-      _transactionsState;
-      _failedSalesState;
-      _salesSettlementsState;
-      _soldIcpState;
-    },
-    {
-      _Cap;
-      _Marketplace;
-      _Tokens;
-    },
-    {
-      ESCROWDELAY;
-      LEDGER_CANISTER;
-    }
-  );
-
-  public shared(msg) func initMint() : async () {
-    _Sale.initMint(msg.caller)
+  public query func viewDisbursements() : async [(MarketplaceTypes.TokenIndex, MarketplaceTypes.AccountIdentifier, MarketplaceTypes.SubAccount, Nat64)] {
+    _Marketplace.viewDisbursements();
   };
 
-  public shared(msg) func reserve(amount : Nat64, quantity : Nat64, address : SaleTypes.AccountIdentifier, subaccount : SaleTypes.SubAccount) : async Result.Result<(SaleTypes.AccountIdentifier, Nat64), Text> {
-    _Sale.reserve(amount, quantity, address, subaccount)
+  public query func pendingCronJobs() : async [Nat] {
+    _Marketplace.pendingCronJobs();
+  };
+
+  public query func toAddress(p : Text, sa : Nat) : async AccountIdentifier {
+    _Marketplace.toAddress(p, sa);
   };
     
-  public shared(msg) func retreive(paymentaddress : SaleTypes.AccountIdentifier) : async Result.Result<(), Text> {
-    await _Sale.retreive(msg.caller, paymentaddress)
-  };
-
-  public query func salesSettlements() : async [(SaleTypes.AccountIdentifier, SaleTypes.Sale)] {
-    _Sale.salesSettlements();
-  };
-    
-  public query func failedSales() : async [(SaleTypes.AccountIdentifier, SaleTypes.SubAccount)] {
-    _Sale.failedSales();
-  };
-
-  public query(msg) func saleTransactions() : async [SaleTypes.SaleTransaction] {
-    _Sale.saleTransactions();
-  };
-
-  public query(msg) func salesStats(address : SaleTypes.AccountIdentifier) : async (Time.Time, Nat64, Nat) {
-    _Sale.salesStats(address);
-  };
 
  // Assets
   let _Assets = Assets.Factory(
@@ -406,6 +371,82 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
 
   public shared(msg) func addAsset(asset : AssetsTypes.Asset) : async Nat {
     _Assets.addAsset(msg.caller, asset);
+  };
+
+
+ // Shuffle
+  let _Shuffle = Shuffle.Factory(
+    {
+      _isShuffledState;
+    },
+    {
+      _Assets;
+      _Tokens;
+    }
+  );
+
+  public shared(msg) func shuffleAssets() : async () {
+    await _Shuffle.shuffleAssets(msg.caller);
+  };
+
+
+ //Sale 
+  let _Sale = Sale.Factory(
+    cid,
+    {
+      _saleTransactionsState;
+      _salesSettlementsState;
+      _salesPrincipalsState;
+      _minterState;
+      _failedSalesState;
+      _tokensForSaleState;
+      _whitelistState;
+      _soldIcpState;
+      _hasBeenInitiatedState;
+    },
+    {
+      _Cap;
+      _Marketplace;
+      _Shuffle;
+      _Tokens;
+    },
+    {
+      LEDGER_CANISTER;
+    }
+  );
+
+  // updates
+  public shared(msg) func initMint() : async () {
+    await _Sale.initMint(msg.caller)
+  };
+
+  public shared(msg) func reserve(amount : Nat64, quantity : Nat64, address : SaleTypes.AccountIdentifier, _subaccountNOTUSED : SaleTypes.SubAccount) : async Result.Result<(SaleTypes.AccountIdentifier, Nat64), Text> {
+    _Sale.reserve(amount, quantity, address, _subaccountNOTUSED)
+  };
+    
+  public shared(msg) func retreive(paymentaddress : SaleTypes.AccountIdentifier) : async Result.Result<(), Text> {
+    await _Sale.retreive(msg.caller, paymentaddress)
+  };
+
+  public shared(msg) func cronSalesSettlements() : async () {
+    await _Sale.cronSalesSettlements(msg.caller);
+  };
+
+  // queries
+  public query func salesSettlements() : async [(SaleTypes.AccountIdentifier, SaleTypes.Sale)] {
+    _Sale.salesSettlements();
+  };
+    
+  public query func failedSales() : async [(SaleTypes.AccountIdentifier, SaleTypes.SubAccount)] {
+    _Sale.failedSales();
+  };
+
+  public query(msg) func saleTransactions() : async [SaleTypes.SaleTransaction] {
+    _Sale.saleTransactions();
+  };
+
+  public query(msg) func salesSettings(address : AccountIdentifier) : async SaleTypes.SaleSettings {
+    _Sale.salesSettings(address);
   };
 
  // EXT
@@ -451,21 +492,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     _EXT.metadata(token);
   };
   
- // Shuffle
-
-  let _Shuffle = Shuffle.Shuffle(
-    {
-      _isShuffledState;
-    },
-    {
-      _Assets;
-      _Tokens;
-    }
-  );
-
-  public shared(msg) func shuffleAssets() : async () {
-    await _Shuffle.shuffleAssets(msg.caller);
-  };
 
 
  // Http
@@ -475,7 +501,8 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
       _Assets; 
       _Marketplace; 
       _Shuffle; 
-      _Tokens
+      _Tokens;
+      _Sale;
     }
   );
   

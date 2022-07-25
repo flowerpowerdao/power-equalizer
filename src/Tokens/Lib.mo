@@ -99,7 +99,7 @@ module {
       return _registry.get(tokenIndex);
     };
 
-    public func getTokensFromOwners(aid : Types.AccountIdentifier) : ?Buffer.Buffer<Types.TokenIndex> {
+    public func getTokensFromOwner(aid : Types.AccountIdentifier) : ?Buffer.Buffer<Types.TokenIndex> {
       _owners.get(aid)
     };
 

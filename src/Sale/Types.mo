@@ -6,6 +6,7 @@ import Cap "mo:cap/Cap";
 import Assets "../CanisterAssets";
 import ExtCore "../toniq-labs/ext/Core";
 import Marketplace "../Marketplace";
+import Shuffle "../Shuffle";
 import Tokens "../Tokens";
 
 module {
@@ -13,20 +14,22 @@ module {
   public type State = {
     _saleTransactionsState : [SaleTransaction];
     _salesSettlementsState : [(AccountIdentifier, Sale)];
+    _salesPrincipalsState : [(AccountIdentifier, Text)];
     _failedSalesState : [(AccountIdentifier, SubAccount)];
     _tokensForSaleState : [TokenIndex];
     _whitelistState : [AccountIdentifier];
     _soldIcpState : Nat64;
+    _hasBeenInitiatedState : Bool;
   };
 
   public type Dependencies = {
     _Cap : Cap.Cap;
     _Tokens : Tokens.Factory;
     _Marketplace: Marketplace.Factory;
+    _Shuffle : Shuffle.Factory;
   };
 
   public type Constants = {
-    ESCROWDELAY: Time.Time;
     LEDGER_CANISTER : actor { account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs };
   };
 
@@ -60,5 +63,16 @@ module {
     price : Nat64;
     buyer : AccountIdentifier;
     time : Time;
+  };
+  public type SaleSettings = {
+    price : Nat64;
+    salePrice : Nat64;
+    sold : Nat;
+    remaining : Nat;
+    startTime : Time;
+    whitelistTime : Time;
+    whitelist : Bool;
+    totalToSell : Nat;
+    bulkPricing : [(Nat64, Nat64)];
   };
 }

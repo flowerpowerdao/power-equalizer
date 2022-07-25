@@ -131,3 +131,7 @@ to get the tokenid from the canister and index do the following
 1. clone https://github.com/Toniq-Labs/ext-cli and https://github.com/Toniq-Labs/ext-js in the same directory
 2. run `npm i -g` from within `ext-cli`
 3. run `ext token <canister_id> <index>`
+
+## settlements
+
+-   if there's a settlement that didn't work, we can call the `settlements` query method and then `settle` using the index to settle the transaction

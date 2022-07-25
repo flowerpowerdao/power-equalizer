@@ -1,7 +1,8 @@
 import Assets "../CanisterAssets";
-import Tokens "../Tokens";
-import Shuffle "../Shuffle";
 import Marketplace "../Marketplace";
+import Sale "../Sale";
+import Shuffle "../Shuffle";
+import Tokens "../Tokens";
 
 module {
   public type HeaderField = (Text, Text);
@@ -38,10 +39,11 @@ module {
     token: ?HttpStreamingCallbackToken;
   };
 
-  public type State = {
+  public type Dependencies = {
     _Assets : Assets.Factory;
-    _Shuffle : Shuffle.Shuffle;
+    _Shuffle : Shuffle.Factory;
     _Tokens : Tokens.Factory;
     _Marketplace : Marketplace.Factory;
+    _Sale : Sale.Factory;
   }
 }
