@@ -22,9 +22,9 @@ import Utils "../Utils";
 module {
   public class Factory(this: Principal, state : Types.State, deps : Types.Dependencies, consts : Types.Constants ) {
     
-    /*********
-    * STATE *
-    *********/
+/*********
+* STATE *
+*********/
 
     private var _transactions : Buffer.Buffer<Types.Transaction> = Utils.bufferFromArray(state._transactionsState);	
     private var _tokenSettlement : HashMap.HashMap<Types.TokenIndex, Types.Settlement> = HashMap.fromIter(state._tokenSettlementState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
@@ -55,9 +55,9 @@ module {
       }
     };
     
-    /*************
-    * CONSTANTS *
-    *************/
+/*************
+* CONSTANTS *
+*************/
 
     let salesFees : [(Types.AccountIdentifier, Nat64)] = [
       (consts.TEAM_ADDRESS, 7500), //Royalty Fee 
@@ -65,9 +65,9 @@ module {
     ];
 
 
-    /********************
-    * PUBLIC INTERFACE *
-    ********************/
+/********************
+* PUBLIC INTERFACE *
+********************/
 
     public func lock(caller : Principal, tokenid : Types.TokenIdentifier, price : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount) : async Result.Result<Types.AccountIdentifier, Types.CommonError> {
       if (ExtCore.TokenIdentifier.isPrincipal(tokenid, this) == false) {
@@ -186,6 +186,11 @@ module {
     };
 
     public func list(caller : Principal, request : Types.ListRequest) : async Result.Result<(), Types.CommonError> {
+      if (Time.now() < (publicSaleStart+marketDelay)) {
+        if (_sold < _totalToSell){
+          return #err(#Other("You can not list yet"));
+        };
+      };
       if (ExtCore.TokenIdentifier.isPrincipal(request.token, this) == false) {
         return #err(#InvalidToken(request.token));
       };
@@ -256,7 +261,7 @@ module {
       };
     };
 
-    public func disburse() : async () {
+    public func cronDisbursements() : async () {
       var _cont : Bool = true;
       while(_cont){
         var last = List.pop(_disbursements);
@@ -363,10 +368,30 @@ module {
       (res.0, res.1, res.2, floor, _tokenListing.size(), deps._Tokens.registrySize(), _transactions.size());
     };
 
-    /***********************
-    * GETTERS AND SETTERS *
-    ***********************/
+    public func cronSettlements(caller : Principal) : async () {
+      for(settlement in unlockedSettlements().vals()){
+          ignore(settle(caller, ExtCore.TokenIdentifier.fromPrincipal(this, settlement.0)));
+      };
+    };
+
+    public func viewDisbursements() : [(Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)] {
+      List.toArray(_disbursements);
+    };
+
+    public func pendingCronJobs() : [Nat] {
+      [List.size(_disbursements),
+      unlockedSettlements().size()];
+    };
+  
+    public func toAddress(p : Text, sa : Nat) : Types.AccountIdentifier {
+      AID.fromPrincipal(Principal.fromText(p), ?_natToSubAccount(sa));
+    };
+
+/********************
+* INTERNAL METHODS *
+********************/
     
+    // getters & setters
     public func transactionsSize () : Nat {
       _transactions.size();
     };
@@ -391,6 +416,18 @@ module {
       return _payments.get(principal);
     };
 
+    // public methods
+    public func getNextSubAccount() : Types.SubAccount {
+      var _saOffset = 4294967296;
+      _nextSubAccount += 1;
+      return _natToSubAccount(_saOffset+_nextSubAccount);
+    };
+
+    public func addDisbursement(d : (Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)) : () {
+      _disbursements := List.push(d, _disbursements);
+    };
+
+    // private methods
     func _isLocked(token : Types.TokenIndex) : Bool {
       switch(_tokenListing.get(token)) {
         case(?listing){
@@ -420,15 +457,10 @@ module {
       Array.tabulate<Nat8>(32, n_byte)
     };
 
-    public func getNextSubAccount() : Types.SubAccount {
-      var _saOffset = 4294967296;
-      _nextSubAccount += 1;
-      return _natToSubAccount(_saOffset+_nextSubAccount);
+    func unlockedSettlements() : [(Types.TokenIndex, Types.Settlement)] {
+      Array.filter<(Types.TokenIndex, Types.Settlement)>(Iter.toArray(_tokenSettlement.entries()), func(a : (Types.TokenIndex, Types.Settlement)) : Bool { 
+        return (_isLocked(a.0) == false);
+      });
     };
-
-    public func addDisbursement(d : (Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)) : () {
-      _disbursements := List.push(d, _disbursements);
-    };
-
   }
 }

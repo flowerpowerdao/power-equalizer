@@ -225,6 +225,14 @@ module {
       };
     };
 
+    public func cronSalesSettlements(caller: Principal) : async () {
+      for(ss in _salesSettlements.entries()){
+        if (ss.1.expires < Time.now()) {
+          ignore(await retreive(caller, ss.0));
+        };
+      };
+    };
+
     // queries
     public func salesSettlements() : [(Types.AccountIdentifier, Types.Sale)] {
       Iter.toArray(_salesSettlements.entries());

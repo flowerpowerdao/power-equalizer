@@ -298,10 +298,14 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     await _Marketplace.clearPayments(seller, payments);
   };
 
-  public shared(msg) func disburse() : async () {
-    await _Marketplace.disburse();
+  public shared(msg) func cronDisbursements() : async () {
+    await _Marketplace.cronDisbursements();
   };
-    
+
+  public shared(msg) func cronSettlements() : async () {
+    await _Marketplace.cronSettlements(msg.caller);
+  };
+
   // queries
   public query func details(token : MarketplaceTypes.TokenIdentifier) : async Result.Result<(MarketplaceTypes.AccountIdentifier, ?MarketplaceTypes.Listing), MarketplaceTypes.CommonError> {
     _Marketplace.details(token);
@@ -334,6 +338,19 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
   public query func stats() : async (Nat64, Nat64, Nat64, Nat64, Nat, Nat, Nat) {
     _Marketplace.stats();
   };
+
+  public query func viewDisbursements() : async [(MarketplaceTypes.TokenIndex, MarketplaceTypes.AccountIdentifier, MarketplaceTypes.SubAccount, Nat64)] {
+    _Marketplace.viewDisbursements();
+  };
+
+  public query func pendingCronJobs() : async [Nat] {
+    _Marketplace.pendingCronJobs();
+  };
+
+  public query func toAddress(p : Text, sa : Nat) : async AccountIdentifier {
+    _Marketplace.toAddress(p, sa);
+  };
+    
 
  // Assets
   let _Assets = Assets.Factory(
@@ -404,6 +421,7 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     }
   );
 
+  // updates
   public shared(msg) func initMint() : async () {
     await _Sale.initMint(msg.caller)
   };
@@ -416,6 +434,11 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     await _Sale.retreive(msg.caller, paymentaddress)
   };
 
+  public shared(msg) func cronSalesSettlements() : async () {
+    await _Sale.cronSalesSettlements(msg.caller);
+  };
+
+  // queries
   public query func salesSettlements() : async [(SaleTypes.AccountIdentifier, SaleTypes.Sale)] {
     _Sale.salesSettlements();
   };
