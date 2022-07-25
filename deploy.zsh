@@ -9,7 +9,7 @@ network=${1:-local}
 number_of_assets=${2:-10}
 mode=${3:-staging}
 threshold="100000"
-asset_canister_url="https://cdfps-iyaaa-aaaae-qabta-cai.raw.ic0.app/"
+asset_canister_url="https://zt63f-rqaaa-aaaae-qadaq-cai.raw.ic0.app/"
 
 dfx stop
 dfx start --background --clean
@@ -75,8 +75,7 @@ do
         payload = record {
             ctype = "image/svg+xml"; 
             data = vec {blob "
-                <svg version=\"1.1\" baseProfile=\"full\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"
-                xmlns:ev=\"http://www.w3.org/2001/xml-events\">
+                <svg xmlns=\"http://www.w3.org/2000/svg\">
                     <script>
                         fetch(\"'$asset_canister_url$i'.svg\")
                         .then(response =&gt; response.text())
@@ -84,31 +83,8 @@ do
                             let parser = new DOMParser();
                             let doc = parser.parseFromString( text, \"image/svg+xml\" );
                             document.getElementsByTagName(\"svg\")[0].appendChild( doc.getElementsByTagName(\"svg\")[0] );
-                            return fetch(\"https://api.coingecko.com/api/v3/simple/price?ids=ethereum&amp;vs_currencies=usd&amp;include_24hr_change=true\");
-                        })
-                        .then(response =&gt; response.json())
-                        .then( priceChange =&gt; {
-                            let usd24HourChange = priceChange.ethereum.usd_24h_change.toFixed(2);
-                            updateAnimationDuration(usd24HourChange);
                         })
                         .catch(err =&gt; console.log(err))
-
-                        function calculateAnimationDuration(usd24HourChange, initialValue) {
-                            let g = initialValue*2;
-                            let k = 1/(50*initialValue);
-                            let newValue = (g * (1 / (1 + Math.exp(k * g * usd24HourChange) * (g / initialValue - 1)))).toFixed(3);
-                            return newValue === 0 ? 0.001 : newValue;
-                        }
-
-                        function updateAnimationDuration (usd24HourChange) {
-                            let styleSheets = document.styleSheets;
-                            for (let i = 2; i &lt; 22; i++){
-                                let animationDuration = parseFloat(styleSheets[0].cssRules[i].style.animationDuration);
-                                let updatedDuration = calculateAnimationDuration(usd24HourChange, animationDuration);
-                                let updatedDurationString = updatedDuration.toString()+\"s\";
-                                styleSheets[0].cssRules[i].style.animationDuration = updatedDurationString;
-                            }
-                        }
                     </script>
                 </svg>"
             };
@@ -116,8 +92,7 @@ do
         thumbnail = opt record {
             ctype = "image/svg+xml"; 
             data = vec {blob "
-                <svg version=\"1.1\" baseProfile=\"full\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"
-                xmlns:ev=\"http://www.w3.org/2001/xml-events\">
+                <svg xmlns=\"http://www.w3.org/2000/svg\">
                     <script>
                         fetch(\"'$asset_canister_url$i'_thumbnail.svg\")
                         .then(response =&gt; response.text())
@@ -125,31 +100,8 @@ do
                             let parser = new DOMParser();
                             let doc = parser.parseFromString( text, \"image/svg+xml\" );
                             document.getElementsByTagName(\"svg\")[0].appendChild( doc.getElementsByTagName(\"svg\")[0] );
-                            return fetch(\"https://api.coingecko.com/api/v3/simple/price?ids=ethereum&amp;vs_currencies=usd&amp;include_24hr_change=true\");
-                        })
-                        .then(response =&gt; response.json())
-                        .then( priceChange =&gt; {
-                            let usd24HourChange = priceChange.ethereum.usd_24h_change.toFixed(2);
-                            updateAnimationDuration(usd24HourChange);
                         })
                         .catch(err =&gt; console.log(err))
-
-                        function calculateAnimationDuration(usd24HourChange, initialValue) {
-                            let g = initialValue*2;
-                            let k = 1/(50*initialValue);
-                            let newValue = (g * (1 / (1 + Math.exp(k * g * usd24HourChange) * (g / initialValue - 1)))).toFixed(3);
-                            return newValue === 0 ? 0.001 : newValue;
-                        }
-
-                        function updateAnimationDuration (usd24HourChange) {
-                            let styleSheets = document.styleSheets;
-                            for (let i = 2; i &lt; 22; i++){
-                                let animationDuration = parseFloat(styleSheets[0].cssRules[i].style.animationDuration);
-                                let updatedDuration = calculateAnimationDuration(usd24HourChange, animationDuration);
-                                let updatedDurationString = updatedDuration.toString()+\"s\";
-                                styleSheets[0].cssRules[i].style.animationDuration = updatedDurationString;
-                            }
-                        }
                     </script>
                 </svg>"
             };
