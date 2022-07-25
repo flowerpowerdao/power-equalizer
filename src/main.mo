@@ -501,7 +501,8 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
       _Assets; 
       _Marketplace; 
       _Shuffle; 
-      _Tokens
+      _Tokens;
+      _Sale;
     }
   );
   
