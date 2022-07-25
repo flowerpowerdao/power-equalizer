@@ -236,13 +236,13 @@ module {
     };
 
     public func clearPayments(seller : Principal, payments : [Types.SubAccount]) : async () {
-      let removedPayments : Buffer.Buffer<Types.SubAccount> = Buffer.Buffer(0);
-      for (p in payments.vals()){
-        let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({account = AID.fromPrincipal(seller, ?p)});
-        if (response.e8s < 10_000){
-          removedPayments.add(p);
-        };
-      };
+      let removedPayments : Buffer.Buffer<Types.SubAccount> = Utils.bufferFromArray(payments);
+      // for (p in payments.vals()){
+      //   let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({account = AID.fromPrincipal(seller, ?p)});
+      //   if (response.e8s < 10_000){
+      //     removedPayments.add(p);
+      //   };
+      // };
       switch(_payments.get(seller)) {
         case(?sellerPayments) {
           var newPayments : Buffer.Buffer<Types.SubAccount> = Buffer.Buffer(0);
