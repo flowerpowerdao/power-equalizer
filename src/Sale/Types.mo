@@ -19,8 +19,6 @@ module {
     _tokensForSaleState : [TokenIndex];
     _whitelistState : [AccountIdentifier];
     _soldIcpState : Nat64;
-    _soldState : Nat;
-    _totalToSellState : Nat;
     _hasBeenInitiatedState : Bool;
   };
 
@@ -32,9 +30,7 @@ module {
   };
 
   public type Constants = {
-    ESCROWDELAY: Time.Time;
     LEDGER_CANISTER : actor { account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs };
-    TEAM_ADDRESS: AccountIdentifier;
   };
 
   public type AccountIdentifier = ExtCore.AccountIdentifier;

@@ -200,13 +200,11 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
 * CONSTANTS *
 *************/
 
-  let ESCROWDELAY : Time.Time = 2 * 60 * 1_000_000_000;
   let LEDGER_CANISTER = actor "ryjl3-tyaaa-aaaaa-aaaba-cai" : actor { 
     account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
     send_dfx : shared SendArgs -> async Nat64; 
   };
   let CREATION_CYCLES: Nat = 1_000_000_000_000;
-  let TEAM_ADDRESS = "979307078c971f6d82a302825ac07dc63a4f68ece99f24014d69d8ccec7b5d6f";
 
 /***********
 * CLASSES *
@@ -269,15 +267,15 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
       _usedPaymentAddressessState;
       _disbursementsState;
       _nextSubAccountState;
+      _soldState;
+      _totalToSellState;
     },
     {
       _Tokens;
       _Cap;
     },
     {
-      ESCROWDELAY;
       LEDGER_CANISTER;
-      TEAM_ADDRESS;
     }
   );
 
@@ -404,8 +402,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
       _tokensForSaleState;
       _whitelistState;
       _soldIcpState;
-      _soldState;
-      _totalToSellState;
       _hasBeenInitiatedState;
     },
     {
@@ -415,9 +411,7 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
       _Tokens;
     },
     {
-      ESCROWDELAY;
       LEDGER_CANISTER;
-      TEAM_ADDRESS;
     }
   );
 

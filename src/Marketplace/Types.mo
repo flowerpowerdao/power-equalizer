@@ -68,7 +68,9 @@ module {
     _paymentsState : [(Principal, [SubAccount])];
     _tokenListingState : [(TokenIndex, Listing)];
     _disbursementsState : [(TokenIndex, AccountIdentifier, SubAccount, Nat64)];
-    _nextSubAccountState : Nat
+    _nextSubAccountState : Nat;
+    _soldState : Nat;
+    _totalToSellState : Nat;
   };
 
   public type Dependencies = {
@@ -77,12 +79,10 @@ module {
   };
 
   public type Constants = {
-    ESCROWDELAY: Time.Time;
     LEDGER_CANISTER : actor { 
     account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
     send_dfx : shared SendArgs -> async Nat64; 
     };
-    TEAM_ADDRESS: AccountIdentifier;
   };
 
 }

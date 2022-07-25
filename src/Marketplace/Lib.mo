@@ -15,6 +15,7 @@ import Root "mo:cap/Root";
 
 import AID "../toniq-labs/util/AccountIdentifier";
 import Buffer "../Buffer";
+import Env "../Env";
 import ExtCore "../toniq-labs/Ext/Core";
 import Types "Types";
 import Utils "../Utils";
@@ -32,6 +33,8 @@ module {
     private var _tokenListing : HashMap.HashMap<Types.TokenIndex, Types.Listing> = HashMap.fromIter(state._tokenListingState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _disbursements : List.List<(Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)> = List.fromArray(state._disbursementsState);
     private var _nextSubAccount : Nat  = state._nextSubAccountState;
+    private var _sold : Nat = state._soldState;
+    private var _totalToSell : Nat = state._totalToSellState;
     
     public func toStable () : {
       transactionsState : [Types.Transaction];
@@ -39,7 +42,9 @@ module {
       paymentsState : [(Principal, [Types.SubAccount])];
       tokenListingState : [(Types.TokenIndex, Types.Listing)];
       disbursementsState : [(Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)];
-      nextSubAccountState : Nat
+      nextSubAccountState : Nat;
+      soldState : Nat;
+      totalToSellState : Nat;
     } {
       return {
         tokenSettlementState = Iter.toArray(_tokenSettlement.entries());
@@ -52,19 +57,11 @@ module {
         tokenListingState = Iter.toArray(_tokenListing.entries());
         disbursementsState = List.toArray(_disbursements);
         nextSubAccountState = _nextSubAccount;
+        soldState = _sold;
+        totalToSellState = _totalToSell;
       }
     };
     
-/*************
-* CONSTANTS *
-*************/
-
-    let salesFees : [(Types.AccountIdentifier, Nat64)] = [
-      (consts.TEAM_ADDRESS, 7500), //Royalty Fee 
-      ("9dd5c70ada66e593cc5739c3177dc7a40530974f270607d142fc72fce91b1d25", 1000), //Entrepot Fee 
-    ];
-
-
 /********************
 * PUBLIC INTERFACE *
 ********************/
@@ -87,7 +84,7 @@ module {
             _tokenListing.put(token, {
               seller = listing.seller;
               price = listing.price;
-              locked = ?(Time.now() + consts.ESCROWDELAY);
+              locked = ?(Time.now() + Env.ecscrowDelay);
             });
             switch(_tokenSettlement.get(token)) {
               case(?settlement){
@@ -132,9 +129,9 @@ module {
               if (response.e8s >= settlement.price){
                 switch (deps._Tokens.getOwnerFromRegistry(token)) {
                   case (?token_owner) {
-                    var bal : Nat64 = settlement.price - (10000 * Nat64.fromNat(salesFees.size() + 1));
+                    var bal : Nat64 = settlement.price - (10000 * Nat64.fromNat(Env.salesFees.size() + 1));
                     var rem = bal;
-                    for(f in salesFees.vals()){
+                    for(f in Env.salesFees.vals()){
                       var _fee : Nat64 = bal * f.1 / 100000;
                       addDisbursement((token, f.0, settlement.subaccount, _fee));
                       rem := rem -  _fee : Nat64;
@@ -186,7 +183,8 @@ module {
     };
 
     public func list(caller : Principal, request : Types.ListRequest) : async Result.Result<(), Types.CommonError> {
-      if (Time.now() < (publicSaleStart+marketDelay)) {
+      // marketplace is open either when marketDelay has passed or collection sold out
+      if (Time.now() < (Env.publicSaleStart+Env.marketDelay)) {
         if (_sold < _totalToSell){
           return #err(#Other("You can not list yet"));
         };
@@ -414,6 +412,22 @@ module {
 
     public func getPayments(principal: Principal) : ?Buffer.Buffer<Types.SubAccount>{
       return _payments.get(principal);
+    };
+
+    public func setTotalToSell(totalToSell : Nat) {
+      _totalToSell := totalToSell;
+    };
+
+    public func increaseSold(amount : Nat) {
+      _sold := _sold + amount;
+    };
+
+    public func getSold() : Nat {
+      _sold;
+    };
+
+    public func getTotalToSell() : Nat {
+      _totalToSell;
     };
 
     // public methods

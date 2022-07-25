@@ -1,5 +1,3 @@
-import AID "../toniq-labs/util/AccountIdentifier";
-import Buffer "../Buffer";
 import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
 import Nat "mo:base/Nat16";
@@ -8,8 +6,13 @@ import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Random "mo:base/Random";
 import Result "mo:base/Result";
-import Root "mo:cap/Root";
 import Time "mo:base/Time";
+
+import Root "mo:cap/Root";
+
+import AID "../toniq-labs/util/AccountIdentifier";
+import Buffer "../Buffer";
+import Env "../Env";
 import Types "Types";
 import Utils "../Utils";
 
@@ -27,8 +30,6 @@ module {
     private var _tokensForSale: Buffer.Buffer<Types.TokenIndex> = Utils.bufferFromArray<Types.TokenIndex>(state._tokensForSaleState);
     private var _whitelist : Buffer.Buffer<Types.AccountIdentifier> = Utils.bufferFromArray<Types.AccountIdentifier>(state._whitelistState);
     private var _soldIcp : Nat64 = state._soldIcpState;
-    private var _sold : Nat = state._soldState;
-    private var _totalToSell : Nat = state._totalToSellState;
     private var _hasBeenInitiated : Bool = state._hasBeenInitiatedState;
 
     public func toStable() : {
@@ -39,8 +40,6 @@ module {
       tokensForSaleState : [Types.TokenIndex];
       whitelistState : [Types.AccountIdentifier];
       soldIcpState : Nat64;
-      soldState : Nat;
-      totalToSellState : Nat;
       hasBeenInitiatedState : Bool;
     } {
       return {
@@ -51,36 +50,9 @@ module {
         tokensForSaleState = _tokensForSale.toArray();
         whitelistState = _whitelist.toArray();
         soldIcpState = _soldIcp;
-        soldState = _sold;
-        totalToSellState = _totalToSell;
         hasBeenInitiatedState = _hasBeenInitiated;
       }
     };
-
-
-/*************
-* CONSTANTS *
-*************/
-
-    let teamRoyaltyAddress : Types.AccountIdentifier = consts.TEAM_ADDRESS;
-    let collectionSize : Nat32 = 7777;
-    // prices
-    // let ethFlowerWhitelistPrice : Nat64 =   350000000;
-    // let modclubWhitelistPrice : Nat64 =     500000000;
-    let whitelistPrice : Nat64 =            500000000;
-    let salePrice : Nat64 =                 700000000;
-
-    let publicSaleStart : Time.Time = 1659276000000000000; //Start of first purchase (WL or other)
-    let whitelistTime : Time.Time = 1659362400000000000; //Period for WL only discount. Set to publicSaleStart for no exclusive period
-    var marketDelay : Time.Time = 2 * 24 * 60 * 60 * 1_000_000_000; //How long to delay market opening
-    var whitelistOneTimeOnly : Bool = true; //Whitelist addresses are removed after purchase
-    var whitelistDiscountLimited : Bool = true; //If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
-    //Whitelist
-     let whitelistAdresses : [Types.AccountIdentifier]= ["7ada07a0a64bff17b8e057b0d51a21e376c76607a16da88cd3f75656bc6b5b0b"];
-    var whitelistLimit : Nat = 1; // how many NFTs per whitelist spot
-
-    //Airdrop (only addresses, no token index anymore)
-      var airdrop : [Types.AccountIdentifier] = [];
 
 /********************
 * PUBLIC INTERFACE *
@@ -90,9 +62,9 @@ module {
     public func initMint(caller : Principal) : async () {
       assert(caller == deps._Tokens.getMinter() and deps._Tokens.getNextTokenId() == 0);
       //Mint
-      mintCollection(collectionSize);
+      mintCollection(Env.collectionSize);
       // turn whitelist into buffer for better performance
-      setWhitelist(whitelistAdresses);
+      setWhitelist(Env.whitelistAdresses);
       // get initial token indices
       _tokensForSale := 
         switch(deps._Tokens.getTokensFromOwner("0000")){ 
@@ -103,20 +75,20 @@ module {
       let seed: Blob = await Random.blob();
       _tokensForSale := deps._Shuffle.shuffleTokens(_tokensForSale, seed);
       // airdrop tokens
-      for(a in airdrop.vals()){
+      for(a in Env.airdrop.vals()){
         // nextTokens() updates _tokensForSale, removing consumed tokens
         deps._Tokens.transferTokenToUser(nextTokens(1)[0], a);
       };
-      _totalToSell := _tokensForSale.size();
+      deps._Marketplace.setTotalToSell(_tokensForSale.size());
       _hasBeenInitiated := true;
     };
 
     public func reserve(amount : Nat64, quantity : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount) : Result.Result<(Types.AccountIdentifier, Nat64), Text> {
-      if (Time.now() < publicSaleStart) {
+      if (Time.now() < Env.publicSaleStart) {
         return #err("The sale has not started yet");
       };
       if (isWhitelisted(address) == false) {
-        if (Time.now() < whitelistTime) {
+        if (Time.now() < Env.whitelistTime) {
           return #err("The public sale has not started yet");
         };            
       };
@@ -148,7 +120,7 @@ module {
       if (tokens.size() == 0) {
         return #err("Not enough NFTs available!");
       };
-      if (whitelistOneTimeOnly == true){
+      if (Env.whitelistOneTimeOnly == true){
         if (isWhitelisted(address)) {
           removeFromWhitelist(address);
         };
@@ -158,7 +130,7 @@ module {
         price = total;
         subaccount = subaccount;
         buyer = address;
-        expires = Time.now() + consts.ESCROWDELAY;
+        expires = Time.now() + Env.ecscrowDelay;
       });
       #ok((paymentAddress, total));
     };
@@ -188,7 +160,7 @@ module {
                     time = Time.now();
                   });
                   _soldIcp += settlement.price;
-                  _sold += tokens.size();
+                  deps._Marketplace.increaseSold(tokens.size());
                   _salesSettlements.delete(paymentaddress);
                   let event : Root.IndefiniteEvent = {
                     operation = "mint";
@@ -205,7 +177,7 @@ module {
                   ignore deps._Cap.insert(event);
                   //Payout
                   var bal : Nat64 = response.e8s - (10000 * 1); //Remove 2x tx fee
-                  deps._Marketplace.addDisbursement((0, consts.TEAM_ADDRESS, settlement.subaccount, bal));
+                  deps._Marketplace.addDisbursement((0, Env.teamAddress, settlement.subaccount, bal));
                   return #ok();
                 }
               } else {
@@ -249,13 +221,13 @@ module {
     public func salesSettings(address : Types.AccountIdentifier) : Types.SaleSettings {
       return {
         price = getAddressPrice(address);
-        salePrice = salePrice;
+        salePrice = Env.salePrice;
         remaining = availableTokens();
-        sold = _sold;
-        startTime = publicSaleStart;
-        whitelistTime = whitelistTime;
+        sold = deps._Marketplace.getSold();
+        startTime = Env.publicSaleStart;
+        whitelistTime = Env.whitelistTime;
         whitelist = isWhitelisted(address);
-        totalToSell = _totalToSell;
+        totalToSell = deps._Marketplace.getTotalToSell();
         bulkPricing = getAddressBulkPrice(address);
       } : Types.SaleSettings;
     };
@@ -284,9 +256,9 @@ module {
     //Set different price types here
     func getAddressBulkPrice(address : Types.AccountIdentifier) : [(Nat64, Nat64)] {
       if (isWhitelisted(address)){
-        return [(1, whitelistPrice)]
+        return [(1, Env.whitelistPrice)]
       };
-      return [(1, salePrice)]
+      return [(1, Env.salePrice)]
     };
 
     public func setWhitelist(whitelistAddresses: [Types.AccountIdentifier]) {
@@ -308,7 +280,7 @@ module {
     };
 
     func isWhitelisted(address : Types.AccountIdentifier) : Bool {
-    if (whitelistDiscountLimited == true and Time.now() >= whitelistTime) {
+    if (Env.whitelistDiscountLimited == true and Time.now() >= Env.whitelistTime) {
       return false;
     };
       Option.isSome(_whitelist.find(func (a : Types.AccountIdentifier) : Bool { a == address }));
