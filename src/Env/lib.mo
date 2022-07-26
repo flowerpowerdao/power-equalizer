@@ -10,7 +10,7 @@ module {
     public let collectionSize : Nat32 = 7777;
     public let salesFees : [(ExtCore.AccountIdentifier, Nat64)] = [
       (teamAddress, 7500), //Royalty Fee 
-      ("9dd5c70ada66e593cc5739c3177dc7a40530974f270607d142fc72fce91b1d25", 1000), //Entrepot Fee 
+      ("c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9", 1000), //Entrepot Fee 
     ];
 
     // prices
