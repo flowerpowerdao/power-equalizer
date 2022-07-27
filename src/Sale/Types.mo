@@ -17,7 +17,8 @@ module {
     _salesPrincipalsState : [(AccountIdentifier, Text)];
     _failedSalesState : [(AccountIdentifier, SubAccount)];
     _tokensForSaleState : [TokenIndex];
-    _whitelistState : [AccountIdentifier];
+    _ethFlowerWhitelistState : [AccountIdentifier];
+    _modclubWhitelistState : [AccountIdentifier];
     _soldIcpState : Nat64;
     _hasBeenInitiatedState : Bool;
   };
