@@ -1,29 +1,10 @@
-import Array "mo:base/Array";
-import Blob "mo:base/Blob";
 import Cycles "mo:base/ExperimentalCycles";
-import Debug "mo:base/Debug";
-import Float "mo:base/Float";
-import HashMap "mo:base/HashMap";
-import Int "mo:base/Int";
-import Int8 "mo:base/Int8";
-import Iter "mo:base/Iter";
-import Nat "mo:base/Nat";
-import Nat32 "mo:base/Nat32";
-import Nat64 "mo:base/Nat64";
-import Nat8 "mo:base/Nat8";
-import Option "mo:base/Option";
 import Principal "mo:base/Principal";
-import Random "mo:base/Random";
 import Result "mo:base/Result";
-import Text "mo:base/Text";
 import Time "mo:base/Time";
 
 import Cap "mo:cap/Cap";
-import Root "mo:cap/Root";
-import Router "mo:cap/Router";
-import Types "mo:cap/Types";
 
-import AID "./toniq-labs/util/AccountIdentifier";
 import Assets "CanisterAssets";
 import AssetsTypes "CanisterAssets/Types";
 import Buffer "./Buffer";
@@ -418,7 +399,19 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
 
   // updates
   public shared(msg) func initMint() : async () {
-    await _Sale.initMint(msg.caller)
+    _Sale.initMint(msg.caller)
+  };
+
+  public shared(msg) func shuffleTokensForSale() : async () {
+    await _Sale.shuffleTokensForSale(msg.caller)
+  };
+
+  public shared(msg) func airdropTokens(startIndex : Nat) : async () {
+    _Sale.airdropTokens(msg.caller, startIndex)
+  };
+
+  public shared(msg) func setTotalToSell() : async Nat {
+    _Sale.setTotalToSell(msg.caller);
   };
 
   public shared(msg) func reserve(amount : Nat64, quantity : Nat64, address : SaleTypes.AccountIdentifier, _subaccountNOTUSED : SaleTypes.SubAccount) : async Result.Result<(SaleTypes.AccountIdentifier, Nat64), Text> {

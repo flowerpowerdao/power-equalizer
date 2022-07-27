@@ -1,7 +1,9 @@
-import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
+import List "mo:base/List";
 import Nat "mo:base/Nat16";
+import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
+import TrieMap "mo:base/TrieMap";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Random "mo:base/Random";
@@ -24,7 +26,7 @@ module {
 *********/
 
     private var _saleTransactions: Buffer.Buffer<Types.SaleTransaction> = Utils.bufferFromArray<Types.SaleTransaction>(state._saleTransactionsState);
-    private var _salesSettlements : HashMap.HashMap<Types.AccountIdentifier, Types.Sale> = HashMap.fromIter(state._salesSettlementsState.vals(), 0, AID.equal, AID.hash);
+    private var _salesSettlements : TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale> = TrieMap.fromEntries(state._salesSettlementsState.vals(), AID.equal, AID.hash);
     private var _failedSales : Buffer.Buffer<(Types.AccountIdentifier, Types.SubAccount)> = Utils.bufferFromArray<(Types.AccountIdentifier, Types.SubAccount)>(state._failedSalesState);
     private var _tokensForSale: Buffer.Buffer<Types.TokenIndex> = Utils.bufferFromArray<Types.TokenIndex>(state._tokensForSaleState);
     private var _ethFlowerWhitelist : Buffer.Buffer<Types.AccountIdentifier> = Utils.bufferFromArray<Types.AccountIdentifier>(state._ethFlowerWhitelistState);
@@ -56,7 +58,7 @@ module {
 ********************/
 
     // updates
-    public func initMint(caller : Principal) : async () {
+    public func initMint(caller : Principal) : () {
       assert(caller == deps._Tokens.getMinter() and deps._Tokens.getNextTokenId() == 0);
       //Mint
       mintCollection(Env.collectionSize);
@@ -69,15 +71,37 @@ module {
           case(?t) t; 
           case(_) Buffer.Buffer<Types.TokenIndex>(0)
         }; 
+    };
+    
+    public func shuffleTokensForSale(caller : Principal) : async () {
+      assert(caller == deps._Tokens.getMinter() and Nat32.toNat(Env.collectionSize) == _tokensForSale.size());
       // shuffle indices
       let seed: Blob = await Random.blob();
       _tokensForSale := deps._Shuffle.shuffleTokens(_tokensForSale, seed);
+    };
+
+
+    public func airdropTokens(caller : Principal, startingIndex: Nat) : () {
+      assert(caller == deps._Tokens.getMinter() and deps._Marketplace.getTotalToSell() == 0);
       // airdrop tokens
-      for(a in Env.airdrop.vals()){
+      var temp = 0;
+      label airdrop for(a in Env.airdrop.vals()){
+        if(temp < startingIndex){
+          temp += 1;
+          continue airdrop
+        } else if (temp >= startingIndex+1500) {
+          break airdrop
+        };
         // nextTokens() updates _tokensForSale, removing consumed tokens
         deps._Tokens.transferTokenToUser(nextTokens(1)[0], a);
+        temp += 1;
       };
+    };
+    
+    public func setTotalToSell(caller : Principal) : Nat {
+      assert(caller == deps._Tokens.getMinter() and deps._Marketplace.getTotalToSell() == 0);
       deps._Marketplace.setTotalToSell(_tokensForSale.size());
+      _tokensForSale.size();
     };
 
     public func reserve(amount : Nat64, quantity : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount) : Result.Result<(Types.AccountIdentifier, Nat64), Text> {
@@ -288,13 +312,16 @@ module {
 
     func nextTokens(qty : Nat64) : [Types.TokenIndex] {
       if (_tokensForSale.size() >= Nat64.toNat(qty)) {
-        let ret : Buffer.Buffer<Types.TokenIndex> = Buffer.Buffer(Nat64.toNat(qty));
-        while(ret.size() < Nat64.toNat(qty)) {        
-          var token : Types.TokenIndex = _tokensForSale.get(0);
-          _tokensForSale := _tokensForSale.filter(func(x : Types.TokenIndex) : Bool { x != token } );
-          ret.add(token);
+        var ret : List.List<Types.TokenIndex> = List.nil();
+        while(List.size(ret) < Nat64.toNat(qty)) {        
+          switch(_tokensForSale.removeLast()) {
+            case(?token) {
+              ret := List.push(token, ret);
+            };
+            case _ return [];
+          }
         };
-        ret.toArray();
+        List.toArray(ret);
       } else {
         [];
       }

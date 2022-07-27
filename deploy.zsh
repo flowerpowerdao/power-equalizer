@@ -122,6 +122,22 @@ dfx canister --network $network call $mode initCap
 echo "initiating mint ..."
 dfx canister --network $network call $mode initMint
 
+# shuffle Tokens For Sale
+echo "shuffle Tokens For Sale ..."
+dfx canister --network $network call $mode shuffleTokensForSale
+
+# airdrop tokens
+echo "airdrop tokens ..."
+dfx canister --network $network call $mode airdropTokens 0
+
+# airdrop tokens
+echo "airdrop tokens ..."
+dfx canister --network $network call $mode airdropTokens 1500
+
+# set total to sell
+echo "set total to sell ..."
+dfx canister --network $network call $mode setTotalToSell
+
 # check the asset that are linked to the tokens
 for i in {0..9}
 do
