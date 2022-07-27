@@ -14,13 +14,11 @@ module {
   public type State = {
     _saleTransactionsState : [SaleTransaction];
     _salesSettlementsState : [(AccountIdentifier, Sale)];
-    _salesPrincipalsState : [(AccountIdentifier, Text)];
     _failedSalesState : [(AccountIdentifier, SubAccount)];
     _tokensForSaleState : [TokenIndex];
     _ethFlowerWhitelistState : [AccountIdentifier];
     _modclubWhitelistState : [AccountIdentifier];
     _soldIcpState : Nat64;
-    _hasBeenInitiatedState : Bool;
   };
 
   public type Dependencies = {

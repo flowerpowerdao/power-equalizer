@@ -25,35 +25,29 @@ module {
 
     private var _saleTransactions: Buffer.Buffer<Types.SaleTransaction> = Utils.bufferFromArray<Types.SaleTransaction>(state._saleTransactionsState);
     private var _salesSettlements : HashMap.HashMap<Types.AccountIdentifier, Types.Sale> = HashMap.fromIter(state._salesSettlementsState.vals(), 0, AID.equal, AID.hash);
-    private var _salesPrincipals : HashMap.HashMap<Types.AccountIdentifier, Text> = HashMap.fromIter(state._salesPrincipalsState.vals(), 0, AID.equal, AID.hash);
     private var _failedSales : Buffer.Buffer<(Types.AccountIdentifier, Types.SubAccount)> = Utils.bufferFromArray<(Types.AccountIdentifier, Types.SubAccount)>(state._failedSalesState);
     private var _tokensForSale: Buffer.Buffer<Types.TokenIndex> = Utils.bufferFromArray<Types.TokenIndex>(state._tokensForSaleState);
     private var _ethFlowerWhitelist : Buffer.Buffer<Types.AccountIdentifier> = Utils.bufferFromArray<Types.AccountIdentifier>(state._ethFlowerWhitelistState);
     private var _modclubWhitelist : Buffer.Buffer<Types.AccountIdentifier> = Utils.bufferFromArray<Types.AccountIdentifier>(state._modclubWhitelistState);
     private var _soldIcp : Nat64 = state._soldIcpState;
-    private var _hasBeenInitiated : Bool = state._hasBeenInitiatedState;
 
     public func toStable() : {
       saleTransactionsState : [Types.SaleTransaction];
       salesSettlementsState : [(Types.AccountIdentifier, Types.Sale)];
-      salesPrincipalsState : [(Types.AccountIdentifier, Text)]; 
       failedSalesState : [(Types.AccountIdentifier, Types.SubAccount)];
       tokensForSaleState : [Types.TokenIndex];
       ethFlowerWhitelistState : [Types.AccountIdentifier];
       modclubWhitelistState : [Types.AccountIdentifier];
       soldIcpState : Nat64;
-      hasBeenInitiatedState : Bool;
     } {
       return {
         saleTransactionsState = _saleTransactions.toArray();
         salesSettlementsState = Iter.toArray(_salesSettlements.entries());
-        salesPrincipalsState = Iter.toArray(_salesPrincipals.entries());
         failedSalesState = _failedSales.toArray();
         tokensForSaleState = _tokensForSale.toArray();
         ethFlowerWhitelistState = _ethFlowerWhitelist.toArray();
         modclubWhitelistState = _modclubWhitelist.toArray();
         soldIcpState = _soldIcp;
-        hasBeenInitiatedState = _hasBeenInitiated;
       }
     };
 
@@ -84,7 +78,6 @@ module {
         deps._Tokens.transferTokenToUser(nextTokens(1)[0], a);
       };
       deps._Marketplace.setTotalToSell(_tokensForSale.size());
-      _hasBeenInitiated := true;
     };
 
     public func reserve(amount : Nat64, quantity : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount) : Result.Result<(Types.AccountIdentifier, Nat64), Text> {

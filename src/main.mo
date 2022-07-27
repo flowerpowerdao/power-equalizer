@@ -78,15 +78,11 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
  // Sale
 	private stable var _saleTransactionsState : [SaleTypes.SaleTransaction] = [];
   private stable var _salesSettlementsState : [(AccountIdentifier, SaleTypes.Sale)] = [];
-  private stable var _salesPrincipalsState : [(AccountIdentifier, Text)] = [];
   private stable var _failedSalesState : [(AccountIdentifier, TokenTypes.SubAccount)] = [];
   private stable var _tokensForSaleState : [TokenTypes.TokenIndex] = [];
   private stable var _ethFlowerWhitelistState : [AccountIdentifier] = [];
   private stable var _modclubWhitelistState : [AccountIdentifier] = [];
   private stable var _soldIcpState : Nat64 = 0;
-  private stable var _soldState : Nat = 0;
-  private stable var _totalToSellState : Nat = 0;
-  private stable var _hasBeenInitiatedState : Bool = false;
 
  // Marketplace
 	private stable var _transactionsState : [MarketplaceTypes.Transaction] = [];
@@ -96,6 +92,8 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
 	private stable var _tokenListingState : [(TokenTypes.TokenIndex, MarketplaceTypes.Listing)] = [];
   private stable var _disbursementsState : [(TokenTypes.TokenIndex, AccountIdentifier, SubAccount, Nat64)] = [];
   private stable var _nextSubAccountState : Nat = 0;
+  private stable var _soldState : Nat = 0;
+  private stable var _totalToSellState : Nat = 0;
 
  // Assets
 	private stable var _assetsState : [AssetsTypes.Asset] = [];
@@ -400,14 +398,12 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     {
       _saleTransactionsState;
       _salesSettlementsState;
-      _salesPrincipalsState;
       _minterState;
       _failedSalesState;
       _tokensForSaleState;
       _ethFlowerWhitelistState;
       _modclubWhitelistState;
       _soldIcpState;
-      _hasBeenInitiatedState;
     },
     {
       _Cap;
