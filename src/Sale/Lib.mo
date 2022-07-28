@@ -1,15 +1,17 @@
+import Array "mo:base/Array";
 import Iter "mo:base/Iter";
 import List "mo:base/List";
 import Nat "mo:base/Nat16";
 import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
-import TrieMap "mo:base/TrieMap";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Random "mo:base/Random";
 import Result "mo:base/Result";
 import Time "mo:base/Time";
+import TrieMap "mo:base/TrieMap";
 
+import AviateAccountIdentifier "mo:accountid/AccountIdentifier";
 import Root "mo:cap/Root";
 
 import AID "../toniq-labs/util/AccountIdentifier";
@@ -58,14 +60,24 @@ module {
 ********************/
 
     // updates
-    public func initMint(caller : Principal) : () {
+    public func initMint(caller : Principal) : async () {
       assert(caller == deps._Tokens.getMinter() and deps._Tokens.getNextTokenId() == 0);
       //Mint
       mintCollection(Env.collectionSize);
       // turn whitelist into buffer for better performance
       setWhitelist(Env.ethFlowerWhitelist, _ethFlowerWhitelist);
-      setWhitelist(Env.modclubWhitelist, _modclubWhitelist);
-      // get initial token indices
+      // get modclub whitelist from canister
+      let modclubWhitelistFromCanister : Buffer.Buffer<Types.AccountIdentifier> = Utils.mapToBufferFromArray<Principal, Types.AccountIdentifier>(
+        await consts.WHITELIST_CANISTER.getWhitelist(),
+        func(p : Principal) {
+          Utils.toLowerString(AviateAccountIdentifier.toText(AviateAccountIdentifier.fromPrincipal(p, null)));
+        }
+      );
+      // concatenate with contest partiticapants that are hardcoded
+      let concatenatedModclubWhitelist = Array.append(modclubWhitelistFromCanister.toArray(), Env.modclubWhitelist);
+      // set the whitelist
+      setWhitelist(concatenatedModclubWhitelist, _modclubWhitelist);
+      // get initial token indices (this will return all tokens as all of them are owned by "0000")
       _tokensForSale := 
         switch(deps._Tokens.getTokensFromOwner("0000")){ 
           case(?t) t; 

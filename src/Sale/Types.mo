@@ -30,6 +30,7 @@ module {
 
   public type Constants = {
     LEDGER_CANISTER : actor { account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs };
+    WHITELIST_CANISTER : actor { getWhitelist: shared () -> async [Principal] };
   };
 
   public type AccountIdentifier = ExtCore.AccountIdentifier;

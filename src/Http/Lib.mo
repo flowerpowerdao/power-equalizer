@@ -199,8 +199,8 @@ module {
           "Minted NFTs:                              " # debug_show (deps._Tokens.getNextTokenId()) # "\n" #
           "Assets:                                   " # debug_show (deps._Assets.size()) # "\n" #
           "---\n" #
-          "Eth Flower Whitelist:                     " # debug_show (deps._Sale.ethFlowerWhitelistSize() : Nat) # "\n" #
-          "Eth Flower Whitelist:                     " # debug_show (deps._Sale.modclubWhitelistSize() : Nat) # "\n" #
+          "ETH Flower Whitelist:                     " # debug_show (deps._Sale.ethFlowerWhitelistSize() : Nat) # "\n" #
+          "MODCLUB Whitelist:                        " # debug_show (deps._Sale.modclubWhitelistSize() : Nat) # "\n" #
           "Total to sell:                            " # debug_show (deps._Marketplace.getTotalToSell()) # "\n" #
           "Remaining:                                " # debug_show (deps._Sale.availableTokens()) # "\n" #
           "Sold:                                     " # debug_show(deps._Marketplace.getSold()) # "\n" #

@@ -5,7 +5,9 @@ import Int8 "mo:base/Int8";
 import Iter "mo:base/Iter";
 import Nat32 "mo:base/Nat32";
 import Nat8 "mo:base/Nat8";
+import Prim "mo:prim";
 import Principal "mo:base/Principal";
+import Text "mo:base/Text";
 import TrieMap "mo:base/TrieMap";
 
 import Buffer "./Buffer";
@@ -18,6 +20,15 @@ module {
     let buffer = Buffer.Buffer<T>(array.size());
     for (element in Array.vals(array)) {
       buffer.add(element);
+    };
+    return buffer;
+  };
+
+  /// Create a Buffer from an Array
+  public func mapToBufferFromArray<T, T2>(array : [T], f : T -> T2) : Buffer.Buffer<T2> {
+    let buffer = Buffer.Buffer<T2>(array.size());
+    for (element in Array.vals(array)) {
+      buffer.add(f(element));
     };
     return buffer;
   };
@@ -143,5 +154,14 @@ module {
     let identifier = ExtCore.TokenIdentifier.fromPrincipal(actorPrincipal, index);
     assert(index == ExtCore.TokenIdentifier.getIndex(identifier));
     return identifier;
+  };
+
+  public func toLowerString(t: Text): Text {
+    var lowerCaseString = "";
+    for (char in t.chars()){
+        lowerCaseString #= Text.fromChar(Prim.charToLower(char));
+    };
+
+    return lowerCaseString;
   };
 }

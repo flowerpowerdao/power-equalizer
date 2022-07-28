@@ -187,6 +187,9 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
     send_dfx : shared SendArgs -> async Nat64; 
   };
+  let WHITELIST_CANISTER = actor "s7o6c-giaaa-aaaae-qac4a-cai" : actor { 
+    getWhitelist: shared () -> async [Principal];
+  };
   let CREATION_CYCLES: Nat = 1_000_000_000_000;
 
 /***********
@@ -394,12 +397,13 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     },
     {
       LEDGER_CANISTER;
+      WHITELIST_CANISTER;
     }
   );
 
   // updates
   public shared(msg) func initMint() : async () {
-    _Sale.initMint(msg.caller)
+    await _Sale.initMint(msg.caller)
   };
 
   public shared(msg) func shuffleTokensForSale() : async () {
