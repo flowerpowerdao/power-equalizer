@@ -1,6 +1,6 @@
-import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";
+import TrieMap "mo:base/TrieMap";
 import Result "mo:base/Result";
 
 import AID "../toniq-labs/util/AccountIdentifier";
@@ -16,9 +16,9 @@ module {
     * STATE *
     *********/
 
-    private var _tokenMetadata : HashMap.HashMap<Types.TokenIndex, Types.Metadata> = HashMap.fromIter(state._tokenMetadataState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-    private var _owners : HashMap.HashMap<Types.AccountIdentifier, Buffer.Buffer<Types.TokenIndex>> = Utils.BufferHashMapFromIter(state._ownersState.vals(), 0, AID.equal, AID.hash);
-    private var _registry : HashMap.HashMap<Types.TokenIndex, Types.AccountIdentifier> = HashMap.fromIter(state._registryState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    private var _tokenMetadata : TrieMap.TrieMap<Types.TokenIndex, Types.Metadata> = TrieMap.fromEntries(state._tokenMetadataState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    private var _owners : TrieMap.TrieMap<Types.AccountIdentifier, Buffer.Buffer<Types.TokenIndex>> = Utils.bufferTrieMapFromIter(state._ownersState.vals(), AID.equal, AID.hash);
+    private var _registry : TrieMap.TrieMap<Types.TokenIndex, Types.AccountIdentifier> = TrieMap.fromEntries(state._registryState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _nextTokenId : Types.TokenIndex = state._nextTokenIdState;
     private var _minter : Principal = state._minterState;
     private var _supply : Types.Balance = state._supplyState;
@@ -127,11 +127,11 @@ module {
       _minter;
     };
 
-    public func getRegistry() : HashMap.HashMap<Types.TokenIndex, Types.AccountIdentifier> {
+    public func getRegistry() : TrieMap.TrieMap<Types.TokenIndex, Types.AccountIdentifier> {
       _registry;
     };
     
-    public func getTokenMetadata() : HashMap.HashMap<Types.TokenIndex, Types.Metadata> {
+    public func getTokenMetadata() : TrieMap.TrieMap<Types.TokenIndex, Types.Metadata> {
       _tokenMetadata;
     };
 

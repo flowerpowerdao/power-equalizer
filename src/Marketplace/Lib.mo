@@ -1,10 +1,10 @@
 import Array "mo:base/Array";
 import Blob "mo:base/Blob";
-import HashMap "mo:base/HashMap";
 import Iter "mo:base/Iter";
 import List "mo:base/List";
 import Nat64 "mo:base/Nat64";
 import Nat8 "mo:base/Nat8";
+import TrieMap "mo:base/TrieMap";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
@@ -28,9 +28,9 @@ module {
 *********/
 
     private var _transactions : Buffer.Buffer<Types.Transaction> = Utils.bufferFromArray(state._transactionsState);	
-    private var _tokenSettlement : HashMap.HashMap<Types.TokenIndex, Types.Settlement> = HashMap.fromIter(state._tokenSettlementState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-    private var _payments : HashMap.HashMap<Principal, Buffer.Buffer<Types.SubAccount>> = Utils.BufferHashMapFromIter(state._paymentsState.vals(), 0, Principal.equal, Principal.hash);
-    private var _tokenListing : HashMap.HashMap<Types.TokenIndex, Types.Listing> = HashMap.fromIter(state._tokenListingState.vals(), 0, ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    private var _tokenSettlement : TrieMap.TrieMap<Types.TokenIndex, Types.Settlement> = TrieMap.fromEntries(state._tokenSettlementState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    private var _payments : TrieMap.TrieMap<Principal, Buffer.Buffer<Types.SubAccount>> = Utils.bufferTrieMapFromIter(state._paymentsState.vals(), Principal.equal, Principal.hash);
+    private var _tokenListing : TrieMap.TrieMap<Types.TokenIndex, Types.Listing> = TrieMap.fromEntries(state._tokenListingState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _disbursements : List.List<(Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)> = List.fromArray(state._disbursementsState);
     private var _nextSubAccount : Nat  = state._nextSubAccountState;
     private var _sold : Nat = state._soldState;

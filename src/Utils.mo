@@ -1,12 +1,14 @@
 import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Hash "mo:base/Hash";
-import HashMap "mo:base/HashMap";
 import Int8 "mo:base/Int8";
 import Iter "mo:base/Iter";
 import Nat32 "mo:base/Nat32";
 import Nat8 "mo:base/Nat8";
+import Prim "mo:prim";
 import Principal "mo:base/Principal";
+import Text "mo:base/Text";
+import TrieMap "mo:base/TrieMap";
 
 import Buffer "./Buffer";
 import ExtCore "./toniq-labs/ext/Core";
@@ -22,14 +24,36 @@ module {
     return buffer;
   };
 
+  /// Create a Buffer from an Array
+  public func mapToBufferFromArray<T, T2>(array : [T], f : T -> T2) : Buffer.Buffer<T2> {
+    let buffer = Buffer.Buffer<T2>(array.size());
+    for (element in Array.vals(array)) {
+      buffer.add(f(element));
+    };
+    return buffer;
+  };
+
   /// Clone from any iterator of key-value pairs
-  public func BufferHashMapFromIter<K, V1>(
+  // public func bufferHashMapFromIter<K, V1>(
+  //   iter : Iter.Iter<(K, [V1])>,
+  //   initCapacity : Nat,
+  //   keyEq : (K, K) -> Bool,
+  //   keyHash : K -> Hash.Hash
+  // ) : HashMap.HashMap<K, Buffer.Buffer<V1>> {
+  //   let h = HashMap.HashMap<K, Buffer.Buffer<V1>>(initCapacity, keyEq, keyHash);
+  //   for ((k, v) in iter) {
+  //     h.put(k, bufferFromArray<V1>(v));
+  //   };
+  //   h
+  // };
+
+  /// Clone from any iterator of key-value pairs
+  public func bufferTrieMapFromIter<K, V1>(
     iter : Iter.Iter<(K, [V1])>,
-    initCapacity : Nat,
     keyEq : (K, K) -> Bool,
     keyHash : K -> Hash.Hash
-  ) : HashMap.HashMap<K, Buffer.Buffer<V1>> {
-    let h = HashMap.HashMap<K, Buffer.Buffer<V1>>(initCapacity, keyEq, keyHash);
+  ) : TrieMap.TrieMap<K, Buffer.Buffer<V1>> {
+    let h = TrieMap.TrieMap<K, Buffer.Buffer<V1>>(keyEq, keyHash);
     for ((k, v) in iter) {
       h.put(k, bufferFromArray<V1>(v));
     };
@@ -130,5 +154,14 @@ module {
     let identifier = ExtCore.TokenIdentifier.fromPrincipal(actorPrincipal, index);
     assert(index == ExtCore.TokenIdentifier.getIndex(identifier));
     return identifier;
+  };
+
+  public func toLowerString(t: Text): Text {
+    var lowerCaseString = "";
+    for (char in t.chars()){
+        lowerCaseString #= Text.fromChar(Prim.charToLower(char));
+    };
+
+    return lowerCaseString;
   };
 }

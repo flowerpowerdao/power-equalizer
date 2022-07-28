@@ -14,12 +14,11 @@ module {
   public type State = {
     _saleTransactionsState : [SaleTransaction];
     _salesSettlementsState : [(AccountIdentifier, Sale)];
-    _salesPrincipalsState : [(AccountIdentifier, Text)];
     _failedSalesState : [(AccountIdentifier, SubAccount)];
     _tokensForSaleState : [TokenIndex];
-    _whitelistState : [AccountIdentifier];
+    _ethFlowerWhitelistState : [AccountIdentifier];
+    _modclubWhitelistState : [AccountIdentifier];
     _soldIcpState : Nat64;
-    _hasBeenInitiatedState : Bool;
   };
 
   public type Dependencies = {
@@ -31,6 +30,7 @@ module {
 
   public type Constants = {
     LEDGER_CANISTER : actor { account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs };
+    WHITELIST_CANISTER : actor { getWhitelist: shared () -> async [Principal] };
   };
 
   public type AccountIdentifier = ExtCore.AccountIdentifier;

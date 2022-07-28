@@ -1,29 +1,10 @@
-import Array "mo:base/Array";
-import Blob "mo:base/Blob";
 import Cycles "mo:base/ExperimentalCycles";
-import Debug "mo:base/Debug";
-import Float "mo:base/Float";
-import HashMap "mo:base/HashMap";
-import Int "mo:base/Int";
-import Int8 "mo:base/Int8";
-import Iter "mo:base/Iter";
-import Nat "mo:base/Nat";
-import Nat32 "mo:base/Nat32";
-import Nat64 "mo:base/Nat64";
-import Nat8 "mo:base/Nat8";
-import Option "mo:base/Option";
 import Principal "mo:base/Principal";
-import Random "mo:base/Random";
 import Result "mo:base/Result";
-import Text "mo:base/Text";
 import Time "mo:base/Time";
 
 import Cap "mo:cap/Cap";
-import Root "mo:cap/Root";
-import Router "mo:cap/Router";
-import Types "mo:cap/Types";
 
-import AID "./toniq-labs/util/AccountIdentifier";
 import Assets "CanisterAssets";
 import AssetsTypes "CanisterAssets/Types";
 import Buffer "./Buffer";
@@ -78,14 +59,11 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
  // Sale
 	private stable var _saleTransactionsState : [SaleTypes.SaleTransaction] = [];
   private stable var _salesSettlementsState : [(AccountIdentifier, SaleTypes.Sale)] = [];
-  private stable var _salesPrincipalsState : [(AccountIdentifier, Text)] = [];
   private stable var _failedSalesState : [(AccountIdentifier, TokenTypes.SubAccount)] = [];
   private stable var _tokensForSaleState : [TokenTypes.TokenIndex] = [];
-  private stable var _whitelistState : [AccountIdentifier] = [];
+  private stable var _ethFlowerWhitelistState : [AccountIdentifier] = [];
+  private stable var _modclubWhitelistState : [AccountIdentifier] = [];
   private stable var _soldIcpState : Nat64 = 0;
-  private stable var _soldState : Nat = 0;
-  private stable var _totalToSellState : Nat = 0;
-  private stable var _hasBeenInitiatedState : Bool = false;
 
  // Marketplace
 	private stable var _transactionsState : [MarketplaceTypes.Transaction] = [];
@@ -95,6 +73,8 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
 	private stable var _tokenListingState : [(TokenTypes.TokenIndex, MarketplaceTypes.Listing)] = [];
   private stable var _disbursementsState : [(TokenTypes.TokenIndex, AccountIdentifier, SubAccount, Nat64)] = [];
   private stable var _nextSubAccountState : Nat = 0;
+  private stable var _soldState : Nat = 0;
+  private stable var _totalToSellState : Nat = 0;
 
  // Assets
 	private stable var _assetsState : [AssetsTypes.Asset] = [];
@@ -130,7 +110,8 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
       salesSettlementsState;
       failedSalesState; 
       tokensForSaleState; 
-      whitelistState;
+      ethFlowerWhitelistState;
+      modclubWhitelistState;
       soldIcpState;
     } = _Sale.toStable();
 
@@ -138,7 +119,8 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     _salesSettlementsState := salesSettlementsState;
     _failedSalesState := failedSalesState;
     _tokensForSaleState := tokensForSaleState;
-    _whitelistState := whitelistState;
+    _ethFlowerWhitelistState := ethFlowerWhitelistState;
+    _modclubWhitelistState := modclubWhitelistState;
     _soldIcpState := soldIcpState;
   
    // Marketplace
@@ -180,7 +162,8 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     _salesSettlementsState := [];
     _failedSalesState := [];
     _tokensForSaleState := [];
-    _whitelistState := [];
+    _ethFlowerWhitelistState := [];
+    _modclubWhitelistState := [];
     _soldIcpState := 0;
 
    // Marketplace
@@ -203,6 +186,9 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
   let LEDGER_CANISTER = actor "ryjl3-tyaaa-aaaaa-aaaba-cai" : actor { 
     account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
     send_dfx : shared SendArgs -> async Nat64; 
+  };
+  let WHITELIST_CANISTER = actor "s7o6c-giaaa-aaaae-qac4a-cai" : actor { 
+    getWhitelist: shared () -> async [Principal];
   };
   let CREATION_CYCLES: Nat = 1_000_000_000_000;
 
@@ -396,13 +382,12 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     {
       _saleTransactionsState;
       _salesSettlementsState;
-      _salesPrincipalsState;
       _minterState;
       _failedSalesState;
       _tokensForSaleState;
-      _whitelistState;
+      _ethFlowerWhitelistState;
+      _modclubWhitelistState;
       _soldIcpState;
-      _hasBeenInitiatedState;
     },
     {
       _Cap;
@@ -412,12 +397,25 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     },
     {
       LEDGER_CANISTER;
+      WHITELIST_CANISTER;
     }
   );
 
   // updates
   public shared(msg) func initMint() : async () {
     await _Sale.initMint(msg.caller)
+  };
+
+  public shared(msg) func shuffleTokensForSale() : async () {
+    await _Sale.shuffleTokensForSale(msg.caller)
+  };
+
+  public shared(msg) func airdropTokens(startIndex : Nat) : async () {
+    _Sale.airdropTokens(msg.caller, startIndex)
+  };
+
+  public shared(msg) func setTotalToSell() : async Nat {
+    _Sale.setTotalToSell(msg.caller);
   };
 
   public shared(msg) func reserve(amount : Nat64, quantity : Nat64, address : SaleTypes.AccountIdentifier, _subaccountNOTUSED : SaleTypes.SubAccount) : async Result.Result<(SaleTypes.AccountIdentifier, Nat64), Text> {

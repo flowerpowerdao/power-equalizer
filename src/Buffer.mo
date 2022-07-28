@@ -37,6 +37,14 @@ module {
       xs;
     };
 
+    public func filterSelf(f : T -> Bool) {
+      let xs = Base.Buffer<T>(size());
+      for (x in vals()) {
+        if (f(x)) xs.add(x);
+      };
+      base := xs;
+    };
+
     public func filterToArray(f : T -> Bool) : [T] {
       let xs = Buffer<T>(size());
       for (x in vals()) {
@@ -45,18 +53,5 @@ module {
       xs.toArray();
     };
 
-    public func filterSelf(
-      f  : T -> Bool,
-      // if (f(t)) g(t);
-      g : (b : Bool, t : T) -> ()
-    ) {
-      let xs = Base.Buffer<T>(size());
-      for (x in vals()) {
-        let t = f(x);
-        if (t) xs.add(x);
-        g(t, x);
-      };
-      base := xs;
-    };
   };
 };
