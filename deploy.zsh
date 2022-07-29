@@ -68,7 +68,6 @@ fi
 # add the other assets
 upload_assets() {
     for asset in {$k..$(($k+$batch_size-1))}; do  
-        echo "$k-$(($k+$batch_size-1))"
         if [ $asset -gt $number_of_assets ];
             then break;
         fi;
