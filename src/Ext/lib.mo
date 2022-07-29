@@ -86,7 +86,7 @@ module {
       };
     };
 
-    public shared(msg) func transfer(request: Types.TransferRequest) : async Types.TransferResponse {
+    public func transfer(caller: Principal, request: Types.TransferRequest) : async Types.TransferResponse {
       if (request.amount != 1) {
         return #err(#Other("Must use amount of 1"));
       };
@@ -98,7 +98,7 @@ module {
         return #err(#Other("This token is currently listed for sale!"));
       };
       let owner = ExtCore.User.toAID(request.from);
-      let spender = AID.fromPrincipal(msg.caller, request.subaccount);
+      let spender = AID.fromPrincipal(caller, request.subaccount);
       let receiver = ExtCore.User.toAID(request.to);
       if (AID.equal(owner, spender) == false) {
         return #err(#Unauthorized(spender));
@@ -125,7 +125,7 @@ module {
                                 ("from", #Text owner),
                                 ("token_id", #Text(request.token))
                               ];
-                              caller = msg.caller;
+                              caller = caller;
                       };
                       ignore deps._Cap.insert(event);
                       // end custom
@@ -157,7 +157,7 @@ module {
                       ("from", #Text owner),
                       ("token_id", #Text(request.token))
                     ];
-                    caller = msg.caller;
+                    caller = caller;
             };
             ignore deps._Cap.insert(event);
             // end custom

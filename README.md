@@ -6,14 +6,22 @@
 
 # TO-DOs
 
+## pre launch
+
 -   check all addresses and parameters in `deploy.zsh`
--   run `make deploy-production-ic-full`
--   check if all assets uploaded correctly by calling the canisters `getTokens`
+-   adapt `Env/lib.mo` to your needs
+-   add canister to DAB
+-   send collection details to entrepot via form
 -   top canister up with cycles
 -   add canister to tip jar
 -   run off chain backup script with mainnet canister id
 -   run disburse script with mainnet canister id
--   call `shuffleAssets` 24 hours after
+
+## launch
+
+-   run `make deploy-production-ic-full`
+-   check if all assets uploaded correctly by calling the canisters `getTokens`
+-   call `shuffleAssets` at desired time (usually 24 hours after market opens)
 
 ## structure
 

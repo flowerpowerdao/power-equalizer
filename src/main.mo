@@ -457,8 +457,12 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
       _Cap;
     }
   );
+  // updates
+  public shared(msg) func transfer(request: EXTTypes.TransferRequest) : async EXTTypes.TransferResponse {
+    await _EXT.transfer(msg.caller, request);
+  };
 
-
+  // queries
   public query func getMinter() : async Principal {
     _EXT.getMinter();
   };
