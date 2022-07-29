@@ -67,11 +67,11 @@ fi
 
 # add the other assets
 upload_assets() {
-    for asset in {$k..$(($k+$batch_size))}; do  
-        if [ $asset -gt $number_of_assets ]; \
-        then break; \
-        fi; \
-        # echo "uploading asset $asset"
+    for asset in {$k..$(($k+$batch_size-1))}; do  
+        echo "$k-$(($k+$batch_size-1))"
+        if [ $asset -gt $number_of_assets ];
+            then break;
+        fi;
         j=$asset-1;
         dfx canister --network $network call --async $mode addAsset '(record {
             name = "'$asset'";
@@ -114,18 +114,17 @@ upload_assets() {
                 data = vec {blob "'"$(cat assets/metadata.json | jq ".[$j]" | sed 's/"/\\"/g')"'"
                 };
             };
-        })'
+        })' &>/dev/null
     done
 }
 
-batch_size=1000
+batch_size=500
 k=1
 while [ $k -le $number_of_assets ]; do
-#   echo "" | env_parallel upload_assets
     upload_assets &
-    echo "uploading $k"
     k=$(($k+$batch_size))
 done
+jobs
 wait
 echo "done" 
 
