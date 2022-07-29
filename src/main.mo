@@ -69,7 +69,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
  // Marketplace
 	private stable var _transactionsState : [MarketplaceTypes.Transaction] = [];
 	private stable var _tokenSettlementState : [(TokenTypes.TokenIndex, MarketplaceTypes.Settlement)] = [];
-	private stable var _usedPaymentAddressessState : [(AccountIdentifier, Principal, TokenTypes.SubAccount)] = [];
 	private stable var _paymentsState : [(Principal, [TokenTypes.SubAccount])] = [];
 	private stable var _tokenListingState : [(TokenTypes.TokenIndex, MarketplaceTypes.Listing)] = [];
   private stable var _disbursementsState : [(TokenTypes.TokenIndex, AccountIdentifier, SubAccount, Nat64)] = [];
@@ -135,6 +134,8 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
       tokenListingState; 
       disbursementsState;
       nextSubAccountState;
+      soldState;
+      totalToSellState;
     } = _Marketplace.toStable();
 
     _transactionsState := transactionsState;
@@ -143,6 +144,8 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     _tokenListingState := tokenListingState;
     _disbursementsState := disbursementsState;
     _nextSubAccountState := nextSubAccountState;
+    _soldState := soldState;
+    _totalToSellState := totalToSellState;
 
    // Assets
     let {
@@ -176,7 +179,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
    // Marketplace
     _transactionsState := [];
     _tokenSettlementState := [];
-    _usedPaymentAddressessState := [];
     _paymentsState := [];
     _tokenListingState := [];
     _disbursementsState := [];
@@ -291,7 +293,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
       _tokenListingState;
       _tokenSettlementState;
       _transactionsState;
-      _usedPaymentAddressessState;
       _disbursementsState;
       _nextSubAccountState;
       _soldState;

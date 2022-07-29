@@ -64,7 +64,6 @@ module {
   public type State = {
     _transactionsState : [Transaction];
     _tokenSettlementState : [(TokenIndex, Settlement)];
-    _usedPaymentAddressessState : [(AccountIdentifier, Principal, SubAccount)];
     _paymentsState : [(Principal, [SubAccount])];
     _tokenListingState : [(TokenIndex, Listing)];
     _disbursementsState : [(TokenIndex, AccountIdentifier, SubAccount, Nat64)];
