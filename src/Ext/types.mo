@@ -1,11 +1,13 @@
 
 import Time "mo:base/Time";
 
+import Cap "mo:cap/Cap";
+
 import Assets "../CanisterAssets";
 import ExtCommon "../toniq-labs/Ext/Common";
 import ExtCore "../toniq-labs/ext/Core";
-import Tokens "../Tokens";
 import Marketplace "../Marketplace";
+import Tokens "../Tokens";
 
 module {
   public type Extension = ExtCore.Extension;
@@ -23,6 +25,12 @@ module {
   public type BalanceRequest = ExtCore.BalanceRequest;
   
   public type BalanceResponse = ExtCore.BalanceResponse;
+
+  public type TransferRequest = ExtCore.TransferRequest;
+
+  public type TransferResponse = ExtCore.TransferResponse;
+
+  public type NotifyService = ExtCore.NotifyService;
 
   public type Listing = {
     seller : Principal;
@@ -42,5 +50,6 @@ module {
     _Tokens : Tokens.Factory;
     _Assets : Assets.Factory;
     _Marketplace : Marketplace.Factory;
+    _Cap : Cap.Cap;
   };
 }

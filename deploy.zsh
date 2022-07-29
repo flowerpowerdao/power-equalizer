@@ -66,53 +66,68 @@ open "http://127.0.0.1:8000/?canisterId=$(dfx canister --network $network id $mo
 fi
 
 # add the other assets
-for i in {1..$number_of_assets}
-do
-    echo "uploading asset $i"
-    j=$i-1;
-	dfx canister --network $network call --async $mode addAsset '(record {
-        name = "'$i'";
-        payload = record {
-            ctype = "image/svg+xml"; 
-            data = vec {blob "
-                <svg xmlns=\"http://www.w3.org/2000/svg\">
-                    <script>
-                        fetch(\"'$asset_canister_url$i'.svg\")
-                        .then(response =&gt; response.text())
-                        .then(text =&gt; {
-                            let parser = new DOMParser();
-                            let doc = parser.parseFromString( text, \"image/svg+xml\" );
-                            document.getElementsByTagName(\"svg\")[0].appendChild( doc.getElementsByTagName(\"svg\")[0] );
-                        })
-                        .catch(err =&gt; console.log(err))
-                    </script>
-                </svg>"
+upload_assets() {
+    for asset in {$k..$(($k+$batch_size))}; do  
+        if [ $asset -gt $number_of_assets ]; \
+        then break; \
+        fi; \
+        # echo "uploading asset $asset"
+        j=$asset-1;
+        dfx canister --network $network call --async $mode addAsset '(record {
+            name = "'$asset'";
+            payload = record {
+                ctype = "image/svg+xml"; 
+                data = vec {blob "
+                    <svg xmlns=\"http://www.w3.org/2000/svg\">
+                        <script>
+                            fetch(\"'$asset_canister_url$asset'.svg\")
+                            .then(response =&gt; response.text())
+                            .then(text =&gt; {
+                                let parser = new DOMParser();
+                                let doc = parser.parseFromString( text, \"image/svg+xml\" );
+                                document.getElementsByTagName(\"svg\")[0].appendChild( doc.getElementsByTagName(\"svg\")[0] );
+                            })
+                            .catch(err =&gt; console.log(err))
+                        </script>
+                    </svg>"
+                };
             };
-        };
-        thumbnail = opt record {
-            ctype = "image/svg+xml"; 
-            data = vec {blob "
-                <svg xmlns=\"http://www.w3.org/2000/svg\">
-                    <script>
-                        fetch(\"'$asset_canister_url$i'_thumbnail.svg\")
-                        .then(response =&gt; response.text())
-                        .then(text =&gt; {
-                            let parser = new DOMParser();
-                            let doc = parser.parseFromString( text, \"image/svg+xml\" );
-                            document.getElementsByTagName(\"svg\")[0].appendChild( doc.getElementsByTagName(\"svg\")[0] );
-                        })
-                        .catch(err =&gt; console.log(err))
-                    </script>
-                </svg>"
+            thumbnail = opt record {
+                ctype = "image/svg+xml"; 
+                data = vec {blob "
+                    <svg xmlns=\"http://www.w3.org/2000/svg\">
+                        <script>
+                            fetch(\"'$asset_canister_url$asset'_thumbnail.svg\")
+                            .then(response =&gt; response.text())
+                            .then(text =&gt; {
+                                let parser = new DOMParser();
+                                let doc = parser.parseFromString( text, \"image/svg+xml\" );
+                                document.getElementsByTagName(\"svg\")[0].appendChild( doc.getElementsByTagName(\"svg\")[0] );
+                            })
+                            .catch(err =&gt; console.log(err))
+                        </script>
+                    </svg>"
+                };
             };
-        };
-        metadata = opt record {
-            ctype = "application/json"; 
-            data = vec {blob "'"$(cat assets/metadata.json | jq ".[$j]" | sed 's/"/\\"/g')"'"
+            metadata = opt record {
+                ctype = "application/json"; 
+                data = vec {blob "'"$(cat assets/metadata.json | jq ".[$j]" | sed 's/"/\\"/g')"'"
+                };
             };
-        };
-    })'
+        })'
+    done
+}
+
+batch_size=1000
+k=1
+while [ $k -le $number_of_assets ]; do
+#   echo "" | env_parallel upload_assets
+    upload_assets &
+    echo "uploading $k"
+    k=$(($k+$batch_size))
 done
+wait
+echo "done" 
 
 # init cap
 echo "initiating cap ..."
