@@ -3,6 +3,7 @@ import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Time "mo:base/Time";
 
+import Canistergeek "mo:canistergeek/canistergeek";
 import Cap "mo:cap/Cap";
 
 import Assets "CanisterAssets";
@@ -68,7 +69,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
  // Marketplace
 	private stable var _transactionsState : [MarketplaceTypes.Transaction] = [];
 	private stable var _tokenSettlementState : [(TokenTypes.TokenIndex, MarketplaceTypes.Settlement)] = [];
-	private stable var _usedPaymentAddressessState : [(AccountIdentifier, Principal, TokenTypes.SubAccount)] = [];
 	private stable var _paymentsState : [(Principal, [TokenTypes.SubAccount])] = [];
 	private stable var _tokenListingState : [(TokenTypes.TokenIndex, MarketplaceTypes.Listing)] = [];
   private stable var _disbursementsState : [(TokenTypes.TokenIndex, AccountIdentifier, SubAccount, Nat64)] = [];
@@ -84,6 +84,9 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
 
  // Cap
   private stable var rootBucketId : ?Text = null;
+
+ // Canistergeek
+  stable var _canistergeekMonitorUD: ? Canistergeek.UpgradeData = null;
 
  //State functions
   system func preupgrade() {
@@ -131,6 +134,8 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
       tokenListingState; 
       disbursementsState;
       nextSubAccountState;
+      soldState;
+      totalToSellState;
     } = _Marketplace.toStable();
 
     _transactionsState := transactionsState;
@@ -139,6 +144,8 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     _tokenListingState := tokenListingState;
     _disbursementsState := disbursementsState;
     _nextSubAccountState := nextSubAccountState;
+    _soldState := soldState;
+    _totalToSellState := totalToSellState;
 
    // Assets
     let {
@@ -146,6 +153,9 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     } = _Assets.toStable();
 
     _assetsState := assetsState;
+
+   // Canistergeek
+    _canistergeekMonitorUD := ? canistergeekMonitor.preupgrade();
   };
 
   system func postupgrade() {
@@ -169,7 +179,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
    // Marketplace
     _transactionsState := [];
     _tokenSettlementState := [];
-    _usedPaymentAddressessState := [];
     _paymentsState := [];
     _tokenListingState := [];
     _disbursementsState := [];
@@ -177,6 +186,10 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
 
    // Assets
     _assetsState := [];
+   
+   // Canistergeek
+    canistergeekMonitor.postupgrade(_canistergeekMonitorUD);
+    _canistergeekMonitorUD := null;
   };
 
 /*************
@@ -196,10 +209,37 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
 * CLASSES *
 ***********/
 
+ // Canistergeek
+  private let canistergeekMonitor = Canistergeek.Monitor();
+  
+  /**
+  * Returns collected data based on passed parameters.
+  * Called from browser.
+  */
+  public query ({caller}) func getCanisterMetrics(parameters: Canistergeek.GetMetricsParameters): async ?Canistergeek.CanisterMetrics {
+      validateCaller(caller);
+      canistergeekMonitor.getMetrics(parameters);
+  };
+
+  /**
+  * Force collecting the data at current time.
+  * Called from browser or any canister "update" method.
+  */
+  public shared ({caller}) func collectCanisterMetrics(): async () {
+      validateCaller(caller);
+      canistergeekMonitor.collectMetrics();
+  };
+
+  private func validateCaller(principal: Principal) : () {
+    assert( principal == Principal.fromText("ikywv-z7xvl-xavcg-ve6kg-dbbtx-wy3gy-qbtwp-7ylai-yl4lc-lwetg-kqe"))
+  };
+
+
  // Cap
   let _Cap = Cap.Cap(null, rootBucketId);
 
   public shared(msg) func initCap() : async Result.Result<(), Text> {
+    canistergeekMonitor.collectMetrics();
     assert(msg.caller == _minterState);
     let pid = Principal.fromActor(myCanister);
     let tokenContractId = Principal.toText(pid);
@@ -229,10 +269,13 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     }
   );
 
+  // updates
   public shared (msg) func setMinter(minter: Principal) {
+    canistergeekMonitor.collectMetrics();
     _Tokens.setMinter(msg.caller, minter);
   };
     
+  // queries
   public query func balance(request : TokenTypes.BalanceRequest) : async TokenTypes.BalanceResponse {
     _Tokens.balance(request);
   };
@@ -250,7 +293,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
       _tokenListingState;
       _tokenSettlementState;
       _transactionsState;
-      _usedPaymentAddressessState;
       _disbursementsState;
       _nextSubAccountState;
       _soldState;
@@ -267,26 +309,32 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
 
   // updates
   public shared(msg) func lock(tokenid : MarketplaceTypes.TokenIdentifier, price : Nat64, address : MarketplaceTypes.AccountIdentifier, subaccount : MarketplaceTypes.SubAccount) : async Result.Result<MarketplaceTypes.AccountIdentifier, MarketplaceTypes.CommonError> {
+    canistergeekMonitor.collectMetrics();
     await _Marketplace.lock(msg.caller, tokenid, price, address, subaccount);
   };
     
   public shared(msg) func settle(tokenid : MarketplaceTypes.TokenIdentifier) : async Result.Result<(), MarketplaceTypes.CommonError> {
+    canistergeekMonitor.collectMetrics();
    await _Marketplace.settle(msg.caller, tokenid);
   };
     
   public shared(msg) func list(request: MarketplaceTypes.ListRequest) : async Result.Result<(), MarketplaceTypes.CommonError> {
+    canistergeekMonitor.collectMetrics();
     await _Marketplace.list(msg.caller, request);
   };
     
   public shared(msg) func clearPayments(seller : Principal, payments : [MarketplaceTypes.SubAccount]) : async () {
+    canistergeekMonitor.collectMetrics();
     await _Marketplace.clearPayments(seller, payments);
   };
 
   public shared(msg) func cronDisbursements() : async () {
+    canistergeekMonitor.collectMetrics();
     await _Marketplace.cronDisbursements();
   };
 
   public shared(msg) func cronSettlements() : async () {
+    canistergeekMonitor.collectMetrics();
     await _Marketplace.cronSettlements(msg.caller);
   };
 
@@ -348,14 +396,17 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
   );
 
   public shared(msg) func streamAsset(id : Nat, isThumb : Bool, payload : Blob) : async () {
+    canistergeekMonitor.collectMetrics();
     _Assets.streamAsset(msg.caller, id, isThumb, payload);
   };
     
   public shared(msg) func updateThumb(name : Text, file : AssetsTypes.File) : async ?Nat {
+    canistergeekMonitor.collectMetrics();
     _Assets.updateThumb(msg.caller, name, file);
   };
 
   public shared(msg) func addAsset(asset : AssetsTypes.Asset) : async Nat {
+    canistergeekMonitor.collectMetrics();
     _Assets.addAsset(msg.caller, asset);
   };
 
@@ -372,6 +423,7 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
   );
 
   public shared(msg) func shuffleAssets() : async () {
+    canistergeekMonitor.collectMetrics();
     await _Shuffle.shuffleAssets(msg.caller);
   };
 
@@ -403,30 +455,37 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
 
   // updates
   public shared(msg) func initMint() : async () {
+    canistergeekMonitor.collectMetrics();
     await _Sale.initMint(msg.caller)
   };
 
   public shared(msg) func shuffleTokensForSale() : async () {
+    canistergeekMonitor.collectMetrics();
     await _Sale.shuffleTokensForSale(msg.caller)
   };
 
   public shared(msg) func airdropTokens(startIndex : Nat) : async () {
+    canistergeekMonitor.collectMetrics();
     _Sale.airdropTokens(msg.caller, startIndex)
   };
 
   public shared(msg) func setTotalToSell() : async Nat {
+    canistergeekMonitor.collectMetrics();
     _Sale.setTotalToSell(msg.caller);
   };
 
   public shared(msg) func reserve(amount : Nat64, quantity : Nat64, address : SaleTypes.AccountIdentifier, _subaccountNOTUSED : SaleTypes.SubAccount) : async Result.Result<(SaleTypes.AccountIdentifier, Nat64), Text> {
+    canistergeekMonitor.collectMetrics();
     _Sale.reserve(amount, quantity, address, _subaccountNOTUSED)
   };
     
   public shared(msg) func retreive(paymentaddress : SaleTypes.AccountIdentifier) : async Result.Result<(), Text> {
+    canistergeekMonitor.collectMetrics();
     await _Sale.retreive(msg.caller, paymentaddress)
   };
 
   public shared(msg) func cronSalesSettlements() : async () {
+    canistergeekMonitor.collectMetrics();
     await _Sale.cronSalesSettlements(msg.caller);
   };
 
@@ -459,6 +518,7 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
   );
   // updates
   public shared(msg) func transfer(request: EXTTypes.TransferRequest) : async EXTTypes.TransferResponse {
+    canistergeekMonitor.collectMetrics();
     await _EXT.transfer(msg.caller, request);
   };
 
@@ -513,6 +573,7 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     }
   );
   
+  // queries
   public query func http_request(request : HttpTypes.HttpRequest) : async HttpTypes.HttpResponse {
     _HttpHandler.http_request(request);
   };
@@ -523,6 +584,7 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
 
  // cycles
   public func acceptCycles() : async () {
+    canistergeekMonitor.collectMetrics();
     let available = Cycles.available();
     let accepted = Cycles.accept(available);
     assert (accepted == available);
