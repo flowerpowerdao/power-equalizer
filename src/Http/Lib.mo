@@ -9,12 +9,12 @@ import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Text "mo:base/Text";
 
-import AssetTypes "../CanisterAssets/Types";
+import AssetTypes "../CanisterAssets/types";
 import Buffer "../Buffer";
 import Env "../Env";
 import ExtCore "../toniq-labs/ext/Core";
-import MarketplaceTypes "../Marketplace/Types";
-import Types "Types";
+import MarketplaceTypes "../Marketplace/types";
+import Types "types";
 import Utils "../Utils";
 
 module {

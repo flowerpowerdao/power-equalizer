@@ -6,7 +6,7 @@ import Result "mo:base/Result";
 import AID "../toniq-labs/util/AccountIdentifier";
 import Buffer "../Buffer";
 import ExtCore "../toniq-labs/Ext/Core";
-import Types "Types";
+import Types "types";
 import Utils "../Utils";
 
 module {

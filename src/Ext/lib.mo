@@ -9,8 +9,8 @@ import Root "mo:cap/Root";
 import AID "../toniq-labs/util/AccountIdentifier";
 import Buffer "../Buffer";
 import ExtCore "../toniq-labs/ext/Core";
-import MarketplaceTypes "../Marketplace/Types";
-import Types "Types";
+import MarketplaceTypes "../Marketplace/types";
+import Types "types";
 
 module {
   public class Factory(this : Principal, deps : Types.Dependencies) {

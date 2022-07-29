@@ -7,22 +7,22 @@ import Canistergeek "mo:canistergeek/canistergeek";
 import Cap "mo:cap/Cap";
 
 import Assets "CanisterAssets";
-import AssetsTypes "CanisterAssets/Types";
+import AssetsTypes "CanisterAssets/types";
 import Buffer "./Buffer";
 import EXT "Ext";
-import EXTTypes "Ext/Types";
+import EXTTypes "Ext/types";
 import ExtAllowance "./toniq-labs/ext/Allowance";
 import ExtCommon "./toniq-labs/ext/Common";
 import ExtCore "./toniq-labs/ext/Core";
 import ExtNonFungible "./toniq-labs/ext/NonFungible";
 import Http "Http";
-import HttpTypes "Http/Types";
+import HttpTypes "Http/types";
 import Marketplace "Marketplace";
-import MarketplaceTypes "Marketplace/Types";
+import MarketplaceTypes "Marketplace/types";
 import Sale "Sale";
-import SaleTypes "Sale/Types";
+import SaleTypes "Sale/types";
 import Shuffle "Shuffle";
-import TokenTypes "Tokens/Types";
+import TokenTypes "Tokens/types";
 import Tokens "Tokens";
 import Utils "./Utils";
 

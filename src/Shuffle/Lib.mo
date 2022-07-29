@@ -3,7 +3,7 @@ import Int "mo:base/Int";
 import Random "mo:base/Random";
 
 import Buffer "../Buffer";
-import Types "Types";
+import Types "types";
 import Utils "../Utils";
 
 module {

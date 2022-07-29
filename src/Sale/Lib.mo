@@ -17,7 +17,7 @@ import Root "mo:cap/Root";
 import AID "../toniq-labs/util/AccountIdentifier";
 import Buffer "../Buffer";
 import Env "../Env";
-import Types "Types";
+import Types "types";
 import Utils "../Utils";
 
 module {

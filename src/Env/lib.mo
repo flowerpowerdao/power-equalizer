@@ -26,7 +26,7 @@ module {
     // public let whitelistTime : Time.Time = 1659362400000000000; //Period for WL only discount. Set to publicSaleStart for no exclusive period
     // public let marketDelay : Time.Time = 172_800_000_000_000; //How long to delay market opening (2 days after whitelist sale started or when sold out)
     public let publicSaleStart : Time.Time =  1659105192000000000; //Start of first purchase (WL or other)
-    public let whitelistTime : Time.Time =    1659106812000000000; //Period for WL only discount. Set to publicSaleStart for no exclusive period
+    public let whitelistTime : Time.Time =    1659113112000000000; //Period for WL only discount. Set to publicSaleStart for no exclusive period
     public let marketDelay : Time.Time = 10800000000000; //How long to delay market opening
 
     public let whitelistOneTimeOnly : Bool = true; //Whitelist addresses are removed after purchase

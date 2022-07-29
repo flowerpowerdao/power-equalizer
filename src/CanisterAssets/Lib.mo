@@ -5,7 +5,7 @@ import Iter "mo:base/Iter";
 import Random "mo:base/Random";
 
 import Buffer "../Buffer";
-import Types "Types";
+import Types "types";
 import Utils "../Utils";
 
 module {

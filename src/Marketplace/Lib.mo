@@ -17,7 +17,7 @@ import AID "../toniq-labs/util/AccountIdentifier";
 import Buffer "../Buffer";
 import Env "../Env";
 import ExtCore "../toniq-labs/Ext/Core";
-import Types "Types";
+import Types "types";
 import Utils "../Utils";
 
 module {
