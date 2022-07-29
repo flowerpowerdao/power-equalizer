@@ -479,8 +479,12 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     _EXT.getRegistry();
   };
 
-  public query func getTokens() : async [(EXTTypes.TokenIndex, Text)] {
+  public query func getTokens() : async [(EXTTypes.TokenIndex, EXTTypes.Metadata)] {
     _EXT.getTokens();
+  };
+
+  public query func getTokenToAssetMapping() : async [(EXTTypes.TokenIndex, Text)] {
+    _EXT.getTokenToAssetMapping();
   };
 
   public query func tokens(aid : EXTTypes.AccountIdentifier) : async Result.Result<[EXTTypes.TokenIndex], EXTTypes.CommonError> {

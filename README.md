@@ -20,7 +20,7 @@
 ## launch
 
 -   run `make deploy-production-ic-full`
--   check if all assets uploaded correctly by calling the canisters `getTokens`
+-   check if all assets uploaded correctly by calling the canisters `getTokenToAssetMapping()` method
 -   call `shuffleAssets` at desired time (usually 24 hours after market opens)
 
 ## structure

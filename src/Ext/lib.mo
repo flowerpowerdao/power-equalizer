@@ -42,7 +42,15 @@ module {
       
     };
 
-    public func getTokens() : [(Types.TokenIndex, Text)] {
+    public func getTokens() : [(Types.TokenIndex, Types.Metadata)] {
+      var resp : Buffer.Buffer<(Types.TokenIndex, Types.Metadata)> = Buffer.Buffer(0);
+      for(e in deps._Tokens.getTokenMetadata().entries()){
+        resp.add((e.0, #nonfungible({ metadata = null })));
+      };
+      resp.toArray();
+    };
+
+    public func getTokenToAssetMapping() : [(Types.TokenIndex, Text)] {
       var resp : Buffer.Buffer<(Types.TokenIndex, Text)> = Buffer.Buffer(0);
       for(e in deps._Tokens.getTokenMetadata().entries()){
         let assetid = deps._Assets.get(Nat32.toNat(e.0)+1).name;
