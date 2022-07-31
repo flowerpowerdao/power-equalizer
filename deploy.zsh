@@ -20,7 +20,7 @@ then
 echo "production deployment ..."
 dfx canister --network $network create $mode
 ID=$(dfx canister --network $network id $mode)
-dfx deploy --network $network --argument "(principal $ID)" $mode
+dfx deploy --network $network --argument "(principal \"$ID\")" $mode
 else
 echo "staging deployment ..."
 dfx canister --network $network create $mode
