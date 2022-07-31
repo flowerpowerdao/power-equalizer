@@ -260,8 +260,9 @@ module {
     };
 
     public func cronDisbursements() : async () {
-      var _cont : Bool = true;
-      while(_cont){
+      var counter : Nat = 0;
+      label payloop while(counter < 5){
+        counter := counter + 1;
         var last = List.pop(_disbursements);
         switch(last.0){
           case(?d) {
@@ -276,11 +277,12 @@ module {
                 created_at_time = null;
               });
             } catch (e) {
-              _disbursements := List.push(d, _disbursements);
+              // this could lead to an infinite loop if there's not enough ICP in the account
+              // _disbursements := List.push(d, _disbursements);
             };
           };
           case(_) {
-            _cont := false;
+            break payloop;
           };
         };
       };
