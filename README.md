@@ -8,8 +8,8 @@
 
 ## pre launch
 
--   check all addresses and parameters in `deploy.zsh`
--   adapt `Env/lib.mo` to your needs
+-   ~~check all addresses and parameters in `deploy.zsh`~~
+-   ~~adapt `Env/lib.mo` to your needs~~
 -   ~~add canister to DAB~~
 -   ~~send collection details to entrepot via form~~
 -   ~~top canister up with cycles~~
