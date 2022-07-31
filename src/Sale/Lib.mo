@@ -223,6 +223,13 @@ module {
                 if (settlement.expires < Time.now()) {
                   _failedSales.add((settlement.buyer, settlement.subaccount));
                   _salesSettlements.delete(paymentaddress);
+                  if (Env.whitelistOneTimeOnly == true){
+                    if (settlement.price == Env.ethFlowerWhitelistPrice) {
+                      addToWhitelist(settlement.buyer, _ethFlowerWhitelist);
+                    } else if (settlement.price == Env.modclubWhitelistPrice) {
+                      addToWhitelist(settlement.buyer, _modclubWhitelist);
+                    };
+                  };
                   return #err("Expired");
                 } else {
                   return #err("Insufficient funds sent");
