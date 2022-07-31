@@ -117,7 +117,7 @@ upload_assets() {
     done
 }
 
-batch_size=500
+batch_size=1000
 k=1
 while [ $k -le $number_of_assets ]; do
     upload_assets &

@@ -14,8 +14,8 @@
 -   ~~send collection details to entrepot via form~~
 -   ~~top canister up with cycles~~
 -   ~~add canister to tip jar~~
--   run off chain backup script with mainnet canister id
--   run disburse script with mainnet canister id
+-   ~~run off chain backup script with mainnet canister id~~
+-   ~~run disburse script with mainnet canister id~~
 
 ## launch
 
