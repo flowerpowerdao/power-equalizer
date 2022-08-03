@@ -220,6 +220,7 @@ module {
                   return #ok();
                 }
               } else {
+                // if the settlement expired and they still didnt send the full amount, we add them to failedSales
                 if (settlement.expires < Time.now()) {
                   _failedSales.add((settlement.buyer, settlement.subaccount));
                   _salesSettlements.delete(paymentaddress);
@@ -244,7 +245,11 @@ module {
     };
 
     public func cronSalesSettlements(caller: Principal) : async () {
+      // _saleSattlements can potentially be really big, we have to make sure 
+      // we dont get out of cycles error or error that outgoing calls queue is full
       for(ss in _salesSettlements.entries()){
+        // we only try and retrieve the settlement if it hasnt expired yet
+        // for settlements that are still in _saleTransactions, we have to call retrieve manually
         if (ss.1.expires < Time.now()) {
           ignore(await retreive(caller, ss.0));
         };

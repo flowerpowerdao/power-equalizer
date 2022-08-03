@@ -143,3 +143,5 @@ to get the tokenid from the canister and index do the following
 ## settlements
 
 -   if there's a settlement that didn't work, we can call the `settlements` query method and then `settle` using the index to settle the transaction
+
+-   if there a salesSettelemnts that didnt work, we call the `salesSettlements` query method and then `retrieve` using the address to settle the transaction
