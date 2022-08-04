@@ -183,6 +183,8 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     _tokenListingState := [];
     _disbursementsState := [];
     _nextSubAccountState := 0;
+    _soldState := 0;
+    _totalToSellState := 0;
 
    // Assets
     _assetsState := [];

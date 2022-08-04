@@ -47,8 +47,8 @@ module {
       totalToSellState : Nat;
     } {
       return {
-        tokenSettlementState = Iter.toArray(_tokenSettlement.entries());
         transactionsState = _transactions.toArray();
+        tokenSettlementState = Iter.toArray(_tokenSettlement.entries());
         paymentsState = Iter.toArray(Iter.map<(Principal, Buffer.Buffer<Types.SubAccount>), (Principal, [Types.SubAccount])>(
           _payments.entries(), 
           func (payment) {
