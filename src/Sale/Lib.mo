@@ -256,6 +256,39 @@ module {
       };
     };
 
+    public func cronFailedSales(caller: Principal) : async () {
+      var counter : Nat = 0;
+      label failedSalesLoop while(counter < 5){
+        counter := counter + 1;
+        var last = _failedSales.removeLast();
+        switch(last){
+          case(?last) {
+            let subaccount = last.1;
+            try {
+              // check if subaccount holds icp
+              let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({account = AID.fromPrincipal(this, ?subaccount)});
+              if (response.e8s > 10000) {
+                var bh = await consts.LEDGER_CANISTER.send_dfx({
+                  memo = 0;
+                  amount = { e8s = response.e8s - 10000 };
+                  fee = { e8s = 10000 };
+                  from_subaccount = ?subaccount;
+                  to = last.0;
+                  created_at_time = null;
+                });
+              }
+            } catch (e) {
+              // this could lead to an infinite loop if there's not enough ICP in the account
+              // _disbursements := List.push(d, _disbursements);
+            };
+          };
+          case(null) {
+            break failedSalesLoop;
+          };
+        };
+      };
+    };
+
     // queries
     public func salesSettlements() : [(Types.AccountIdentifier, Types.Sale)] {
       Iter.toArray(_salesSettlements.entries());

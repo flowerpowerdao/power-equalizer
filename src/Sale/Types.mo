@@ -28,8 +28,20 @@ module {
     _Shuffle : Shuffle.Factory;
   };
 
+  type SendArgs = {
+    memo: Nat64;
+    amount: ICPTs;
+    fee: ICPTs;
+    from_subaccount: ?SubAccount;
+    to: AccountIdentifier;
+    created_at_time: ?Time.Time;
+  };
+
   public type Constants = {
-    LEDGER_CANISTER : actor { account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs };
+    LEDGER_CANISTER : actor { 
+      account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
+      send_dfx : shared SendArgs -> async Nat64;  
+    };
     WHITELIST_CANISTER : actor { getWhitelist: shared () -> async [Principal] };
   };
 
