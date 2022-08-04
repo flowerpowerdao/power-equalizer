@@ -1,6 +1,7 @@
-![homepagebanner_comp1](https://user-images.githubusercontent.com/32162112/158982003-4b747cfd-32ad-4582-8e24-395b60bc0668.jpg)
+![photo_2022-08-04 23 41 19](https://user-images.githubusercontent.com/32162112/182957869-8479f309-283d-4d81-af9f-2d34acbac27e.jpeg)
 
-# eth flower nft 🌼
+
+# pineapple punks nft 🌼
 
 > :warning: **If you use this for another NFT project**: MAKE SURE YOU DELETE THE `canister_ids.json` FIRST!
 
@@ -25,9 +26,7 @@
 
 ## structure
 
--   the `main` contains the logic that is currently deployed on mainnet
--   the `development` branch is the one all the rewrite branches are merged into
--   the `local-development` branch can be used for local deployment to avoid accidentially deploying the canister to mainnet
+-   the `main` branch contains the logic that is currently deployed on mainnet
 
 ## quick deploy 🏃‍♀️
 
@@ -36,7 +35,7 @@
 ## sophisticated deploy 📚
 
 -   use `make` to run the standard local deploy, use `make deploy-staging-ic` to deploy the staging canister to the mainnet, by default it deploys the NFT staging canister locally and uses `assets/output.mp4` and `metadata.json` as file paths
-    -   `metadata.json` **MUST NOT** contain a mint number! (use `cat btcflower.json| sed '/mint/ d' > metadata.json` to remove the mint number)
+    -   `metadata.json` **MUST NOT** contain a mint number! (use `cat mymetadata.json| sed '/mint/ d' > metadata.json` to remove the mint number)
     -   note that you need [ext](#ext) installed
 -   The `deploy.zsh` adds another oracle to the NFT canister because the script in the source SVG won't be executed the way it's currently structured. Make sure you use the correct API endpoint there as well!
     -   note: this script is not allowed to contain any `&` or `>` characters!
@@ -51,7 +50,7 @@
 
 ## vessel 🚢
 
--   Run `vessel verify --version 0.6.21` to verify everything still builds correctly after adding a new depdenceny
+-   Run `vessel verify --version 0.6.28` to verify everything still builds correctly after adding a new depdenceny
 -   To use `vessels`s moc version when deploying, use `DFX_MOC_PATH="$(vessel bin)/moc" dfx deploy`
 
 ## shuffle 🔀
@@ -72,7 +71,7 @@ assetIndex -> NFT
 
 ## off-chain backup ⛓
 
-We use the `getRegistry` (`tokenIndex -> AccountIdentifier`) and `getTokens` (`tokenIndex -> NFT`) canister methods to backup state offchain. Therefore we simply use a script that queries the afore mentioned methods every 60 minutes and saves the responses on a server. You can find the script in `state_backup`. We are also submitting every transaction to `CAP`, which again offers off-chain backups of their data.
+We use the `getRegistry` (`tokenIndex -> AccountIdentifier`) and `getTokenToAssetMapping` (`tokenIndex -> NFT`) canister methods to backup state offchain. Therefore we simply use a script that queries the afore mentioned methods every 60 minutes and saves the responses on a server. You can find the script in `state_backup`. We are also submitting every transaction to `CAP`, which again offers off-chain backups of their data.
 
 Note that the indices of the json outputs represent the indices of the internal storage. E.g. index `0` means it is the first item in the array. In the UI (entrepot or stoic wallet) those indices are incremented by one, so they start with `1` and not with `0`.
 
