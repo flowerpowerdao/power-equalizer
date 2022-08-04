@@ -369,7 +369,7 @@ module {
     };
 
     public func cronSettlements(caller : Principal) : async () {
-      for(settlement in unlockedSettlements().vals()){
+      for(settlement in unlockedSettlements().vals()){ // only failed settlments are settled here
           ignore(settle(caller, ExtCore.TokenIdentifier.fromPrincipal(this, settlement.0)));
       };
     };
@@ -380,7 +380,7 @@ module {
 
     public func pendingCronJobs() : [Nat] {
       [List.size(_disbursements),
-      unlockedSettlements().size()];
+      unlockedSettlements().size()]; // those are the settlements that exceeded their 2 min lock time
     };
   
     public func toAddress(p : Text, sa : Nat) : Types.AccountIdentifier {

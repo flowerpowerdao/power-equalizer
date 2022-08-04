@@ -248,7 +248,7 @@ module {
       // _saleSattlements can potentially be really big, we have to make sure 
       // we dont get out of cycles error or error that outgoing calls queue is full
       for(ss in _salesSettlements.entries()){
-        // we only try and retrieve the settlement if it hasnt expired yet
+        // we only try and retrieve the settlement if it expired 
         // for settlements that are still in _saleTransactions, we have to call retrieve manually
         if (ss.1.expires < Time.now()) {
           ignore(await retreive(caller, ss.0));
