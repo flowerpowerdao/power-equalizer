@@ -69,7 +69,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
  // Marketplace
 	private stable var _transactionsState : [MarketplaceTypes.Transaction] = [];
 	private stable var _tokenSettlementState : [(TokenTypes.TokenIndex, MarketplaceTypes.Settlement)] = [];
-	private stable var _paymentsState : [(Principal, [TokenTypes.SubAccount])] = [];
 	private stable var _tokenListingState : [(TokenTypes.TokenIndex, MarketplaceTypes.Listing)] = [];
   private stable var _disbursementsState : [(TokenTypes.TokenIndex, AccountIdentifier, SubAccount, Nat64)] = [];
   private stable var _nextSubAccountState : Nat = 0;
@@ -130,7 +129,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     let { 
       transactionsState; 
       tokenSettlementState; 
-      paymentsState; 
       tokenListingState; 
       disbursementsState;
       nextSubAccountState;
@@ -140,7 +138,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
 
     _transactionsState := transactionsState;
     _tokenSettlementState := tokenSettlementState;
-    _paymentsState := paymentsState;
     _tokenListingState := tokenListingState;
     _disbursementsState := disbursementsState;
     _nextSubAccountState := nextSubAccountState;
@@ -179,7 +176,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
    // Marketplace
     _transactionsState := [];
     _tokenSettlementState := [];
-    _paymentsState := [];
     _tokenListingState := [];
     _disbursementsState := [];
     _nextSubAccountState := 0;
@@ -291,7 +287,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
   let _Marketplace = Marketplace.Factory(
     cid,
     {
-      _paymentsState;
       _tokenListingState;
       _tokenSettlementState;
       _transactionsState;
@@ -325,11 +320,6 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     await _Marketplace.list(msg.caller, request);
   };
     
-  public shared(msg) func clearPayments(seller : Principal, payments : [MarketplaceTypes.SubAccount]) : async () {
-    canistergeekMonitor.collectMetrics();
-    await _Marketplace.clearPayments(seller, payments);
-  };
-
   public shared(msg) func cronDisbursements() : async () {
     canistergeekMonitor.collectMetrics();
     await _Marketplace.cronDisbursements();
@@ -353,20 +343,12 @@ shared ({ caller = init_minter}) actor class Canister(cid: Principal) = myCanist
     _Marketplace.settlements();
   };
     
-  public query(msg) func payments() : async ?[MarketplaceTypes.SubAccount] {
-    _Marketplace.payments(msg.caller);
-  };
-
   public query func listings() : async [(MarketplaceTypes.TokenIndex, MarketplaceTypes.Listing, MarketplaceTypes.Metadata)] {
     _Marketplace.listings();
   };
     
   public query(msg) func allSettlements() : async [(MarketplaceTypes.TokenIndex, MarketplaceTypes.Settlement)] {
     _Marketplace.allSettlements();
-  };
-    
-  public query(msg) func allPayments() : async [(Principal, [MarketplaceTypes.SubAccount])] {
-    _Marketplace.allPayments();
   };
     
   public query func stats() : async (Nat64, Nat64, Nat64, Nat64, Nat, Nat, Nat) {
