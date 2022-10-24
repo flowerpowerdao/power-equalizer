@@ -68,13 +68,15 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   };
 
   // Marketplace
-  private stable var _transactionsState : [MarketplaceTypes.Transaction] = [];
-  private stable var _tokenSettlementState : [(TokenTypes.TokenIndex, MarketplaceTypes.Settlement)] = [];
-  private stable var _tokenListingState : [(TokenTypes.TokenIndex, MarketplaceTypes.Listing)] = [];
-  private stable var _disbursementsState : [(TokenTypes.TokenIndex, AccountIdentifier, SubAccount, Nat64)] = [];
-  private stable var _nextSubAccountState : Nat = 0;
-  private stable var _soldState : Nat = 0;
-  private stable var _totalToSellState : Nat = 0;
+  private stable var _marketplaceState : MarketplaceTypes.State = {
+    _transactionsState : [MarketplaceTypes.Transaction] = [];
+    _tokenSettlementState : [(TokenTypes.TokenIndex, MarketplaceTypes.Settlement)] = [];
+    _tokenListingState : [(TokenTypes.TokenIndex, MarketplaceTypes.Listing)] = [];
+    _disbursementsState : [(TokenTypes.TokenIndex, AccountIdentifier, SubAccount, Nat64)] = [];
+    _nextSubAccountState : Nat = 0;
+    _soldState : Nat = 0;
+    _totalToSellState : Nat = 0;
+  };
 
   // Assets
   private stable var _assetsState : [AssetsTypes.Asset] = [];
@@ -97,23 +99,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     _saleState := _Sale.toStable();
 
     // Marketplace
-    let {
-      transactionsState;
-      tokenSettlementState;
-      tokenListingState;
-      disbursementsState;
-      nextSubAccountState;
-      soldState;
-      totalToSellState;
-    } = _Marketplace.toStable();
-
-    _transactionsState := transactionsState;
-    _tokenSettlementState := tokenSettlementState;
-    _tokenListingState := tokenListingState;
-    _disbursementsState := disbursementsState;
-    _nextSubAccountState := nextSubAccountState;
-    _soldState := soldState;
-    _totalToSellState := totalToSellState;
+    _marketplaceState := _Marketplace.toStable();
 
     // Assets
     let {
@@ -149,13 +135,15 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     };
 
     // Marketplace
-    _transactionsState := [];
-    _tokenSettlementState := [];
-    _tokenListingState := [];
-    _disbursementsState := [];
-    _nextSubAccountState := 0;
-    _soldState := 0;
-    _totalToSellState := 0;
+    _marketplaceState := {
+      _transactionsState : [MarketplaceTypes.Transaction] = [];
+      _tokenSettlementState : [(TokenTypes.TokenIndex, MarketplaceTypes.Settlement)] = [];
+      _tokenListingState : [(TokenTypes.TokenIndex, MarketplaceTypes.Listing)] = [];
+      _disbursementsState : [(TokenTypes.TokenIndex, AccountIdentifier, SubAccount, Nat64)] = [];
+      _nextSubAccountState : Nat = 0;
+      _soldState : Nat = 0;
+      _totalToSellState : Nat = 0;
+    };
 
     // Assets
     _assetsState := [];
@@ -246,15 +234,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   // Marketplace
   let _Marketplace = Marketplace.Factory(
     cid,
-    {
-      _tokenListingState;
-      _tokenSettlementState;
-      _transactionsState;
-      _disbursementsState;
-      _nextSubAccountState;
-      _soldState;
-      _totalToSellState;
-    },
+    _marketplaceState,
     {
       _Tokens;
       _Cap;
