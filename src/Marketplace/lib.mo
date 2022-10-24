@@ -16,7 +16,7 @@ import Root "mo:cap/Root";
 import AID "../toniq-labs/util/AccountIdentifier";
 import Buffer "../buffer";
 import Env "../Env";
-import ExtCore "../toniq-labs/Ext/Core";
+import ExtCore "../toniq-labs/ext/Core";
 import Types "types";
 import Utils "../utils";
 

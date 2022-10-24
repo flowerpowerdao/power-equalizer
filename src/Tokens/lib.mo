@@ -5,7 +5,7 @@ import Result "mo:base/Result";
 
 import AID "../toniq-labs/util/AccountIdentifier";
 import Buffer "../buffer";
-import ExtCore "../toniq-labs/Ext/Core";
+import ExtCore "../toniq-labs/ext/Core";
 import Types "types";
 import Utils "../utils";
 

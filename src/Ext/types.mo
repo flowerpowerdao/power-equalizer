@@ -3,7 +3,7 @@ import Time "mo:base/Time";
 import Cap "mo:cap/Cap";
 
 import Assets "../CanisterAssets";
-import ExtCommon "../toniq-labs/Ext/Common";
+import ExtCommon "../toniq-labs/ext/Common";
 import ExtCore "../toniq-labs/ext/Core";
 import Marketplace "../Marketplace";
 import Tokens "../Tokens";

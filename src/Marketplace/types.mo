@@ -2,7 +2,7 @@ import Time "mo:base/Time";
 
 import Cap "mo:cap/Cap";
 
-import ExtCore "../toniq-labs/Ext/Core";
+import ExtCore "../toniq-labs/ext/Core";
 import TokenTypes "../Tokens/types";
 import Tokens "../Tokens";
 
