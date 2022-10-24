@@ -10,12 +10,12 @@ import Principal "mo:base/Principal";
 import Text "mo:base/Text";
 
 import AssetTypes "../CanisterAssets/types";
-import Buffer "../Buffer";
+import Buffer "../buffer";
 import Env "../Env";
 import ExtCore "../toniq-labs/ext/Core";
 import MarketplaceTypes "../Marketplace/types";
 import Types "types";
-import Utils "../Utils";
+import Utils "../utils";
 
 module {
 

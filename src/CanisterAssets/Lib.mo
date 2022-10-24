@@ -4,9 +4,9 @@ import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import Random "mo:base/Random";
 
-import Buffer "../Buffer";
+import Buffer "../buffer";
 import Types "types";
-import Utils "../Utils";
+import Utils "../utils";
 
 module {
 

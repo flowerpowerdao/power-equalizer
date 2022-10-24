@@ -7,7 +7,7 @@ import Result "mo:base/Result";
 import Root "mo:cap/Root";
 
 import AID "../toniq-labs/util/AccountIdentifier";
-import Buffer "../Buffer";
+import Buffer "../buffer";
 import ExtCore "../toniq-labs/ext/Core";
 import MarketplaceTypes "../Marketplace/types";
 import Types "types";

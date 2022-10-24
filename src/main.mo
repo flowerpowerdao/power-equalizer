@@ -8,7 +8,7 @@ import Cap "mo:cap/Cap";
 
 import Assets "CanisterAssets";
 import AssetsTypes "CanisterAssets/types";
-import Buffer "./Buffer";
+import Buffer "./buffer";
 import EXT "Ext";
 import EXTTypes "Ext/types";
 import ExtAllowance "./toniq-labs/ext/Allowance";
@@ -24,11 +24,11 @@ import SaleTypes "Sale/types";
 import Shuffle "Shuffle";
 import TokenTypes "Tokens/types";
 import Tokens "Tokens";
-import Utils "./Utils";
+import Utils "./utils";
 
 shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCanister {
 
-/*********
+  /*********
 * TYPES *
 *********/
   type AccountIdentifier = ExtCore.AccountIdentifier;
@@ -43,19 +43,18 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     to : AccountIdentifier;
     created_at_time : ?Time.Time;
   };
-  
-  
-/****************
-* STABLE STATE *
-****************/
+
+  // *** ** ** ** ** ** ** * * STABLE STATE * ** ** ** ** ** ** ** **
 
   // Tokens
-  private stable var _tokenMetadataState : [(TokenTypes.TokenIndex, TokenTypes.Metadata)] = [];
-  private stable var _ownersState : [(AccountIdentifier, [TokenTypes.TokenIndex])] = [];
-  private stable var _registryState : [(TokenTypes.TokenIndex, AccountIdentifier)] = [];
-  private stable var _nextTokenIdState : TokenTypes.TokenIndex = 0;
-  private stable var _minterState : Principal = init_minter;
-  private stable var _supplyState : TokenTypes.Balance = 0;
+  private stable var _tokenState : TokenTypes.State = {
+    _tokenMetadataState : [(TokenTypes.TokenIndex, TokenTypes.Metadata)] = [];
+    _ownersState : [(AccountIdentifier, [TokenTypes.TokenIndex])] = [];
+    _registryState : [(TokenTypes.TokenIndex, AccountIdentifier)] = [];
+    _nextTokenIdState : TokenTypes.TokenIndex = 0;
+    _minterState : Principal = init_minter;
+    _supplyState : TokenTypes.Balance = 0;
+  };
 
   // Sale
   private stable var _saleTransactionsState : [SaleTypes.SaleTransaction] = [];
@@ -90,21 +89,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   //State functions
   system func preupgrade() {
     // Tokens
-    let {
-      tokenMetadataState;
-      ownersState;
-      registryState;
-      nextTokenIdState;
-      minterState;
-      supplyState;
-    } = _Tokens.toStable();
-
-    _tokenMetadataState := tokenMetadataState;
-    _ownersState := ownersState;
-    _registryState := registryState;
-    _nextTokenIdState := nextTokenIdState;
-    _minterState := minterState;
-    _supplyState := supplyState;
+    _tokenState := _Tokens.toStable();
 
     // Sale
     let {
@@ -157,12 +142,14 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   system func postupgrade() {
     // Tokens
-    _tokenMetadataState := [];
-    _ownersState := [];
-    _registryState := [];
-    _nextTokenIdState := 0;
-    _minterState := init_minter;
-    _supplyState := 0;
+    _tokenState := {
+      _tokenMetadataState : [(TokenTypes.TokenIndex, TokenTypes.Metadata)] = [];
+      _ownersState : [(AccountIdentifier, [TokenTypes.TokenIndex])] = [];
+      _registryState : [(TokenTypes.TokenIndex, AccountIdentifier)] = [];
+      _nextTokenIdState : TokenTypes.TokenIndex = 0;
+      _minterState : Principal = init_minter;
+      _supplyState : TokenTypes.Balance = 0;
+    };
 
     // Sale
     _saleTransactionsState := [];
@@ -190,7 +177,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     _canistergeekMonitorUD := null;
   };
 
-/*************
+  /*************
 * CONSTANTS *
 *************/
 
@@ -203,7 +190,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   };
   let CREATION_CYCLES : Nat = 1_000_000_000_000;
 
-/***********
+  /***********
 * CLASSES *
 ***********/
 
@@ -237,7 +224,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   public shared (msg) func initCap() : async Result.Result<(), Text> {
     canistergeekMonitor.collectMetrics();
-    assert (msg.caller == _minterState);
+    assert (msg.caller == _tokenState._minterState);
     let pid = Principal.fromActor(myCanister);
     let tokenContractId = Principal.toText(pid);
 
@@ -256,21 +243,8 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   // Tokens
   let _Tokens = Tokens.Factory(
     cid,
-    {
-      _minterState;
-      _nextTokenIdState;
-      _registryState;
-      _tokenMetadataState;
-      _supplyState;
-      _ownersState;
-    },
+    _tokenState,
   );
-
-  // updates
-  public shared (msg) func setMinter(minter : Principal) {
-    canistergeekMonitor.collectMetrics();
-    _Tokens.setMinter(msg.caller, minter);
-  };
 
   // queries
   public query func balance(request : TokenTypes.BalanceRequest) : async TokenTypes.BalanceResponse {
@@ -413,7 +387,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     {
       _saleTransactionsState;
       _salesSettlementsState;
-      _minterState;
+      _minterState = _tokenState._minterState;
       _failedSalesState;
       _tokensForSaleState;
       _ethFlowerWhitelistState;

@@ -15,10 +15,10 @@ import AviateAccountIdentifier "mo:accountid/AccountIdentifier";
 import Root "mo:cap/Root";
 
 import AID "../toniq-labs/util/AccountIdentifier";
-import Buffer "../Buffer";
+import Buffer "../buffer";
 import Env "../Env";
 import Types "types";
-import Utils "../Utils";
+import Utils "../utils";
 
 module {
   public class Factory(this : Principal, state : Types.State, deps : Types.Dependencies, consts : Types.Constants) {

@@ -10,7 +10,7 @@ import Principal "mo:base/Principal";
 import Text "mo:base/Text";
 import TrieMap "mo:base/TrieMap";
 
-import Buffer "./Buffer";
+import Buffer "./buffer";
 import ExtCore "./toniq-labs/ext/Core";
 
 module {

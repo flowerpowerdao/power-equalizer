@@ -2,9 +2,9 @@ import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Random "mo:base/Random";
 
-import Buffer "../Buffer";
+import Buffer "../buffer";
 import Types "types";
-import Utils "../Utils";
+import Utils "../utils";
 
 module {
   public class Factory(state : Types.State, deps : Types.Dependencies) {
