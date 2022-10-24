@@ -323,7 +323,11 @@ module {
     public func cronSettlements(caller : Principal) : async () {
       for (settlement in unlockedSettlements().vals()) {
         // only failed settlments are settled here
-        ignore (settle(caller, ExtCore.TokenIdentifier.fromPrincipal(this, settlement.0)));
+        //  even though the result is ignored, if settle traps the catch block is executed
+        // it doesn't matter if this is executed multiple times on the same settlement, `settle` checks if it's already settled
+        try {
+          ignore (await settle(caller, ExtCore.TokenIdentifier.fromPrincipal(this, settlement.0)));
+        } catch (e) {};
       };
     };
 
