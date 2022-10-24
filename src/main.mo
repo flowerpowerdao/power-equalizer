@@ -57,13 +57,15 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   };
 
   // Sale
-  private stable var _saleTransactionsState : [SaleTypes.SaleTransaction] = [];
-  private stable var _salesSettlementsState : [(AccountIdentifier, SaleTypes.Sale)] = [];
-  private stable var _failedSalesState : [(AccountIdentifier, TokenTypes.SubAccount)] = [];
-  private stable var _tokensForSaleState : [TokenTypes.TokenIndex] = [];
-  private stable var _ethFlowerWhitelistState : [AccountIdentifier] = [];
-  private stable var _modclubWhitelistState : [AccountIdentifier] = [];
-  private stable var _soldIcpState : Nat64 = 0;
+  private stable var _saleState : SaleTypes.State = {
+    _saleTransactionsState : [SaleTypes.SaleTransaction] = [];
+    _salesSettlementsState : [(AccountIdentifier, SaleTypes.Sale)] = [];
+    _failedSalesState : [(AccountIdentifier, TokenTypes.SubAccount)] = [];
+    _tokensForSaleState : [TokenTypes.TokenIndex] = [];
+    _ethFlowerWhitelistState : [AccountIdentifier] = [];
+    _modclubWhitelistState : [AccountIdentifier] = [];
+    _soldIcpState : Nat64 = 0;
+  };
 
   // Marketplace
   private stable var _transactionsState : [MarketplaceTypes.Transaction] = [];
@@ -92,23 +94,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     _tokenState := _Tokens.toStable();
 
     // Sale
-    let {
-      saleTransactionsState;
-      salesSettlementsState;
-      failedSalesState;
-      tokensForSaleState;
-      ethFlowerWhitelistState;
-      modclubWhitelistState;
-      soldIcpState;
-    } = _Sale.toStable();
-
-    _saleTransactionsState := saleTransactionsState;
-    _salesSettlementsState := salesSettlementsState;
-    _failedSalesState := failedSalesState;
-    _tokensForSaleState := tokensForSaleState;
-    _ethFlowerWhitelistState := ethFlowerWhitelistState;
-    _modclubWhitelistState := modclubWhitelistState;
-    _soldIcpState := soldIcpState;
+    _saleState := _Sale.toStable();
 
     // Marketplace
     let {
@@ -152,13 +138,15 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     };
 
     // Sale
-    _saleTransactionsState := [];
-    _salesSettlementsState := [];
-    _failedSalesState := [];
-    _tokensForSaleState := [];
-    _ethFlowerWhitelistState := [];
-    _modclubWhitelistState := [];
-    _soldIcpState := 0;
+    _saleState := {
+      _saleTransactionsState : [SaleTypes.SaleTransaction] = [];
+      _salesSettlementsState : [(AccountIdentifier, SaleTypes.Sale)] = [];
+      _failedSalesState : [(AccountIdentifier, TokenTypes.SubAccount)] = [];
+      _tokensForSaleState : [TokenTypes.TokenIndex] = [];
+      _ethFlowerWhitelistState : [AccountIdentifier] = [];
+      _modclubWhitelistState : [AccountIdentifier] = [];
+      _soldIcpState : Nat64 = 0;
+    };
 
     // Marketplace
     _transactionsState := [];
@@ -384,15 +372,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   //Sale
   let _Sale = Sale.Factory(
     cid,
-    {
-      _saleTransactionsState;
-      _salesSettlementsState;
-      _failedSalesState;
-      _tokensForSaleState;
-      _ethFlowerWhitelistState;
-      _modclubWhitelistState;
-      _soldIcpState;
-    },
+    _saleState,
     {
       _Cap;
       _Marketplace;

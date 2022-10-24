@@ -35,29 +35,19 @@ module {
     private var _modclubWhitelist : Buffer.Buffer<Types.AccountIdentifier> = Utils.bufferFromArray<Types.AccountIdentifier>(state._modclubWhitelistState);
     private var _soldIcp : Nat64 = state._soldIcpState;
 
-    public func toStable() : {
-      saleTransactionsState : [Types.SaleTransaction];
-      salesSettlementsState : [(Types.AccountIdentifier, Types.Sale)];
-      failedSalesState : [(Types.AccountIdentifier, Types.SubAccount)];
-      tokensForSaleState : [Types.TokenIndex];
-      ethFlowerWhitelistState : [Types.AccountIdentifier];
-      modclubWhitelistState : [Types.AccountIdentifier];
-      soldIcpState : Nat64;
-    } {
+    public func toStable() : Types.State {
       return {
-        saleTransactionsState = _saleTransactions.toArray();
-        salesSettlementsState = Iter.toArray(_salesSettlements.entries());
-        failedSalesState = _failedSales.toArray();
-        tokensForSaleState = _tokensForSale.toArray();
-        ethFlowerWhitelistState = _ethFlowerWhitelist.toArray();
-        modclubWhitelistState = _modclubWhitelist.toArray();
-        soldIcpState = _soldIcp;
+        _saleTransactionsState = _saleTransactions.toArray();
+        _salesSettlementsState = Iter.toArray(_salesSettlements.entries());
+        _failedSalesState = _failedSales.toArray();
+        _tokensForSaleState = _tokensForSale.toArray();
+        _ethFlowerWhitelistState = _ethFlowerWhitelist.toArray();
+        _modclubWhitelistState = _modclubWhitelist.toArray();
+        _soldIcpState = _soldIcp;
       };
     };
 
-/********************
-* PUBLIC INTERFACE *
-********************/
+    // *** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
     // updates
     public func initMint(caller : Principal) : async () {
@@ -321,7 +311,7 @@ module {
       } : Types.SaleSettings;
     };
 
-/*******************
+    /*******************
 * INTERNAL METHODS *
 *******************/
 
