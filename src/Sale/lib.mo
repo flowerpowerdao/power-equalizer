@@ -240,11 +240,15 @@ module {
 
     public func cronSalesSettlements(caller : Principal) : async () {
       // _saleSattlements can potentially be really big, we have to make sure
-      // we dont get out of cycles error or error that outgoing calls queue is full
+      // we dont get out of cycles error or error that outgoing calls queue is full.
+      // This is done by adding the await statement.
+      // For every message the max cycles is reset
       for (ss in _salesSettlements.entries()) {
         // we only try and retrieve the settlement if it expired, this will add it to failedSales
         if (ss.1.expires < Time.now()) {
-          ignore (await retreive(caller, ss.0));
+          try {
+            ignore (await retreive(caller, ss.0));
+          } catch (e) {};
         };
       };
     };
