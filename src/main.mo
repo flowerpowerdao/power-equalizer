@@ -22,6 +22,7 @@ import MarketplaceTypes "Marketplace/types";
 import Sale "Sale";
 import SaleTypes "Sale/types";
 import Shuffle "Shuffle";
+import ShuffleTypes "Shuffle/types";
 import TokenTypes "Tokens/types";
 import Tokens "Tokens";
 import Utils "./utils";
@@ -84,7 +85,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   };
 
   // Shuffle
-  private stable var _isShuffledState : Bool = false;
+  private stable var _shuffleState : ShuffleTypes.State = {
+    _isShuffledState : Bool = false;
+  };
 
   // Cap
   private stable var rootBucketId : ?Text = null;
@@ -105,6 +108,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
     // Assets
     _assetsState := _Assets.toStable();
+
+    // Shuffle
+    _shuffleState := _Shuffle.toStable();
 
     // Canistergeek
     _canistergeekMonitorUD := ?canistergeekMonitor.preupgrade();
@@ -146,6 +152,11 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     // Assets
     _assetsState := {
       _assetsState : [AssetsTypes.Asset] = [];
+    };
+
+    // Shuffle
+    _shuffleState := {
+      _isShuffledState : Bool = false;
     };
 
     // Canistergeek
@@ -332,9 +343,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   // Shuffle
   let _Shuffle = Shuffle.Factory(
-    {
-      _isShuffledState;
-    },
+    _shuffleState,
     {
       _Assets;
       _Tokens;
