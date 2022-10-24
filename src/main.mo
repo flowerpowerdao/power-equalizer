@@ -387,7 +387,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     {
       _saleTransactionsState;
       _salesSettlementsState;
-      _minterState = _tokenState._minterState;
       _failedSalesState;
       _tokensForSaleState;
       _ethFlowerWhitelistState;
