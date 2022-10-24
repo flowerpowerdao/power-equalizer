@@ -227,13 +227,11 @@ module {
     };
 
     public func cronDisbursements() : async () {
-      var counter : Nat = 0;
-      label payloop while (counter < 5) {
-        counter := counter + 1;
-        var last = List.pop(_disbursements);
-        switch (last.0) {
+      label payloop while (true) {
+        let (last, newDisbursements) = List.pop(_disbursements);
+        switch (last) {
           case (?d) {
-            _disbursements := last.1;
+            _disbursements := newDisbursements;
             try {
               var bh = await consts.LEDGER_CANISTER.send_dfx({
                 memo = Encoding.BigEndian.toNat64(Blob.toArray(Principal.toBlob(Principal.fromText(ExtCore.TokenIdentifier.fromPrincipal(this, d.0)))));
