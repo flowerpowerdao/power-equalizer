@@ -39,8 +39,8 @@ module {
     };
 
     /********************
-* PUBLIC INTERFACE *
-********************/
+    * PUBLIC INTERFACE *
+    ********************/
 
     public func http_request_streaming_callback(token : Types.HttpStreamingCallbackToken) : Types.HttpStreamingCallbackResponse {
       switch (Utils.natFromText(token.key)) {
@@ -166,6 +166,7 @@ module {
       /**********************
       * TOKEN INDEX LOOKUP *
       **********************/
+
       // check if theres a path
       switch (path.size()) {
         // check if there's only on "argument" to it
@@ -207,8 +208,8 @@ module {
     };
 
     /********************
-* INTERNAL METHODS *
-********************/
+    * INTERNAL METHODS *
+    ********************/
 
     private func _processFile(tokenid : ExtCore.TokenIdentifier, file : AssetTypes.File) : Types.HttpResponse {
       // start custom
