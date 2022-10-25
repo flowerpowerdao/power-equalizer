@@ -191,7 +191,15 @@ module {
       };
 
       //Just show index
-      var soldValue : Nat = Nat64.toNat(Array.foldLeft<MarketplaceTypes.Transaction, Nat64>(deps._Marketplace.getTransactions().toArray(), 0, func(b : Nat64, a : MarketplaceTypes.Transaction) : Nat64 { b + a.price }));
+      var soldValue : Nat = Nat64.toNat(
+        Array.foldLeft<MarketplaceTypes.Transaction, Nat64>(
+          deps._Marketplace.getTransactions().toArray(),
+          0,
+          func(b : Nat64, a : MarketplaceTypes.Transaction) : Nat64 {
+            b + a.price;
+          },
+        ),
+      );
       var avg : Nat = if (deps._Marketplace.transactionsSize() > 0) {
         soldValue / deps._Marketplace.transactionsSize();
       } else {
