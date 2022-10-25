@@ -259,13 +259,11 @@ module {
     };
 
     public func cronFailedSales(caller : Principal) : async () {
-      var counter : Nat = 0;
-      label failedSalesLoop while (counter < 5) {
-        counter := counter + 1;
-        var last = _failedSales.removeLast();
+      label failedSalesLoop while (true) {
+        let last = _failedSales.removeLast();
         switch (last) {
-          case (?last) {
-            let subaccount = last.1;
+          case (?failedSale) {
+            let subaccount = failedSale.1;
             try {
               // check if subaccount holds icp
               let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({
@@ -277,7 +275,7 @@ module {
                   amount = { e8s = response.e8s - 10000 };
                   fee = { e8s = 10000 };
                   from_subaccount = ?subaccount;
-                  to = last.0;
+                  to = failedSale.0;
                   created_at_time = null;
                 });
               };
