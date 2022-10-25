@@ -108,7 +108,7 @@ module {
       if (ExtCore.TokenIdentifier.isPrincipal(tokenid, this) == false) {
         return #err(#InvalidToken(tokenid));
       };
-      let token = ExtCore.TokenIdentifier.getIndex(tokenid);
+      let token : Types.TokenIndex = ExtCore.TokenIdentifier.getIndex(tokenid);
       switch (_tokenSettlement.get(token)) {
         case (?settlement) {
           let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({
@@ -325,9 +325,14 @@ module {
         // only failed settlments are settled here
         //  even though the result is ignored, if settle traps the catch block is executed
         // it doesn't matter if this is executed multiple times on the same settlement, `settle` checks if it's already settled
-        try {
-          ignore (await settle(caller, ExtCore.TokenIdentifier.fromPrincipal(this, settlement.0)));
-        } catch (e) {};
+        switch (_tokenSettlement.get(settlement.0)) {
+          case (?_) {
+            try {
+              ignore (await settle(caller, ExtCore.TokenIdentifier.fromPrincipal(this, settlement.0)));
+            } catch (e) {};
+          };
+          case (_) {};
+        };
       };
     };
 
