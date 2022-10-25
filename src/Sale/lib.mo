@@ -246,9 +246,14 @@ module {
       for (ss in _salesSettlements.entries()) {
         // we only try and retrieve the settlement if it expired, this will add it to failedSales
         if (ss.1.expires < Time.now()) {
-          try {
-            ignore (await retreive(caller, ss.0));
-          } catch (e) {};
+          switch (_salesSettlements.get(ss.0)) {
+            case (?_) {
+              try {
+                ignore (await retreive(caller, ss.0));
+              } catch (e) {};
+            };
+            case (_) {};
+          };
         };
       };
     };
