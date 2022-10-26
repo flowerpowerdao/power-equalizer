@@ -7,7 +7,7 @@ import Types "types";
 import Utils "../utils";
 
 module {
-  public class Factory(state : Types.State, deps : Types.Dependencies) {
+  public class Factory(state : Types.StableState, deps : Types.Dependencies) {
 
     /*********
 * STATE *
@@ -15,7 +15,7 @@ module {
 
     private var _isShuffled : Bool = state._isShuffledState;
 
-    public func toStable() : Types.State {
+    public func toStable() : Types.StableState {
       return {
         _isShuffledState = _isShuffled;
       };

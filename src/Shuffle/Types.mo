@@ -3,7 +3,7 @@ import ExtCore "../toniq-labs/ext/Core";
 import Tokens "../Tokens";
 
 module {
-    public type State = {
+    public type StableState = {
         _isShuffledState : Bool;
     };
 

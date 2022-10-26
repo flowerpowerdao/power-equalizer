@@ -85,7 +85,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   };
 
   // Shuffle
-  private stable var _shuffleState : ShuffleTypes.State = {
+  private stable var _shuffleState : ShuffleTypes.StableState = {
     _isShuffledState : Bool = false;
   };
 
