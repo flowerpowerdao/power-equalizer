@@ -21,7 +21,7 @@ import Types "types";
 import Utils "../utils";
 
 module {
-  public class Factory(this : Principal, state : Types.State, deps : Types.Dependencies, consts : Types.Constants) {
+  public class Factory(this : Principal, state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
 
     /*********
 * STATE *
@@ -35,7 +35,7 @@ module {
     private var _modclubWhitelist : Buffer.Buffer<Types.AccountIdentifier> = Utils.bufferFromArray<Types.AccountIdentifier>(state._modclubWhitelistState);
     private var _soldIcp : Nat64 = state._soldIcpState;
 
-    public func toStable() : Types.State {
+    public func toStable() : Types.StableState {
       return {
         _saleTransactionsState = _saleTransactions.toArray();
         _salesSettlementsState = Iter.toArray(_salesSettlements.entries());

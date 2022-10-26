@@ -11,7 +11,7 @@ import Tokens "../Tokens";
 
 module {
 
-  public type State = {
+  public type StableState = {
     _saleTransactionsState : [SaleTransaction];
     _salesSettlementsState : [(AccountIdentifier, Sale)];
     _failedSalesState : [(AccountIdentifier, SubAccount)];

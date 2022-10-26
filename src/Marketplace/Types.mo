@@ -61,7 +61,7 @@ module {
 
   public type AccountBalanceArgs = { account : AccountIdentifier };
 
-  public type State = {
+  public type StableState = {
     _transactionsState : [Transaction];
     _tokenSettlementState : [(TokenIndex, Settlement)];
     _tokenListingState : [(TokenIndex, Listing)];

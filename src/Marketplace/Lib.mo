@@ -21,7 +21,7 @@ import Types "types";
 import Utils "../utils";
 
 module {
-  public class Factory(this : Principal, state : Types.State, deps : Types.Dependencies, consts : Types.Constants) {
+  public class Factory(this : Principal, state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
 
     /*********
 * STATE *
@@ -35,7 +35,7 @@ module {
     private var _sold : Nat = state._soldState;
     private var _totalToSell : Nat = state._totalToSellState;
 
-    public func toStable() : Types.State {
+    public func toStable() : Types.StableState {
       return {
         _transactionsState = _transactions.toArray();
         _tokenSettlementState = Iter.toArray(_tokenSettlement.entries());

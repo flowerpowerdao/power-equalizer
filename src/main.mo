@@ -58,7 +58,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   };
 
   // Sale
-  private stable var _saleState : SaleTypes.State = {
+  private stable var _saleState : SaleTypes.StableState = {
     _saleTransactionsState : [SaleTypes.SaleTransaction] = [];
     _salesSettlementsState : [(AccountIdentifier, SaleTypes.Sale)] = [];
     _failedSalesState : [(AccountIdentifier, TokenTypes.SubAccount)] = [];
@@ -69,7 +69,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   };
 
   // Marketplace
-  private stable var _marketplaceState : MarketplaceTypes.State = {
+  private stable var _marketplaceState : MarketplaceTypes.StableState = {
     _transactionsState : [MarketplaceTypes.Transaction] = [];
     _tokenSettlementState : [(TokenTypes.TokenIndex, MarketplaceTypes.Settlement)] = [];
     _tokenListingState : [(TokenTypes.TokenIndex, MarketplaceTypes.Listing)] = [];
