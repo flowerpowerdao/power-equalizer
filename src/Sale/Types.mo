@@ -1,4 +1,3 @@
-
 import Time "mo:base/Time";
 
 import Cap "mo:cap/Cap";
@@ -10,6 +9,18 @@ import Shuffle "../Shuffle";
 import Tokens "../Tokens";
 
 module {
+
+  public func newStableState() : StableState {
+    return {
+      _saleTransactionsState : [SaleTransaction] = [];
+      _salesSettlementsState : [(AccountIdentifier, Sale)] = [];
+      _failedSalesState : [(AccountIdentifier, SubAccount)] = [];
+      _tokensForSaleState : [TokenIndex] = [];
+      _ethFlowerWhitelistState : [AccountIdentifier] = [];
+      _modclubWhitelistState : [AccountIdentifier] = [];
+      _soldIcpState : Nat64 = 0;
+    };
+  };
 
   public type StableState = {
     _saleTransactionsState : [SaleTransaction];
@@ -24,25 +35,26 @@ module {
   public type Dependencies = {
     _Cap : Cap.Cap;
     _Tokens : Tokens.Factory;
-    _Marketplace: Marketplace.Factory;
+    _Marketplace : Marketplace.Factory;
     _Shuffle : Shuffle.Factory;
   };
 
   type SendArgs = {
-    memo: Nat64;
-    amount: ICPTs;
-    fee: ICPTs;
-    from_subaccount: ?SubAccount;
-    to: AccountIdentifier;
-    created_at_time: ?Time.Time;
+    memo : Nat64;
+    amount : ICPTs;
+    fee : ICPTs;
+    from_subaccount : ?SubAccount;
+    to : AccountIdentifier;
+    created_at_time : ?Time.Time;
   };
 
   public type Constants = {
-    LEDGER_CANISTER : actor { 
+    LEDGER_CANISTER : actor {
       account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
-      send_dfx : shared SendArgs -> async Nat64;  
+      send_dfx : shared SendArgs -> async Nat64;
     };
-    WHITELIST_CANISTER : actor { getWhitelist: shared () -> async [Principal] };
+    WHITELIST_CANISTER : actor { getWhitelist : shared () -> async [Principal] };
+    minter : Principal;
   };
 
   public type AccountIdentifier = ExtCore.AccountIdentifier;
@@ -55,12 +67,12 @@ module {
 
   public type CommonError = ExtCore.CommonError;
 
-  public type TokenIndex  = ExtCore.TokenIndex ;
-  
+  public type TokenIndex = ExtCore.TokenIndex;
+
   public type ICPTs = { e8s : Nat64 };
-  
+
   public type AccountBalanceArgs = { account : AccountIdentifier };
-  
+
   public type Sale = {
     tokens : [TokenIndex];
     price : Nat64;
@@ -68,7 +80,7 @@ module {
     buyer : AccountIdentifier;
     expires : Time;
   };
-  
+
   public type SaleTransaction = {
     tokens : [TokenIndex];
     seller : Principal;
@@ -87,4 +99,4 @@ module {
     totalToSell : Nat;
     bulkPricing : [(Nat64, Nat64)];
   };
-}
+};

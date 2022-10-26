@@ -48,46 +48,19 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   // *** ** ** ** ** ** ** * * STABLE STATE * ** ** ** ** ** ** ** **
 
   // Tokens
-  private stable var _tokenState : TokenTypes.StableState = {
-    _tokenMetadataState : [(TokenTypes.TokenIndex, TokenTypes.Metadata)] = [];
-    _ownersState : [(AccountIdentifier, [TokenTypes.TokenIndex])] = [];
-    _registryState : [(TokenTypes.TokenIndex, AccountIdentifier)] = [];
-    _nextTokenIdState : TokenTypes.TokenIndex = 0;
-    _minterState : Principal = init_minter;
-    _supplyState : TokenTypes.Balance = 0;
-  };
+  private stable var _tokenState : TokenTypes.StableState = TokenTypes.newStableState();
 
   // Sale
-  private stable var _saleState : SaleTypes.StableState = {
-    _saleTransactionsState : [SaleTypes.SaleTransaction] = [];
-    _salesSettlementsState : [(AccountIdentifier, SaleTypes.Sale)] = [];
-    _failedSalesState : [(AccountIdentifier, TokenTypes.SubAccount)] = [];
-    _tokensForSaleState : [TokenTypes.TokenIndex] = [];
-    _ethFlowerWhitelistState : [AccountIdentifier] = [];
-    _modclubWhitelistState : [AccountIdentifier] = [];
-    _soldIcpState : Nat64 = 0;
-  };
+  private stable var _saleState : SaleTypes.StableState = SaleTypes.newStableState();
 
   // Marketplace
-  private stable var _marketplaceState : MarketplaceTypes.StableState = {
-    _transactionsState : [MarketplaceTypes.Transaction] = [];
-    _tokenSettlementState : [(TokenTypes.TokenIndex, MarketplaceTypes.Settlement)] = [];
-    _tokenListingState : [(TokenTypes.TokenIndex, MarketplaceTypes.Listing)] = [];
-    _disbursementsState : [(TokenTypes.TokenIndex, AccountIdentifier, SubAccount, Nat64)] = [];
-    _nextSubAccountState : Nat = 0;
-    _soldState : Nat = 0;
-    _totalToSellState : Nat = 0;
-  };
+  private stable var _marketplaceState : MarketplaceTypes.StableState = MarketplaceTypes.newStableState();
 
   // Assets
-  private stable var _assetsState : AssetsTypes.StableState = {
-    _assetsState : [AssetsTypes.Asset] = [];
-  };
+  private stable var _assetsState : AssetsTypes.StableState = AssetsTypes.newStableState();
 
   // Shuffle
-  private stable var _shuffleState : ShuffleTypes.StableState = {
-    _isShuffledState : Bool = false;
-  };
+  private stable var _shuffleState : ShuffleTypes.StableState = ShuffleTypes.newStableState();
 
   // Cap
   private stable var rootBucketId : ?Text = null;
@@ -211,7 +184,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   public shared (msg) func initCap() : async Result.Result<(), Text> {
     canistergeekMonitor.collectMetrics();
-    assert (msg.caller == _tokenState._minterState);
+    assert (msg.caller == init_minter);
     let pid = Principal.fromActor(myCanister);
     let tokenContractId = Principal.toText(pid);
 
@@ -231,6 +204,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   let _Tokens = Tokens.Factory(
     cid,
     _tokenState,
+    {
+      minter = init_minter;
+    },
   );
 
   // queries
@@ -324,6 +300,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     {
       _Tokens;
     },
+    {
+      minter = init_minter;
+    },
   );
 
   public shared (msg) func streamAsset(id : Nat, isThumb : Bool, payload : Blob) : async () {
@@ -348,6 +327,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
       _Assets;
       _Tokens;
     },
+    {
+      minter = init_minter;
+    },
   );
 
   public shared (msg) func shuffleAssets() : async () {
@@ -368,6 +350,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     {
       LEDGER_CANISTER;
       WHITELIST_CANISTER;
+      minter = init_minter;
     },
   );
 
@@ -433,6 +416,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
       _Marketplace;
       _Cap;
     },
+    {
+      minter = init_minter;
+    },
   );
   // updates
   public shared (msg) func transfer(request : EXTTypes.TransferRequest) : async EXTTypes.TransferResponse {
@@ -486,6 +472,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
       _Shuffle;
       _Tokens;
       _Sale;
+    },
+    {
+      minter = init_minter;
     },
   );
 

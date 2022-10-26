@@ -10,7 +10,7 @@ import Types "types";
 import Utils "../utils";
 
 module {
-  public class Factory(this : Principal, state : Types.StableState) {
+  public class Factory(this : Principal, state : Types.StableState, consts : Types.Constants) {
 
     /*********
     * STATE *
@@ -20,7 +20,6 @@ module {
     private var _owners : TrieMap.TrieMap<Types.AccountIdentifier, Buffer.Buffer<Types.TokenIndex>> = Utils.bufferTrieMapFromIter(state._ownersState.vals(), AID.equal, AID.hash);
     private var _registry : TrieMap.TrieMap<Types.TokenIndex, Types.AccountIdentifier> = TrieMap.fromEntries(state._registryState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _nextTokenId : Types.TokenIndex = state._nextTokenIdState;
-    private var _minter : Principal = state._minterState;
     private var _supply : Types.Balance = state._supplyState;
 
     public func toStable() : Types.StableState {
@@ -36,7 +35,6 @@ module {
         );
         _registryState = Iter.toArray(_registry.entries());
         _nextTokenIdState = _nextTokenId;
-        _minterState = _minter;
         _supplyState = _supply;
       };
     };
@@ -108,10 +106,6 @@ module {
 
     public func getSupply() : Types.Balance {
       _supply;
-    };
-
-    public func getMinter() : Principal {
-      _minter;
     };
 
     public func getRegistry() : TrieMap.TrieMap<Types.TokenIndex, Types.AccountIdentifier> {

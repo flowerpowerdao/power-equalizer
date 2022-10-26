@@ -7,7 +7,7 @@ import Types "types";
 import Utils "../utils";
 
 module {
-  public class Factory(state : Types.StableState, deps : Types.Dependencies) {
+  public class Factory(state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
 
     /*********
 * STATE *
@@ -28,7 +28,7 @@ module {
     //*** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
     public func shuffleAssets(caller : Principal) : async () {
-      assert (caller == deps._Tokens.getMinter() and _isShuffled == false);
+      assert (caller == consts.minter and _isShuffled == false);
       // get a random seed from the IC
       let seed : Blob = await Random.blob();
       // use that seed to generate a truly random number

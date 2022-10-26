@@ -51,7 +51,7 @@ module {
 
     // updates
     public func initMint(caller : Principal) : async () {
-      assert (caller == deps._Tokens.getMinter() and deps._Tokens.getNextTokenId() == 0);
+      assert (caller == consts.minter and deps._Tokens.getNextTokenId() == 0);
       //Mint
       mintCollection(Env.collectionSize);
       // turn whitelist into buffer for better performance
@@ -75,14 +75,14 @@ module {
     };
 
     public func shuffleTokensForSale(caller : Principal) : async () {
-      assert (caller == deps._Tokens.getMinter() and Nat32.toNat(Env.collectionSize) == _tokensForSale.size());
+      assert (caller == consts.minter and Nat32.toNat(Env.collectionSize) == _tokensForSale.size());
       // shuffle indices
       let seed : Blob = await Random.blob();
       _tokensForSale := deps._Shuffle.shuffleTokens(_tokensForSale, seed);
     };
 
     public func airdropTokens(caller : Principal, startingIndex : Nat) : () {
-      assert (caller == deps._Tokens.getMinter() and deps._Marketplace.getTotalToSell() == 0);
+      assert (caller == consts.minter and deps._Marketplace.getTotalToSell() == 0);
       // airdrop tokens
       var temp = 0;
       label airdrop for (a in Env.airdrop.vals()) {
@@ -99,7 +99,7 @@ module {
     };
 
     public func setTotalToSell(caller : Principal) : Nat {
-      assert (caller == deps._Tokens.getMinter() and deps._Marketplace.getTotalToSell() == 0);
+      assert (caller == consts.minter and deps._Marketplace.getTotalToSell() == 0);
       deps._Marketplace.setTotalToSell(_tokensForSale.size());
       _tokensForSale.size();
     };

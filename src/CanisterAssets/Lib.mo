@@ -10,7 +10,7 @@ import Utils "../utils";
 
 module {
 
-  public class Factory(state : Types.StableState, deps : Types.Dependencies) {
+  public class Factory(state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
 
     /*********
     * STATE *
@@ -27,7 +27,7 @@ module {
     //*** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
     public func streamAsset(caller : Principal, id : Nat, isThumb : Bool, payload : Blob) : () {
-      assert (caller == deps._Tokens.getMinter());
+      assert (caller == consts.minter);
       var asset : Types.Asset = _assets.get(id);
       if (isThumb) {
         switch (asset.thumbnail) {
@@ -59,7 +59,7 @@ module {
     };
 
     public func updateThumb(caller : Principal, name : Text, file : Types.File) : ?Nat {
-      assert (caller == deps._Tokens.getMinter());
+      assert (caller == consts.minter);
       var i : Nat = 0;
       for (a in _assets.vals()) {
         if (a.name == name) {
@@ -79,7 +79,7 @@ module {
     };
 
     public func addAsset(caller : Principal, asset : Types.Asset) : Nat {
-      assert (caller == deps._Tokens.getMinter());
+      assert (caller == consts.minter);
       _assets.add(asset);
       _assets.size() - 1;
     };

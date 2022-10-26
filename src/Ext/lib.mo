@@ -13,20 +13,20 @@ import MarketplaceTypes "../Marketplace/types";
 import Types "types";
 
 module {
-  public class Factory(this : Principal, deps : Types.Dependencies) {
+  public class Factory(this : Principal, deps : Types.Dependencies, consts : Types.Constants) {
 
-/*************
+    /*************
 * CONSTANTS *
 *************/
 
     private let EXTENSIONS : [Types.Extension] = ["@ext/common", "@ext/nonfungible"];
 
-/********************
+    /********************
 * PUBLIC INTERFACE *
 ********************/
 
     public func getMinter() : Principal {
-      deps._Tokens.getMinter();
+      consts.minter
     };
 
     public func extensions() : [Types.Extension] {
@@ -39,12 +39,12 @@ module {
 
     public func getRegistry() : [(Types.TokenIndex, Types.AccountIdentifier)] {
       Iter.toArray(deps._Tokens.getRegistry().entries());
-      
+
     };
 
     public func getTokens() : [(Types.TokenIndex, Types.Metadata)] {
       var resp : Buffer.Buffer<(Types.TokenIndex, Types.Metadata)> = Buffer.Buffer(0);
-      for(e in deps._Tokens.getTokenMetadata().entries()){
+      for (e in deps._Tokens.getTokenMetadata().entries()) {
         resp.add((e.0, #nonfungible({ metadata = null })));
       };
       resp.toArray();
@@ -52,30 +52,30 @@ module {
 
     public func getTokenToAssetMapping() : [(Types.TokenIndex, Text)] {
       var resp : Buffer.Buffer<(Types.TokenIndex, Text)> = Buffer.Buffer(0);
-      for(e in deps._Tokens.getTokenMetadata().entries()){
-        let assetid = deps._Assets.get(Nat32.toNat(e.0)+1).name;
+      for (e in deps._Tokens.getTokenMetadata().entries()) {
+        let assetid = deps._Assets.get(Nat32.toNat(e.0) +1).name;
         resp.add((e.0, assetid));
       };
       resp.toArray();
     };
 
     public func tokens(aid : Types.AccountIdentifier) : Result.Result<[Types.TokenIndex], Types.CommonError> {
-      switch(deps._Tokens.getTokensFromOwner(aid)) {
-        case(?tokens) return #ok(tokens.toArray());
-        case(_) return #err(#Other("No tokens"));
+      switch (deps._Tokens.getTokensFromOwner(aid)) {
+        case (?tokens) return #ok(tokens.toArray());
+        case (_) return #err(#Other("No tokens"));
       };
     };
-    
+
     public func tokens_ext(aid : Types.AccountIdentifier) : Result.Result<[(Types.TokenIndex, ?MarketplaceTypes.Listing, ?Blob)], Types.CommonError> {
-      switch(deps._Tokens.getTokensFromOwner(aid)) {
-        case(?tokens) {
+      switch (deps._Tokens.getTokensFromOwner(aid)) {
+        case (?tokens) {
           var resp : Buffer.Buffer<(Types.TokenIndex, ?Types.Listing, ?Blob)> = Buffer.Buffer(0);
-          for (a in tokens.vals()){
+          for (a in tokens.vals()) {
             resp.add((a, deps._Marketplace.getListingFromTokenListing(a), null));
           };
           return #ok(resp.toArray());
         };
-        case(_) return #err(#Other("No tokens"));
+        case (_) return #err(#Other("No tokens"));
       };
     };
 
@@ -94,7 +94,7 @@ module {
       };
     };
 
-    public func transfer(caller: Principal, request: Types.TransferRequest) : async Types.TransferResponse {
+    public func transfer(caller : Principal, request : Types.TransferRequest) : async Types.TransferResponse {
       if (request.amount != 1) {
         return #err(#Other("Must use amount of 1"));
       };
@@ -113,27 +113,27 @@ module {
       };
       switch (deps._Tokens.getOwnerFromRegistry(token)) {
         case (?token_owner) {
-          if(AID.equal(owner, token_owner) == false) {
+          if (AID.equal(owner, token_owner) == false) {
             return #err(#Unauthorized(owner));
           };
           if (request.notify) {
-            switch(ExtCore.User.toPrincipal(request.to)) {
+            switch (ExtCore.User.toPrincipal(request.to)) {
               case (?canisterId) {
                 //Do this to avoid atomicity issue
                 deps._Tokens.removeTokenFromUser(token);
-                let notifier : Types.NotifyService = actor(Principal.toText(canisterId));
-                switch(await notifier.tokenTransferNotification(request.token, request.from, request.amount, request.memo)) {
+                let notifier : Types.NotifyService = actor (Principal.toText(canisterId));
+                switch (await notifier.tokenTransferNotification(request.token, request.from, request.amount, request.memo)) {
                   case (?balance) {
                     if (balance == 1) {
                       // start custom
                       let event : Root.IndefiniteEvent = {
-                              operation = "transfer";
-                              details = [
-                                ("to", #Text receiver ),
-                                ("from", #Text owner),
-                                ("token_id", #Text(request.token))
-                              ];
-                              caller = caller;
+                        operation = "transfer";
+                        details = [
+                          ("to", #Text receiver),
+                          ("from", #Text owner),
+                          ("token_id", #Text(request.token)),
+                        ];
+                        caller = caller;
                       };
                       ignore deps._Cap.insert(event);
                       // end custom
@@ -154,18 +154,18 @@ module {
               };
               case (_) {
                 return #err(#CannotNotify(receiver));
-              }
+              };
             };
           } else {
             // start custom
             let event : Root.IndefiniteEvent = {
-                    operation = "transfer";
-                    details = [
-                      ("to", #Text receiver ),
-                      ("from", #Text owner),
-                      ("token_id", #Text(request.token))
-                    ];
-                    caller = caller;
+              operation = "transfer";
+              details = [
+                ("to", #Text receiver),
+                ("from", #Text owner),
+                ("token_id", #Text(request.token)),
+              ];
+              caller = caller;
             };
             ignore deps._Cap.insert(event);
             // end custom
@@ -179,5 +179,5 @@ module {
       };
     };
 
-  }
-}
+  };
+};

@@ -7,6 +7,19 @@ import TokenTypes "../Tokens/types";
 import Tokens "../Tokens";
 
 module {
+
+  public func newStableState() : StableState {
+    return {
+      _transactionsState : [Transaction] = [];
+      _tokenSettlementState : [(TokenTypes.TokenIndex, Settlement)] = [];
+      _tokenListingState : [(TokenTypes.TokenIndex, Listing)] = [];
+      _disbursementsState : [(TokenTypes.TokenIndex, AccountIdentifier, SubAccount, Nat64)] = [];
+      _nextSubAccountState : Nat = 0;
+      _soldState : Nat = 0;
+      _totalToSellState : Nat = 0;
+    };
+  };
+
   public type AccountIdentifier = ExtCore.AccountIdentifier;
 
   public type Time = Time.Time;
@@ -19,8 +32,8 @@ module {
 
   public type CommonError = ExtCore.CommonError;
 
-  public type TokenIndex  = ExtCore.TokenIndex ;
-  
+  public type TokenIndex = ExtCore.TokenIndex;
+
   public type ICPTs = { e8s : Nat64 };
 
   public type Transaction = {
@@ -48,15 +61,15 @@ module {
     token : TokenIdentifier;
     from_subaccount : ?SubAccount;
     price : ?Nat64;
-  }; 
+  };
 
   type SendArgs = {
-    memo: Nat64;
-    amount: ICPTs;
-    fee: ICPTs;
-    from_subaccount: ?SubAccount;
-    to: AccountIdentifier;
-    created_at_time: ?Time.Time;
+    memo : Nat64;
+    amount : ICPTs;
+    fee : ICPTs;
+    from_subaccount : ?SubAccount;
+    to : AccountIdentifier;
+    created_at_time : ?Time.Time;
   };
 
   public type AccountBalanceArgs = { account : AccountIdentifier };
@@ -77,10 +90,10 @@ module {
   };
 
   public type Constants = {
-    LEDGER_CANISTER : actor { 
-    account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
-    send_dfx : shared SendArgs -> async Nat64; 
+    LEDGER_CANISTER : actor {
+      account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
+      send_dfx : shared SendArgs -> async Nat64;
     };
   };
 
-}
+};
