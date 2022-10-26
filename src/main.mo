@@ -80,7 +80,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   };
 
   // Assets
-  private stable var _assetsState : AssetsTypes.State = {
+  private stable var _assetsState : AssetsTypes.StableState = {
     _assetsState : [AssetsTypes.Asset] = [];
   };
 

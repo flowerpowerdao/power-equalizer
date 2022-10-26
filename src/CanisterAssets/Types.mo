@@ -12,7 +12,7 @@ module {
     payload : File;
   };
 
-  public type State = {
+  public type StableState = {
     _assetsState : [Asset]; 
   };
 

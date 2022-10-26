@@ -10,7 +10,7 @@ import Utils "../utils";
 
 module {
 
-  public class Factory(state : Types.State, deps : Types.Dependencies) {
+  public class Factory(state : Types.StableState, deps : Types.Dependencies) {
 
     /*********
     * STATE *
@@ -18,7 +18,7 @@ module {
 
     private var _assets : Buffer.Buffer<Types.Asset> = Utils.bufferFromArray(state._assetsState);
 
-    public func toStable() : Types.State {
+    public func toStable() : Types.StableState {
       return {
         _assetsState = _assets.toArray();
       };
