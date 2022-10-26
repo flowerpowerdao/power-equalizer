@@ -32,7 +32,7 @@ module {
   
   public type ICPTs = { e8s : Nat64 };
 
-  public type State = {
+  public type StableState = {
     _tokenMetadataState : [(TokenIndex, Metadata)] ;
     _ownersState : [(AccountIdentifier, [TokenIndex])];
     _registryState : [(TokenIndex, AccountIdentifier)];

@@ -48,7 +48,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   // *** ** ** ** ** ** ** * * STABLE STATE * ** ** ** ** ** ** ** **
 
   // Tokens
-  private stable var _tokenState : TokenTypes.State = {
+  private stable var _tokenState : TokenTypes.StableState = {
     _tokenMetadataState : [(TokenTypes.TokenIndex, TokenTypes.Metadata)] = [];
     _ownersState : [(AccountIdentifier, [TokenTypes.TokenIndex])] = [];
     _registryState : [(TokenTypes.TokenIndex, AccountIdentifier)] = [];

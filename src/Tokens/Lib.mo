@@ -10,7 +10,7 @@ import Types "types";
 import Utils "../utils";
 
 module {
-  public class Factory(this : Principal, state : Types.State) {
+  public class Factory(this : Principal, state : Types.StableState) {
 
     /*********
     * STATE *
@@ -23,7 +23,7 @@ module {
     private var _minter : Principal = state._minterState;
     private var _supply : Types.Balance = state._supplyState;
 
-    public func toStable() : Types.State {
+    public func toStable() : Types.StableState {
       return {
         _tokenMetadataState = Iter.toArray(_tokenMetadata.entries());
         _ownersState = Iter.toArray(
