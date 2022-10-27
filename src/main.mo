@@ -91,46 +91,19 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   system func postupgrade() {
     // Tokens
-    _tokenState := {
-      _tokenMetadataState : [(TokenTypes.TokenIndex, TokenTypes.Metadata)] = [];
-      _ownersState : [(AccountIdentifier, [TokenTypes.TokenIndex])] = [];
-      _registryState : [(TokenTypes.TokenIndex, AccountIdentifier)] = [];
-      _nextTokenIdState : TokenTypes.TokenIndex = 0;
-      _minterState : Principal = init_minter;
-      _supplyState : TokenTypes.Balance = 0;
-    };
+    _tokenState := TokenTypes.newStableState();
 
     // Sale
-    _saleState := {
-      _saleTransactionsState : [SaleTypes.SaleTransaction] = [];
-      _salesSettlementsState : [(AccountIdentifier, SaleTypes.Sale)] = [];
-      _failedSalesState : [(AccountIdentifier, TokenTypes.SubAccount)] = [];
-      _tokensForSaleState : [TokenTypes.TokenIndex] = [];
-      _ethFlowerWhitelistState : [AccountIdentifier] = [];
-      _modclubWhitelistState : [AccountIdentifier] = [];
-      _soldIcpState : Nat64 = 0;
-    };
+    _saleState := SaleTypes.newStableState();
 
     // Marketplace
-    _marketplaceState := {
-      _transactionsState : [MarketplaceTypes.Transaction] = [];
-      _tokenSettlementState : [(TokenTypes.TokenIndex, MarketplaceTypes.Settlement)] = [];
-      _tokenListingState : [(TokenTypes.TokenIndex, MarketplaceTypes.Listing)] = [];
-      _disbursementsState : [(TokenTypes.TokenIndex, AccountIdentifier, SubAccount, Nat64)] = [];
-      _nextSubAccountState : Nat = 0;
-      _soldState : Nat = 0;
-      _totalToSellState : Nat = 0;
-    };
+    _marketplaceState := MarketplaceTypes.newStableState();
 
     // Assets
-    _assetsState := {
-      _assetsState : [AssetsTypes.Asset] = [];
-    };
+    _assetsState := AssetsTypes.newStableState();
 
     // Shuffle
-    _shuffleState := {
-      _isShuffledState : Bool = false;
-    };
+    _shuffleState := ShuffleTypes.newStableState();
 
     // Canistergeek
     canistergeekMonitor.postupgrade(_canistergeekMonitorUD);
