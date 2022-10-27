@@ -27,8 +27,8 @@ import Utils "./utils";
 shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCanister {
 
   /*********
-* TYPES *
-*********/
+  * TYPES *
+  *********/
   type AccountIdentifier = ExtCore.AccountIdentifier;
   type SubAccount = ExtCore.SubAccount;
   type AccountBalanceArgs = { account : AccountIdentifier };
@@ -42,7 +42,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     created_at_time : ?Time.Time;
   };
 
-  // *** ** ** ** ** ** ** * * STABLE STATE * ** ** ** ** ** ** ** **
+  /****************
+  * STABLE STATE *
+  ****************/
 
   // Tokens
   private stable var _tokenState : TokenTypes.StableState = TokenTypes.newStableState();
@@ -108,8 +110,8 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   };
 
   /*************
-* CONSTANTS *
-*************/
+  * CONSTANTS *
+  *************/
 
   let LEDGER_CANISTER = actor "ryjl3-tyaaa-aaaaa-aaaba-cai" : actor {
     account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
@@ -121,8 +123,8 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   let CREATION_CYCLES : Nat = 1_000_000_000_000;
 
   /***********
-* CLASSES *
-***********/
+  * CLASSES *
+  ***********/
 
   // Canistergeek
   private let canistergeekMonitor = Canistergeek.Monitor();
