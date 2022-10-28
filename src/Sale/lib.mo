@@ -243,17 +243,14 @@ module {
       // we dont get out of cycles error or error that outgoing calls queue is full.
       // This is done by adding the await statement.
       // For every message the max cycles is reset
-      for (ss in _salesSettlements.entries()) {
-        // we only try and retrieve the settlement if it expired, this will add it to failedSales
-        if (ss.1.expires < Time.now()) {
-          switch (_salesSettlements.get(ss.0)) {
-            case (?_) {
-              try {
-                ignore (await retreive(caller, ss.0));
-              } catch (e) {};
-            };
-            case (_) {};
+      label settleLoop while (true) {
+        switch (expiredSalesSettlements().keys().next()) {
+          case (?paymentAddress) {
+            try {
+              ignore (await retreive(caller, paymentAddress));
+            } catch (e) {};
           };
+          case null break settleLoop;
         };
       };
     };
@@ -416,6 +413,24 @@ module {
         deps._Tokens.incrementSupply();
         deps._Tokens.incrementNextTokenId();
       };
+    };
+
+    func expiredSalesSettlements() : TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale> {
+      TrieMap.mapFilter<Types.AccountIdentifier, Types.Sale, Types.Sale>(
+        _salesSettlements,
+        AID.equal,
+        AID.hash,
+        func(a : (Types.AccountIdentifier, Types.Sale)) : ?Types.Sale {
+          switch (a.1.expires < Time.now()) {
+            case (true) {
+              ?a.1;
+            };
+            case (false) {
+              null;
+            };
+          };
+        },
+      );
     };
   };
 };

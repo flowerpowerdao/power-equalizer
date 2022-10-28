@@ -321,17 +321,17 @@ module {
     };
 
     public func cronSettlements(caller : Principal) : async () {
-      for (settlement in unlockedSettlements().vals()) {
-        // only failed settlments are settled here
-        //  even though the result is ignored, if settle traps the catch block is executed
-        // it doesn't matter if this is executed multiple times on the same settlement, `settle` checks if it's already settled
-        switch (_tokenSettlement.get(settlement.0)) {
-          case (?_) {
+      // only failed settlments are settled here
+      //  even though the result is ignored, if settle traps the catch block is executed
+      // it doesn't matter if this is executed multiple times on the same settlement, `settle` checks if it's already settled
+      label settleLoop while (true) {
+        switch (unlockedSettlements().keys().next()) {
+          case (?tokenindex) {
             try {
-              ignore (await settle(caller, ExtCore.TokenIdentifier.fromPrincipal(this, settlement.0)));
+              ignore (await settle(caller, ExtCore.TokenIdentifier.fromPrincipal(this, tokenindex)));
             } catch (e) {};
           };
-          case (_) {};
+          case null break settleLoop;
         };
       };
     };
@@ -427,11 +427,20 @@ module {
       Array.tabulate<Nat8>(32, n_byte);
     };
 
-    func unlockedSettlements() : [(Types.TokenIndex, Types.Settlement)] {
-      Array.filter<(Types.TokenIndex, Types.Settlement)>(
-        Iter.toArray(_tokenSettlement.entries()),
-        func(a : (Types.TokenIndex, Types.Settlement)) : Bool {
-          return (_isLocked(a.0) == false);
+    func unlockedSettlements() : TrieMap.TrieMap<Types.TokenIndex, Types.Settlement> {
+      TrieMap.mapFilter<Types.TokenIndex, Types.Settlement, Types.Settlement>(
+        _tokenSettlement,
+        ExtCore.TokenIndex.equal,
+        ExtCore.TokenIndex.hash,
+        func(a : (Types.TokenIndex, Types.Settlement)) : ?Types.Settlement {
+          switch (_isLocked(a.0) == false) {
+            case (true) {
+              ?a.1;
+            };
+            case (false) {
+              null;
+            };
+          };
         },
       );
     };
