@@ -1,4 +1,3 @@
-
 import Time "mo:base/Time";
 
 import Cap "mo:cap/Cap";
@@ -13,17 +12,17 @@ module {
   public type Extension = ExtCore.Extension;
 
   public type TokenIdentifier = ExtCore.TokenIdentifier;
-  
-  public type TokenIndex  = ExtCore.TokenIndex ;
-  
+
+  public type TokenIndex = ExtCore.TokenIndex;
+
   public type Metadata = ExtCommon.Metadata;
-  
+
   public type AccountIdentifier = ExtCore.AccountIdentifier;
 
   public type Balance = ExtCore.Balance;
-  
+
   public type BalanceRequest = ExtCore.BalanceRequest;
-  
+
   public type BalanceResponse = ExtCore.BalanceResponse;
 
   public type TransferRequest = ExtCore.TransferRequest;
@@ -43,7 +42,7 @@ module {
   public type SubAccount = ExtCore.SubAccount;
 
   public type CommonError = ExtCore.CommonError;
-  
+
   public type ICPTs = { e8s : Nat64 };
 
   public type Dependencies = {
@@ -52,4 +51,8 @@ module {
     _Marketplace : Marketplace.Factory;
     _Cap : Cap.Cap;
   };
-}
+
+  public type Constants = {
+    minter : Principal;
+  };
+};

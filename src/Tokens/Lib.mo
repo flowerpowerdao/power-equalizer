@@ -4,13 +4,13 @@ import TrieMap "mo:base/TrieMap";
 import Result "mo:base/Result";
 
 import AID "../toniq-labs/util/AccountIdentifier";
-import Buffer "../Buffer";
+import Buffer "../buffer";
 import ExtCore "../toniq-labs/Ext/Core";
 import Types "types";
-import Utils "../Utils";
+import Utils "../utils";
 
 module {
-  public class Factory(this: Principal, state : Types.State) {
+  public class Factory(this : Principal, state : Types.StableState, consts : Types.Constants) {
 
     /*********
     * STATE *
@@ -20,40 +20,26 @@ module {
     private var _owners : TrieMap.TrieMap<Types.AccountIdentifier, Buffer.Buffer<Types.TokenIndex>> = Utils.bufferTrieMapFromIter(state._ownersState.vals(), AID.equal, AID.hash);
     private var _registry : TrieMap.TrieMap<Types.TokenIndex, Types.AccountIdentifier> = TrieMap.fromEntries(state._registryState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _nextTokenId : Types.TokenIndex = state._nextTokenIdState;
-    private var _minter : Principal = state._minterState;
     private var _supply : Types.Balance = state._supplyState;
 
-    
-    public func toStable() : {
-      tokenMetadataState : [(Types.TokenIndex, Types.Metadata)] ;
-      ownersState : [(Types.AccountIdentifier, [Types.TokenIndex])];
-      registryState : [(Types.TokenIndex, Types.AccountIdentifier)];
-      nextTokenIdState : Types.TokenIndex;
-      minterState : Principal;
-      supplyState : Types.Balance;
-    } {
+    public func toStable() : Types.StableState {
       return {
-        tokenMetadataState = Iter.toArray(_tokenMetadata.entries());
-        ownersState = Iter.toArray(Iter.map<(Types.AccountIdentifier, Buffer.Buffer<Types.TokenIndex>), (Types.AccountIdentifier, [Types.TokenIndex])>(
-          _owners.entries(), 
-          func (owner) {
-            return (owner.0, owner.1.toArray());
-        }));
-        registryState = Iter.toArray(_registry.entries());
-        nextTokenIdState = _nextTokenId;
-        minterState = _minter;
-        supplyState = _supply;
-      }
+        _tokenMetadataState = Iter.toArray(_tokenMetadata.entries());
+        _ownersState = Iter.toArray(
+          Iter.map<(Types.AccountIdentifier, Buffer.Buffer<Types.TokenIndex>), (Types.AccountIdentifier, [Types.TokenIndex])>(
+            _owners.entries(),
+            func(owner) {
+              return (owner.0, owner.1.toArray());
+            },
+          ),
+        );
+        _registryState = Iter.toArray(_registry.entries());
+        _nextTokenIdState = _nextTokenId;
+        _supplyState = _supply;
+      };
     };
 
-    /********************
-    * PUBLIC INTERFACE *
-    ********************/
-
-    public func setMinter(caller: Principal, minter : Principal) {
-      assert(caller == _minter);
-      _minter := minter;
-    };
+    //*** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
     public func balance(request : Types.BalanceRequest) : Types.BalanceResponse {
       if (ExtCore.TokenIdentifier.isPrincipal(request.token, this) == false) {
@@ -65,7 +51,7 @@ module {
         case (?token_owner) {
           if (AID.equal(aid, token_owner) == true) {
             return #ok(1);
-          } else {					
+          } else {
             return #ok(0);
           };
         };
@@ -90,7 +76,6 @@ module {
       };
     };
 
-
     /*******************
     * INTERNAL METHODS *
     *******************/
@@ -100,7 +85,7 @@ module {
     };
 
     public func getTokensFromOwner(aid : Types.AccountIdentifier) : ?Buffer.Buffer<Types.TokenIndex> {
-      _owners.get(aid)
+      _owners.get(aid);
     };
 
     public func registrySize() : Nat {
@@ -116,21 +101,17 @@ module {
     };
 
     public func incrementSupply() {
-      _supply:= _supply + 1;
+      _supply := _supply + 1;
     };
 
     public func getSupply() : Types.Balance {
-      _supply
-    };
-
-    public func getMinter() : Principal {
-      _minter;
+      _supply;
     };
 
     public func getRegistry() : TrieMap.TrieMap<Types.TokenIndex, Types.AccountIdentifier> {
       _registry;
     };
-    
+
     public func getTokenMetadata() : TrieMap.TrieMap<Types.TokenIndex, Types.Metadata> {
       _tokenMetadata;
     };
@@ -139,14 +120,14 @@ module {
       _tokenMetadata.get(tokenIndex);
     };
 
-    public func putTokenMetadata(index : Types.TokenIndex, metadata: Types.Metadata) {
+    public func putTokenMetadata(index : Types.TokenIndex, metadata : Types.Metadata) {
       _tokenMetadata.put(index, metadata);
     };
 
-    public func getTokenDataFromIndex(tokenind: Nat32) : ?Blob {
+    public func getTokenDataFromIndex(tokenind : Nat32) : ?Blob {
       switch (_tokenMetadata.get(tokenind)) {
         case (?token_metadata) {
-          switch(token_metadata) {
+          switch (token_metadata) {
             case (#fungible data) return null;
             case (#nonfungible data) return data.metadata;
           };
@@ -165,7 +146,7 @@ module {
       let tokenind = ExtCore.TokenIdentifier.getIndex(token);
       switch (_tokenMetadata.get(tokenind)) {
         case (?token_metadata) {
-          switch(token_metadata) {
+          switch (token_metadata) {
             case (#fungible data) return null;
             case (#nonfungible data) return data.metadata;
           };
@@ -180,33 +161,33 @@ module {
     public func transferTokenToUser(tindex : Types.TokenIndex, receiver : Types.AccountIdentifier) : () {
       let owner : ?Types.AccountIdentifier = getBearer(tindex); // who owns the token (no one if mint)
       _registry.put(tindex, receiver); // transfer the token to the new owner
-      switch(owner){
+      switch (owner) {
         case (?o) removeFromUserTokens(tindex, o);
         case (_) {};
       };
       addToUserTokens(tindex, receiver);
     };
-    
+
     public func removeTokenFromUser(tindex : Types.TokenIndex) : () {
       let owner : ?Types.AccountIdentifier = getBearer(tindex);
       _registry.delete(tindex);
-      switch(owner){
+      switch (owner) {
         case (?o) removeFromUserTokens(tindex, o);
         case (_) {};
       };
     };
 
     public func removeFromUserTokens(tindex : Types.TokenIndex, owner : Types.AccountIdentifier) : () {
-      switch(_owners.get(owner)) {
-        case(?ownersTokens) _owners.put(owner, ownersTokens.filter(func (a : Types.TokenIndex) : Bool { (a != tindex) }));
-        case(_) ();
+      switch (_owners.get(owner)) {
+        case (?ownersTokens) _owners.put(owner, ownersTokens.filter(func(a : Types.TokenIndex) : Bool { (a != tindex) }));
+        case (_)();
       };
     };
 
     public func addToUserTokens(tindex : Types.TokenIndex, receiver : Types.AccountIdentifier) : () {
-      let ownersTokensNew : Buffer.Buffer<Types.TokenIndex> = switch(_owners.get(receiver)) {
-        case(?ownersTokens) {ownersTokens.add(tindex); ownersTokens};
-        case(_) Utils.bufferFromArray([tindex]);
+      let ownersTokensNew : Buffer.Buffer<Types.TokenIndex> = switch (_owners.get(receiver)) {
+        case (?ownersTokens) { ownersTokens.add(tindex); ownersTokens };
+        case (_) Utils.bufferFromArray([tindex]);
       };
       _owners.put(receiver, ownersTokensNew);
     };
@@ -214,5 +195,5 @@ module {
     public func getBearer(tindex : Types.TokenIndex) : ?Types.AccountIdentifier {
       _registry.get(tindex);
     };
-  }
-}
+  };
+};

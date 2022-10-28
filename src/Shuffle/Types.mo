@@ -3,7 +3,14 @@ import ExtCore "../toniq-labs/ext/Core";
 import Tokens "../Tokens";
 
 module {
-    public type State = {
+
+    public func newStableState() : StableState {
+        return {
+            _isShuffledState : Bool = false;
+        };
+    };
+
+    public type StableState = {
         _isShuffledState : Bool;
     };
 
@@ -11,5 +18,9 @@ module {
         _Assets : Assets.Factory;
         _Tokens : Tokens.Factory;
     };
-    public type TokenIndex  = ExtCore.TokenIndex ;
-}
+    public type TokenIndex = ExtCore.TokenIndex;
+
+    public type Constants = {
+        minter : Principal;
+    };
+};

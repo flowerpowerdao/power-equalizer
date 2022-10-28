@@ -15,13 +15,13 @@ import AviateAccountIdentifier "mo:accountid/AccountIdentifier";
 import Root "mo:cap/Root";
 
 import AID "../toniq-labs/util/AccountIdentifier";
-import Buffer "../Buffer";
+import Buffer "../buffer";
 import Env "../Env";
 import Types "types";
-import Utils "../Utils";
+import Utils "../utils";
 
 module {
-  public class Factory(this : Principal, state : Types.State, deps : Types.Dependencies, consts : Types.Constants) {
+  public class Factory(this : Principal, state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
 
     /*********
 * STATE *
@@ -35,33 +35,23 @@ module {
     private var _modclubWhitelist : Buffer.Buffer<Types.AccountIdentifier> = Utils.bufferFromArray<Types.AccountIdentifier>(state._modclubWhitelistState);
     private var _soldIcp : Nat64 = state._soldIcpState;
 
-    public func toStable() : {
-      saleTransactionsState : [Types.SaleTransaction];
-      salesSettlementsState : [(Types.AccountIdentifier, Types.Sale)];
-      failedSalesState : [(Types.AccountIdentifier, Types.SubAccount)];
-      tokensForSaleState : [Types.TokenIndex];
-      ethFlowerWhitelistState : [Types.AccountIdentifier];
-      modclubWhitelistState : [Types.AccountIdentifier];
-      soldIcpState : Nat64;
-    } {
+    public func toStable() : Types.StableState {
       return {
-        saleTransactionsState = _saleTransactions.toArray();
-        salesSettlementsState = Iter.toArray(_salesSettlements.entries());
-        failedSalesState = _failedSales.toArray();
-        tokensForSaleState = _tokensForSale.toArray();
-        ethFlowerWhitelistState = _ethFlowerWhitelist.toArray();
-        modclubWhitelistState = _modclubWhitelist.toArray();
-        soldIcpState = _soldIcp;
+        _saleTransactionsState = _saleTransactions.toArray();
+        _salesSettlementsState = Iter.toArray(_salesSettlements.entries());
+        _failedSalesState = _failedSales.toArray();
+        _tokensForSaleState = _tokensForSale.toArray();
+        _ethFlowerWhitelistState = _ethFlowerWhitelist.toArray();
+        _modclubWhitelistState = _modclubWhitelist.toArray();
+        _soldIcpState = _soldIcp;
       };
     };
 
-/********************
-* PUBLIC INTERFACE *
-********************/
+    // *** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
     // updates
     public func initMint(caller : Principal) : async () {
-      assert (caller == deps._Tokens.getMinter() and deps._Tokens.getNextTokenId() == 0);
+      assert (caller == consts.minter and deps._Tokens.getNextTokenId() == 0);
       //Mint
       mintCollection(Env.collectionSize);
       // turn whitelist into buffer for better performance
@@ -85,14 +75,14 @@ module {
     };
 
     public func shuffleTokensForSale(caller : Principal) : async () {
-      assert (caller == deps._Tokens.getMinter() and Nat32.toNat(Env.collectionSize) == _tokensForSale.size());
+      assert (caller == consts.minter and Nat32.toNat(Env.collectionSize) == _tokensForSale.size());
       // shuffle indices
       let seed : Blob = await Random.blob();
       _tokensForSale := deps._Shuffle.shuffleTokens(_tokensForSale, seed);
     };
 
     public func airdropTokens(caller : Principal, startingIndex : Nat) : () {
-      assert (caller == deps._Tokens.getMinter() and deps._Marketplace.getTotalToSell() == 0);
+      assert (caller == consts.minter and deps._Marketplace.getTotalToSell() == 0);
       // airdrop tokens
       var temp = 0;
       label airdrop for (a in Env.airdrop.vals()) {
@@ -109,7 +99,7 @@ module {
     };
 
     public func setTotalToSell(caller : Principal) : Nat {
-      assert (caller == deps._Tokens.getMinter() and deps._Marketplace.getTotalToSell() == 0);
+      assert (caller == consts.minter and deps._Marketplace.getTotalToSell() == 0);
       deps._Marketplace.setTotalToSell(_tokensForSale.size());
       _tokensForSale.size();
     };
@@ -321,7 +311,7 @@ module {
       } : Types.SaleSettings;
     };
 
-/*******************
+    /*******************
 * INTERNAL METHODS *
 *******************/
 

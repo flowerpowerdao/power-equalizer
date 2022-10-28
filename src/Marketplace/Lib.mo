@@ -14,16 +14,16 @@ import Encoding "mo:encoding/Binary";
 import Root "mo:cap/Root";
 
 import AID "../toniq-labs/util/AccountIdentifier";
-import Buffer "../Buffer";
+import Buffer "../buffer";
 import Env "../Env";
 import ExtCore "../toniq-labs/Ext/Core";
 import Types "types";
-import Utils "../Utils";
+import Utils "../utils";
 
 module {
-  public class Factory(this : Principal, state : Types.State, deps : Types.Dependencies, consts : Types.Constants) {
+  public class Factory(this : Principal, state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
 
-/*********
+    /*********
 * STATE *
 *********/
 
@@ -35,29 +35,19 @@ module {
     private var _sold : Nat = state._soldState;
     private var _totalToSell : Nat = state._totalToSellState;
 
-    public func toStable() : {
-      transactionsState : [Types.Transaction];
-      tokenSettlementState : [(Types.TokenIndex, Types.Settlement)];
-      tokenListingState : [(Types.TokenIndex, Types.Listing)];
-      disbursementsState : [(Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)];
-      nextSubAccountState : Nat;
-      soldState : Nat;
-      totalToSellState : Nat;
-    } {
+    public func toStable() : Types.StableState {
       return {
-        transactionsState = _transactions.toArray();
-        tokenSettlementState = Iter.toArray(_tokenSettlement.entries());
-        tokenListingState = Iter.toArray(_tokenListing.entries());
-        disbursementsState = List.toArray(_disbursements);
-        nextSubAccountState = _nextSubAccount;
-        soldState = _sold;
-        totalToSellState = _totalToSell;
+        _transactionsState = _transactions.toArray();
+        _tokenSettlementState = Iter.toArray(_tokenSettlement.entries());
+        _tokenListingState = Iter.toArray(_tokenListing.entries());
+        _disbursementsState = List.toArray(_disbursements);
+        _nextSubAccountState = _nextSubAccount;
+        _soldState = _sold;
+        _totalToSellState = _totalToSell;
       };
     };
 
-/********************
-* PUBLIC INTERFACE *
-********************/
+    // *** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
     public func lock(caller : Principal, tokenid : Types.TokenIdentifier, price : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount) : async Result.Result<Types.AccountIdentifier, Types.CommonError> {
       if (ExtCore.TokenIdentifier.isPrincipal(tokenid, this) == false) {
@@ -354,10 +344,8 @@ module {
       AID.fromPrincipal(Principal.fromText(p), ?_natToSubAccount(sa));
     };
 
-/********************
-* INTERNAL METHODS *
-********************/
-    
+    // *** ** ** ** ** ** ** ** ** * * INTERNAL METHODS * ** ** ** ** ** ** ** ** ** ** /
+
     // getters & setters
     public func transactionsSize() : Nat {
       _transactions.size();
