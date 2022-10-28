@@ -16,7 +16,7 @@ import Root "mo:cap/Root";
 import AID "../toniq-labs/util/AccountIdentifier";
 import Buffer "../buffer";
 import Env "../Env";
-import ExtCore "../toniq-labs/Ext/Core";
+import ExtCore "../toniq-labs/ext/Core";
 import Types "types";
 import Utils "../utils";
 
@@ -108,7 +108,7 @@ module {
       if (ExtCore.TokenIdentifier.isPrincipal(tokenid, this) == false) {
         return #err(#InvalidToken(tokenid));
       };
-      let token = ExtCore.TokenIdentifier.getIndex(tokenid);
+      let token : Types.TokenIndex = ExtCore.TokenIdentifier.getIndex(tokenid);
       switch (_tokenSettlement.get(token)) {
         case (?settlement) {
           let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({
@@ -227,13 +227,11 @@ module {
     };
 
     public func cronDisbursements() : async () {
-      var counter : Nat = 0;
-      label payloop while (counter < 5) {
-        counter := counter + 1;
-        var last = List.pop(_disbursements);
-        switch (last.0) {
+      label payloop while (true) {
+        let (last, newDisbursements) = List.pop(_disbursements);
+        switch (last) {
           case (?d) {
-            _disbursements := last.1;
+            _disbursements := newDisbursements;
             try {
               var bh = await consts.LEDGER_CANISTER.send_dfx({
                 memo = Encoding.BigEndian.toNat64(Blob.toArray(Principal.toBlob(Principal.fromText(ExtCore.TokenIdentifier.fromPrincipal(this, d.0)))));
@@ -323,9 +321,18 @@ module {
     };
 
     public func cronSettlements(caller : Principal) : async () {
-      for (settlement in unlockedSettlements().vals()) {
-        // only failed settlments are settled here
-        ignore (settle(caller, ExtCore.TokenIdentifier.fromPrincipal(this, settlement.0)));
+      // only failed settlments are settled here
+      //  even though the result is ignored, if settle traps the catch block is executed
+      // it doesn't matter if this is executed multiple times on the same settlement, `settle` checks if it's already settled
+      label settleLoop while (true) {
+        switch (unlockedSettlements().keys().next()) {
+          case (?tokenindex) {
+            try {
+              ignore (await settle(caller, ExtCore.TokenIdentifier.fromPrincipal(this, tokenindex)));
+            } catch (e) {};
+          };
+          case null break settleLoop;
+        };
       };
     };
 
@@ -420,11 +427,20 @@ module {
       Array.tabulate<Nat8>(32, n_byte);
     };
 
-    func unlockedSettlements() : [(Types.TokenIndex, Types.Settlement)] {
-      Array.filter<(Types.TokenIndex, Types.Settlement)>(
-        Iter.toArray(_tokenSettlement.entries()),
-        func(a : (Types.TokenIndex, Types.Settlement)) : Bool {
-          return (_isLocked(a.0) == false);
+    func unlockedSettlements() : TrieMap.TrieMap<Types.TokenIndex, Types.Settlement> {
+      TrieMap.mapFilter<Types.TokenIndex, Types.Settlement, Types.Settlement>(
+        _tokenSettlement,
+        ExtCore.TokenIndex.equal,
+        ExtCore.TokenIndex.hash,
+        func(a : (Types.TokenIndex, Types.Settlement)) : ?Types.Settlement {
+          switch (_isLocked(a.0) == false) {
+            case (true) {
+              ?a.1;
+            };
+            case (false) {
+              null;
+            };
+          };
         },
       );
     };

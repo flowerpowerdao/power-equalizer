@@ -240,23 +240,27 @@ module {
 
     public func cronSalesSettlements(caller : Principal) : async () {
       // _saleSattlements can potentially be really big, we have to make sure
-      // we dont get out of cycles error or error that outgoing calls queue is full
-      for (ss in _salesSettlements.entries()) {
-        // we only try and retrieve the settlement if it expired, this will add it to failedSales
-        if (ss.1.expires < Time.now()) {
-          ignore (await retreive(caller, ss.0));
+      // we dont get out of cycles error or error that outgoing calls queue is full.
+      // This is done by adding the await statement.
+      // For every message the max cycles is reset
+      label settleLoop while (true) {
+        switch (expiredSalesSettlements().keys().next()) {
+          case (?paymentAddress) {
+            try {
+              ignore (await retreive(caller, paymentAddress));
+            } catch (e) {};
+          };
+          case null break settleLoop;
         };
       };
     };
 
     public func cronFailedSales(caller : Principal) : async () {
-      var counter : Nat = 0;
-      label failedSalesLoop while (counter < 5) {
-        counter := counter + 1;
-        var last = _failedSales.removeLast();
+      label failedSalesLoop while (true) {
+        let last = _failedSales.removeLast();
         switch (last) {
-          case (?last) {
-            let subaccount = last.1;
+          case (?failedSale) {
+            let subaccount = failedSale.1;
             try {
               // check if subaccount holds icp
               let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({
@@ -268,7 +272,7 @@ module {
                   amount = { e8s = response.e8s - 10000 };
                   fee = { e8s = 10000 };
                   from_subaccount = ?subaccount;
-                  to = last.0;
+                  to = failedSale.0;
                   created_at_time = null;
                 });
               };
@@ -409,6 +413,24 @@ module {
         deps._Tokens.incrementSupply();
         deps._Tokens.incrementNextTokenId();
       };
+    };
+
+    func expiredSalesSettlements() : TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale> {
+      TrieMap.mapFilter<Types.AccountIdentifier, Types.Sale, Types.Sale>(
+        _salesSettlements,
+        AID.equal,
+        AID.hash,
+        func(a : (Types.AccountIdentifier, Types.Sale)) : ?Types.Sale {
+          switch (a.1.expires < Time.now()) {
+            case (true) {
+              ?a.1;
+            };
+            case (false) {
+              null;
+            };
+          };
+        },
+      );
     };
   };
 };

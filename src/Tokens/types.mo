@@ -1,7 +1,7 @@
 import Time "mo:base/Time";
 
-import ExtCommon "../toniq-labs/Ext/Common";
-import ExtCore "../toniq-labs/Ext/Core";
+import ExtCommon "../toniq-labs/ext/Common";
+import ExtCore "../toniq-labs/ext/Core";
 
 module {
 

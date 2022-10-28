@@ -39,8 +39,8 @@ module {
     };
 
     /********************
-* PUBLIC INTERFACE *
-********************/
+    * PUBLIC INTERFACE *
+    ********************/
 
     public func http_request_streaming_callback(token : Types.HttpStreamingCallbackToken) : Types.HttpStreamingCallbackResponse {
       switch (Utils.natFromText(token.key)) {
@@ -166,6 +166,7 @@ module {
       /**********************
       * TOKEN INDEX LOOKUP *
       **********************/
+
       // check if theres a path
       switch (path.size()) {
         // check if there's only on "argument" to it
@@ -190,7 +191,15 @@ module {
       };
 
       //Just show index
-      var soldValue : Nat = Nat64.toNat(Array.foldLeft<MarketplaceTypes.Transaction, Nat64>(deps._Marketplace.getTransactions().toArray(), 0, func(b : Nat64, a : MarketplaceTypes.Transaction) : Nat64 { b + a.price }));
+      var soldValue : Nat = Nat64.toNat(
+        Array.foldLeft<MarketplaceTypes.Transaction, Nat64>(
+          deps._Marketplace.getTransactions().toArray(),
+          0,
+          func(b : Nat64, a : MarketplaceTypes.Transaction) : Nat64 {
+            b + a.price;
+          },
+        ),
+      );
       var avg : Nat = if (deps._Marketplace.transactionsSize() > 0) {
         soldValue / deps._Marketplace.transactionsSize();
       } else {
@@ -207,8 +216,8 @@ module {
     };
 
     /********************
-* INTERNAL METHODS *
-********************/
+    * INTERNAL METHODS *
+    ********************/
 
     private func _processFile(tokenid : ExtCore.TokenIdentifier, file : AssetTypes.File) : Types.HttpResponse {
       // start custom

@@ -11,10 +11,7 @@ import AssetsTypes "CanisterAssets/types";
 import Buffer "./buffer";
 import EXT "Ext";
 import EXTTypes "Ext/types";
-import ExtAllowance "./toniq-labs/ext/Allowance";
-import ExtCommon "./toniq-labs/ext/Common";
 import ExtCore "./toniq-labs/ext/Core";
-import ExtNonFungible "./toniq-labs/ext/NonFungible";
 import Http "Http";
 import HttpTypes "Http/types";
 import Marketplace "Marketplace";
@@ -30,8 +27,8 @@ import Utils "./utils";
 shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCanister {
 
   /*********
-* TYPES *
-*********/
+  * TYPES *
+  *********/
   type AccountIdentifier = ExtCore.AccountIdentifier;
   type SubAccount = ExtCore.SubAccount;
   type AccountBalanceArgs = { account : AccountIdentifier };
@@ -45,7 +42,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     created_at_time : ?Time.Time;
   };
 
-  // *** ** ** ** ** ** ** * * STABLE STATE * ** ** ** ** ** ** ** **
+  /****************
+  * STABLE STATE *
+  ****************/
 
   // Tokens
   private stable var _tokenState : TokenTypes.StableState = TokenTypes.newStableState();
@@ -111,8 +110,8 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   };
 
   /*************
-* CONSTANTS *
-*************/
+  * CONSTANTS *
+  *************/
 
   let LEDGER_CANISTER = actor "ryjl3-tyaaa-aaaaa-aaaba-cai" : actor {
     account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
@@ -124,8 +123,8 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   let CREATION_CYCLES : Nat = 1_000_000_000_000;
 
   /***********
-* CLASSES *
-***********/
+  * CLASSES *
+  ***********/
 
   // Canistergeek
   private let canistergeekMonitor = Canistergeek.Monitor();
