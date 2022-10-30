@@ -362,6 +362,11 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     await _Sale.cronSalesSettlements(msg.caller);
   };
 
+  public shared (msg) func cronFailedSales() : async () {
+    canistergeekMonitor.collectMetrics();
+    await _Sale.cronFailedSales(msg.caller);
+  };
+
   // queries
   public query func salesSettlements() : async [(SaleTypes.AccountIdentifier, SaleTypes.Sale)] {
     _Sale.salesSettlements();
