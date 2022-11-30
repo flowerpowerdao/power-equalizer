@@ -52,19 +52,19 @@ module {
     // updates
     public func initMint(caller : Principal) : async () {
       assert (caller == consts.minter and deps._Tokens.getNextTokenId() == 0);
-      //Mint
-      mintCollection(Env.collectionSize);
-      // turn whitelist into buffer for better performance
-      setWhitelist(Env.ethFlowerWhitelist, _ethFlowerWhitelist);
       // get modclub whitelist from canister
-      let modclubWhitelistFromCanister : Buffer.Buffer<Types.AccountIdentifier> = Utils.mapToBufferFromArray<Principal, Types.AccountIdentifier>(
+      let modclubWhitelistFromCanister : [Types.AccountIdentifier] = Array.map<Principal, Types.AccountIdentifier>(
         await consts.WHITELIST_CANISTER.getWhitelist(),
         func(p : Principal) {
           Utils.toLowerString(AviateAccountIdentifier.toText(AviateAccountIdentifier.fromPrincipal(p, null)));
         },
       );
+      //Mint
+      mintCollection(Env.collectionSize);
+      // turn whitelist into buffer for better performance
+      setWhitelist(Env.ethFlowerWhitelist, _ethFlowerWhitelist);
       // concatenate with contest partiticapants that are hardcoded
-      let concatenatedModclubWhitelist = Array.append(modclubWhitelistFromCanister.toArray(), Env.modclubWhitelist);
+      let concatenatedModclubWhitelist = Array.append(modclubWhitelistFromCanister, Env.modclubWhitelist);
       // set the whitelist
       setWhitelist(concatenatedModclubWhitelist, _modclubWhitelist);
       // get initial token indices (this will return all tokens as all of them are owned by "0000")
