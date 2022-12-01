@@ -139,6 +139,25 @@ module {
     return _fromIntToNat8(next) % 100;
   };
 
+  /// creates a pseudo random number generator that returns Nat between 0 and 9_223_372_036_854_775_807
+  public func prngStrong(seed: Blob) : { next() : Nat } {
+    assert(seed.size() == 32);
+
+    let seedAr = Iter.toArray(Iter.map(seed.vals(), Nat8.toNat));
+    let seedSize = seedAr.size();
+    let initial = seedAr[0] * seedAr[1] * seedAr[2] * seedAr[3] * seedAr[4] + seedAr[5] * seedAr[6] * seedAr[7] * seedAr[8];
+    var current = initial * 1103515245 + 12345;
+    var i = 0;
+
+    return {
+      next = func() {
+        i := (i + 1) % seedSize;
+        current := (current * 1103515245 + seedAr[i]) % 9_223_372_036_854_775_807;
+        return current;
+      };
+    };
+  };
+
   /// convert Nat8 to Int
   public func fromNat8ToInt(n : Nat8) : Int {
     Int8.toInt(Int8.fromNat8(n))
