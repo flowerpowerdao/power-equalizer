@@ -37,11 +37,6 @@ let additions = [
   , version = "v0.1.1"
   , dependencies = [ "base", "encoding" ]
   },
-  { name = "encoding"
-  , repo = "https://github.com/aviate-labs/encoding.mo"
-  , version = "v0.2.1"
-  , dependencies = ["base"]
-  },
   { name = "cap"
   , repo = "https://github.com/Psychedelic/cap-motoko-library"
   , version = "v1.0.4"
