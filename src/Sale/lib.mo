@@ -50,27 +50,32 @@ module {
     // *** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
     // updates
-    public func initMint(caller : Principal) : async () {
+    public func initMint(caller : Principal) : async Result.Result<(), Text> {
       assert (caller == consts.minter and deps._Tokens.getNextTokenId() == 0);
-      // get modclub whitelist from canister
-      let modclubWhitelistFromCanister : [Types.AccountIdentifier] = Array.map<Principal, Types.AccountIdentifier>(
-        await consts.WHITELIST_CANISTER.getWhitelist(),
-        func(p : Principal) {
-          Utils.toLowerString(AviateAccountIdentifier.toText(AviateAccountIdentifier.fromPrincipal(p, null)));
-        },
-      );
-      //Mint
-      mintCollection(Env.collectionSize);
-      // turn whitelist into buffer for better performance
-      setWhitelist(Env.ethFlowerWhitelist, _ethFlowerWhitelist);
-      // concatenate with contest partiticapants that are hardcoded
-      let concatenatedModclubWhitelist = Array.append(modclubWhitelistFromCanister, Env.modclubWhitelist);
-      // set the whitelist
-      setWhitelist(concatenatedModclubWhitelist, _modclubWhitelist);
-      // get initial token indices (this will return all tokens as all of them are owned by "0000")
-      _tokensForSale := switch (deps._Tokens.getTokensFromOwner("0000")) {
-        case (?t) t;
-        case (_) Buffer.Buffer<Types.TokenIndex>(0);
+      try {
+        // get modclub whitelist from canister
+        let modclubWhitelistFromCanister : [Types.AccountIdentifier] = Array.map<Principal, Types.AccountIdentifier>(
+          await consts.WHITELIST_CANISTER.getWhitelist(),
+          func(p : Principal) {
+            Utils.toLowerString(AviateAccountIdentifier.toText(AviateAccountIdentifier.fromPrincipal(p, null)));
+          },
+        );
+        //Mint
+        mintCollection(Env.collectionSize);
+        // turn whitelist into buffer for better performance
+        setWhitelist(Env.ethFlowerWhitelist, _ethFlowerWhitelist);
+        // concatenate with contest partiticapants that are hardcoded
+        let concatenatedModclubWhitelist = Array.append(modclubWhitelistFromCanister, Env.modclubWhitelist);
+        // set the whitelist
+        setWhitelist(concatenatedModclubWhitelist, _modclubWhitelist);
+        // get initial token indices (this will return all tokens as all of them are owned by "0000")
+        _tokensForSale := switch (deps._Tokens.getTokensFromOwner("0000")) {
+          case (?t) t;
+          case (_) Buffer.Buffer<Types.TokenIndex>(0);
+        };
+        return #ok;
+      } catch e {
+        return #err("Failed to initialize");
       };
     };
 
