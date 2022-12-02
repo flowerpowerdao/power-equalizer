@@ -31,17 +31,15 @@ module {
       assert (caller == consts.minter and _isShuffled == false);
       // get a random seed from the IC
       let seed : Blob = await Random.blob();
-      // use that seed to generate a truly random number
-      var randomNumber : Nat8 = Random.byteFrom(seed);
+      // use that seed to create random number generator
+      let randGen = Utils.prngStrong(seed);
       // get the number of available assets
       var currentIndex : Nat = deps._Assets.size();
 
       // shuffle the assets array using the random beacon
       while (currentIndex != 1) {
-        // create a pseudo random number between 0-99
-        randomNumber := Utils.prng(randomNumber);
-        // use that number to calculate a random index between 0 and currentIndex
-        var randomIndex : Nat = Int.abs(Float.toInt(Float.floor(Float.fromInt(Utils.fromNat8ToInt(randomNumber) * currentIndex / 100))));
+        // use a random number to calculate a random index between 0 and currentIndex
+        var randomIndex = randGen.next() % currentIndex;
         assert (randomIndex < currentIndex);
         currentIndex -= 1;
         // we never want to touch the 0 index
