@@ -122,7 +122,16 @@ module {
                 //Do this to avoid atomicity issue
                 deps._Tokens.removeTokenFromUser(token);
                 let notifier : Types.NotifyService = actor (Principal.toText(canisterId));
-                switch (await notifier.tokenTransferNotification(request.token, request.from, request.amount, request.memo)) {
+
+                let notifyRes = try {
+                  await notifier.tokenTransferNotification(request.token, request.from, request.amount, request.memo);
+                } catch (e) {
+                  //Refund
+                  deps._Tokens.transferTokenToUser(token, owner);
+                  return #err(#Rejected);
+                };
+
+                switch (notifyRes) {
                   case (?balance) {
                     if (balance == 1) {
                       // start custom
