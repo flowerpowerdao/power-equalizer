@@ -158,42 +158,39 @@ module {
       return null;
     };
 
+    public func getBearer(tindex : Types.TokenIndex) : ?Types.AccountIdentifier {
+      _registry.get(tindex);
+    };
+
     public func transferTokenToUser(tindex : Types.TokenIndex, receiver : Types.AccountIdentifier) : () {
       let owner : ?Types.AccountIdentifier = getBearer(tindex); // who owns the token (no one if mint)
-      _registry.put(tindex, receiver); // transfer the token to the new owner
+
+      // transfer the token to the new owner
+      _registry.put(tindex, receiver);
+
+      // remove from old owner tokens
       switch (owner) {
-        case (?o) removeFromUserTokens(tindex, o);
+        case (?o) _removeFromUserTokens(tindex, o);
         case (_) {};
       };
-      addToUserTokens(tindex, receiver);
+
+      // add to new owner tokens
+      _addToUserTokens(tindex, receiver);
     };
 
-    public func removeTokenFromUser(tindex : Types.TokenIndex) : () {
-      let owner : ?Types.AccountIdentifier = getBearer(tindex);
-      _registry.delete(tindex);
-      switch (owner) {
-        case (?o) removeFromUserTokens(tindex, o);
-        case (_) {};
-      };
-    };
-
-    public func removeFromUserTokens(tindex : Types.TokenIndex, owner : Types.AccountIdentifier) : () {
+    func _removeFromUserTokens(tindex : Types.TokenIndex, owner : Types.AccountIdentifier) : () {
       switch (_owners.get(owner)) {
         case (?ownersTokens) _owners.put(owner, ownersTokens.filter(func(a : Types.TokenIndex) : Bool { (a != tindex) }));
-        case (_)();
+        case (_) ();
       };
     };
 
-    public func addToUserTokens(tindex : Types.TokenIndex, receiver : Types.AccountIdentifier) : () {
+    func _addToUserTokens(tindex : Types.TokenIndex, receiver : Types.AccountIdentifier) : () {
       let ownersTokensNew : Buffer.Buffer<Types.TokenIndex> = switch (_owners.get(receiver)) {
         case (?ownersTokens) { ownersTokens.add(tindex); ownersTokens };
         case (_) Utils.bufferFromArray([tindex]);
       };
       _owners.put(receiver, ownersTokensNew);
-    };
-
-    public func getBearer(tindex : Types.TokenIndex) : ?Types.AccountIdentifier {
-      _registry.get(tindex);
     };
   };
 };
