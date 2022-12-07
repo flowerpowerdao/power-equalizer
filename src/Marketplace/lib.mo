@@ -174,7 +174,7 @@ module {
 
     public func list(caller : Principal, request : Types.ListRequest) : async Result.Result<(), Types.CommonError> {
       // marketplace is open either when marketDelay has passed or collection sold out
-      if (Time.now() < (Env.publicSaleStart +Env.marketDelay)) {
+      if (Time.now() < Env.publicSaleStart + Env.marketDelay) {
         if (_sold < _totalToSell) {
           return #err(#Other("You can not list yet"));
         };
@@ -433,13 +433,10 @@ module {
         ExtCore.TokenIndex.equal,
         ExtCore.TokenIndex.hash,
         func(a : (Types.TokenIndex, Types.Settlement)) : ?Types.Settlement {
-          switch (_isLocked(a.0) == false) {
-            case (true) {
-              ?a.1;
-            };
-            case (false) {
-              null;
-            };
+          if (_isLocked(a.0)) {
+            null;
+          } else {
+            ?a.1;
           };
         },
       );

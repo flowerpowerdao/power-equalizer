@@ -260,7 +260,7 @@ module {
       };
     };
 
-    public func cronFailedSales(caller : Principal) : async () {
+    public func cronFailedSales() : async () {
       label failedSalesLoop while (true) {
         let last = _failedSales.removeLast();
         switch (last) {
