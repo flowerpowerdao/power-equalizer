@@ -24,8 +24,8 @@ module {
   public class Factory(this : Principal, state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
 
     /*********
-* STATE *
-*********/
+    * STATE *
+    *********/
 
     private var _saleTransactions : Buffer.Buffer<Types.SaleTransaction> = Utils.bufferFromArray<Types.SaleTransaction>(state._saleTransactionsState);
     private var _salesSettlements : TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale> = TrieMap.fromEntries(state._salesSettlementsState.vals(), AID.equal, AID.hash);
@@ -321,8 +321,8 @@ module {
     };
 
     /*******************
-* INTERNAL METHODS *
-*******************/
+    * INTERNAL METHODS *
+    *******************/
 
     // getters & setters
     public func ethFlowerWhitelistSize() : Nat {
