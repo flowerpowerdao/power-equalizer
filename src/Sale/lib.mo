@@ -412,12 +412,7 @@ module {
     };
 
     func mintCollection(collectionSize : Nat32) {
-      while (deps._Tokens.getNextTokenId() < collectionSize) {
-        deps._Tokens.putTokenMetadata(deps._Tokens.getNextTokenId(), #nonfungible({ /* we start with asset 1, as index 0 */ /* contains the seed animation and is not being shuffled */ metadata = ?Utils.nat32ToBlob(deps._Tokens.getNextTokenId() +1) }));
-        deps._Tokens.transferTokenToUser(deps._Tokens.getNextTokenId(), "0000");
-        deps._Tokens.incrementSupply();
-        deps._Tokens.incrementNextTokenId();
-      };
+      deps._Tokens.mintCollection(collectionSize);
     };
 
     func expiredSalesSettlements() : TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale> {

@@ -80,6 +80,18 @@ module {
     * INTERNAL METHODS *
     *******************/
 
+    public func mintCollection(collectionSize : Nat32) {
+      while (getNextTokenId() < collectionSize) {
+        putTokenMetadata(getNextTokenId(), #nonfungible({
+          /* we start with asset 1, as index 0 */ /* contains the seed animation and is not being shuffled */
+          metadata = ?Utils.nat32ToBlob(getNextTokenId() + 1)
+        }));
+        transferTokenToUser(getNextTokenId(), "0000");
+        incrementSupply();
+        incrementNextTokenId();
+      };
+    };
+
     public func getOwnerFromRegistry(tokenIndex : Types.TokenIndex) : ?Types.AccountIdentifier {
       return _registry.get(tokenIndex);
     };
@@ -96,11 +108,11 @@ module {
       return _nextTokenId;
     };
 
-    public func incrementNextTokenId() {
+    func incrementNextTokenId() {
       _nextTokenId := _nextTokenId + 1;
     };
 
-    public func incrementSupply() {
+    func incrementSupply() {
       _supply := _supply + 1;
     };
 
@@ -120,7 +132,7 @@ module {
       _tokenMetadata.get(tokenIndex);
     };
 
-    public func putTokenMetadata(index : Types.TokenIndex, metadata : Types.Metadata) {
+    func putTokenMetadata(index : Types.TokenIndex, metadata : Types.Metadata) {
       _tokenMetadata.put(index, metadata);
     };
 
