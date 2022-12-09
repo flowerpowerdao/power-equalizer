@@ -1,4 +1,3 @@
-// hello.test.ts
 import { expect, should, test } from 'vitest';
 import { Actor, CanisterStatus, HttpAgent } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
@@ -12,23 +11,23 @@ test('should check minter principal', async () => {
 test('should throw on collectCanisterMetrics', async () => {
   await expect(async () => {
     await actor.collectCanisterMetrics();
-  }).rejects.toThrow();
+  }).rejects.toThrow(/assertion failed/);
 });
 
 test('should throw on shuffleAssets', async () => {
   await expect(async () => {
     await actor.shuffleAssets();
-  }).rejects.toThrow();
+  }).rejects.toThrow(/assertion failed/);
 });
 
 test('should throw on initMint', async () => {
   await expect(async () => {
     await actor.initMint();
-  }).rejects.toThrow();
+  }).rejects.toThrow(/assertion failed/);
 });
 
 test('should throw on shuffleTokensForSale', async () => {
   await expect(async () => {
     await actor.shuffleTokensForSale();
-  }).rejects.toThrow();
+  }).rejects.toThrow(/assertion failed/);
 });
