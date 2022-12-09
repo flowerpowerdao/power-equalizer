@@ -2,7 +2,7 @@ import Time "mo:base/Time";
 import ExtCore "../toniq-labs/ext/Core";
 
 module {
-    public let isLocal = true; // change to false on production build
+    public let isLocal = false; // change to false on production build
     public let collectionName = "Pineapple Punks";
     public let placeholderContentLength = "1053832";
     public let teamAddress = "979307078c971f6d82a302825ac07dc63a4f68ece99f24014d69d8ccec7b5d6f";

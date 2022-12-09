@@ -3,7 +3,10 @@
     "canisters": {
         "staging": {
             "type": "motoko",
-            "main": "src/main.mo"
+            "main": "src/main.mo",
+            "declarations": {
+                "output": "test/declarations"
+            }
         },
         "production": {
             "type": "motoko",

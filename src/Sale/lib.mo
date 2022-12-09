@@ -10,6 +10,7 @@ import Random "mo:base/Random";
 import Result "mo:base/Result";
 import Time "mo:base/Time";
 import TrieMap "mo:base/TrieMap";
+import Error "mo:base/Error";
 
 import AviateAccountIdentifier "mo:accountid/AccountIdentifier";
 import Root "mo:cap/Root";
@@ -54,12 +55,16 @@ module {
       assert (caller == consts.minter and deps._Tokens.getNextTokenId() == 0);
       try {
         // get modclub whitelist from canister
-        let modclubWhitelistFromCanister : [Types.AccountIdentifier] = Array.map<Principal, Types.AccountIdentifier>(
-          await consts.WHITELIST_CANISTER.getWhitelist(),
-          func(p : Principal) {
-            Utils.toLowerString(AviateAccountIdentifier.toText(AviateAccountIdentifier.fromPrincipal(p, null)));
-          },
-        );
+        let modclubWhitelistFromCanister : [Types.AccountIdentifier] = if (Env.isLocal) {
+            [];
+          } else {
+            Array.map<Principal, Types.AccountIdentifier>(
+              await consts.WHITELIST_CANISTER.getWhitelist(),
+              func(p : Principal) {
+                Utils.toLowerString(AviateAccountIdentifier.toText(AviateAccountIdentifier.fromPrincipal(p, null)));
+              },
+            );
+          };
         //Mint
         mintCollection(Env.collectionSize);
         // turn whitelist into buffer for better performance
@@ -75,7 +80,7 @@ module {
         };
         return #ok;
       } catch e {
-        return #err("Failed to initialize");
+        return #err("Failed to initialize: " # Error.message(e));
       };
     };
 

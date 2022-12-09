@@ -1,0 +1,17 @@
+{
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "start": "npm run replica && npm run deploy && npm run mint",
+    "replica": "dfx stop && dfx start --clean --background",
+    "deploy": "dfx deploy staging --mode reinstall -y --argument '(principal \"aaaaa-aa\")' --no-wallet",
+    "mint": "dfx canister call staging addAsset '(record {name = \"privat\";payload = record {ctype = \"text/html\"; data = vec {blob \"hello world!\"} } })' && dfx canister call staging initMint",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@dfinity/agent": "^0.14.1",
+    "@dfinity/principal": "^0.14.1",
+    "vitest": "^0.25.6"
+  }
+}
