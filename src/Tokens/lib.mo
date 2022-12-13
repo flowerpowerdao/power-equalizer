@@ -178,6 +178,17 @@ module {
       _addToUserTokens(tindex, receiver);
     };
 
+    public func removeTokenFromUser(tindex : Types.TokenIndex) : () {
+      let owner : ?Types.AccountIdentifier = getBearer(tindex);
+
+      _registry.delete(tindex);
+      
+      switch (owner) {
+        case (?o) _removeFromUserTokens(tindex, o);
+        case (_) {};
+      };
+    };
+
     func _removeFromUserTokens(tindex : Types.TokenIndex, owner : Types.AccountIdentifier) : () {
       switch (_owners.get(owner)) {
         case (?ownersTokens) _owners.put(owner, ownersTokens.filter(func(a : Types.TokenIndex) : Bool { (a != tindex) }));

@@ -138,9 +138,15 @@ module {
               case (?canisterId) {
                 let notifier : Types.NotifyService = actor (Principal.toText(canisterId));
 
+                // while waiting for the notifier call, the token can be sold to another user
+                // so we are temporarily "lock" the token here
+                deps._Tokens.removeTokenFromUser(token);
+
                 let notifyRes = try {
                   await notifier.tokenTransferNotification(request.token, request.from, request.amount, request.memo);
                 } catch (e) {
+                  // return "locked" token to the owner
+                  deps._Tokens.transferTokenToUser(token, owner);
                   return #err(#Rejected);
                 };
 
