@@ -5,13 +5,15 @@
   "scripts": {
     "start": "npm run replica && npm run deploy && npm run mint",
     "replica": "dfx stop && dfx start --clean --background",
-    "deploy": "dfx deploy staging --mode reinstall -y --argument '(principal \"aaaaa-aa\")' --no-wallet",
+    "deploy": "npm run deploy:staging && npm run deploy:ledger",
+    "deploy:staging": "dfx deploy staging --mode reinstall -y --argument '(principal \"aaaaa-aa\")' --no-wallet",
+    "deploy:ledger": "dfx deploy ledger --no-wallet --mode reinstall -y --argument '(record {minting_account = \"'$(dfx ledger account-id)'\"; initial_values = vec { record { \"8b61ff722d7e6321eb99bb607ab0cf323b3c64b43d6a13c245c8a4e197f7b38b\"; record { e8s=10_000_000_000_000 } }; }; send_whitelist = vec {}})'",
     "mint": "dfx canister call staging addAsset '(record {name = \"privat\";payload = record {ctype = \"text/html\"; data = vec {blob \"hello world!\"} } })' && dfx canister call staging initMint",
     "test": "vitest"
   },
   "devDependencies": {
-    "@dfinity/agent": "^0.14.1",
-    "@dfinity/principal": "^0.14.1",
+    "@dfinity/agent": "^0.15.0",
+    "@dfinity/principal": "^0.15.0",
     "vitest": "^0.25.6"
   }
 }

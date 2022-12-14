@@ -8,6 +8,18 @@
                 "output": "test/declarations"
             }
         },
+        "ledger": {
+            "type": "custom",
+            "wasm": "./declarations/ledger/ledger.wasm",
+            "candid": "./declarations/ledger/ledger.private.did",
+            "build": "",
+            "remote": {
+                "candid": "./declarations/ledger/ledger.public.did",
+                "id": {
+                    "ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+                }
+            }
+        },
         "production": {
             "type": "motoko",
             "main": "src/main.mo"
