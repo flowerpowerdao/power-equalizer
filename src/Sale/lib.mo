@@ -170,7 +170,7 @@ module {
       #ok((paymentAddress, total));
     };
 
-    public func retreive(caller : Principal, paymentaddress : Types.AccountIdentifier) : async Result.Result<(), Text> {
+    public func retrieve(caller : Principal, paymentaddress : Types.AccountIdentifier) : async Result.Result<(), Text> {
       if (Option.isNull(_salesSettlements.get(paymentaddress))) {
         return #err("Nothing to settle");
       };
@@ -254,7 +254,7 @@ module {
         switch (expiredSalesSettlements().keys().next()) {
           case (?paymentAddress) {
             try {
-              ignore (await retreive(caller, paymentAddress));
+              ignore (await retrieve(caller, paymentAddress));
             } catch (e) {};
           };
           case null break settleLoop;
