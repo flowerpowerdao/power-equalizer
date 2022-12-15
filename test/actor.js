@@ -34,5 +34,7 @@ export const createActor = (canisterId, options = {}) => {
 };
 
 export let actor = createActor(canisterIds.staging.local, {
-    agentOptions: { host: "http://127.0.0.1:4943", }
+    agentOptions: {
+      host: "http://127.0.0.1:4943",
+    },
 });
