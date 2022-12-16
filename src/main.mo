@@ -216,7 +216,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   public shared ({ caller }) func settle(tokenid : MarketplaceTypes.TokenIdentifier) : async Result.Result<(), MarketplaceTypes.CommonError> {
     canistergeekMonitor.collectMetrics();
     // no caller check, token will be sent to the address that was set on 'lock'
-    // caller will be stored to the Cap event, is that ok?
     await _Marketplace.settle(caller, tokenid);
   };
 
@@ -373,13 +372,11 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   public shared ({ caller }) func retreive(paymentaddress : SaleTypes.AccountIdentifier) : async Result.Result<(), Text> {
     canistergeekMonitor.collectMetrics();
     // no caller check, token will be sent to the address that was set on 'reserve'
-    // caller will be stored to the Cap event, is that ok?
     await _Sale.retreive(caller, paymentaddress);
   };
 
   public shared ({ caller }) func cronSalesSettlements() : async () {
     canistergeekMonitor.collectMetrics();
-    // caller will be stored to the Cap event, is that ok?
     await _Sale.cronSalesSettlements(caller);
   };
 
