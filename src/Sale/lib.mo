@@ -170,76 +170,78 @@ module {
       #ok((paymentAddress, total));
     };
 
-    public func retreive(caller : Principal, paymentaddress : Types.AccountIdentifier) : async Result.Result<(), Text> {
-      switch (_salesSettlements.get(paymentaddress)) {
-        case (?settlement) {
-          let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({
-            account = paymentaddress;
-          });
-          // because of the await above, we check again if there is a settlement available for the paymentaddress
-          switch (_salesSettlements.get(paymentaddress)) {
-            case (?settlement) {
-              if (response.e8s >= settlement.price) {
-                if (settlement.tokens.size() > availableTokens()) {
-                  //Issue refund if not enough NFTs available
-                  deps._Marketplace.addDisbursement((0, settlement.buyer, settlement.subaccount, (response.e8s -10000)));
-                  _salesSettlements.delete(paymentaddress);
-                  return #err("Not enough NFTs - a refund will be sent automatically very soon");
-                } else {
-                  var tokens = nextTokens(Nat64.fromNat(settlement.tokens.size()));
-                  for (a in tokens.vals()) {
-                    deps._Tokens.transferTokenToUser(a, settlement.buyer);
-                  };
-                  _saleTransactions.add({
-                    tokens = tokens;
-                    seller = this;
-                    price = settlement.price;
-                    buyer = settlement.buyer;
-                    time = Time.now();
-                  });
-                  _soldIcp += settlement.price;
-                  deps._Marketplace.increaseSold(tokens.size());
-                  _salesSettlements.delete(paymentaddress);
-                  let event : Root.IndefiniteEvent = {
-                    operation = "mint";
-                    details = [
-                      ("to", #Text(settlement.buyer)),
-                      ("price_decimals", #U64(8)),
-                      ("price_currency", #Text("ICP")),
-                      ("price", #U64(settlement.price)),
-                      // there can only be one token in tokens due to the reserve function
-                      ("token_id", #Text(Utils.indexToIdentifier(settlement.tokens[0], this))),
-                    ];
-                    caller;
-                  };
-                  ignore deps._Cap.insert(event);
-                  //Payout
-                  var bal : Nat64 = response.e8s - (10000 * 1); //Remove 2x tx fee
-                  deps._Marketplace.addDisbursement((0, Env.teamAddress, settlement.subaccount, bal));
-                  return #ok();
-                };
-              } else {
-                // if the settlement expired and they still didnt send the full amount, we add them to failedSales
-                if (settlement.expires < Time.now()) {
-                  _failedSales.add((settlement.buyer, settlement.subaccount));
-                  _salesSettlements.delete(paymentaddress);
-                  if (Env.whitelistOneTimeOnly == true) {
-                    if (settlement.price == Env.ethFlowerWhitelistPrice) {
-                      addToWhitelist(settlement.buyer, _ethFlowerWhitelist);
-                    } else if (settlement.price == Env.modclubWhitelistPrice) {
-                      addToWhitelist(settlement.buyer, _modclubWhitelist);
-                    };
-                  };
-                  return #err("Expired");
-                } else {
-                  return #err("Insufficient funds sent");
-                };
-              };
-            };
-            case (_) return #err("Nothing to settle");
-          };
+    public func retrieve(caller : Principal, paymentaddress : Types.AccountIdentifier) : async Result.Result<(), Text> {
+      if (Option.isNull(_salesSettlements.get(paymentaddress))) {
+        return #err("Nothing to settle");
+      };
+
+      let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({
+        account = paymentaddress;
+      });
+
+      // because of the await above, we check again if there is a settlement available for the paymentaddress
+      let settlement = switch (_salesSettlements.get(paymentaddress)) {
+        case (?settlement) { settlement };
+        case (null) {
+          return #err("Nothing to settle");
         };
-        case (_) return #err("Nothing to settle");
+      };
+
+      if (response.e8s >= settlement.price) {
+        if (settlement.tokens.size() > availableTokens()) {
+          //Issue refund if not enough NFTs available
+          deps._Marketplace.addDisbursement((0, settlement.buyer, settlement.subaccount, (response.e8s - 10000)));
+          _salesSettlements.delete(paymentaddress);
+          return #err("Not enough NFTs - a refund will be sent automatically very soon");
+        } else {
+          var tokens = nextTokens(Nat64.fromNat(settlement.tokens.size()));
+          for (a in tokens.vals()) {
+            deps._Tokens.transferTokenToUser(a, settlement.buyer);
+          };
+          _saleTransactions.add({
+            tokens = tokens;
+            seller = this;
+            price = settlement.price;
+            buyer = settlement.buyer;
+            time = Time.now();
+          });
+          _soldIcp += settlement.price;
+          deps._Marketplace.increaseSold(tokens.size());
+          _salesSettlements.delete(paymentaddress);
+          let event : Root.IndefiniteEvent = {
+            operation = "mint";
+            details = [
+              ("to", #Text(settlement.buyer)),
+              ("price_decimals", #U64(8)),
+              ("price_currency", #Text("ICP")),
+              ("price", #U64(settlement.price)),
+              // there can only be one token in tokens due to the reserve function
+              ("token_id", #Text(Utils.indexToIdentifier(settlement.tokens[0], this))),
+            ];
+            caller;
+          };
+          ignore deps._Cap.insert(event);
+          //Payout
+          var bal : Nat64 = response.e8s - (10000 * 1); //Remove 2x tx fee
+          deps._Marketplace.addDisbursement((0, Env.teamAddress, settlement.subaccount, bal));
+          return #ok();
+        };
+      } else {
+        // if the settlement expired and they still didnt send the full amount, we add them to failedSales
+        if (settlement.expires < Time.now()) {
+          _failedSales.add((settlement.buyer, settlement.subaccount));
+          _salesSettlements.delete(paymentaddress);
+          if (Env.whitelistOneTimeOnly == true) {
+            if (settlement.price == Env.ethFlowerWhitelistPrice) {
+              addToWhitelist(settlement.buyer, _ethFlowerWhitelist);
+            } else if (settlement.price == Env.modclubWhitelistPrice) {
+              addToWhitelist(settlement.buyer, _modclubWhitelist);
+            };
+          };
+          return #err("Expired");
+        } else {
+          return #err("Insufficient funds sent");
+        };
       };
     };
 
@@ -252,7 +254,7 @@ module {
         switch (expiredSalesSettlements().keys().next()) {
           case (?paymentAddress) {
             try {
-              ignore (await retreive(caller, paymentAddress));
+              ignore (await retrieve(caller, paymentAddress));
             } catch (e) {};
           };
           case null break settleLoop;
