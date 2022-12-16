@@ -162,6 +162,8 @@ module {
                     };
                   };
                   case (_) {
+                    //Refund
+                    deps._Tokens.transferTokenToUser(token, owner);
                     return #err(#Rejected);
                   };
                 };
