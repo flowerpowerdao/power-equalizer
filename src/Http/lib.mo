@@ -22,8 +22,8 @@ module {
   public class HttpHandler(this : Principal, deps : Types.Dependencies, consts : Types.Constants) {
 
     /*************
-* CONSTANTS *
-*************/
+    * CONSTANTS *
+    *************/
 
     let NOT_FOUND : Types.HttpResponse = {
       status_code = 404;

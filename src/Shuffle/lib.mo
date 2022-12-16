@@ -10,8 +10,8 @@ module {
   public class Factory(state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
 
     /*********
-* STATE *
-*********/
+    * STATE *
+    *********/
 
     private var _isShuffled : Bool = state._isShuffledState;
 

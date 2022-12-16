@@ -16,14 +16,14 @@ module {
   public class Factory(this : Principal, deps : Types.Dependencies, consts : Types.Constants) {
 
     /*************
-* CONSTANTS *
-*************/
+    * CONSTANTS *
+    *************/
 
     private let EXTENSIONS : [Types.Extension] = ["@ext/common", "@ext/nonfungible"];
 
     /********************
-* PUBLIC INTERFACE *
-********************/
+    * PUBLIC INTERFACE *
+    ********************/
 
     public func getMinter() : Principal {
       consts.minter

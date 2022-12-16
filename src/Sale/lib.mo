@@ -24,8 +24,8 @@ module {
   public class Factory(this : Principal, state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
 
     /*********
-* STATE *
-*********/
+    * STATE *
+    *********/
 
     private var _saleTransactions : Buffer.Buffer<Types.SaleTransaction> = Utils.bufferFromArray<Types.SaleTransaction>(state._saleTransactionsState);
     private var _salesSettlements : TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale> = TrieMap.fromEntries(state._salesSettlementsState.vals(), AID.equal, AID.hash);
@@ -262,7 +262,7 @@ module {
       };
     };
 
-    public func cronFailedSales(caller : Principal) : async () {
+    public func cronFailedSales() : async () {
       label failedSalesLoop while (true) {
         let last = _failedSales.removeLast();
         switch (last) {
@@ -284,8 +284,8 @@ module {
                 });
               };
             } catch (e) {
-              // this could lead to an infinite loop if there's not enough ICP in the account
-              // _disbursements := List.push(d, _disbursements);
+              // if the transaction fails for some reason, we add it back to the Buffer
+              _failedSales.add(failedSale);
             };
           };
           case (null) {
@@ -323,8 +323,8 @@ module {
     };
 
     /*******************
-* INTERNAL METHODS *
-*******************/
+    * INTERNAL METHODS *
+    *******************/
 
     // getters & setters
     public func ethFlowerWhitelistSize() : Nat {
@@ -414,12 +414,7 @@ module {
     };
 
     func mintCollection(collectionSize : Nat32) {
-      while (deps._Tokens.getNextTokenId() < collectionSize) {
-        deps._Tokens.putTokenMetadata(deps._Tokens.getNextTokenId(), #nonfungible({ /* we start with asset 1, as index 0 */ /* contains the seed animation and is not being shuffled */ metadata = ?Utils.nat32ToBlob(deps._Tokens.getNextTokenId() +1) }));
-        deps._Tokens.transferTokenToUser(deps._Tokens.getNextTokenId(), "0000");
-        deps._Tokens.incrementSupply();
-        deps._Tokens.incrementNextTokenId();
-      };
+      deps._Tokens.mintCollection(collectionSize);
     };
 
     func expiredSalesSettlements() : TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale> {
