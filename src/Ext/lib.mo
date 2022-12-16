@@ -156,6 +156,8 @@ module {
                       ignore performTransfer();
                       return #ok(request.amount);
                     } else {
+                      //Refund
+                      deps._Tokens.transferTokenToUser(token, owner);
                       return #err(#Rejected);
                     };
                   };
