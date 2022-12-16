@@ -327,7 +327,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   );
 
   // updates
-  public shared (msg) func initMint() : async () {
+  public shared (msg) func initMint() : async Result.Result<(), Text> {
     canistergeekMonitor.collectMetrics();
     await _Sale.initMint(msg.caller);
   };
