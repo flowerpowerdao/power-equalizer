@@ -352,9 +352,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     _Sale.reserve(amount, quantity, address, _subaccountNOTUSED);
   };
 
-  public shared (msg) func retreive(paymentaddress : SaleTypes.AccountIdentifier) : async Result.Result<(), Text> {
+  public shared (msg) func retrieve(paymentaddress : SaleTypes.AccountIdentifier) : async Result.Result<(), Text> {
     canistergeekMonitor.collectMetrics();
-    await _Sale.retreive(msg.caller, paymentaddress);
+    await _Sale.retrieve(msg.caller, paymentaddress);
   };
 
   public shared (msg) func cronSalesSettlements() : async () {
