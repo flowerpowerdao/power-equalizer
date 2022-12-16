@@ -282,8 +282,8 @@ module {
                 });
               };
             } catch (e) {
-              // this could lead to an infinite loop if there's not enough ICP in the account
-              // _disbursements := List.push(d, _disbursements);
+              // if the transaction fails for some reason, we add it back to the Buffer
+              _failedSales.add(failedSale);
             };
           };
           case (null) {
