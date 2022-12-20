@@ -369,7 +369,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     _Sale.reserve(amount, quantity, address, _subaccountNOTUSED);
   };
 
-  public shared ({ caller }) func retreive(paymentaddress : SaleTypes.AccountIdentifier) : async Result.Result<(), Text> {
+  public shared ({ caller }) func retrieve(paymentaddress : SaleTypes.AccountIdentifier) : async Result.Result<(), Text> {
     canistergeekMonitor.collectMetrics();
     // no caller check, token will be sent to the address that was set on 'reserve'
     await _Sale.retrieve(caller, paymentaddress);
