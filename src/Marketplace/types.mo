@@ -5,6 +5,7 @@ import Cap "mo:cap/Cap";
 import ExtCore "../toniq-labs/ext/Core";
 import TokenTypes "../Tokens/types";
 import Tokens "../Tokens";
+import Disburser "../Disburser";
 
 module {
 
@@ -13,7 +14,6 @@ module {
       _transactionsState : [Transaction] = [];
       _tokenSettlementState : [(TokenTypes.TokenIndex, Settlement)] = [];
       _tokenListingState : [(TokenTypes.TokenIndex, Listing)] = [];
-      _disbursementsState : [(TokenTypes.TokenIndex, AccountIdentifier, SubAccount, Nat64)] = [];
       _nextSubAccountState : Nat = 0;
       _soldState : Nat = 0;
       _totalToSellState : Nat = 0;
@@ -78,7 +78,6 @@ module {
     _transactionsState : [Transaction];
     _tokenSettlementState : [(TokenIndex, Settlement)];
     _tokenListingState : [(TokenIndex, Listing)];
-    _disbursementsState : [(TokenIndex, AccountIdentifier, SubAccount, Nat64)];
     _nextSubAccountState : Nat;
     _soldState : Nat;
     _totalToSellState : Nat;
@@ -87,6 +86,7 @@ module {
   public type Dependencies = {
     _Cap : Cap.Cap;
     _Tokens : Tokens.Factory;
+    _Disburser : Disburser.Factory;
   };
 
   public type Constants = {

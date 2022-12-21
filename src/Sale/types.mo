@@ -7,6 +7,7 @@ import ExtCore "../toniq-labs/ext/Core";
 import Marketplace "../Marketplace";
 import Shuffle "../Shuffle";
 import Tokens "../Tokens";
+import Disburser "../Disburser";
 
 module {
 
@@ -37,6 +38,7 @@ module {
     _Tokens : Tokens.Factory;
     _Marketplace : Marketplace.Factory;
     _Shuffle : Shuffle.Factory;
+    _Disburser : Disburser.Factory;
   };
 
   type SendArgs = {
