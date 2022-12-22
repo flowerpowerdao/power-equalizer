@@ -15,8 +15,6 @@ module {
       _tokenListingState : [(TokenTypes.TokenIndex, Listing)] = [];
       _disbursementsState : [(TokenTypes.TokenIndex, AccountIdentifier, SubAccount, Nat64)] = [];
       _nextSubAccountState : Nat = 0;
-      _soldState : Nat = 0;
-      _totalToSellState : Nat = 0;
     };
   };
 
@@ -80,8 +78,6 @@ module {
     _tokenListingState : [(TokenIndex, Listing)];
     _disbursementsState : [(TokenIndex, AccountIdentifier, SubAccount, Nat64)];
     _nextSubAccountState : Nat;
-    _soldState : Nat;
-    _totalToSellState : Nat;
   };
 
   public type Dependencies = {

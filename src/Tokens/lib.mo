@@ -21,6 +21,8 @@ module {
     private var _registry : TrieMap.TrieMap<Types.TokenIndex, Types.AccountIdentifier> = TrieMap.fromEntries(state._registryState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _nextTokenId : Types.TokenIndex = state._nextTokenIdState;
     private var _supply : Types.Balance = state._supplyState;
+    private var _sold : Nat = state._soldState;
+    private var _totalToSell : Nat = state._totalToSellState;
 
     public func toStable() : Types.StableState {
       return {
@@ -36,6 +38,8 @@ module {
         _registryState = Iter.toArray(_registry.entries());
         _nextTokenIdState = _nextTokenId;
         _supplyState = _supply;
+        _soldState = _sold;
+        _totalToSellState = _totalToSell;
       };
     };
 
@@ -114,6 +118,22 @@ module {
 
     func incrementSupply() {
       _supply := _supply + 1;
+    };
+
+    public func setTotalToSell(totalToSell : Nat) {
+      _totalToSell := totalToSell;
+    };
+
+    public func increaseSold(amount : Nat) {
+      _sold := _sold + amount;
+    };
+
+    public func getSold() : Nat {
+      _sold;
+    };
+
+    public func getTotalToSell() : Nat {
+      _totalToSell;
     };
 
     public func getSupply() : Types.Balance {

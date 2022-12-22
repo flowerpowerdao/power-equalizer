@@ -32,8 +32,6 @@ module {
     private var _tokenListing : TrieMap.TrieMap<Types.TokenIndex, Types.Listing> = TrieMap.fromEntries(state._tokenListingState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _disbursements : List.List<(Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)> = List.fromArray(state._disbursementsState);
     private var _nextSubAccount : Nat = state._nextSubAccountState;
-    private var _sold : Nat = state._soldState;
-    private var _totalToSell : Nat = state._totalToSellState;
 
     public func toStable() : Types.StableState {
       return {
@@ -42,8 +40,6 @@ module {
         _tokenListingState = Iter.toArray(_tokenListing.entries());
         _disbursementsState = List.toArray(_disbursements);
         _nextSubAccountState = _nextSubAccount;
-        _soldState = _sold;
-        _totalToSellState = _totalToSell;
       };
     };
 
@@ -175,7 +171,7 @@ module {
     public func list(caller : Principal, request : Types.ListRequest) : async Result.Result<(), Types.CommonError> {
       // marketplace is open either when marketDelay has passed or collection sold out
       if (Time.now() < Env.publicSaleStart + Env.marketDelay) {
-        if (_sold < _totalToSell) {
+        if (deps._Tokens.getSold() < deps._Tokens.getTotalToSell()) {
           return #err(#Other("You can not list yet"));
         };
       };
@@ -368,22 +364,6 @@ module {
 
     public func getListingFromTokenListing(token : Types.TokenIndex) : ?Types.Listing {
       return _tokenListing.get(token);
-    };
-
-    public func setTotalToSell(totalToSell : Nat) {
-      _totalToSell := totalToSell;
-    };
-
-    public func increaseSold(amount : Nat) {
-      _sold := _sold + amount;
-    };
-
-    public func getSold() : Nat {
-      _sold;
-    };
-
-    public func getTotalToSell() : Nat {
-      _totalToSell;
     };
 
     // public methods
