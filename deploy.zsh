@@ -147,9 +147,9 @@ dfx canister --network $network call $mode airdropTokens 0
 echo "airdrop tokens ..."
 dfx canister --network $network call $mode airdropTokens 1500
 
-# set total to sell
-echo "set total to sell ..."
-dfx canister --network $network call $mode setTotalToSell
+# start sale
+echo "start sale ..."
+dfx canister --network $network call $mode startSale
 
 # check the asset that are linked to the tokens
 for i in {0..9}
