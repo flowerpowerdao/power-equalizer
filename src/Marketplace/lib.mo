@@ -24,8 +24,8 @@ module {
   public class Factory(this : Principal, state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
 
     /*********
-* STATE *
-*********/
+    * STATE *
+    *********/
 
     private var _transactions : Buffer.Buffer<Types.Transaction> = Utils.bufferFromArray(state._transactionsState);
     private var _tokenSettlement : TrieMap.TrieMap<Types.TokenIndex, Types.Settlement> = TrieMap.fromEntries(state._tokenSettlementState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
@@ -174,7 +174,7 @@ module {
 
     public func list(caller : Principal, request : Types.ListRequest) : async Result.Result<(), Types.CommonError> {
       // marketplace is open either when marketDelay has passed or collection sold out
-      if (Time.now() < (Env.publicSaleStart +Env.marketDelay)) {
+      if (Time.now() < Env.publicSaleStart + Env.marketDelay) {
         if (_sold < _totalToSell) {
           return #err(#Other("You can not list yet"));
         };
@@ -433,13 +433,10 @@ module {
         ExtCore.TokenIndex.equal,
         ExtCore.TokenIndex.hash,
         func(a : (Types.TokenIndex, Types.Settlement)) : ?Types.Settlement {
-          switch (_isLocked(a.0) == false) {
-            case (true) {
-              ?a.1;
-            };
-            case (false) {
-              null;
-            };
+          if (_isLocked(a.0)) {
+            null;
+          } else {
+            ?a.1;
           };
         },
       );

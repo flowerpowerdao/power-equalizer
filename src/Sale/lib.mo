@@ -25,8 +25,8 @@ module {
   public class Factory(this : Principal, state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
 
     /*********
-* STATE *
-*********/
+    * STATE *
+    *********/
 
     private var _saleTransactions : Buffer.Buffer<Types.SaleTransaction> = Utils.bufferFromArray<Types.SaleTransaction>(state._saleTransactionsState);
     private var _salesSettlements : TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale> = TrieMap.fromEntries(state._salesSettlementsState.vals(), AID.equal, AID.hash);
@@ -175,76 +175,78 @@ module {
       #ok((paymentAddress, total));
     };
 
-    public func retreive(caller : Principal, paymentaddress : Types.AccountIdentifier) : async Result.Result<(), Text> {
-      switch (_salesSettlements.get(paymentaddress)) {
-        case (?settlement) {
-          let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({
-            account = paymentaddress;
-          });
-          // because of the await above, we check again if there is a settlement available for the paymentaddress
-          switch (_salesSettlements.get(paymentaddress)) {
-            case (?settlement) {
-              if (response.e8s >= settlement.price) {
-                if (settlement.tokens.size() > availableTokens()) {
-                  //Issue refund if not enough NFTs available
-                  deps._Marketplace.addDisbursement((0, settlement.buyer, settlement.subaccount, (response.e8s -10000)));
-                  _salesSettlements.delete(paymentaddress);
-                  return #err("Not enough NFTs - a refund will be sent automatically very soon");
-                } else {
-                  var tokens = nextTokens(Nat64.fromNat(settlement.tokens.size()));
-                  for (a in tokens.vals()) {
-                    deps._Tokens.transferTokenToUser(a, settlement.buyer);
-                  };
-                  _saleTransactions.add({
-                    tokens = tokens;
-                    seller = this;
-                    price = settlement.price;
-                    buyer = settlement.buyer;
-                    time = Time.now();
-                  });
-                  _soldIcp += settlement.price;
-                  deps._Marketplace.increaseSold(tokens.size());
-                  _salesSettlements.delete(paymentaddress);
-                  let event : Root.IndefiniteEvent = {
-                    operation = "mint";
-                    details = [
-                      ("to", #Text(settlement.buyer)),
-                      ("price_decimals", #U64(8)),
-                      ("price_currency", #Text("ICP")),
-                      ("price", #U64(settlement.price)),
-                      // there can only be one token in tokens due to the reserve function
-                      ("token_id", #Text(Utils.indexToIdentifier(settlement.tokens[0], this))),
-                    ];
-                    caller;
-                  };
-                  ignore deps._Cap.insert(event);
-                  //Payout
-                  var bal : Nat64 = response.e8s - (10000 * 1); //Remove 2x tx fee
-                  deps._Marketplace.addDisbursement((0, Env.teamAddress, settlement.subaccount, bal));
-                  return #ok();
-                };
-              } else {
-                // if the settlement expired and they still didnt send the full amount, we add them to failedSales
-                if (settlement.expires < Time.now()) {
-                  _failedSales.add((settlement.buyer, settlement.subaccount));
-                  _salesSettlements.delete(paymentaddress);
-                  if (Env.whitelistOneTimeOnly == true) {
-                    if (settlement.price == Env.ethFlowerWhitelistPrice) {
-                      addToWhitelist(settlement.buyer, _ethFlowerWhitelist);
-                    } else if (settlement.price == Env.modclubWhitelistPrice) {
-                      addToWhitelist(settlement.buyer, _modclubWhitelist);
-                    };
-                  };
-                  return #err("Expired");
-                } else {
-                  return #err("Insufficient funds sent");
-                };
-              };
-            };
-            case (_) return #err("Nothing to settle");
-          };
+    public func retrieve(caller : Principal, paymentaddress : Types.AccountIdentifier) : async Result.Result<(), Text> {
+      if (Option.isNull(_salesSettlements.get(paymentaddress))) {
+        return #err("Nothing to settle");
+      };
+
+      let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({
+        account = paymentaddress;
+      });
+
+      // because of the await above, we check again if there is a settlement available for the paymentaddress
+      let settlement = switch (_salesSettlements.get(paymentaddress)) {
+        case (?settlement) { settlement };
+        case (null) {
+          return #err("Nothing to settle");
         };
-        case (_) return #err("Nothing to settle");
+      };
+
+      if (response.e8s >= settlement.price) {
+        if (settlement.tokens.size() > availableTokens()) {
+          //Issue refund if not enough NFTs available
+          deps._Marketplace.addDisbursement((0, settlement.buyer, settlement.subaccount, (response.e8s - 10000)));
+          _salesSettlements.delete(paymentaddress);
+          return #err("Not enough NFTs - a refund will be sent automatically very soon");
+        } else {
+          var tokens = nextTokens(Nat64.fromNat(settlement.tokens.size()));
+          for (a in tokens.vals()) {
+            deps._Tokens.transferTokenToUser(a, settlement.buyer);
+          };
+          _saleTransactions.add({
+            tokens = tokens;
+            seller = this;
+            price = settlement.price;
+            buyer = settlement.buyer;
+            time = Time.now();
+          });
+          _soldIcp += settlement.price;
+          deps._Marketplace.increaseSold(tokens.size());
+          _salesSettlements.delete(paymentaddress);
+          let event : Root.IndefiniteEvent = {
+            operation = "mint";
+            details = [
+              ("to", #Text(settlement.buyer)),
+              ("price_decimals", #U64(8)),
+              ("price_currency", #Text("ICP")),
+              ("price", #U64(settlement.price)),
+              // there can only be one token in tokens due to the reserve function
+              ("token_id", #Text(Utils.indexToIdentifier(settlement.tokens[0], this))),
+            ];
+            caller;
+          };
+          ignore deps._Cap.insert(event);
+          //Payout
+          var bal : Nat64 = response.e8s - (10000 * 1); //Remove 2x tx fee
+          deps._Marketplace.addDisbursement((0, Env.teamAddress, settlement.subaccount, bal));
+          return #ok();
+        };
+      } else {
+        // if the settlement expired and they still didnt send the full amount, we add them to failedSales
+        if (settlement.expires < Time.now()) {
+          _failedSales.add((settlement.buyer, settlement.subaccount));
+          _salesSettlements.delete(paymentaddress);
+          if (Env.whitelistOneTimeOnly == true) {
+            if (settlement.price == Env.ethFlowerWhitelistPrice) {
+              addToWhitelist(settlement.buyer, _ethFlowerWhitelist);
+            } else if (settlement.price == Env.modclubWhitelistPrice) {
+              addToWhitelist(settlement.buyer, _modclubWhitelist);
+            };
+          };
+          return #err("Expired");
+        } else {
+          return #err("Insufficient funds sent");
+        };
       };
     };
 
@@ -257,7 +259,7 @@ module {
         switch (expiredSalesSettlements().keys().next()) {
           case (?paymentAddress) {
             try {
-              ignore (await retreive(caller, paymentAddress));
+              ignore (await retrieve(caller, paymentAddress));
             } catch (e) {};
           };
           case null break settleLoop;
@@ -265,7 +267,7 @@ module {
       };
     };
 
-    public func cronFailedSales(caller : Principal) : async () {
+    public func cronFailedSales() : async () {
       label failedSalesLoop while (true) {
         let last = _failedSales.removeLast();
         switch (last) {
@@ -287,8 +289,8 @@ module {
                 });
               };
             } catch (e) {
-              // this could lead to an infinite loop if there's not enough ICP in the account
-              // _disbursements := List.push(d, _disbursements);
+              // if the transaction fails for some reason, we add it back to the Buffer
+              _failedSales.add(failedSale);
             };
           };
           case (null) {
@@ -326,8 +328,8 @@ module {
     };
 
     /*******************
-* INTERNAL METHODS *
-*******************/
+    * INTERNAL METHODS *
+    *******************/
 
     // getters & setters
     public func ethFlowerWhitelistSize() : Nat {
@@ -417,12 +419,7 @@ module {
     };
 
     func mintCollection(collectionSize : Nat32) {
-      while (deps._Tokens.getNextTokenId() < collectionSize) {
-        deps._Tokens.putTokenMetadata(deps._Tokens.getNextTokenId(), #nonfungible({ /* we start with asset 1, as index 0 */ /* contains the seed animation and is not being shuffled */ metadata = ?Utils.nat32ToBlob(deps._Tokens.getNextTokenId() +1) }));
-        deps._Tokens.transferTokenToUser(deps._Tokens.getNextTokenId(), "0000");
-        deps._Tokens.incrementSupply();
-        deps._Tokens.incrementNextTokenId();
-      };
+      deps._Tokens.mintCollection(collectionSize);
     };
 
     func expiredSalesSettlements() : TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale> {
