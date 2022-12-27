@@ -61,7 +61,7 @@ export interface Canister {
     [bigint, bigint, AccountIdentifier__4, SubAccount__2],
     Result_5
   >,
-  'retreive' : ActorMethod<[AccountIdentifier__4], Result_4>,
+  'retrieve' : ActorMethod<[AccountIdentifier__4], Result_4>,
   'saleTransactions' : ActorMethod<[], Array<SaleTransaction>>,
   'salesSettings' : ActorMethod<[AccountIdentifier__3], SaleSettings>,
   'salesSettlements' : ActorMethod<[], Array<[AccountIdentifier__4, Sale]>>,

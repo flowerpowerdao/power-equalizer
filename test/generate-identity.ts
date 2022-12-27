@@ -1,4 +1,4 @@
-import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1/src';
+import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 
 // generate random identity
 // use seed to generate deterministic identity

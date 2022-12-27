@@ -342,7 +342,7 @@ type Canister =
    metadata: (TokenIdentifier__2) -> (Result_6) query;
    pendingCronJobs: () -> (vec nat) query;
    reserve: (nat64, nat64, AccountIdentifier__4, SubAccount__2) -> (Result_5);
-   retreive: (AccountIdentifier__4) -> (Result_4);
+   retrieve: (AccountIdentifier__4) -> (Result_4);
    saleTransactions: () -> (vec SaleTransaction) query;
    salesSettings: (AccountIdentifier__3) -> (SaleSettings) query;
    salesSettlements: () -> (vec record {

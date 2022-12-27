@@ -9,14 +9,21 @@
     "deploy:staging": "dfx deploy staging --mode reinstall -y --argument '(principal \"aaaaa-aa\")' --no-wallet",
     "deploy:ledger": "dfx deploy ledger --no-wallet --mode reinstall -y --argument '(record {minting_account = \"e82226d3101bd8525111e2c6501a79365f2484d82d3f2be96269b78fe200eeaa\"; initial_values = vec { record { \"8b61ff722d7e6321eb99bb607ab0cf323b3c64b43d6a13c245c8a4e197f7b38b\"; record { e8s=10_000_000_000_000 } }; }; send_whitelist = vec {}})'",
     "mint": "dfx canister call staging addAsset '(record {name = \"privat\";payload = record {ctype = \"text/html\"; data = vec {blob \"hello world!\"} } })' && dfx canister call staging initMint",
-    "test": "vitest"
+    "vitest": "vitest run",
+    "vitest:watch": "vitest watch",
+    "env:production": "ts-node ./test/apply-env.ts production",
+    "env:pending-sale": "ts-node ./test/apply-env.ts pending-sale",
+    "test:pending-sale": "npm run env:pending-sale && npm run deploy && npm run mint && vitest run pending-sale",
+    "test": "npm run test:pending-sale"
   },
   "devDependencies": {
     "@dfinity/agent": "^0.15.0",
     "@dfinity/identity": "^0.15.0",
-    "@dfinity/identity-secp256k1": "^0.15.0",
+    "@dfinity/identity-secp256k1": "^0.15.1",
     "@dfinity/nns": "^0.10.0",
     "@dfinity/principal": "^0.15.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.4",
     "vitest": "^0.25.6"
   }
 }

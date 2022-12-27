@@ -314,7 +314,7 @@ export const idlFactory = ({ IDL }) => {
         [Result_5],
         [],
       ),
-    'retreive' : IDL.Func([AccountIdentifier__4], [Result_4], []),
+    'retrieve' : IDL.Func([AccountIdentifier__4], [Result_4], []),
     'saleTransactions' : IDL.Func([], [IDL.Vec(SaleTransaction)], ['query']),
     'salesSettings' : IDL.Func(
         [AccountIdentifier__3],

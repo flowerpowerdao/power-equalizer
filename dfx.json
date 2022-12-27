@@ -5,7 +5,7 @@
             "type": "motoko",
             "main": "src/main.mo",
             "declarations": {
-                "output": "test/declarations"
+                "output": "declarations/main"
             }
         },
         "ledger": {
