@@ -87,7 +87,7 @@ module {
     };
 
     public func airdropTokens(caller : Principal, startingIndex : Nat) : () {
-      assert (caller == consts.minter and deps._Marketplace.getTotalToSell() == 0);
+      assert (caller == consts.minter and deps._Tokens.getTotalToSell() == 0);
       // airdrop tokens
       var temp = 0;
       label airdrop for (a in Env.airdrop.vals()) {
@@ -103,9 +103,9 @@ module {
       };
     };
 
-    public func setTotalToSell(caller : Principal) : Nat {
-      assert (caller == consts.minter and deps._Marketplace.getTotalToSell() == 0);
-      deps._Marketplace.setTotalToSell(_tokensForSale.size());
+    public func startSale(caller : Principal) : Nat {
+      assert (caller == consts.minter and deps._Tokens.getTotalToSell() == 0);
+      deps._Tokens.setTotalToSell(_tokensForSale.size());
       _tokensForSale.size();
     };
 
@@ -211,7 +211,7 @@ module {
             time = Time.now();
           });
           _soldIcp += settlement.price;
-          deps._Marketplace.increaseSold(tokens.size());
+          deps._Tokens.increaseSold(tokens.size());
           _salesSettlements.delete(paymentaddress);
           let event : Root.IndefiniteEvent = {
             operation = "mint";
@@ -323,11 +323,11 @@ module {
         price = getAddressPrice(address);
         salePrice = Env.salePrice;
         remaining = availableTokens();
-        sold = deps._Marketplace.getSold();
+        sold = deps._Tokens.getSold();
+        totalToSell = deps._Tokens.getTotalToSell();
         startTime = Env.publicSaleStart;
         whitelistTime = Env.whitelistTime;
         whitelist = isWhitelistedAny(address);
-        totalToSell = deps._Marketplace.getTotalToSell();
         bulkPricing = getAddressBulkPrice(address);
       } : Types.SaleSettings;
     };

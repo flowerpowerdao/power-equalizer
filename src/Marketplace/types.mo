@@ -15,8 +15,6 @@ module {
       _tokenSettlementState : [(TokenTypes.TokenIndex, Settlement)] = [];
       _tokenListingState : [(TokenTypes.TokenIndex, Listing)] = [];
       _nextSubAccountState : Nat = 0;
-      _soldState : Nat = 0;
-      _totalToSellState : Nat = 0;
     };
   };
 
@@ -79,8 +77,6 @@ module {
     _tokenSettlementState : [(TokenIndex, Settlement)];
     _tokenListingState : [(TokenIndex, Listing)];
     _nextSubAccountState : Nat;
-    _soldState : Nat;
-    _totalToSellState : Nat;
   };
 
   public type Dependencies = {
