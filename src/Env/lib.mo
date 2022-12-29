@@ -3,6 +3,7 @@ import ExtCore "../toniq-labs/ext/Core";
 
 module {
     public let ethFlowerWhitelistEnabled = true;
+    public let modclubWhitelistEnabled = true;
   
     public let collectionName = "Pineapple Punks";
     public let placeholderContentLength = "1053832";

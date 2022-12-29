@@ -54,23 +54,28 @@ module {
       assert (caller == consts.minter and deps._Tokens.getNextTokenId() == 0);
       try {
         // get modclub whitelist from canister
-        let modclubWhitelistFromCanister : [Types.AccountIdentifier] = Array.map<Principal, Types.AccountIdentifier>(
-          await consts.WHITELIST_CANISTER.getWhitelist(),
-          func(p : Principal) {
-            Utils.toLowerString(AviateAccountIdentifier.toText(AviateAccountIdentifier.fromPrincipal(p, null)));
-          },
-        );
-        //Mint
+        var modclubWhitelistFromCanister : [Types.AccountIdentifier] = [];
+        if (Env.modclubWhitelistEnabled) {
+          modclubWhitelistFromCanister := Array.map<Principal, Types.AccountIdentifier>(
+            await consts.WHITELIST_CANISTER.getWhitelist(),
+            func(p : Principal) {
+              Utils.toLowerString(AviateAccountIdentifier.toText(AviateAccountIdentifier.fromPrincipal(p, null)));
+            },
+          );
+        };
+        // Mint
         mintCollection(Env.collectionSize);
         // turn whitelist into buffer for better performance
         if (Env.ethFlowerWhitelistEnabled) {
           setWhitelist(Env.ethFlowerWhitelist, _ethFlowerWhitelist);
         };
-        // concatenate with contest partiticapants that are hardcoded
-        let concatenatedModclubWhitelist = Array.append(modclubWhitelistFromCanister, Env.modclubWhitelist);
-        // set the whitelist
-        setWhitelist(concatenatedModclubWhitelist, _modclubWhitelist);
-        // get initial token indices (this will return all tokens as all of them are owned by "0000")
+        if (Env.modclubWhitelistEnabled) {
+          // concatenate with contest partiticapants that are hardcoded
+          let concatenatedModclubWhitelist = Array.append(modclubWhitelistFromCanister, Env.modclubWhitelist);
+          // set the whitelist
+          setWhitelist(concatenatedModclubWhitelist, _modclubWhitelist);
+          // get initial token indices (this will return all tokens as all of them are owned by "0000")
+        };
         _tokensForSale := switch (deps._Tokens.getTokensFromOwner("0000")) {
           case (?t) t;
           case (_) Buffer.Buffer<Types.TokenIndex>(0);
@@ -155,7 +160,7 @@ module {
       if (Env.whitelistOneTimeOnly == true) {
         if (Env.ethFlowerWhitelistEnabled and isWhitelisted(address, _ethFlowerWhitelist)) {
           removeFromWhitelist(address, _ethFlowerWhitelist);
-        } else if (isWhitelisted(address, _modclubWhitelist)) {
+        } else if (Env.modclubWhitelistEnabled and isWhitelisted(address, _modclubWhitelist)) {
           removeFromWhitelist(address, _modclubWhitelist);
         };
       };
@@ -246,7 +251,7 @@ module {
           if (Env.whitelistOneTimeOnly == true) {
             if (Env.ethFlowerWhitelistEnabled and settlement.price == Env.ethFlowerWhitelistPrice) {
               addToWhitelist(settlement.buyer, _ethFlowerWhitelist);
-            } else if (settlement.price == Env.modclubWhitelistPrice) {
+            } else if (Env.modclubWhitelistEnabled and settlement.price == Env.modclubWhitelistPrice) {
               addToWhitelist(settlement.buyer, _modclubWhitelist);
             };
           };
@@ -342,12 +347,13 @@ module {
     public func ethFlowerWhitelistSize() : Nat {
       if (Env.ethFlowerWhitelistEnabled) {
         _ethFlowerWhitelist.size();
-      }
-      else { 0 };
+      } else { 0 };
     };
 
     public func modclubWhitelistSize() : Nat {
-      _modclubWhitelist.size();
+      if (Env.modclubWhitelistEnabled) {
+        _modclubWhitelist.size();
+      } else { 0 };
     };
 
     public func availableTokens() : Nat {
@@ -373,7 +379,7 @@ module {
       if (Env.ethFlowerWhitelistEnabled and isWhitelisted(address, _ethFlowerWhitelist)) {
         return [(1, Env.ethFlowerWhitelistPrice)];
       };
-      if (isWhitelisted(address, _modclubWhitelist)) {
+      if (Env.modclubWhitelistEnabled and isWhitelisted(address, _modclubWhitelist)) {
         return [(1, Env.modclubWhitelistPrice)];
       };
       return [(1, Env.salePrice)];
@@ -408,7 +414,9 @@ module {
     };
 
     func isWhitelistedAny(address : Types.AccountIdentifier) : Bool {
-      return Env.ethFlowerWhitelistEnabled and isWhitelisted(address, _ethFlowerWhitelist) or isWhitelisted(address, _modclubWhitelist);
+      let ethFlower = Env.ethFlowerWhitelistEnabled and isWhitelisted(address, _ethFlowerWhitelist);
+      let modclub = Env.modclubWhitelistEnabled and isWhitelisted(address, _modclubWhitelist);
+      return ethFlower or modclub;
     };
 
     func removeFromWhitelist(address : Types.AccountIdentifier, whitelist : Buffer.Buffer<Types.AccountIdentifier>) : () {
