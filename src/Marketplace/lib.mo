@@ -47,55 +47,63 @@ module {
       if (ExtCore.TokenIdentifier.isPrincipal(tokenid, this) == false) {
         return #err(#InvalidToken(tokenid));
       };
+
       let token = ExtCore.TokenIdentifier.getIndex(tokenid);
-      if (_isLocked(token)) { return #err(#Other("Listing is locked")) };
-      let subaccount = getNextSubAccount();
-      switch (_tokenListing.get(token)) {
-        case (?listing) {
-          if (listing.price != price) {
-            return #err(#Other("Price has changed!"));
-          } else {
-            let paymentAddress : Types.AccountIdentifier = AID.fromPrincipal(this, ?subaccount);
-            _tokenListing.put(
-              token,
-              {
-                seller = listing.seller;
-                price = listing.price;
-                locked = ?(Time.now() + Env.ecscrowDelay);
-              },
-            );
-            //  check if there is a previous settlement that has never been settled
-            switch (_tokenSettlement.get(token)) {
-              case (?settlement) {
-                let resp : Result.Result<(), Types.CommonError> = await settle(caller, tokenid);
-                switch (resp) {
-                  case (#ok) {
-                    return #err(#Other("Listing has sold"));
-                  };
-                  case (#err _) {
-                    //Atomic protection
-                    if (Option.isNull(_tokenListing.get(token))) return #err(#Other("Listing has sold"));
-                  };
-                };
-              };
-              case (_) {};
-            };
-            _tokenSettlement.put(
-              token,
-              {
-                seller = listing.seller;
-                price = listing.price;
-                subaccount = subaccount;
-                buyer = address;
-              },
-            );
-            return #ok(paymentAddress);
-          };
-        };
-        case (_) {
+
+      if (_isLocked(token)) {
+        return #err(#Other("Listing is locked"));
+      };
+
+      let listing = switch (_tokenListing.get(token)) {
+        case (?listing) { listing };
+        case (null) {
           return #err(#Other("No listing!"));
         };
       };
+
+      if (listing.price != price) {
+        return #err(#Other("Price has changed!"));
+      };
+
+      let subaccount = getNextSubAccount();
+      let paymentAddress : Types.AccountIdentifier = AID.fromPrincipal(this, ?subaccount);
+      _tokenListing.put(
+        token,
+        {
+          seller = listing.seller;
+          price = listing.price;
+          locked = ?(Time.now() + Env.ecscrowDelay);
+        },
+      );
+
+      // check if there is a previous settlement that has never been settled
+      switch (_tokenSettlement.get(token)) {
+        case (?settlement) {
+          let resp : Result.Result<(), Types.CommonError> = await settle(caller, tokenid);
+          switch (resp) {
+            case (#ok) {
+              return #err(#Other("Listing has sold"));
+            };
+            case (#err _) {
+              // Atomic protection
+              if (Option.isNull(_tokenListing.get(token))) {
+                return #err(#Other("Listing has sold"));
+              }
+            };
+          };
+        };
+        case (null) {};
+      };
+      _tokenSettlement.put(
+        token,
+        {
+          seller = listing.seller;
+          price = listing.price;
+          subaccount = subaccount;
+          buyer = address;
+        },
+      );
+      return #ok(paymentAddress);
     };
 
     public func settle(caller : Principal, tokenid : Types.TokenIdentifier) : async Result.Result<(), Types.CommonError> {
@@ -103,82 +111,94 @@ module {
         return #err(#InvalidToken(tokenid));
       };
       let token : Types.TokenIndex = ExtCore.TokenIdentifier.getIndex(tokenid);
-      switch (_tokenSettlement.get(token)) {
-        case (?settlement) {
-          let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({
-            account = AID.fromPrincipal(this, ?settlement.subaccount);
-          });
-          switch (_tokenSettlement.get(token)) {
-            case (?settlement) {
-              if (response.e8s >= settlement.price) {
-                switch (deps._Tokens.getOwnerFromRegistry(token)) {
-                  case (?token_owner) {
-                    var bal : Nat64 = settlement.price - (10000 * Nat64.fromNat(Env.salesFees.size() + 1));
-                    var rem = bal;
 
-                    // disbursement of fees
-                    for (f in Env.salesFees.vals()) {
-                      var _fee : Nat64 = bal * f.1 / 100000;
-                      deps._Disburser.addDisbursement({
-                        to = f.0;
-                        fromSubaccount = settlement.subaccount;
-                        amount = _fee;
-                        tokenIndex = token;
-                      });
-                      rem := rem - _fee : Nat64;
-                    };
-
-                    // disbursement to the previous token owner
-                    deps._Disburser.addDisbursement({
-                      to = token_owner;
-                      fromSubaccount = settlement.subaccount;
-                      amount = rem;
-                      tokenIndex = token;
-                    });
-                    
-                    let event : Root.IndefiniteEvent = {
-                      operation = "sale";
-                      details = [
-                        ("to", #Text(settlement.buyer)),
-                        ("from", #Principal(settlement.seller)),
-                        ("price_decimals", #U64(8)),
-                        ("price_currency", #Text("ICP")),
-                        ("price", #U64(settlement.price)),
-                        ("token_id", #Text(tokenid)),
-                      ];
-                      caller;
-                    };
-                    ignore deps._Cap.insert(event);
-                    deps._Tokens.transferTokenToUser(token, settlement.buyer);
-                    _transactions.add({
-                      token = tokenid;
-                      seller = settlement.seller;
-                      price = settlement.price;
-                      buyer = settlement.buyer;
-                      time = Time.now();
-                    });
-                    _tokenListing.delete(token);
-                    _tokenSettlement.delete(token);
-                    return #ok();
-                  };
-                  case (_) {
-                    return #err(#InvalidToken(tokenid));
-                  };
-                };
-              } else {
-                if (_isLocked(token)) {
-                  return #err(#Other("Insufficient funds sent"));
-                } else {
-                  _tokenSettlement.delete(token);
-                  return #err(#Other("Nothing to settle"));
-                };
-              };
-            };
-            case (_) return #err(#Other("Nothing to settle"));
-          };
+      var settlement = switch (_tokenSettlement.get(token)) {
+        case (?settlement) { settlement };
+        case (null) {
+          return #err(#Other("Nothing to settle"));
         };
-        case (_) return #err(#Other("Nothing to settle"));
       };
+      
+      let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({
+        account = AID.fromPrincipal(this, ?settlement.subaccount);
+      });
+
+      // because of the await above, we check again if there is a settlement available for the token
+      settlement := switch (_tokenSettlement.get(token)) {
+        case (?settlement) { settlement };
+        case (null) {
+          return #err(#Other("Nothing to settle"));
+        };
+      };
+
+      if (response.e8s < settlement.price) {
+        if (_isLocked(token)) {
+          return #err(#Other("Insufficient funds sent"));
+        } else {
+          _tokenSettlement.delete(token);
+          return #err(#Other("Nothing to settle"));
+        };
+      };
+
+      let tokenOwner = switch (deps._Tokens.getOwnerFromRegistry(token)) {
+        case (?tokenOwner) { tokenOwner };
+        case (null) {
+          return #err(#InvalidToken(tokenid));
+        };
+      };
+
+      var bal : Nat64 = settlement.price - (10000 * Nat64.fromNat(Env.salesFees.size() + 1));
+      var rem = bal;
+
+      // disbursement of fees
+      for (f in Env.salesFees.vals()) {
+        var _fee : Nat64 = bal * f.1 / 100000;
+        deps._Disburser.addDisbursement({
+          to = f.0;
+          fromSubaccount = settlement.subaccount;
+          amount = _fee;
+          tokenIndex = token;
+        });
+        rem := rem - _fee : Nat64;
+      };
+
+      // disbursement to the previous token owner
+      deps._Disburser.addDisbursement({
+        to = tokenOwner;
+        fromSubaccount = settlement.subaccount;
+        amount = rem;
+        tokenIndex = token;
+      });
+      
+      // add event to CAP
+      let event : Root.IndefiniteEvent = {
+        operation = "sale";
+        details = [
+          ("to", #Text(settlement.buyer)),
+          ("from", #Principal(settlement.seller)),
+          ("price_decimals", #U64(8)),
+          ("price_currency", #Text("ICP")),
+          ("price", #U64(settlement.price)),
+          ("token_id", #Text(tokenid)),
+        ];
+        caller;
+      };
+      ignore deps._Cap.insert(event);
+
+      // transfer token to new owner
+      deps._Tokens.transferTokenToUser(token, settlement.buyer);
+
+      _transactions.add({
+        token = tokenid;
+        seller = settlement.seller;
+        price = settlement.price;
+        buyer = settlement.buyer;
+        time = Time.now();
+      });
+      _tokenListing.delete(token);
+      _tokenSettlement.delete(token);
+
+      return #ok();
     };
 
     public func list(caller : Principal, request : Types.ListRequest) : async Result.Result<(), Types.CommonError> {
@@ -192,17 +212,25 @@ module {
         return #err(#InvalidToken(request.token));
       };
       let token = ExtCore.TokenIdentifier.getIndex(request.token);
-      if (_isLocked(token)) { return #err(#Other("Listing is locked")) };
+
+      if (_isLocked(token)) {
+        return #err(#Other("Listing is locked"));
+      };
+
+      // ??
       switch (_tokenSettlement.get(token)) {
         case (?settlement) {
           let resp : Result.Result<(), Types.CommonError> = await settle(caller, request.token);
           switch (resp) {
-            case (#ok) return #err(#Other("Listing as sold"));
+            case (#ok) {
+              return #err(#Other("Listing is sold"));
+            };
             case (#err _) {};
           };
         };
         case (_) {};
       };
+
       let owner = AID.fromPrincipal(caller, request.from_subaccount);
       switch (deps._Tokens.getOwnerFromRegistry(token)) {
         case (?token_owner) {
