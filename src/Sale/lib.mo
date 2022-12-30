@@ -95,6 +95,11 @@ module {
 
     public func airdropTokens(caller : Principal, startingIndex : Nat) : () {
       assert (caller == consts.minter and deps._Tokens.getTotalToSell() == 0);
+
+      if (not Env.airdropEnabled) {
+        return;
+      };
+
       // airdrop tokens
       var temp = 0;
       label airdrop for (a in Env.airdrop.vals()) {
