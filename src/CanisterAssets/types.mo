@@ -9,9 +9,10 @@ module {
   };
 
   public type File = {
-    ctype : Text; //"image/jpeg"
+    ctype : Text; // "image/jpeg"
     data : [Blob];
   };
+
   public type Asset = {
     name : Text;
     thumbnail : ?File;
@@ -21,10 +22,6 @@ module {
 
   public type StableState = {
     _assetsState : [Asset];
-  };
-
-  public type Dependencies = {
-    _Tokens : Tokens.Factory;
   };
 
   public type Constants = {
