@@ -378,17 +378,40 @@ module {
       getAddressBulkPrice(address)[0].1;
     };
 
-    //Set different price types here
+    // Set different price types here
     func getAddressBulkPrice(address : Types.AccountIdentifier) : [(Nat64, Nat64)] {
       // order by WL price, cheapest first
-      if (Env.ethFlowerWhitelistEnabled and isWhitelisted(address, _ethFlowerWhitelist)) {
-        return [(1, Env.ethFlowerWhitelistPrice)];
-      };
-      if (Env.modclubWhitelistEnabled and isWhitelisted(address, _modclubWhitelist)) {
-        return [(1, Env.modclubWhitelistPrice)];
+      if (Env.dutchAuctionEnabled) { // whitelist only??
+        return [(1, getCurrentDutchAuctionPrice())];
+      }
+      else {
+        if (Env.ethFlowerWhitelistEnabled and isWhitelisted(address, _ethFlowerWhitelist)) {
+          return [(1, Env.ethFlowerWhitelistPrice)];
+        };
+        if (Env.modclubWhitelistEnabled and isWhitelisted(address, _modclubWhitelist)) {
+          return [(1, Env.modclubWhitelistPrice)];
+        };
       };
       return [(1, Env.salePrice)];
     };
+
+    func getCurrentDutchAuctionPrice() : Nat64 {
+      let timeSinceStart : Int = Time.now() - Env.publicSaleStart; // how many nano seconds passed since the auction began
+      // in the event that this function is called before the auction has started, return the starting price
+      if (timeSinceStart < 0) {
+        return Env.dutchAuctionStartPrice;
+      };
+      let priceInterval = timeSinceStart / Env.dutchAuctionInterval; // how many intervals passed since the auction began
+      // what is the discount from the start price in this interval
+      let discount = Nat64.fromIntWrap(priceInterval) * Env.dutchAuctionIntervalPriceDrop;
+      // to prevent trapping, we check if the start price is bigger than the discount
+      if (Env.dutchAuctionStartPrice > discount) {
+        return Env.dutchAuctionStartPrice - discount;
+      } else {
+        return Env.dutchAuctionReservePrice;
+      };
+    };
+
 
     public func setWhitelist(whitelistAddresses : [Types.AccountIdentifier], whitelist : Buffer.Buffer<Types.AccountIdentifier>) {
       whitelist.append(Utils.bufferFromArray<Types.AccountIdentifier>(whitelistAddresses));

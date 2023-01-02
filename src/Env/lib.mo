@@ -5,7 +5,14 @@ module {
     public let ethFlowerWhitelistEnabled = true;
     public let modclubWhitelistEnabled = true;
     public let airdropEnabled = true;
-  
+
+    // dutch auction
+    public let dutchAuctionEnabled = true;
+    public let dutchAuctionStartPrice : Nat64 = 21500000000; // start with 350 icp for dutch auction
+    public let dutchAuctionIntervalPriceDrop : Nat64 = 500000000; // drop 5 icp every interval
+    public let dutchAuctionReservePrice : Nat64 = 500000000; // reserve price is 5 icp
+    public let dutchAuctionInterval : Time.Time = 60000000000; // 1 minute
+
     public let collectionName = "Pineapple Punks";
     public let placeholderContentLength = "1053832";
     public let teamAddress = "979307078c971f6d82a302825ac07dc63a4f68ece99f24014d69d8ccec7b5d6f";
