@@ -4,7 +4,6 @@ import Cap "mo:cap/Cap";
 
 import Assets "../CanisterAssets";
 import ExtCore "../toniq-labs/ext/Core";
-import Marketplace "../Marketplace";
 import Shuffle "../Shuffle";
 import Tokens "../Tokens";
 
@@ -19,6 +18,9 @@ module {
       _ethFlowerWhitelistState : [AccountIdentifier] = [];
       _modclubWhitelistState : [AccountIdentifier] = [];
       _soldIcpState : Nat64 = 0;
+      _soldState : Nat = 0;
+      _totalToSellState : Nat = 0;
+      _nextSubAccountState : Nat = 0;
     };
   };
 
@@ -30,12 +32,14 @@ module {
     _ethFlowerWhitelistState : [AccountIdentifier];
     _modclubWhitelistState : [AccountIdentifier];
     _soldIcpState : Nat64;
+    _soldState : Nat;
+    _totalToSellState : Nat;
+    _nextSubAccountState : Nat;
   };
 
   public type Dependencies = {
     _Cap : Cap.Cap;
     _Tokens : Tokens.Factory;
-    _Marketplace : Marketplace.Factory;
     _Shuffle : Shuffle.Factory;
   };
 

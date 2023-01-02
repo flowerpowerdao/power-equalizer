@@ -12,8 +12,6 @@ module {
       _registryState : [(TokenIndex, AccountIdentifier)] = [];
       _nextTokenIdState : TokenIndex = 0;
       _supplyState : Balance = 0;
-      _soldState : Nat = 0;
-      _totalToSellState : Nat = 0;
     };
   };
 
@@ -51,8 +49,6 @@ module {
     _registryState : [(TokenIndex, AccountIdentifier)];
     _nextTokenIdState : TokenIndex;
     _supplyState : Balance;
-    _soldState : Nat;
-    _totalToSellState : Nat;
   };
 
   public type Constants = {

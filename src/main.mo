@@ -190,6 +190,134 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     _Tokens.bearer(token);
   };
 
+  // Assets
+  let _Assets = Assets.Factory(
+    _assetsState,
+    {
+      _Tokens;
+    },
+    {
+      minter = init_minter;
+    },
+  );
+
+  public shared ({ caller }) func streamAsset(id : Nat, isThumb : Bool, payload : Blob) : async () {
+    canistergeekMonitor.collectMetrics();
+    // checks caller == minter
+    _Assets.streamAsset(caller, id, isThumb, payload);
+  };
+
+  public shared ({ caller }) func updateThumb(name : Text, file : AssetsTypes.File) : async ?Nat {
+    canistergeekMonitor.collectMetrics();
+    // checks caller == minter
+    _Assets.updateThumb(caller, name, file);
+  };
+
+  public shared ({ caller }) func addAsset(asset : AssetsTypes.Asset) : async Nat {
+    canistergeekMonitor.collectMetrics();
+    // checks caller == minter
+    _Assets.addAsset(caller, asset);
+  };
+
+  // Shuffle
+  let _Shuffle = Shuffle.Factory(
+    _shuffleState,
+    {
+      _Assets;
+      _Tokens;
+    },
+    {
+      minter = init_minter;
+    },
+  );
+
+  public shared ({ caller }) func shuffleAssets() : async () {
+    canistergeekMonitor.collectMetrics();
+    // checks caller == minter
+    // prevents double shuffle
+    await _Shuffle.shuffleAssets(caller);
+  };
+
+  // Sale
+  let _Sale = Sale.Factory(
+    cid,
+    _saleState,
+    {
+      _Cap;
+      _Shuffle;
+      _Tokens;
+    },
+    {
+      LEDGER_CANISTER;
+      WHITELIST_CANISTER;
+      minter = init_minter;
+    },
+  );
+
+  // updates
+  public shared ({ caller }) func initMint() : async Result.Result<(), Text> {
+    canistergeekMonitor.collectMetrics();
+    // checks caller == minter
+    // prevents double mint
+    await _Sale.initMint(caller);
+  };
+
+  public shared ({ caller }) func shuffleTokensForSale() : async () {
+    canistergeekMonitor.collectMetrics();
+    // checks caller == minter
+    await _Sale.shuffleTokensForSale(caller);
+  };
+
+  public shared ({ caller }) func airdropTokens(startIndex : Nat) : async () {
+    canistergeekMonitor.collectMetrics();
+    // checks caller == minter
+    _Sale.airdropTokens(caller, startIndex);
+  };
+
+  public shared ({ caller }) func startSale() : async Nat {
+    canistergeekMonitor.collectMetrics();
+    // checks caller == minter
+    _Sale.startSale(caller);
+  };
+
+  public func reserve(amount : Nat64, quantity : Nat64, address : SaleTypes.AccountIdentifier, _subaccountNOTUSED : SaleTypes.SubAccount) : async Result.Result<(SaleTypes.AccountIdentifier, Nat64), Text> {
+    canistergeekMonitor.collectMetrics();
+    _Sale.reserve(amount, quantity, address, _subaccountNOTUSED);
+  };
+
+  public shared ({ caller }) func retrieve(paymentaddress : SaleTypes.AccountIdentifier) : async Result.Result<(), Text> {
+    canistergeekMonitor.collectMetrics();
+    // no caller check, token will be sent to the address that was set on 'reserve'
+    await _Sale.retrieve(caller, paymentaddress);
+  };
+
+  public shared ({ caller }) func cronSalesSettlements() : async () {
+    canistergeekMonitor.collectMetrics();
+    await _Sale.cronSalesSettlements(caller);
+  };
+
+  public func cronFailedSales() : async () {
+    canistergeekMonitor.collectMetrics();
+    await _Sale.cronFailedSales();
+  };
+
+  // queries
+  public query func salesSettlements() : async [(SaleTypes.AccountIdentifier, SaleTypes.Sale)] {
+    _Sale.salesSettlements();
+  };
+
+  public query func failedSales() : async [(SaleTypes.AccountIdentifier, SaleTypes.SubAccount)] {
+    _Sale.failedSales();
+  };
+
+  public query func saleTransactions() : async [SaleTypes.SaleTransaction] {
+    _Sale.saleTransactions();
+  };
+
+  public query func salesSettings(address : AccountIdentifier) : async SaleTypes.SaleSettings {
+    _Sale.salesSettings(address);
+  };
+
   // Marketplace
   let _Marketplace = Marketplace.Factory(
     cid,
@@ -197,6 +325,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     {
       _Tokens;
       _Cap;
+      _Sale;
     },
     {
       LEDGER_CANISTER;
@@ -271,135 +400,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   public query func toAddress(p : Text, sa : Nat) : async AccountIdentifier {
     _Marketplace.toAddress(p, sa);
-  };
-
-  // Assets
-  let _Assets = Assets.Factory(
-    _assetsState,
-    {
-      _Tokens;
-    },
-    {
-      minter = init_minter;
-    },
-  );
-
-  public shared ({ caller }) func streamAsset(id : Nat, isThumb : Bool, payload : Blob) : async () {
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    _Assets.streamAsset(caller, id, isThumb, payload);
-  };
-
-  public shared ({ caller }) func updateThumb(name : Text, file : AssetsTypes.File) : async ?Nat {
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    _Assets.updateThumb(caller, name, file);
-  };
-
-  public shared ({ caller }) func addAsset(asset : AssetsTypes.Asset) : async Nat {
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    _Assets.addAsset(caller, asset);
-  };
-
-  // Shuffle
-  let _Shuffle = Shuffle.Factory(
-    _shuffleState,
-    {
-      _Assets;
-      _Tokens;
-    },
-    {
-      minter = init_minter;
-    },
-  );
-
-  public shared ({ caller }) func shuffleAssets() : async () {
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    // prevents double shuffle
-    await _Shuffle.shuffleAssets(caller);
-  };
-
-  //Sale
-  let _Sale = Sale.Factory(
-    cid,
-    _saleState,
-    {
-      _Cap;
-      _Marketplace;
-      _Shuffle;
-      _Tokens;
-    },
-    {
-      LEDGER_CANISTER;
-      WHITELIST_CANISTER;
-      minter = init_minter;
-    },
-  );
-
-  // updates
-  public shared ({ caller }) func initMint() : async Result.Result<(), Text> {
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    // prevents double mint
-    await _Sale.initMint(caller);
-  };
-
-  public shared ({ caller }) func shuffleTokensForSale() : async () {
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    await _Sale.shuffleTokensForSale(caller);
-  };
-
-  public shared ({ caller }) func airdropTokens(startIndex : Nat) : async () {
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    _Sale.airdropTokens(caller, startIndex);
-  };
-
-  public shared ({ caller }) func startSale() : async Nat {
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    _Sale.startSale(caller);
-  };
-
-  public func reserve(amount : Nat64, quantity : Nat64, address : SaleTypes.AccountIdentifier, _subaccountNOTUSED : SaleTypes.SubAccount) : async Result.Result<(SaleTypes.AccountIdentifier, Nat64), Text> {
-    canistergeekMonitor.collectMetrics();
-    _Sale.reserve(amount, quantity, address, _subaccountNOTUSED);
-  };
-
-  public shared ({ caller }) func retrieve(paymentaddress : SaleTypes.AccountIdentifier) : async Result.Result<(), Text> {
-    canistergeekMonitor.collectMetrics();
-    // no caller check, token will be sent to the address that was set on 'reserve'
-    await _Sale.retrieve(caller, paymentaddress);
-  };
-
-  public shared ({ caller }) func cronSalesSettlements() : async () {
-    canistergeekMonitor.collectMetrics();
-    await _Sale.cronSalesSettlements(caller);
-  };
-
-  public func cronFailedSales() : async () {
-    canistergeekMonitor.collectMetrics();
-    await _Sale.cronFailedSales();
-  };
-
-  // queries
-  public query func salesSettlements() : async [(SaleTypes.AccountIdentifier, SaleTypes.Sale)] {
-    _Sale.salesSettlements();
-  };
-
-  public query func failedSales() : async [(SaleTypes.AccountIdentifier, SaleTypes.SubAccount)] {
-    _Sale.failedSales();
-  };
-
-  public query func saleTransactions() : async [SaleTypes.SaleTransaction] {
-    _Sale.saleTransactions();
-  };
-
-  public query func salesSettings(address : AccountIdentifier) : async SaleTypes.SaleSettings {
-    _Sale.salesSettings(address);
   };
 
   // EXT

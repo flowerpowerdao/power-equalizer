@@ -31,7 +31,6 @@ module {
     private var _tokenSettlement : TrieMap.TrieMap<Types.TokenIndex, Types.Settlement> = TrieMap.fromEntries(state._tokenSettlementState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _tokenListing : TrieMap.TrieMap<Types.TokenIndex, Types.Listing> = TrieMap.fromEntries(state._tokenListingState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _disbursements : List.List<(Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)> = List.fromArray(state._disbursementsState);
-    private var _nextSubAccount : Nat = state._nextSubAccountState;
 
     public func toStable() : Types.StableState {
       return {
@@ -39,7 +38,6 @@ module {
         _tokenSettlementState = Iter.toArray(_tokenSettlement.entries());
         _tokenListingState = Iter.toArray(_tokenListing.entries());
         _disbursementsState = List.toArray(_disbursements);
-        _nextSubAccountState = _nextSubAccount;
       };
     };
 
@@ -51,7 +49,7 @@ module {
       };
       let token = ExtCore.TokenIdentifier.getIndex(tokenid);
       if (_isLocked(token)) { return #err(#Other("Listing is locked")) };
-      let subaccount = getNextSubAccount();
+      let subaccount = deps._Sale.getNextSubAccount();
       switch (_tokenListing.get(token)) {
         case (?listing) {
           if (listing.price != price) {
@@ -171,7 +169,7 @@ module {
     public func list(caller : Principal, request : Types.ListRequest) : async Result.Result<(), Types.CommonError> {
       // marketplace is open either when marketDelay has passed or collection sold out
       if (Time.now() < Env.publicSaleStart + Env.marketDelay) {
-        if (deps._Tokens.getSold() < deps._Tokens.getTotalToSell()) {
+        if (deps._Sale.getSold() < deps._Sale.getTotalToSell()) {
           return #err(#Other("You can not list yet"));
         };
       };
@@ -344,7 +342,7 @@ module {
     };
 
     public func toAddress(p : Text, sa : Nat) : Types.AccountIdentifier {
-      AID.fromPrincipal(Principal.fromText(p), ?_natToSubAccount(sa));
+      AID.fromPrincipal(Principal.fromText(p), ?Utils.natToSubAccount(sa));
     };
 
     // *** ** ** ** ** ** ** ** ** * * INTERNAL METHODS * ** ** ** ** ** ** ** ** ** ** /
@@ -367,12 +365,6 @@ module {
     };
 
     // public methods
-    public func getNextSubAccount() : Types.SubAccount {
-      var _saOffset = 4294967296;
-      _nextSubAccount += 1;
-      return _natToSubAccount(_saOffset +_nextSubAccount);
-    };
-
     public func addDisbursement(d : (Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)) : () {
       _disbursements := List.push(d, _disbursements);
     };
@@ -396,15 +388,6 @@ module {
         };
         case (_) return false;
       };
-    };
-
-    func _natToSubAccount(n : Nat) : Types.SubAccount {
-      let n_byte = func(i : Nat) : Nat8 {
-        assert (i < 32);
-        let shift : Nat = 8 * (32 - 1 - i);
-        Nat8.fromIntWrap(n / 2 ** shift);
-      };
-      Array.tabulate<Nat8>(32, n_byte);
     };
 
     func unlockedSettlements() : TrieMap.TrieMap<Types.TokenIndex, Types.Settlement> {
