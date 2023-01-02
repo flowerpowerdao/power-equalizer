@@ -194,9 +194,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   let _Assets = Assets.Factory(
     _assetsState,
     {
-      _Tokens;
-    },
-    {
       minter = init_minter;
     },
   );

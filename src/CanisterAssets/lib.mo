@@ -10,7 +10,7 @@ import Utils "../utils";
 
 module {
 
-  public class Factory(state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
+  public class Factory(state : Types.StableState, consts : Types.Constants) {
 
     /*********
     * STATE *

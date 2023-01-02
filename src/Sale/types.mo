@@ -2,7 +2,6 @@ import Time "mo:base/Time";
 
 import Cap "mo:cap/Cap";
 
-import Assets "../CanisterAssets";
 import ExtCore "../toniq-labs/ext/Core";
 import Shuffle "../Shuffle";
 import Tokens "../Tokens";
