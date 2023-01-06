@@ -46,7 +46,18 @@ module {
 
             try {
               var res = await consts.LEDGER_CANISTER.transfer({
-                to = disbursement.to;
+
+                to = switch (Utils.ledgerAccountIdentifierFromText(disbursement.to)) {
+                  case (#ok(accountId)) {
+                    accountId : [Nat8];
+                  };
+                  case (#err(_)) {
+                    // this should never happen because account ids are always created from within the
+                    // canister which should guarantee that they are valid and we are able to decode them
+                    // to [Nat8]
+                    continue payloop;
+                  };
+                };
                 from_subaccount = ?disbursement.fromSubaccount;
                 amount = { e8s = disbursement.amount };
                 fee = { e8s = 10000 };

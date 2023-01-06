@@ -63,15 +63,6 @@ module {
     price : ?Nat64;
   };
 
-  type SendArgs = {
-    memo : Nat64;
-    amount : ICPTs;
-    fee : ICPTs;
-    from_subaccount : ?SubAccount;
-    to : AccountIdentifier;
-    created_at_time : ?Time.Time;
-  };
-
   public type AccountBalanceArgs = { account : AccountIdentifier };
 
   public type StableState = {
@@ -92,7 +83,6 @@ module {
   public type Constants = {
     LEDGER_CANISTER : actor {
       account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
-      send_dfx : shared SendArgs -> async Nat64;
     };
   };
 

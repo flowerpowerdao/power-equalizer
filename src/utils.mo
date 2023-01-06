@@ -10,6 +10,8 @@ import Prim "mo:prim";
 import Principal "mo:base/Principal";
 import Text "mo:base/Text";
 import TrieMap "mo:base/TrieMap";
+import Result "mo:base/Result";
+import Hex "mo:encoding/Hex";
 
 import Buffer "./buffer";
 import ExtCore "./toniq-labs/ext/Core";
@@ -185,5 +187,14 @@ module {
     };
 
     return lowerCaseString;
+  };
+
+  public func ledgerAccountIdentifierFromText(accountIdentifier : Text) : Result.Result<[Nat8], Text> {
+    switch (Hex.decode(accountIdentifier)) {
+      case (#err(e)) { #err(e) };
+      case (#ok(bs)) {
+        #ok(bs);
+      };
+    };
   };
 };

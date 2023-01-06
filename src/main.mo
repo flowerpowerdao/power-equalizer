@@ -35,14 +35,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   type SubAccount = ExtCore.SubAccount;
   type AccountBalanceArgs = { account : AccountIdentifier };
   type ICPTs = { e8s : Nat64 };
-  type SendArgs = {
-    memo : Nat64;
-    amount : ICPTs;
-    fee : ICPTs;
-    from_subaccount : ?SubAccount;
-    to : AccountIdentifier;
-    created_at_time : ?Time.Time;
-  };
 
   // ledger types
   type LedgerAccountIdentifier = [Nat8];
@@ -156,7 +148,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   let LEDGER_CANISTER = actor "ryjl3-tyaaa-aaaaa-aaaba-cai" : actor {
     account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
-    send_dfx : shared SendArgs -> async Nat64;
     transfer : shared TransferArgs -> async TransferResult;
   };
   let WHITELIST_CANISTER = actor "s7o6c-giaaa-aaaae-qac4a-cai" : actor {

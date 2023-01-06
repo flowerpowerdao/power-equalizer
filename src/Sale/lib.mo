@@ -284,12 +284,22 @@ module {
                 account = AID.fromPrincipal(this, ?subaccount);
               });
               if (response.e8s > 10000) {
-                var bh = await consts.LEDGER_CANISTER.send_dfx({
+                var bh = await consts.LEDGER_CANISTER.transfer({
                   memo = 0;
                   amount = { e8s = response.e8s - 10000 };
                   fee = { e8s = 10000 };
                   from_subaccount = ?subaccount;
-                  to = failedSale.0;
+                  to = switch (Utils.ledgerAccountIdentifierFromText(failedSale.0)) {
+                    case (#ok(accountId)) {
+                      accountId : [Nat8];
+                    };
+                    case (#err(_)) {
+                      // this should never happen because account ids are always created from within the
+                      // canister which should guarantee that they are valid and we are able to decode them
+                      // to [Nat8]
+                      continue failedSalesLoop;
+                    };
+                  };
                   created_at_time = null;
                 });
               };

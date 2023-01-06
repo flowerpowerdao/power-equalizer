@@ -30,35 +30,40 @@ module {
   public type AccountBalanceArgs = { account : AccountIdentifier };
   public type TokenIndex = ExtCore.TokenIndex;
   public type ICPTs = { e8s : Nat64 };
-  type SendArgs = {
-    memo : Nat64;
-    amount : ICPTs;
-    fee : ICPTs;
-    from_subaccount : ?SubAccount;
-    to : AccountIdentifier;
-    created_at_time : ?Time.Time;
+  // ledger types
+  type LedgerAccountIdentifier = [Nat8];
+  type BlockIndex = Nat64;
+  type Memo = Nat64;
+  type LedgerSubAccount = [Nat8];
+  type TimeStamp = {
+    timestamp_nanos : Nat64;
   };
-  public type TransferArgs = {
-    to : AccountIdentifier;
-    fee : ICPTs;
-    memo : Nat64;
-    from_subaccount : ?SubAccount;
-    created_at_time : ?Time.Time;
-    amount : ICPTs;
+  type Tokens = {
+    e8s : Nat64;
   };
-  public type TransferError = {
+  type TransferArgs = {
+    to : LedgerAccountIdentifier;
+    fee : Tokens;
+    memo : Memo;
+    from_subaccount : ?LedgerSubAccount;
+    created_at_time : ?TimeStamp;
+    amount : Tokens;
+  };
+  type TransferError = {
     #TxTooOld : { allowed_window_nanos : Nat64 };
-    #BadFee : { expected_fee : ICPTs };
-    #TxDuplicate : { duplicate_of : Nat64 };
+    #BadFee : { expected_fee : Tokens };
+    #TxDuplicate : { duplicate_of : BlockIndex };
     #TxCreatedInFuture;
-    #InsufficientFunds : { balance : ICPTs };
+    #InsufficientFunds : { balance : Tokens };
   };
-  public type TransferResult = { #Ok : Nat64; #Err : TransferError };
+  type TransferResult = {
+    #Ok : BlockIndex;
+    #Err : TransferError;
+  };
 
   public type Constants = {
     LEDGER_CANISTER : actor {
       account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
-      send_dfx : shared SendArgs -> async Nat64;
       transfer : shared TransferArgs -> async TransferResult;
     };
   };
