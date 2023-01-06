@@ -107,6 +107,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
     // Canistergeek
     _canistergeekMonitorUD := ?canistergeekMonitor.preupgrade();
+
+    // Disburser
+    _disburserState := _Disburser.toStable();
   };
 
   system func postupgrade() {
@@ -128,6 +131,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     // Canistergeek
     canistergeekMonitor.postupgrade(_canistergeekMonitorUD);
     _canistergeekMonitorUD := null;
+
+    // Disburser
+    _disburserState := DisburserTypes.newStableState();
   };
 
   /*************
@@ -182,10 +188,12 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     },
   );
 
+  // queries
   public query func getDisbursements() : async [DisburserTypes.Disbursement] {
     _Disburser.getDisbursements();
   };
 
+  // updates
   public func cronDisbursements() : async () {
     canistergeekMonitor.collectMetrics();
     await _Disburser.cronDisbursements();
