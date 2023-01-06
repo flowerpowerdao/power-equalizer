@@ -43,23 +43,37 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     to : AccountIdentifier;
     created_at_time : ?Time.Time;
   };
-  public type TransferArgs = {
-    to : AccountIdentifier;
-    fee : ICPTs;
-    memo : Nat64;
-    from_subaccount : ?SubAccount;
-    created_at_time : ?Time.Time;
-    amount : ICPTs;
-  };
-  public type TransferError = {
-    #TxTooOld : { allowed_window_nanos : Nat64 };
-    #BadFee : { expected_fee : ICPTs };
-    #TxDuplicate : { duplicate_of : Nat64 };
-    #TxCreatedInFuture;
-    #InsufficientFunds : { balance : ICPTs };
-  };
-  public type TransferResult = { #Ok : Nat64; #Err : TransferError };
 
+  // ledger types
+  type LedgerAccountIdentifier = [Nat8];
+  type BlockIndex = Nat64;
+  type Memo = Nat64;
+  type LedgerSubAccount = [Nat8];
+  type TimeStamp = {
+    timestamp_nanos : Nat64;
+  };
+  type Tokens = {
+    e8s : Nat64;
+  };
+  type TransferArgs = {
+    to : LedgerAccountIdentifier;
+    fee : Tokens;
+    memo : Memo;
+    from_subaccount : ?LedgerSubAccount;
+    created_at_time : ?TimeStamp;
+    amount : Tokens;
+  };
+  type TransferError = {
+    #TxTooOld : { allowed_window_nanos : Nat64 };
+    #BadFee : { expected_fee : Tokens };
+    #TxDuplicate : { duplicate_of : BlockIndex };
+    #TxCreatedInFuture;
+    #InsufficientFunds : { balance : Tokens };
+  };
+  type TransferResult = {
+    #Ok : BlockIndex;
+    #Err : TransferError;
+  };
   /****************
   * STABLE STATE *
   ****************/
