@@ -189,8 +189,13 @@ module {
 
       if (response.e8s >= settlement.price) {
         if (settlement.tokens.size() > availableTokens()) {
-          //Issue refund if not enough NFTs available
-          deps._Marketplace.addDisbursement((0, settlement.buyer, settlement.subaccount, (response.e8s - 10000)));
+          // Issue refund if not enough NFTs available
+          deps._Disburser.addDisbursement({
+            to = settlement.buyer;
+            fromSubaccount = settlement.subaccount;
+            amount = response.e8s - 10000;
+            tokenIndex = 0;
+          });
           _salesSettlements.delete(paymentaddress);
           return #err("Not enough NFTs - a refund will be sent automatically very soon");
         } else {
@@ -221,9 +226,14 @@ module {
             caller;
           };
           ignore deps._Cap.insert(event);
-          //Payout
+          // Payout
           var bal : Nat64 = response.e8s - (10000 * 1); //Remove 2x tx fee
-          deps._Marketplace.addDisbursement((0, Env.teamAddress, settlement.subaccount, bal));
+          deps._Disburser.addDisbursement({
+            to = Env.teamAddress;
+            fromSubaccount = settlement.subaccount;
+            amount = bal;
+            tokenIndex = 0;
+          });
           return #ok();
         };
       } else {
@@ -274,12 +284,22 @@ module {
                 account = AID.fromPrincipal(this, ?subaccount);
               });
               if (response.e8s > 10000) {
-                var bh = await consts.LEDGER_CANISTER.send_dfx({
+                var bh = await consts.LEDGER_CANISTER.transfer({
                   memo = 0;
                   amount = { e8s = response.e8s - 10000 };
                   fee = { e8s = 10000 };
                   from_subaccount = ?subaccount;
-                  to = failedSale.0;
+                  to = switch (Utils.ledgerAccountIdentifierFromText(failedSale.0)) {
+                    case (#ok(accountId)) {
+                      accountId : [Nat8];
+                    };
+                    case (#err(_)) {
+                      // this should never happen because account ids are always created from within the
+                      // canister which should guarantee that they are valid and we are able to decode them
+                      // to [Nat8]
+                      continue failedSalesLoop;
+                    };
+                  };
                   created_at_time = null;
                 });
               };

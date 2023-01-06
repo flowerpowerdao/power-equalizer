@@ -22,6 +22,8 @@ import Shuffle "Shuffle";
 import ShuffleTypes "Shuffle/types";
 import TokenTypes "Tokens/types";
 import Tokens "Tokens";
+import Disburser "Disburser";
+import DisburserTypes "Disburser/types";
 import Utils "./utils";
 
 shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCanister {
@@ -33,15 +35,37 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   type SubAccount = ExtCore.SubAccount;
   type AccountBalanceArgs = { account : AccountIdentifier };
   type ICPTs = { e8s : Nat64 };
-  type SendArgs = {
-    memo : Nat64;
-    amount : ICPTs;
-    fee : ICPTs;
-    from_subaccount : ?SubAccount;
-    to : AccountIdentifier;
-    created_at_time : ?Time.Time;
-  };
 
+  // ledger types
+  type LedgerAccountIdentifier = [Nat8];
+  type BlockIndex = Nat64;
+  type Memo = Nat64;
+  type LedgerSubAccount = [Nat8];
+  type TimeStamp = {
+    timestamp_nanos : Nat64;
+  };
+  type Tokens = {
+    e8s : Nat64;
+  };
+  type TransferArgs = {
+    to : LedgerAccountIdentifier;
+    fee : Tokens;
+    memo : Memo;
+    from_subaccount : ?LedgerSubAccount;
+    created_at_time : ?TimeStamp;
+    amount : Tokens;
+  };
+  type TransferError = {
+    #TxTooOld : { allowed_window_nanos : Nat64 };
+    #BadFee : { expected_fee : Tokens };
+    #TxDuplicate : { duplicate_of : BlockIndex };
+    #TxCreatedInFuture;
+    #InsufficientFunds : { balance : Tokens };
+  };
+  type TransferResult = {
+    #Ok : BlockIndex;
+    #Err : TransferError;
+  };
   /****************
   * STABLE STATE *
   ****************/
@@ -60,6 +84,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   // Shuffle
   private stable var _shuffleState : ShuffleTypes.StableState = ShuffleTypes.newStableState();
+
+  // Disburser
+  private stable var _disburserState : DisburserTypes.StableState = DisburserTypes.newStableState();
 
   // Cap
   private stable var rootBucketId : ?Text = null;
@@ -86,6 +113,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
     // Canistergeek
     _canistergeekMonitorUD := ?canistergeekMonitor.preupgrade();
+
+    // Disburser
+    _disburserState := _Disburser.toStable();
   };
 
   system func postupgrade() {
@@ -107,6 +137,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     // Canistergeek
     canistergeekMonitor.postupgrade(_canistergeekMonitorUD);
     _canistergeekMonitorUD := null;
+
+    // Disburser
+    _disburserState := DisburserTypes.newStableState();
   };
 
   /*************
@@ -115,7 +148,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   let LEDGER_CANISTER = actor "ryjl3-tyaaa-aaaaa-aaaba-cai" : actor {
     account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
-    send_dfx : shared SendArgs -> async Nat64;
+    transfer : shared TransferArgs -> async TransferResult;
   };
   let WHITELIST_CANISTER = actor "s7o6c-giaaa-aaaae-qac4a-cai" : actor {
     getWhitelist : shared () -> async [Principal];
@@ -149,6 +182,26 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   private func validateCaller(principal : Principal) : () {
     assert (principal == Principal.fromText("ikywv-z7xvl-xavcg-ve6kg-dbbtx-wy3gy-qbtwp-7ylai-yl4lc-lwetg-kqe"));
+  };
+
+  // Disburser
+  let _Disburser = Disburser.Factory(
+    cid,
+    _disburserState,
+    {
+      LEDGER_CANISTER;
+    },
+  );
+
+  // queries
+  public query func getDisbursements() : async [DisburserTypes.Disbursement] {
+    _Disburser.getDisbursements();
+  };
+
+  // updates
+  public func cronDisbursements() : async () {
+    canistergeekMonitor.collectMetrics();
+    await _Disburser.cronDisbursements();
   };
 
   // Cap
@@ -197,6 +250,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     {
       _Tokens;
       _Cap;
+      _Disburser;
     },
     {
       LEDGER_CANISTER;
@@ -223,11 +277,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     canistergeekMonitor.collectMetrics();
     // checks caller == token_owner
     await _Marketplace.list(caller, request);
-  };
-
-  public func cronDisbursements() : async () {
-    canistergeekMonitor.collectMetrics();
-    await _Marketplace.cronDisbursements();
   };
 
   public shared ({ caller }) func cronSettlements() : async () {
@@ -261,12 +310,14 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     _Marketplace.stats();
   };
 
-  public query func viewDisbursements() : async [(MarketplaceTypes.TokenIndex, MarketplaceTypes.AccountIdentifier, MarketplaceTypes.SubAccount, Nat64)] {
-    _Marketplace.viewDisbursements();
-  };
-
-  public query func pendingCronJobs() : async [Nat] {
-    _Marketplace.pendingCronJobs();
+  public query func pendingCronJobs() : async {
+    disbursements : Nat;
+    failedSettlements : Nat;
+  } {
+    {
+      disbursements = _Disburser.pendingCronJobs();
+      failedSettlements = _Marketplace.pendingCronJobs();
+    };
   };
 
   public query func toAddress(p : Text, sa : Nat) : async AccountIdentifier {
@@ -327,6 +378,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
       _Marketplace;
       _Shuffle;
       _Tokens;
+      _Disburser;
     },
     {
       LEDGER_CANISTER;
