@@ -1,6 +1,5 @@
 import Cycles "mo:base/ExperimentalCycles";
 import Principal "mo:base/Principal";
-import Array "mo:base/Array";
 import Result "mo:base/Result";
 import Time "mo:base/Time";
 
@@ -59,7 +58,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     #TxCreatedInFuture;
     #InsufficientFunds : { balance : ICPTs };
   };
-	public type TransferResult = { #Ok : Nat64; #Err : TransferError };
+  public type TransferResult = { #Ok : Nat64; #Err : TransferError };
 
   /****************
   * STABLE STATE *
@@ -138,7 +137,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   let LEDGER_CANISTER = actor "ryjl3-tyaaa-aaaaa-aaaba-cai" : actor {
     account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
     send_dfx : shared SendArgs -> async Nat64;
-		transfer : shared TransferArgs -> async TransferResult;
+    transfer : shared TransferArgs -> async TransferResult;
   };
   let WHITELIST_CANISTER = actor "s7o6c-giaaa-aaaae-qac4a-cai" : actor {
     getWhitelist : shared () -> async [Principal];
@@ -298,8 +297,14 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     _Marketplace.stats();
   };
 
-  public query func pendingCronJobs() : async [Nat] {
-    Array.append(_Marketplace.pendingCronJobs(), _Disburser.pendingCronJobs());
+  public query func pendingCronJobs() : async {
+    disbursements : Nat;
+    failedSettlements : Nat;
+  } {
+    {
+      disbursements = _Disburser.pendingCronJobs();
+      failedSettlements = _Marketplace.pendingCronJobs();
+    };
   };
 
   public query func toAddress(p : Text, sa : Nat) : async AccountIdentifier {

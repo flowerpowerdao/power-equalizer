@@ -74,10 +74,8 @@ module {
       };
     };
 
-    public func pendingCronJobs() : [Nat] {
-      [
-        List.size(_disbursements),
-      ];
+    public func pendingCronJobs() : Nat {
+      List.size(_disbursements);
     };
   };
 };

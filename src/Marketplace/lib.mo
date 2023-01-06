@@ -139,7 +139,7 @@ module {
                       amount = rem;
                       tokenIndex = token;
                     });
-                    
+
                     let event : Root.IndefiniteEvent = {
                       operation = "sale";
                       details = [
@@ -322,10 +322,8 @@ module {
       };
     };
 
-    public func pendingCronJobs() : [Nat] {
-      [
-        unlockedSettlements().size(),
-      ]; // those are the settlements that exceeded their 2 min lock time
+    public func pendingCronJobs() : Nat {
+      unlockedSettlements().size(); // those are the settlements that exceeded their 2 min lock time
     };
 
     public func toAddress(p : Text, sa : Nat) : Types.AccountIdentifier {
