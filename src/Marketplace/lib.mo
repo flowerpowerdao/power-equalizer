@@ -30,14 +30,12 @@ module {
     private var _transactions : Buffer.Buffer<Types.Transaction> = Utils.bufferFromArray(state._transactionsState);
     private var _tokenSettlement : TrieMap.TrieMap<Types.TokenIndex, Types.Settlement> = TrieMap.fromEntries(state._tokenSettlementState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _tokenListing : TrieMap.TrieMap<Types.TokenIndex, Types.Listing> = TrieMap.fromEntries(state._tokenListingState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-    private var _disbursements : List.List<(Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)> = List.fromArray(state._disbursementsState);
 
     public func toStable() : Types.StableState {
       return {
         _transactionsState = _transactions.toArray();
         _tokenSettlementState = Iter.toArray(_tokenSettlement.entries());
         _tokenListingState = Iter.toArray(_tokenListing.entries());
-        _disbursementsState = List.toArray(_disbursements);
       };
     };
 
@@ -115,12 +113,27 @@ module {
                   case (?token_owner) {
                     var bal : Nat64 = settlement.price - (10000 * Nat64.fromNat(Env.salesFees.size() + 1));
                     var rem = bal;
+
+                    // disbursement of fees
                     for (f in Env.salesFees.vals()) {
                       var _fee : Nat64 = bal * f.1 / 100000;
-                      addDisbursement((token, f.0, settlement.subaccount, _fee));
+                      deps._Disburser.addDisbursement({
+                        to = f.0;
+                        fromSubaccount = settlement.subaccount;
+                        amount = _fee;
+                        tokenIndex = token;
+                      });
                       rem := rem - _fee : Nat64;
                     };
-                    addDisbursement((token, token_owner, settlement.subaccount, rem));
+
+                    // disbursement to the previous token owner
+                    deps._Disburser.addDisbursement({
+                      to = token_owner;
+                      fromSubaccount = settlement.subaccount;
+                      amount = rem;
+                      tokenIndex = token;
+                    });
+
                     let event : Root.IndefiniteEvent = {
                       operation = "sale";
                       details = [
@@ -220,33 +233,6 @@ module {
       };
     };
 
-    public func cronDisbursements() : async () {
-      label payloop while (true) {
-        let (last, newDisbursements) = List.pop(_disbursements);
-        switch (last) {
-          case (?d) {
-            _disbursements := newDisbursements;
-            try {
-              var bh = await consts.LEDGER_CANISTER.send_dfx({
-                memo = Encoding.BigEndian.toNat64(Blob.toArray(Principal.toBlob(Principal.fromText(ExtCore.TokenIdentifier.fromPrincipal(this, d.0)))));
-                amount = { e8s = d.3 };
-                fee = { e8s = 10000 };
-                from_subaccount = ?d.2;
-                to = d.1;
-                created_at_time = null;
-              });
-            } catch (e) {
-              // this could lead to an infinite loop if there's not enough ICP in the account
-              // _disbursements := List.push(d, _disbursements);
-            };
-          };
-          case (_) {
-            break payloop;
-          };
-        };
-      };
-    };
-
     public func details(token : Types.TokenIdentifier) : Result.Result<(Types.AccountIdentifier, ?Types.Listing), Types.CommonError> {
       if (ExtCore.TokenIdentifier.isPrincipal(token, this) == false) {
         return #err(#InvalidToken(token));
@@ -330,15 +316,8 @@ module {
       };
     };
 
-    public func viewDisbursements() : [(Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)] {
-      List.toArray(_disbursements);
-    };
-
-    public func pendingCronJobs() : [Nat] {
-      [
-        List.size(_disbursements),
-        unlockedSettlements().size(),
-      ]; // those are the settlements that exceeded their 2 min lock time
+    public func pendingCronJobs() : Nat {
+      unlockedSettlements().size(); // those are the settlements that exceeded their 2 min lock time
     };
 
     public func toAddress(p : Text, sa : Nat) : Types.AccountIdentifier {
@@ -362,11 +341,6 @@ module {
 
     public func getListingFromTokenListing(token : Types.TokenIndex) : ?Types.Listing {
       return _tokenListing.get(token);
-    };
-
-    // public methods
-    public func addDisbursement(d : (Types.TokenIndex, Types.AccountIdentifier, Types.SubAccount, Nat64)) : () {
-      _disbursements := List.push(d, _disbursements);
     };
 
     // private methods
