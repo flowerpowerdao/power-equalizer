@@ -34,6 +34,9 @@ module {
     private var _ethFlowerWhitelist : Buffer.Buffer<Types.AccountIdentifier> = Utils.bufferFromArray<Types.AccountIdentifier>(state._ethFlowerWhitelistState);
     private var _modclubWhitelist : Buffer.Buffer<Types.AccountIdentifier> = Utils.bufferFromArray<Types.AccountIdentifier>(state._modclubWhitelistState);
     private var _soldIcp : Nat64 = state._soldIcpState;
+    private var _sold : Nat = state._soldState;
+    private var _totalToSell : Nat = state._totalToSellState;
+    private var _nextSubAccount : Nat = state._nextSubAccountState;
 
     public func toStable() : Types.StableState {
       return {
@@ -44,6 +47,9 @@ module {
         _ethFlowerWhitelistState = _ethFlowerWhitelist.toArray();
         _modclubWhitelistState = _modclubWhitelist.toArray();
         _soldIcpState = _soldIcp;
+        _soldState = _sold;
+        _totalToSellState = _totalToSell;
+        _nextSubAccountState = _nextSubAccount;
       };
     };
 
@@ -94,7 +100,7 @@ module {
     };
 
     public func airdropTokens(caller : Principal, startingIndex : Nat) : () {
-      assert (caller == consts.minter and deps._Tokens.getTotalToSell() == 0);
+      assert (caller == consts.minter and _totalToSell == 0);
 
       if (not Env.airdropEnabled) {
         return;
@@ -116,8 +122,8 @@ module {
     };
 
     public func startSale(caller : Principal) : Nat {
-      assert (caller == consts.minter and deps._Tokens.getTotalToSell() == 0);
-      deps._Tokens.setTotalToSell(_tokensForSale.size());
+      assert (caller == consts.minter and _totalToSell == 0);
+      _totalToSell := _tokensForSale.size();
       _tokensForSale.size();
     };
 
@@ -155,7 +161,7 @@ module {
       if (total > amount) {
         return #err("Price mismatch!");
       };
-      let subaccount = deps._Marketplace.getNextSubAccount();
+      let subaccount = getNextSubAccount();
       let paymentAddress : Types.AccountIdentifier = AID.fromPrincipal(this, ?subaccount);
 
       // we only reserve the tokens here, they deducted from the available tokens
@@ -223,7 +229,7 @@ module {
             time = Time.now();
           });
           _soldIcp += settlement.price;
-          deps._Tokens.increaseSold(tokens.size());
+          _sold += tokens.size();
           _salesSettlements.delete(paymentaddress);
           let event : Root.IndefiniteEvent = {
             operation = "mint";
@@ -296,12 +302,22 @@ module {
                 account = AID.fromPrincipal(this, ?subaccount);
               });
               if (response.e8s > 10000) {
-                var bh = await consts.LEDGER_CANISTER.send_dfx({
+                var bh = await consts.LEDGER_CANISTER.transfer({
                   memo = 0;
                   amount = { e8s = response.e8s - 10000 };
                   fee = { e8s = 10000 };
                   from_subaccount = ?subaccount;
-                  to = failedSale.0;
+                  to = switch (Utils.ledgerAccountIdentifierFromText(failedSale.0)) {
+                    case (#ok(accountId)) {
+                      accountId : [Nat8];
+                    };
+                    case (#err(_)) {
+                      // this should never happen because account ids are always created from within the
+                      // canister which should guarantee that they are valid and we are able to decode them
+                      // to [Nat8]
+                      continue failedSalesLoop;
+                    };
+                  };
                   created_at_time = null;
                 });
               };
@@ -317,6 +333,12 @@ module {
       };
     };
 
+    public func getNextSubAccount() : Types.SubAccount {
+      var _saOffset = 4294967296;
+      _nextSubAccount += 1;
+      return Utils.natToSubAccount(_saOffset +_nextSubAccount);
+    };
+
     // queries
     public func salesSettlements() : [(Types.AccountIdentifier, Types.Sale)] {
       Iter.toArray(_salesSettlements.entries());
@@ -330,13 +352,21 @@ module {
       _saleTransactions.toArray();
     };
 
+    public func getSold() : Nat {
+      _sold;
+    };
+
+    public func getTotalToSell() : Nat {
+      _totalToSell;
+    };
+
     public func salesSettings(address : Types.AccountIdentifier) : Types.SaleSettings {
       return {
         price = getAddressPrice(address);
         salePrice = Env.salePrice;
         remaining = availableTokens();
-        sold = deps._Tokens.getSold();
-        totalToSell = deps._Tokens.getTotalToSell();
+        sold = _sold;
+        totalToSell = _totalToSell;
         startTime = Env.publicSaleStart;
         whitelistTime = Env.whitelistTime;
         whitelist = isWhitelistedAny(address);

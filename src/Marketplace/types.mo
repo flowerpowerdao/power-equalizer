@@ -5,6 +5,7 @@ import Cap "mo:cap/Cap";
 import ExtCore "../toniq-labs/ext/Core";
 import TokenTypes "../Tokens/types";
 import Tokens "../Tokens";
+import Sale "../Sale";
 import Disburser "../Disburser";
 
 module {
@@ -14,7 +15,6 @@ module {
       _transactionsState : [Transaction] = [];
       _tokenSettlementState : [(TokenTypes.TokenIndex, Settlement)] = [];
       _tokenListingState : [(TokenTypes.TokenIndex, Listing)] = [];
-      _nextSubAccountState : Nat = 0;
     };
   };
 
@@ -61,34 +61,24 @@ module {
     price : ?Nat64;
   };
 
-  type SendArgs = {
-    memo : Nat64;
-    amount : ICPTs;
-    fee : ICPTs;
-    from_subaccount : ?SubAccount;
-    to : AccountIdentifier;
-    created_at_time : ?Time.Time;
-  };
-
   public type AccountBalanceArgs = { account : AccountIdentifier };
 
   public type StableState = {
     _transactionsState : [Transaction];
     _tokenSettlementState : [(TokenIndex, Settlement)];
     _tokenListingState : [(TokenIndex, Listing)];
-    _nextSubAccountState : Nat;
   };
 
   public type Dependencies = {
     _Cap : Cap.Cap;
     _Tokens : Tokens.Factory;
+    _Sale : Sale.Factory;
     _Disburser : Disburser.Factory;
   };
 
   public type Constants = {
     LEDGER_CANISTER : actor {
       account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
-      send_dfx : shared SendArgs -> async Nat64;
     };
   };
 

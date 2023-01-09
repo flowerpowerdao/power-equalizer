@@ -29,8 +29,13 @@ let additions = [
   },
   { name = "accountid"
   , repo = "https://github.com/aviate-labs/principal.mo"
-  , version = "main"
-  , dependencies = [ "array", "crypto", "base", "encoding", "hash" ]
+  , version = "v0.2.6"
+  , dependencies = [ "array", "crypto", "base-0.7.3", "encoding", "hash" ]
+  },
+  { name = "base-0.7.3"
+  , repo = "https://github.com/dfinity/motoko-base"
+  , version = "aafcdee0c8328087aeed506e64aa2ff4ed329b47"
+  , dependencies = [] : List Text
   },
   { name = "sha"
   , repo = "https://github.com/aviate-labs/sha.mo"

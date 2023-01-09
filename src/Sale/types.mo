@@ -3,7 +3,6 @@ import Time "mo:base/Time";
 import Cap "mo:cap/Cap";
 
 import ExtCore "../toniq-labs/ext/Core";
-import Marketplace "../Marketplace";
 import Shuffle "../Shuffle";
 import Tokens "../Tokens";
 import Disburser "../Disburser";
@@ -19,6 +18,9 @@ module {
       _ethFlowerWhitelistState : [AccountIdentifier] = [];
       _modclubWhitelistState : [AccountIdentifier] = [];
       _soldIcpState : Nat64 = 0;
+      _soldState : Nat = 0;
+      _totalToSellState : Nat = 0;
+      _nextSubAccountState : Nat = 0;
     };
   };
 
@@ -30,29 +32,53 @@ module {
     _ethFlowerWhitelistState : [AccountIdentifier];
     _modclubWhitelistState : [AccountIdentifier];
     _soldIcpState : Nat64;
+    _soldState : Nat;
+    _totalToSellState : Nat;
+    _nextSubAccountState : Nat;
   };
 
   public type Dependencies = {
     _Cap : Cap.Cap;
     _Tokens : Tokens.Factory;
-    _Marketplace : Marketplace.Factory;
     _Shuffle : Shuffle.Factory;
     _Disburser : Disburser.Factory;
   };
 
-  type SendArgs = {
-    memo : Nat64;
-    amount : ICPTs;
-    fee : ICPTs;
-    from_subaccount : ?SubAccount;
-    to : AccountIdentifier;
-    created_at_time : ?Time.Time;
+  // ledger types
+  type LedgerAccountIdentifier = [Nat8];
+  type BlockIndex = Nat64;
+  type Memo = Nat64;
+  type LedgerSubAccount = [Nat8];
+  type TimeStamp = {
+    timestamp_nanos : Nat64;
+  };
+  type Tokens = {
+    e8s : Nat64;
+  };
+  type TransferArgs = {
+    to : LedgerAccountIdentifier;
+    fee : Tokens;
+    memo : Memo;
+    from_subaccount : ?LedgerSubAccount;
+    created_at_time : ?TimeStamp;
+    amount : Tokens;
+  };
+  type TransferError = {
+    #TxTooOld : { allowed_window_nanos : Nat64 };
+    #BadFee : { expected_fee : Tokens };
+    #TxDuplicate : { duplicate_of : BlockIndex };
+    #TxCreatedInFuture;
+    #InsufficientFunds : { balance : Tokens };
+  };
+  type TransferResult = {
+    #Ok : BlockIndex;
+    #Err : TransferError;
   };
 
   public type Constants = {
     LEDGER_CANISTER : actor {
       account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
-      send_dfx : shared SendArgs -> async Nat64;
+      transfer : shared TransferArgs -> async TransferResult;
     };
     WHITELIST_CANISTER : actor { getWhitelist : shared () -> async [Principal] };
     minter : Principal;

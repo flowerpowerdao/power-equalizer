@@ -30,14 +30,12 @@ module {
     private var _transactions : Buffer.Buffer<Types.Transaction> = Utils.bufferFromArray(state._transactionsState);
     private var _tokenSettlement : TrieMap.TrieMap<Types.TokenIndex, Types.Settlement> = TrieMap.fromEntries(state._tokenSettlementState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _tokenListing : TrieMap.TrieMap<Types.TokenIndex, Types.Listing> = TrieMap.fromEntries(state._tokenListingState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-    private var _nextSubAccount : Nat = state._nextSubAccountState;
 
     public func toStable() : Types.StableState {
       return {
         _transactionsState = _transactions.toArray();
         _tokenSettlementState = Iter.toArray(_tokenSettlement.entries());
         _tokenListingState = Iter.toArray(_tokenListing.entries());
-        _nextSubAccountState = _nextSubAccount;
       };
     };
 
@@ -54,6 +52,11 @@ module {
         return #err(#Other("Listing is locked"));
       };
 
+
+      if (_isLocked(token)) {
+        return #err(#Other("Listing is locked"));
+      };
+
       let listing = switch (_tokenListing.get(token)) {
         case (?listing) { listing };
         case (null) {
@@ -65,7 +68,7 @@ module {
         return #err(#Other("Price has changed!"));
       };
 
-      let subaccount = getNextSubAccount();
+      let subaccount = deps._Sale.getNextSubAccount();
       let paymentAddress : Types.AccountIdentifier = AID.fromPrincipal(this, ?subaccount);
       _tokenListing.put(
         token,
@@ -118,7 +121,7 @@ module {
           return #err(#Other("Nothing to settle"));
         };
       };
-      
+
       let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({
         account = AID.fromPrincipal(this, ?settlement.subaccount);
       });
@@ -204,7 +207,7 @@ module {
     public func list(caller : Principal, request : Types.ListRequest) : async Result.Result<(), Types.CommonError> {
       // marketplace is open either when marketDelay has passed or collection sold out
       if (Time.now() < Env.publicSaleStart + Env.marketDelay) {
-        if (deps._Tokens.getSold() < deps._Tokens.getTotalToSell()) {
+        if (deps._Sale.getSold() < deps._Sale.getTotalToSell()) {
           return #err(#Other("You can not list yet"));
         };
       };
@@ -346,14 +349,12 @@ module {
       };
     };
 
-    public func pendingCronJobs() : [Nat] {
-      [
-        unlockedSettlements().size(),
-      ]; // those are the settlements that exceeded their 2 min lock time
+    public func pendingCronJobs() : Nat {
+      unlockedSettlements().size(); // those are the settlements that exceeded their 2 min lock time
     };
 
     public func toAddress(p : Text, sa : Nat) : Types.AccountIdentifier {
-      AID.fromPrincipal(Principal.fromText(p), ?_natToSubAccount(sa));
+      AID.fromPrincipal(Principal.fromText(p), ?Utils.natToSubAccount(sa));
     };
 
     // *** ** ** ** ** ** ** ** ** * * INTERNAL METHODS * ** ** ** ** ** ** ** ** ** ** /
@@ -375,13 +376,6 @@ module {
       return _tokenListing.get(token);
     };
 
-    // public methods
-    public func getNextSubAccount() : Types.SubAccount {
-      var _saOffset = 4294967296;
-      _nextSubAccount += 1;
-      return _natToSubAccount(_saOffset +_nextSubAccount);
-    };
-
     // private methods
     func _isLocked(token : Types.TokenIndex) : Bool {
       switch (_tokenListing.get(token)) {
@@ -401,15 +395,6 @@ module {
         };
         case (_) return false;
       };
-    };
-
-    func _natToSubAccount(n : Nat) : Types.SubAccount {
-      let n_byte = func(i : Nat) : Nat8 {
-        assert (i < 32);
-        let shift : Nat = 8 * (32 - 1 - i);
-        Nat8.fromIntWrap(n / 2 ** shift);
-      };
-      Array.tabulate<Nat8>(32, n_byte);
     };
 
     func unlockedSettlements() : TrieMap.TrieMap<Types.TokenIndex, Types.Settlement> {

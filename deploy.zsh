@@ -62,7 +62,7 @@ if [[ "$network" == "ic" ]]
 then
 open "https://$(dfx canister --network $network id $mode).raw.ic0.app/?asset=0"
 else
-open "http://127.0.0.1:8000/?canisterId=$(dfx canister --network $network id $mode)&asset=0"
+open "http://127.0.0.1:4943/?canisterId=$(dfx canister --network $network id $mode)&asset=0"
 fi
 
 # add the other assets
