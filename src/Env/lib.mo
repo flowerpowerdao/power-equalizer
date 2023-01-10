@@ -11,8 +11,8 @@ module {
 
     public let salePrice : Nat64 = 700000000;
     public let salesFees : [(ExtCore.AccountIdentifier, Nat64)] = [
-      (teamAddress, 7500), // Royalty Fee 
-      ("c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9", 1000), // Entrepot Fee 
+      (teamAddress, 7500), // Royalty Fee
+      ("c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9", 1000), // Entrepot Fee
     ];
 
     public let publicSaleStart : Time.Time = 1659276000000000000; // Start of first purchase (WL or other)
@@ -23,7 +23,13 @@ module {
     public let whitelistDiscountLimited : Bool = true; // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
 
     // dutch auction
+    public type DutchAuctionFor = {
+      #everyone; // dutch auction for everyone
+      #whitelist; // dutch auction for whitelist(tier price is ignored), then salePrice for public sale
+      #publicSale; // tier price for whitelist, then dutch auction for public sale
+    };
     public let dutchAuctionEnabled = true;
+    public let dutchAuctionFor: DutchAuctionFor = #everyone;
     public let dutchAuctionStartPrice : Nat64 = 21500000000; // start with 350 icp for dutch auction
     public let dutchAuctionIntervalPriceDrop : Nat64 = 500000000; // drop 5 icp every interval
     public let dutchAuctionReservePrice : Nat64 = 500000000; // reserve price is 5 icp

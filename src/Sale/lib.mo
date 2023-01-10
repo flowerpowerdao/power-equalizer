@@ -419,24 +419,35 @@ module {
 
     // Set different price types here
     func getAddressBulkPrice(address : Types.AccountIdentifier) : [(Nat64, Nat64)] {
-      // order by WL price, cheapest first
-      if (Env.dutchAuctionEnabled) { // whitelist only??
-        return [(1, getCurrentDutchAuctionPrice())];
-      }
-      else {
-        let whitelisted = _whitelist.find(func(a) : Bool { a.1 == address });
-        switch (whitelisted) {
-          case (?whitelistedItem) {
-            return [(1, whitelistedItem.0)];
-          };
-          case (null) {};
+      if (Env.dutchAuctionEnabled) {
+        let everyone = Env.dutchAuctionFor == #everyone;
+        let whitelist = Env.dutchAuctionFor == #whitelist and isWhitelisted(address);
+        let publicSale = Env.dutchAuctionFor == #publicSale and not isWhitelisted(address);
+
+        if (everyone or whitelist or publicSale) {
+          return [(1, getCurrentDutchAuctionPrice())];
         };
       };
+
+      let whitelisted = _whitelist.find(func(a) : Bool { a.1 == address });
+      switch (whitelisted) {
+        case (?whitelistedItem) {
+          return [(1, whitelistedItem.0)];
+        };
+        case (null) {};
+      };
+
       return [(1, Env.salePrice)];
     };
 
     func getCurrentDutchAuctionPrice() : Nat64 {
-      let timeSinceStart : Int = Time.now() - Env.publicSaleStart; // how many nano seconds passed since the auction began
+      let start = if (Env.dutchAuctionFor == #publicSale) {
+        // if the dutch auction is for public sale only, we take the start time when the whitelist time has expired
+        Env.whitelistTime
+      } else {
+        Env.publicSaleStart
+      };
+      let timeSinceStart : Int = Time.now() - start; // how many nano seconds passed since the auction began
       // in the event that this function is called before the auction has started, return the starting price
       if (timeSinceStart < 0) {
         return Env.dutchAuctionStartPrice;
