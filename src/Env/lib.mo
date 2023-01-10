@@ -4,9 +4,8 @@ import ExtCore "../toniq-labs/ext/Core";
 module {
     public let collectionName = "Pineapple Punks";
     public let placeholderContentLength = "1053832";
-    public let teamAddress = "979307078c971f6d82a302825ac07dc63a4f68ece99f24014d69d8ccec7b5d6f";
+    public let teamAddress : ExtCore.AccountIdentifier = "979307078c971f6d82a302825ac07dc63a4f68ece99f24014d69d8ccec7b5d6f";
     public let ecscrowDelay: Time.Time = 120_000_000_000; // 120 seconds
-    public let teamRoyaltyAddress : ExtCore.AccountIdentifier = teamAddress;
     public let collectionSize : Nat32 = 7777;
 
     public let salePrice : Nat64 = 700000000;
