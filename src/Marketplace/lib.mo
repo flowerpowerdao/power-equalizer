@@ -220,7 +220,6 @@ module {
         return #err(#Other("Listing is locked"));
       };
 
-      // ??
       switch (_tokenSettlement.get(token)) {
         case (?settlement) {
           let resp : Result.Result<(), Types.CommonError> = await settle(caller, request.token);

@@ -15,7 +15,7 @@ module {
       _salesSettlementsState : [(AccountIdentifier, Sale)] = [];
       _failedSalesState : [(AccountIdentifier, SubAccount)] = [];
       _tokensForSaleState : [TokenIndex] = [];
-      _ethFlowerWhitelistState : [AccountIdentifier] = [];
+      _whitelistStable : [(Nat64, AccountIdentifier)] = [];
       _modclubWhitelistState : [AccountIdentifier] = [];
       _soldIcpState : Nat64 = 0;
       _soldState : Nat = 0;
@@ -29,7 +29,7 @@ module {
     _salesSettlementsState : [(AccountIdentifier, Sale)];
     _failedSalesState : [(AccountIdentifier, SubAccount)];
     _tokensForSaleState : [TokenIndex];
-    _ethFlowerWhitelistState : [AccountIdentifier];
+    _whitelistStable : [(Nat64, AccountIdentifier)];
     _modclubWhitelistState : [AccountIdentifier];
     _soldIcpState : Nat64;
     _soldState : Nat;
@@ -105,6 +105,7 @@ module {
     price : Nat64;
     subaccount : SubAccount;
     buyer : AccountIdentifier;
+    whitelisted : Bool;
     expires : Time;
   };
 
@@ -115,6 +116,7 @@ module {
     buyer : AccountIdentifier;
     time : Time;
   };
+
   public type SaleSettings = {
     price : Nat64;
     salePrice : Nat64;

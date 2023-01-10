@@ -31,7 +31,7 @@ module {
     private var _salesSettlements : TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale> = TrieMap.fromEntries(state._salesSettlementsState.vals(), AID.equal, AID.hash);
     private var _failedSales : Buffer.Buffer<(Types.AccountIdentifier, Types.SubAccount)> = Utils.bufferFromArray<(Types.AccountIdentifier, Types.SubAccount)>(state._failedSalesState);
     private var _tokensForSale : Buffer.Buffer<Types.TokenIndex> = Utils.bufferFromArray<Types.TokenIndex>(state._tokensForSaleState);
-    private var _ethFlowerWhitelist : Buffer.Buffer<Types.AccountIdentifier> = Utils.bufferFromArray<Types.AccountIdentifier>(state._ethFlowerWhitelistState);
+    private var _whitelist : Buffer.Buffer<(Nat64, Types.AccountIdentifier)> = Utils.bufferFromArray<(Nat64, Types.AccountIdentifier)>(state._whitelistStable);
     private var _modclubWhitelist : Buffer.Buffer<Types.AccountIdentifier> = Utils.bufferFromArray<Types.AccountIdentifier>(state._modclubWhitelistState);
     private var _soldIcp : Nat64 = state._soldIcpState;
     private var _sold : Nat = state._soldState;
@@ -44,7 +44,7 @@ module {
         _salesSettlementsState = Iter.toArray(_salesSettlements.entries());
         _failedSalesState = _failedSales.toArray();
         _tokensForSaleState = _tokensForSale.toArray();
-        _ethFlowerWhitelistState = _ethFlowerWhitelist.toArray();
+        _whitelistStable = _whitelist.toArray();
         _modclubWhitelistState = _modclubWhitelist.toArray();
         _soldIcpState = _soldIcp;
         _soldState = _sold;
@@ -69,19 +69,37 @@ module {
             },
           );
         };
+
         // Mint
         mintCollection(Env.collectionSize);
-        // turn whitelist into buffer for better performance
-        if (Env.ethFlowerWhitelistEnabled) {
-          setWhitelist(Env.ethFlowerWhitelist, _ethFlowerWhitelist);
-        };
-        if (Env.modclubWhitelistEnabled) {
+
+        var modclubAdded = false;
+        func addModclubWhitelist() {
+          if (modclubAdded) {
+            return;
+          };
+          modclubAdded := true;
           // concatenate with contest partiticapants that are hardcoded
           let concatenatedModclubWhitelist = Array.append(modclubWhitelistFromCanister, Env.modclubWhitelist);
           // set the whitelist
-          setWhitelist(concatenatedModclubWhitelist, _modclubWhitelist);
-          // get initial token indices (this will return all tokens as all of them are owned by "0000")
+          appendWhitelist(Env.modclubWhitelistPrice, concatenatedModclubWhitelist);
         };
+
+        // turn whitelist into buffer for better performance
+        for (whitelistTier in Env.whitelistTiers.vals()) {
+          // add modclub to proper place
+          if (Env.modclubWhitelistEnabled and Env.modclubWhitelistPrice < whitelistTier.price) {
+            addModclubWhitelist();
+          };
+          appendWhitelist(whitelistTier.price, whitelistTier.whitelist);
+        };
+
+        // ensure modclub added
+        if (Env.modclubWhitelistEnabled) {
+          addModclubWhitelist();
+        };
+
+        // get initial token indices (this will return all tokens as all of them are owned by "0000")
         _tokensForSale := switch (deps._Tokens.getTokensFromOwner("0000")) {
           case (?t) t;
           case (_) Buffer.Buffer<Types.TokenIndex>(0);
@@ -131,7 +149,7 @@ module {
       if (Time.now() < Env.publicSaleStart) {
         return #err("The sale has not started yet");
       };
-      if (isWhitelistedAny(address) == false) {
+      if (isWhitelisted(address) == false) {
         if (Time.now() < Env.whitelistTime) {
           return #err("The public sale has not started yet");
         };
@@ -169,10 +187,8 @@ module {
       // the tokens without paying for them
       let tokens : [Types.TokenIndex] = tempNextTokens(quantity);
       if (Env.whitelistOneTimeOnly == true) {
-        if (Env.ethFlowerWhitelistEnabled and isWhitelisted(address, _ethFlowerWhitelist)) {
-          removeFromWhitelist(address, _ethFlowerWhitelist);
-        } else if (Env.modclubWhitelistEnabled and isWhitelisted(address, _modclubWhitelist)) {
-          removeFromWhitelist(address, _modclubWhitelist);
+        if (isWhitelisted(address)) {
+          removeFromWhitelist(address);
         };
       };
       _salesSettlements.put(
@@ -182,6 +198,7 @@ module {
           price = total;
           subaccount = subaccount;
           buyer = address;
+          whitelisted = isWhitelisted(address);
           expires = Time.now() + Env.ecscrowDelay;
         },
       );
@@ -259,12 +276,10 @@ module {
         if (settlement.expires < Time.now()) {
           _failedSales.add((settlement.buyer, settlement.subaccount));
           _salesSettlements.delete(paymentaddress);
-          if (Env.whitelistOneTimeOnly == true) {
-            if (Env.ethFlowerWhitelistEnabled and settlement.price == Env.ethFlowerWhitelistPrice) {
-              addToWhitelist(settlement.buyer, _ethFlowerWhitelist);
-            } else if (Env.modclubWhitelistEnabled and settlement.price == Env.modclubWhitelistPrice) {
-              addToWhitelist(settlement.buyer, _modclubWhitelist);
-            };
+
+          // return to whitelist
+          if (Env.whitelistOneTimeOnly and settlement.whitelisted) {
+            addToWhitelist(settlement.price, settlement.buyer);
           };
           return #err("Expired");
         } else {
@@ -369,7 +384,7 @@ module {
         totalToSell = _totalToSell;
         startTime = Env.publicSaleStart;
         whitelistTime = Env.whitelistTime;
-        whitelist = isWhitelistedAny(address);
+        whitelist = isWhitelisted(address);
         bulkPricing = getAddressBulkPrice(address);
       } : Types.SaleSettings;
     };
@@ -379,12 +394,6 @@ module {
     *******************/
 
     // getters & setters
-    public func ethFlowerWhitelistSize() : Nat {
-      if (Env.ethFlowerWhitelistEnabled) {
-        _ethFlowerWhitelist.size();
-      } else { 0 };
-    };
-
     public func modclubWhitelistSize() : Nat {
       if (Env.modclubWhitelistEnabled) {
         _modclubWhitelist.size();
@@ -415,11 +424,12 @@ module {
         return [(1, getCurrentDutchAuctionPrice())];
       }
       else {
-        if (Env.ethFlowerWhitelistEnabled and isWhitelisted(address, _ethFlowerWhitelist)) {
-          return [(1, Env.ethFlowerWhitelistPrice)];
-        };
-        if (Env.modclubWhitelistEnabled and isWhitelisted(address, _modclubWhitelist)) {
-          return [(1, Env.modclubWhitelistPrice)];
+        let whitelisted = _whitelist.find(func(a) : Bool { a.1 == address });
+        switch (whitelisted) {
+          case (?whitelistedItem) {
+            return [(1, whitelistedItem.0)];
+          };
+          case (null) {};
         };
       };
       return [(1, Env.salePrice)];
@@ -442,11 +452,6 @@ module {
       };
     };
 
-
-    public func setWhitelist(whitelistAddresses : [Types.AccountIdentifier], whitelist : Buffer.Buffer<Types.AccountIdentifier>) {
-      whitelist.append(Utils.bufferFromArray<Types.AccountIdentifier>(whitelistAddresses));
-    };
-
     func nextTokens(qty : Nat64) : [Types.TokenIndex] {
       if (_tokensForSale.size() >= Nat64.toNat(qty)) {
         var ret : List.List<Types.TokenIndex> = List.nil();
@@ -464,25 +469,25 @@ module {
       };
     };
 
-    func isWhitelisted(address : Types.AccountIdentifier, whitelist : Buffer.Buffer<Types.AccountIdentifier>) : Bool {
+    public func appendWhitelist(price: Nat64, whitelist : [Types.AccountIdentifier]) {
+      _whitelist.append(Utils.mapToBufferFromArray<Types.AccountIdentifier, (Nat64, Types.AccountIdentifier)>(whitelist, func(addr) {
+        (price, addr);
+      }));
+    };
+
+    func isWhitelisted(address : Types.AccountIdentifier) : Bool {
       if (Env.whitelistDiscountLimited == true and Time.now() >= Env.whitelistTime) {
         return false;
       };
-      Option.isSome(whitelist.find(func(a : Types.AccountIdentifier) : Bool { a == address }));
+      Option.isSome(_whitelist.find(func(a) : Bool { a.1 == address }));
     };
 
-    func isWhitelistedAny(address : Types.AccountIdentifier) : Bool {
-      let ethFlower = Env.ethFlowerWhitelistEnabled and isWhitelisted(address, _ethFlowerWhitelist);
-      let modclub = Env.modclubWhitelistEnabled and isWhitelisted(address, _modclubWhitelist);
-      return ethFlower or modclub;
-    };
-
-    func removeFromWhitelist(address : Types.AccountIdentifier, whitelist : Buffer.Buffer<Types.AccountIdentifier>) : () {
+    func removeFromWhitelist(address : Types.AccountIdentifier) : () {
       var found : Bool = false;
-      whitelist.filterSelf(
-        func(a : Types.AccountIdentifier) : Bool {
+      _whitelist.filterSelf(
+        func(a) : Bool {
           if (found) { return true } else {
-            if (a != address) return true;
+            if (a.1 != address) return true;
             found := true;
             return false;
           };
@@ -490,8 +495,8 @@ module {
       );
     };
 
-    func addToWhitelist(address : Types.AccountIdentifier, whitelist : Buffer.Buffer<Types.AccountIdentifier>) : () {
-      whitelist.add(address);
+    func addToWhitelist(price: Nat64, address : Types.AccountIdentifier) : () {
+      _whitelist.add((price, address));
     };
 
     func mintCollection(collectionSize : Nat32) {
