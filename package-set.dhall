@@ -51,6 +51,11 @@ let additions = [
   , repo = "https://github.com/usergeek/canistergeek-ic-motoko"
   , version = "v0.0.4"
   , dependencies = ["base"] : List Text
+  },
+  { name = "base"
+  , repo = "https://github.com/dfinity/motoko-base.git"
+  , version = "moc-0.7.4"
+  , dependencies = [] : List Text
   }
 ] : List Package
 
