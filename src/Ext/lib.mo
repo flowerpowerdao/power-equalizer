@@ -112,70 +112,28 @@ module {
         return #err(#Unauthorized(spender));
       };
 
-      func performTransfer(): async () {
-        // start custom
-        let event : Root.IndefiniteEvent = {
-          operation = "transfer";
-          details = [
-            ("to", #Text receiver),
-            ("from", #Text owner),
-            ("token_id", #Text(request.token)),
-          ];
-          caller = caller;
-        };
-        ignore deps._Cap.insert(event);
-        // end custom
-        deps._Tokens.transferTokenToUser(token, receiver); // actual transfer
-      };
-      
       switch (deps._Tokens.getOwnerFromRegistry(token)) {
         case (?token_owner) {
           if (AID.equal(owner, token_owner) == false) {
             return #err(#Unauthorized(owner));
           };
-          if (request.notify) {
-            switch (ExtCore.User.toPrincipal(request.to)) {
-              case (?canisterId) {
-                let notifier : Types.NotifyService = actor (Principal.toText(canisterId));
-
-                // while waiting for the notifier call, the token can be sold to another user
-                // so we are temporarily "lock" the token here
-                deps._Tokens.removeTokenFromUser(token);
-
-                let notifyRes = try {
-                  await notifier.tokenTransferNotification(request.token, request.from, request.amount, request.memo);
-                } catch (e) {
-                  // return "locked" token to the owner
-                  deps._Tokens.transferTokenToUser(token, owner);
-                  return #err(#Rejected);
-                };
-
-                switch (notifyRes) {
-                  case (?balance) {
-                    if (balance == 1) {
-                      ignore performTransfer();
-                      return #ok(request.amount);
-                    } else {
-                      //Refund
-                      deps._Tokens.transferTokenToUser(token, owner);
-                      return #err(#Rejected);
-                    };
-                  };
-                  case (_) {
-                    //Refund
-                    deps._Tokens.transferTokenToUser(token, owner);
-                    return #err(#Rejected);
-                  };
-                };
-              };
-              case (_) {
-                return #err(#CannotNotify(receiver));
-              };
-            };
-          } else {
-            ignore performTransfer();
-            return #ok(request.amount);
+          
+          // start custom
+          let event : Root.IndefiniteEvent = {
+            operation = "transfer";
+            details = [
+              ("to", #Text receiver),
+              ("from", #Text owner),
+              ("token_id", #Text(request.token)),
+            ];
+            caller = caller;
           };
+          ignore deps._Cap.insert(event);
+          // end custom
+
+          deps._Tokens.transferTokenToUser(token, receiver); // actual transfer
+
+          return #ok(request.amount);
         };
         case (_) {
           return #err(#InvalidToken(request.token));
