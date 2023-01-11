@@ -18,6 +18,10 @@ module {
     public let whitelistTime : Time.Time = 1659362400000000000; // Period for WL only discount. Set to publicSaleStart for no exclusive period
     public let marketDelay : Time.Time = 172_800_000_000_000; // How long to delay market opening (2 days after whitelist sale started or when sold out)
 
+    // true - assets will be revealed after manually calling 'shuffleAssets' 
+    // false - assets will be revealed immediately and assets shuffling will be disabled
+    public let delayedAssetReveal = true;
+
     public let whitelistOneTimeOnly : Bool = true; // Whitelist addresses are removed after purchase
     public let whitelistDiscountLimited : Bool = true; // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
 

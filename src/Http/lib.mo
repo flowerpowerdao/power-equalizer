@@ -63,7 +63,7 @@ module {
           // start custom
           // we assume the seed animation video is stored in index 0
           // and thus uploaded first
-          if (not deps._Shuffle.isShuffled()) {
+          if (Env.delayedAssetReveal and not deps._Shuffle.isShuffled()) {
             return _processFile(Nat.toText(0), deps._Assets.get(0).payload);
           };
           // end custom

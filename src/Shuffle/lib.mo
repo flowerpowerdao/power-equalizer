@@ -5,6 +5,7 @@ import Random "mo:base/Random";
 import Buffer "../buffer";
 import Types "types";
 import Utils "../utils";
+import Env "../Env";
 
 module {
   public class Factory(state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
@@ -28,7 +29,7 @@ module {
     //*** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
     public func shuffleAssets(caller : Principal) : async () {
-      assert (caller == consts.minter and _isShuffled == false);
+      assert (caller == consts.minter and Env.delayedAssetReveal and not _isShuffled);
       // get a random seed from the IC
       let seed : Blob = await Random.blob();
       // use that seed to create random number generator
