@@ -29,7 +29,7 @@ module {
     //*** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
     public func shuffleAssets(caller : Principal) : async () {
-      assert (caller == consts.minter and Env.delayedAssetReveal and not _isShuffled);
+      assert (caller == consts.minter and Env.delayedReveal and not _isShuffled);
       // get a random seed from the IC
       let seed : Blob = await Random.blob();
       // use that seed to create random number generator

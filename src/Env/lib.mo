@@ -20,7 +20,7 @@ module {
 
     // true - assets will be revealed after manually calling 'shuffleAssets' 
     // false - assets will be revealed immediately and assets shuffling will be disabled
-    public let delayedAssetReveal = true;
+    public let delayedReveal = true;
 
     public let whitelistOneTimeOnly : Bool = true; // Whitelist addresses are removed after purchase
     public let whitelistDiscountLimited : Bool = true; // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
