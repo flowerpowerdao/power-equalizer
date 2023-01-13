@@ -34,6 +34,9 @@ module {
     private var _ethFlowerWhitelist : Buffer.Buffer<Types.AccountIdentifier> = Utils.bufferFromArray<Types.AccountIdentifier>(state._ethFlowerWhitelistState);
     private var _modclubWhitelist : Buffer.Buffer<Types.AccountIdentifier> = Utils.bufferFromArray<Types.AccountIdentifier>(state._modclubWhitelistState);
     private var _soldIcp : Nat64 = state._soldIcpState;
+    private var _sold : Nat = state._soldState;
+    private var _totalToSell : Nat = state._totalToSellState;
+    private var _nextSubAccount : Nat = state._nextSubAccountState;
 
     public func toStable() : Types.StableState {
       return {
@@ -44,6 +47,9 @@ module {
         _ethFlowerWhitelistState = _ethFlowerWhitelist.toArray();
         _modclubWhitelistState = _modclubWhitelist.toArray();
         _soldIcpState = _soldIcp;
+        _soldState = _sold;
+        _totalToSellState = _totalToSell;
+        _nextSubAccountState = _nextSubAccount;
       };
     };
 
@@ -87,7 +93,7 @@ module {
     };
 
     public func airdropTokens(caller : Principal, startingIndex : Nat) : () {
-      assert (caller == consts.minter and deps._Marketplace.getTotalToSell() == 0);
+      assert (caller == consts.minter and _totalToSell == 0);
       // airdrop tokens
       var temp = 0;
       label airdrop for (a in Env.airdrop.vals()) {
@@ -103,9 +109,9 @@ module {
       };
     };
 
-    public func setTotalToSell(caller : Principal) : Nat {
-      assert (caller == consts.minter and deps._Marketplace.getTotalToSell() == 0);
-      deps._Marketplace.setTotalToSell(_tokensForSale.size());
+    public func startSale(caller : Principal) : Nat {
+      assert (caller == consts.minter and _totalToSell == 0);
+      _totalToSell := _tokensForSale.size();
       _tokensForSale.size();
     };
 
@@ -143,7 +149,7 @@ module {
       if (total > amount) {
         return #err("Price mismatch!");
       };
-      let subaccount = deps._Marketplace.getNextSubAccount();
+      let subaccount = getNextSubAccount();
       let paymentAddress : Types.AccountIdentifier = AID.fromPrincipal(this, ?subaccount);
 
       // we only reserve the tokens here, they deducted from the available tokens
@@ -211,7 +217,7 @@ module {
             time = Time.now();
           });
           _soldIcp += settlement.price;
-          deps._Marketplace.increaseSold(tokens.size());
+          _sold += tokens.size();
           _salesSettlements.delete(paymentaddress);
           let event : Root.IndefiniteEvent = {
             operation = "mint";
@@ -315,6 +321,12 @@ module {
       };
     };
 
+    public func getNextSubAccount() : Types.SubAccount {
+      var _saOffset = 4294967296;
+      _nextSubAccount += 1;
+      return Utils.natToSubAccount(_saOffset +_nextSubAccount);
+    };
+
     // queries
     public func salesSettlements() : [(Types.AccountIdentifier, Types.Sale)] {
       Iter.toArray(_salesSettlements.entries());
@@ -328,16 +340,24 @@ module {
       _saleTransactions.toArray();
     };
 
+    public func getSold() : Nat {
+      _sold;
+    };
+
+    public func getTotalToSell() : Nat {
+      _totalToSell;
+    };
+
     public func salesSettings(address : Types.AccountIdentifier) : Types.SaleSettings {
       return {
         price = getAddressPrice(address);
         salePrice = Env.salePrice;
         remaining = availableTokens();
-        sold = deps._Marketplace.getSold();
+        sold = _sold;
+        totalToSell = _totalToSell;
         startTime = Env.publicSaleStart;
         whitelistTime = Env.whitelistTime;
         whitelist = isWhitelistedAny(address);
-        totalToSell = deps._Marketplace.getTotalToSell();
         bulkPricing = getAddressBulkPrice(address);
       } : Types.SaleSettings;
     };

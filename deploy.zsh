@@ -62,7 +62,7 @@ if [[ "$network" == "ic" ]]
 then
 open "https://$(dfx canister --network $network id $mode).raw.ic0.app/?asset=0"
 else
-open "http://127.0.0.1:8000/?canisterId=$(dfx canister --network $network id $mode)&asset=0"
+open "http://127.0.0.1:4943/?canisterId=$(dfx canister --network $network id $mode)&asset=0"
 fi
 
 # add the other assets
@@ -147,9 +147,9 @@ dfx canister --network $network call $mode airdropTokens 0
 echo "airdrop tokens ..."
 dfx canister --network $network call $mode airdropTokens 1500
 
-# set total to sell
-echo "set total to sell ..."
-dfx canister --network $network call $mode setTotalToSell
+# start sale
+echo "start sale ..."
+dfx canister --network $network call $mode startSale
 
 # check the asset that are linked to the tokens
 for i in {0..9}

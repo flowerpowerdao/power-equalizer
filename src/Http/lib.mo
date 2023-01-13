@@ -209,7 +209,21 @@ module {
         status_code = 200;
         headers = [("content-type", "text/plain")];
         body = Text.encodeUtf8(
-          Env.collectionName # "\n" # "---\n" # "Cycle Balance:                            ~" # debug_show (Cycles.balance() / 1000000000000) # "T\n" # "Minted NFTs:                              " # debug_show (deps._Tokens.getNextTokenId()) # "\n" # "Assets:                                   " # debug_show (deps._Assets.size()) # "\n" # "---\n" # "ETH Flower Whitelist:                     " # debug_show (deps._Sale.ethFlowerWhitelistSize() : Nat) # "\n" # "MODCLUB Whitelist:                        " # debug_show (deps._Sale.modclubWhitelistSize() : Nat) # "\n" # "Total to sell:                            " # debug_show (deps._Marketplace.getTotalToSell()) # "\n" # "Remaining:                                " # debug_show (deps._Sale.availableTokens()) # "\n" # "Sold:                                     " # debug_show (deps._Marketplace.getSold()) # "\n" # "Sold (ICP):                               " # _displayICP(Nat64.toNat(deps._Sale.soldIcp())) # "\n" # "---\n" # "Marketplace Listings:                     " # debug_show (deps._Marketplace.tokenListingSize()) # "\n" # "Sold via Marketplace:                     " # debug_show (deps._Marketplace.transactionsSize()) # "\n" # "Sold via Marketplace in ICP:              " # _displayICP(soldValue) # "\n" # "Average Price ICP Via Marketplace:        " # _displayICP(avg) # "\n" # "Admin:                                    " # debug_show (consts.minter) # "\n",
+          Env.collectionName # "\n" # "---\n"
+          # "Cycle Balance:                            ~" # debug_show (Cycles.balance() / 1000000000000) # "T\n"
+          # "Minted NFTs:                              " # debug_show (deps._Tokens.getNextTokenId()) # "\n"
+          # "Assets:                                   " # debug_show (deps._Assets.size()) # "\n" # "---\n"
+          # "ETH Flower Whitelist:                     " # debug_show (deps._Sale.ethFlowerWhitelistSize() : Nat) # "\n"
+          # "MODCLUB Whitelist:                        " # debug_show (deps._Sale.modclubWhitelistSize() : Nat) # "\n"
+          # "Total to sell:                            " # debug_show (deps._Sale.getTotalToSell()) # "\n"
+          # "Remaining:                                " # debug_show (deps._Sale.availableTokens()) # "\n"
+          # "Sold:                                     " # debug_show (deps._Sale.getSold()) # "\n"
+          # "Sold (ICP):                               " # _displayICP(Nat64.toNat(deps._Sale.soldIcp())) # "\n" # "---\n"
+          # "Marketplace Listings:                     " # debug_show (deps._Marketplace.tokenListingSize()) # "\n"
+          # "Sold via Marketplace:                     " # debug_show (deps._Marketplace.transactionsSize()) # "\n"
+          # "Sold via Marketplace in ICP:              " # _displayICP(soldValue) # "\n"
+          # "Average Price ICP Via Marketplace:        " # _displayICP(avg) # "\n"
+          # "Admin:                                    " # debug_show (consts.minter) # "\n",
         );
         streaming_strategy = null;
       };
