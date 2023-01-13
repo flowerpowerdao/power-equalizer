@@ -52,11 +52,6 @@ module {
         return #err(#Other("Listing is locked"));
       };
 
-
-      if (_isLocked(token)) {
-        return #err(#Other("Listing is locked"));
-      };
-
       let listing = switch (_tokenListing.get(token)) {
         case (?listing) { listing };
         case (null) {
