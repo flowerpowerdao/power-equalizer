@@ -63,7 +63,7 @@ module {
           // start custom
           // we assume the seed animation video is stored in index 0
           // and thus uploaded first
-          if (not deps._Shuffle.isShuffled()) {
+          if (Env.delayedReveal and not deps._Shuffle.isShuffled()) {
             return _processFile(Nat.toText(0), deps._Assets.get(0).payload);
           };
           // end custom
@@ -205,6 +205,12 @@ module {
       } else {
         0;
       };
+
+      var whitelistTiersText = "";
+      for (whitelistTier in Env.whitelistTiers.vals()) {
+        whitelistTiersText #= whitelistTier.name # " " # Nat64.toText(whitelistTier.price) # "; ";
+      };
+
       return {
         status_code = 200;
         headers = [("content-type", "text/plain")];
@@ -213,7 +219,7 @@ module {
           # "Cycle Balance:                            ~" # debug_show (Cycles.balance() / 1000000000000) # "T\n"
           # "Minted NFTs:                              " # debug_show (deps._Tokens.getNextTokenId()) # "\n"
           # "Assets:                                   " # debug_show (deps._Assets.size()) # "\n" # "---\n"
-          # "ETH Flower Whitelist:                     " # debug_show (deps._Sale.ethFlowerWhitelistSize() : Nat) # "\n"
+          # "Whitelist Tiers:                          " # whitelistTiersText # "\n"
           # "MODCLUB Whitelist:                        " # debug_show (deps._Sale.modclubWhitelistSize() : Nat) # "\n"
           # "Total to sell:                            " # debug_show (deps._Sale.getTotalToSell()) # "\n"
           # "Remaining:                                " # debug_show (deps._Sale.availableTokens()) # "\n"
