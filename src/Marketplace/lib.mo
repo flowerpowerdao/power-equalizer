@@ -10,6 +10,7 @@ import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Time "mo:base/Time";
 
+import AviateAccountIdentifier "mo:accountid/AccountIdentifier";
 import Encoding "mo:encoding/Binary";
 import Root "mo:cap/Root";
 
@@ -117,8 +118,8 @@ module {
         };
       };
 
-      let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({
-        account = AID.fromPrincipal(this, ?settlement.subaccount);
+      let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance({
+        account = AviateAccountIdentifier.fromPrincipal(this, ?settlement.subaccount);
       });
 
       // because of the await above, we check again if there is a settlement available for the token

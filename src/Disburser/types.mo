@@ -27,7 +27,7 @@ module {
     _disbursementsState : [Disbursement];
   };
 
-  public type AccountBalanceArgs = { account : AccountIdentifier };
+  public type AccountBalanceArgs = { account : LedgerAccountIdentifier };
   public type TokenIndex = ExtCore.TokenIndex;
   public type ICPTs = { e8s : Nat64 };
   // ledger types
@@ -63,7 +63,7 @@ module {
 
   public type Constants = {
     LEDGER_CANISTER : actor {
-      account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
+      account_balance : shared query AccountBalanceArgs -> async ICPTs;
       transfer : shared TransferArgs -> async TransferResult;
     };
   };

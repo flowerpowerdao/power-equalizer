@@ -77,7 +77,7 @@ module {
 
   public type Constants = {
     LEDGER_CANISTER : actor {
-      account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
+      account_balance : shared query AccountBalanceArgs -> async ICPTs;
       transfer : shared TransferArgs -> async TransferResult;
     };
     WHITELIST_CANISTER : actor { getWhitelist : shared () -> async [Principal] };
@@ -98,7 +98,7 @@ module {
 
   public type ICPTs = { e8s : Nat64 };
 
-  public type AccountBalanceArgs = { account : AccountIdentifier };
+  public type AccountBalanceArgs = { account : LedgerAccountIdentifier };
 
   public type Sale = {
     tokens : [TokenIndex];
