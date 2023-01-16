@@ -9,12 +9,12 @@ import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Time "mo:base/Time";
+import Buffer "mo:base/Buffer";
 
 import Encoding "mo:encoding/Binary";
 import Root "mo:cap/Root";
 
 import AID "../toniq-labs/util/AccountIdentifier";
-import Buffer "../buffer";
 import Env "../Env";
 import ExtCore "../toniq-labs/ext/Core";
 import Types "types";
@@ -33,7 +33,7 @@ module {
 
     public func toStable() : Types.StableState {
       return {
-        _transactionsState = _transactions.toArray();
+        _transactionsState = Buffer.toArray(_transactions);
         _tokenSettlementState = Iter.toArray(_tokenSettlement.entries());
         _tokenListingState = Iter.toArray(_tokenListing.entries());
       };
@@ -276,7 +276,7 @@ module {
     };
 
     public func transactions() : [Types.Transaction] {
-      _transactions.toArray();
+      Buffer.toArray(_transactions);
     };
 
     public func settlements() : [(Types.TokenIndex, Types.AccountIdentifier, Nat64)] {
@@ -292,7 +292,7 @@ module {
           };
         };
       };
-      result.toArray();
+      Buffer.toArray(result);
     };
 
     public func listings() : [(Types.TokenIndex, Types.Listing, Types.Metadata)] {
@@ -300,7 +300,7 @@ module {
       for (a in _tokenListing.entries()) {
         results.add((a.0, a.1, #nonfungible({ metadata = null })));
       };
-      results.toArray();
+      Buffer.toArray(results);
     };
 
     public func allSettlements() : [(Types.TokenIndex, Types.Settlement)] {
@@ -309,7 +309,7 @@ module {
 
     public func stats() : (Nat64, Nat64, Nat64, Nat64, Nat, Nat, Nat) {
       var res : (Nat64, Nat64, Nat64) = Array.foldLeft<Types.Transaction, (Nat64, Nat64, Nat64)>(
-        _transactions.toArray(),
+        Buffer.toArray(_transactions),
         (0, 0, 0),
         func(b : (Nat64, Nat64, Nat64), a : Types.Transaction) : (Nat64, Nat64, Nat64) {
           var total : Nat64 = b.0 + a.price;

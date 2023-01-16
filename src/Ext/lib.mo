@@ -3,11 +3,11 @@ import Nat32 "mo:base/Nat32";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
+import Buffer "mo:base/Buffer";
 
 import Root "mo:cap/Root";
 
 import AID "../toniq-labs/util/AccountIdentifier";
-import Buffer "../buffer";
 import ExtCore "../toniq-labs/ext/Core";
 import MarketplaceTypes "../Marketplace/types";
 import Types "types";
@@ -47,7 +47,7 @@ module {
       for (e in deps._Tokens.getTokenMetadata().entries()) {
         resp.add((e.0, #nonfungible({ metadata = null })));
       };
-      resp.toArray();
+      Buffer.toArray(resp);
     };
 
     public func getTokenToAssetMapping() : [(Types.TokenIndex, Text)] {
@@ -56,12 +56,12 @@ module {
         let assetid = deps._Assets.get(Nat32.toNat(e.0) +1).name;
         resp.add((e.0, assetid));
       };
-      resp.toArray();
+      Buffer.toArray(resp);
     };
 
     public func tokens(aid : Types.AccountIdentifier) : Result.Result<[Types.TokenIndex], Types.CommonError> {
       switch (deps._Tokens.getTokensFromOwner(aid)) {
-        case (?tokens) return #ok(tokens.toArray());
+        case (?tokens) return #ok(Buffer.toArray(tokens));
         case (_) return #err(#Other("No tokens"));
       };
     };
@@ -73,7 +73,7 @@ module {
           for (a in tokens.vals()) {
             resp.add((a, deps._Marketplace.getListingFromTokenListing(a), null));
           };
-          return #ok(resp.toArray());
+          return #ok(Buffer.toArray(resp));
         };
         case (_) return #err(#Other("No tokens"));
       };
