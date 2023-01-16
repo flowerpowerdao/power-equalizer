@@ -32,7 +32,6 @@ module {
     private var _failedSales : Buffer.Buffer<(Types.AccountIdentifier, Types.SubAccount)> = Utils.bufferFromArray<(Types.AccountIdentifier, Types.SubAccount)>(state._failedSalesState);
     private var _tokensForSale : Buffer.Buffer<Types.TokenIndex> = Utils.bufferFromArray<Types.TokenIndex>(state._tokensForSaleState);
     private var _whitelist : Buffer.Buffer<(Nat64, Types.AccountIdentifier)> = Utils.bufferFromArray<(Nat64, Types.AccountIdentifier)>(state._whitelistStable);
-    private var _modclubWhitelist : Buffer.Buffer<Types.AccountIdentifier> = Utils.bufferFromArray<Types.AccountIdentifier>(state._modclubWhitelistState);
     private var _soldIcp : Nat64 = state._soldIcpState;
     private var _sold : Nat = state._soldState;
     private var _totalToSell : Nat = state._totalToSellState;
@@ -45,7 +44,6 @@ module {
         _failedSalesState = _failedSales.toArray();
         _tokensForSaleState = _tokensForSale.toArray();
         _whitelistStable = _whitelist.toArray();
-        _modclubWhitelistState = _modclubWhitelist.toArray();
         _soldIcpState = _soldIcp;
         _soldState = _sold;
         _totalToSellState = _totalToSell;
@@ -56,58 +54,28 @@ module {
     // *** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
     // updates
-    public func initMint(caller : Principal) : async Result.Result<(), Text> {
-      assert (caller == consts.minter and deps._Tokens.getNextTokenId() == 0);
-      try {
-        // get modclub whitelist from canister
-        var modclubWhitelistFromCanister : [Types.AccountIdentifier] = [];
-        if (Env.modclubWhitelistEnabled) {
-          modclubWhitelistFromCanister := Array.map<Principal, Types.AccountIdentifier>(
-            await consts.WHITELIST_CANISTER.getWhitelist(),
-            func(p : Principal) {
-              Utils.toLowerString(AviateAccountIdentifier.toText(AviateAccountIdentifier.fromPrincipal(p, null)));
-            },
-          );
-        };
+    public func initMint(caller : Principal) : Result.Result<(), Text> {
+      assert (caller == consts.minter);
 
-        // Mint
-        mintCollection(Env.collectionSize);
-
-        var modclubAdded = false;
-        func addModclubWhitelist() {
-          if (modclubAdded) {
-            return;
-          };
-          modclubAdded := true;
-          // concatenate with contest partiticapants that are hardcoded
-          let concatenatedModclubWhitelist = Array.append(modclubWhitelistFromCanister, Env.modclubWhitelist);
-          // set the whitelist
-          appendWhitelist(Env.modclubWhitelistPrice, concatenatedModclubWhitelist);
-        };
-
-        // turn whitelist into buffer for better performance
-        for (whitelistTier in Env.whitelistTiers.vals()) {
-          // add modclub to proper place
-          if (Env.modclubWhitelistEnabled and Env.modclubWhitelistPrice < whitelistTier.price) {
-            addModclubWhitelist();
-          };
-          appendWhitelist(whitelistTier.price, whitelistTier.whitelist);
-        };
-
-        // ensure modclub added
-        if (Env.modclubWhitelistEnabled) {
-          addModclubWhitelist();
-        };
-
-        // get initial token indices (this will return all tokens as all of them are owned by "0000")
-        _tokensForSale := switch (deps._Tokens.getTokensFromOwner("0000")) {
-          case (?t) t;
-          case (_) Buffer.Buffer<Types.TokenIndex>(0);
-        };
-        return #ok;
-      } catch e {
-        return #err("Failed to initialize");
+      if (deps._Tokens.getNextTokenId() != 0) {
+        return #err("already minted");
       };
+
+      // Mint
+      mintCollection(Env.collectionSize);
+
+      // turn whitelist into buffer for better performance
+      for (whitelistTier in Env.whitelistTiers.vals()) {
+        appendWhitelist(whitelistTier.price, whitelistTier.whitelist);
+      };
+
+      // get initial token indices (this will return all tokens as all of them are owned by "0000")
+      _tokensForSale := switch (deps._Tokens.getTokensFromOwner("0000")) {
+        case (?t) t;
+        case (_) Buffer.Buffer<Types.TokenIndex>(0);
+      };
+
+      return #ok;
     };
 
     public func shuffleTokensForSale(caller : Principal) : async () {
@@ -394,12 +362,6 @@ module {
     *******************/
 
     // getters & setters
-    public func modclubWhitelistSize() : Nat {
-      if (Env.modclubWhitelistEnabled) {
-        _modclubWhitelist.size();
-      } else { 0 };
-    };
-
     public func availableTokens() : Nat {
       _tokensForSale.size();
     };

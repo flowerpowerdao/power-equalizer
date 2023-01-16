@@ -310,7 +310,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     canistergeekMonitor.collectMetrics();
     // checks caller == minter
     // prevents double mint
-    await _Sale.initMint(caller);
+    _Sale.initMint(caller);
   };
 
   public shared ({ caller }) func shuffleTokensForSale() : async () {
