@@ -78,7 +78,6 @@ module {
       account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
       transfer : shared TransferArgs -> async TransferResult;
     };
-    WHITELIST_CANISTER : actor { getWhitelist : shared () -> async [Principal] };
     minter : Principal;
   };
 
