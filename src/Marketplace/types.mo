@@ -61,7 +61,8 @@ module {
     price : ?Nat64;
   };
 
-  public type AccountBalanceArgs = { account : AccountIdentifier };
+  type LedgerAccountIdentifier = [Nat8];
+  public type AccountBalanceArgs = { account : LedgerAccountIdentifier };
 
   public type StableState = {
     _transactionsState : [Transaction];
@@ -78,7 +79,7 @@ module {
 
   public type Constants = {
     LEDGER_CANISTER : actor {
-      account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
+      account_balance : shared query AccountBalanceArgs -> async ICPTs;
     };
   };
 

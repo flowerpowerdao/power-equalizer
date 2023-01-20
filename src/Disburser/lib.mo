@@ -46,7 +46,6 @@ module {
 
             try {
               var res = await consts.LEDGER_CANISTER.transfer({
-
                 to = switch (Utils.ledgerAccountIdentifierFromText(disbursement.to)) {
                   case (#ok(accountId)) {
                     accountId : [Nat8];

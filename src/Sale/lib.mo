@@ -210,8 +210,18 @@ module {
         return #err("Nothing to settle");
       };
 
-      let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({
-        account = paymentaddress;
+      let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance({
+        account = switch (Utils.ledgerAccountIdentifierFromText(paymentaddress)) {
+          case (#ok(accountId)) {
+            accountId : [Nat8];
+          };
+          case (#err(_)) {
+            // this should never happen because account ids are always created from within the
+            // canister which should guarantee that they are valid and we are able to decode them
+            // to [Nat8]
+            return #err("Failed to decode payment address");
+          };
+        };
       });
 
       // because of the await above, we check again if there is a settlement available for the paymentaddress
@@ -313,8 +323,8 @@ module {
             let subaccount = failedSale.1;
             try {
               // check if subaccount holds icp
-              let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance_dfx({
-                account = AID.fromPrincipal(this, ?subaccount);
+              let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance({
+                account = AviateAccountIdentifier.fromPrincipal(this, ?subaccount);
               });
               if (response.e8s > 10000) {
                 var bh = await consts.LEDGER_CANISTER.transfer({
