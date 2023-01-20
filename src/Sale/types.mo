@@ -16,7 +16,6 @@ module {
       _failedSalesState : [(AccountIdentifier, SubAccount)] = [];
       _tokensForSaleState : [TokenIndex] = [];
       _whitelistStable : [(Nat64, AccountIdentifier)] = [];
-      _modclubWhitelistState : [AccountIdentifier] = [];
       _soldIcpState : Nat64 = 0;
       _soldState : Nat = 0;
       _totalToSellState : Nat = 0;
@@ -30,7 +29,6 @@ module {
     _failedSalesState : [(AccountIdentifier, SubAccount)];
     _tokensForSaleState : [TokenIndex];
     _whitelistStable : [(Nat64, AccountIdentifier)];
-    _modclubWhitelistState : [AccountIdentifier];
     _soldIcpState : Nat64;
     _soldState : Nat;
     _totalToSellState : Nat;
@@ -80,7 +78,6 @@ module {
       account_balance : shared query AccountBalanceArgs -> async ICPTs;
       transfer : shared TransferArgs -> async TransferResult;
     };
-    WHITELIST_CANISTER : actor { getWhitelist : shared () -> async [Principal] };
     minter : Principal;
   };
 

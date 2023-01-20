@@ -208,7 +208,7 @@ module {
 
       var whitelistTiersText = "";
       for (whitelistTier in Env.whitelistTiers.vals()) {
-        whitelistTiersText #= whitelistTier.name # " " # Nat64.toText(whitelistTier.price) # "; ";
+        whitelistTiersText #= whitelistTier.name # " " # _displayICP(Nat64.toNat(whitelistTier.price)) # "; ";
       };
 
       return {
@@ -220,7 +220,6 @@ module {
           # "Minted NFTs:                              " # debug_show (deps._Tokens.getNextTokenId()) # "\n"
           # "Assets:                                   " # debug_show (deps._Assets.size()) # "\n" # "---\n"
           # "Whitelist Tiers:                          " # whitelistTiersText # "\n"
-          # "MODCLUB Whitelist:                        " # debug_show (deps._Sale.modclubWhitelistSize() : Nat) # "\n"
           # "Total to sell:                            " # debug_show (deps._Sale.getTotalToSell()) # "\n"
           # "Remaining:                                " # debug_show (deps._Sale.availableTokens()) # "\n"
           # "Sold:                                     " # debug_show (deps._Sale.getSold()) # "\n"

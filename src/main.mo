@@ -150,9 +150,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     account_balance : shared query AccountBalanceArgs -> async ICPTs;
     transfer : shared TransferArgs -> async TransferResult;
   };
-  let WHITELIST_CANISTER = actor "s7o6c-giaaa-aaaae-qac4a-cai" : actor {
-    getWhitelist : shared () -> async [Principal];
-  };
   let CREATION_CYCLES : Nat = 1_000_000_000_000;
 
   /***********
@@ -300,7 +297,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     },
     {
       LEDGER_CANISTER;
-      WHITELIST_CANISTER;
       minter = init_minter;
     },
   );
@@ -310,7 +306,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     canistergeekMonitor.collectMetrics();
     // checks caller == minter
     // prevents double mint
-    await _Sale.initMint(caller);
+    _Sale.initMint(caller);
   };
 
   public shared ({ caller }) func shuffleTokensForSale() : async () {
