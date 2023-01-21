@@ -21,23 +21,6 @@ module {
 
   public class HttpHandler(this : Principal, deps : Types.Dependencies, consts : Types.Constants) {
 
-    /*************
-    * CONSTANTS *
-    *************/
-
-    let NOT_FOUND : Types.HttpResponse = {
-      status_code = 404;
-      headers = [];
-      body = Blob.fromArray([]);
-      streaming_strategy = null;
-    };
-    let BAD_REQUEST : Types.HttpResponse = {
-      status_code = 400;
-      headers = [];
-      body = Blob.fromArray([]);
-      streaming_strategy = null;
-    };
-
     /********************
     * PUBLIC INTERFACE *
     ********************/
@@ -71,42 +54,14 @@ module {
             case (?metadata) {
               let assetid : Nat = Nat32.toNat(Utils.blobToNat32(metadata));
               let asset : AssetTypes.Asset = deps._Assets.get(assetid);
-              switch (_getParam(request.url, "type")) {
-                case (?t) {
-                  // start custom
-                  switch (t) {
-                    case ("thumbnail") {
-                      switch (asset.thumbnail) {
-                        case (?thumb) {
-                          return {
-                            status_code = 200;
-                            headers = [("content-type", thumb.ctype)];
-                            body = thumb.data[0];
-                            streaming_strategy = null;
-                          };
-                        };
-                        case (_) {};
-                      };
-                    };
-                    case ("metadata") {
-                      switch (asset.metadata) {
-                        case (?metadata) {
-                          return {
-                            status_code = 200;
-                            headers = [("content-type", metadata.ctype)];
-                            body = metadata.data[0];
-                            streaming_strategy = null;
-                          };
-                        };
-                        case (_) {};
-                      };
-                    };
-                    case (_) {};
-                  };
-                  // end custom
+              // start custom
+              switch (_processAsset(request, asset)) {
+                case (?response) {
+                  return response;
                 };
-                case (_) {};
+                case (null) {};
               };
+              // end custom
               return _processFile(Nat.toText(assetid), asset.payload);
             };
             case (_) {};
@@ -119,42 +74,14 @@ module {
           switch (Utils.natFromText(atext)) {
             case (?assetid) {
               let asset : AssetTypes.Asset = deps._Assets.get(assetid);
-              switch (_getParam(request.url, "type")) {
-                case (?t) {
-                  // start custom
-                  switch (t) {
-                    case ("thumbnail") {
-                      switch (asset.thumbnail) {
-                        case (?thumb) {
-                          return {
-                            status_code = 200;
-                            headers = [("content-type", thumb.ctype)];
-                            body = thumb.data[0];
-                            streaming_strategy = null;
-                          };
-                        };
-                        case (_) {};
-                      };
-                    };
-                    case ("metadata") {
-                      switch (asset.metadata) {
-                        case (?metadata) {
-                          return {
-                            status_code = 200;
-                            headers = [("content-type", metadata.ctype)];
-                            body = metadata.data[0];
-                            streaming_strategy = null;
-                          };
-                        };
-                        case (_) {};
-                      };
-                    };
-                    case (_) {};
-                  };
-                  // end custom
+              // start custom
+              switch (_processAsset(request, asset)) {
+                case (?response) {
+                  return response;
                 };
-                case (_) {};
+                case (null) {};
               };
+              // end custom
               return _processFile(Nat.toText(assetid), asset.payload);
             };
             case (_) {};
@@ -167,30 +94,35 @@ module {
       * TOKEN INDEX LOOKUP *
       **********************/
 
-      // check if theres a path
-      switch (path.size()) {
-        // check if there's only on "argument" to it
-        case 1 {
-          // try and convert it to a Nat from Text
-          switch (Utils.natFromText(path[0])) {
-            // if that works, use that
-            case (?tokenIndex) {
-              switch (deps._Tokens.getTokenDataFromIndex(Nat32.fromNat(tokenIndex))) {
-                case (?assetIdBlob) {
-                  let assetid : Nat = Nat32.toNat(Utils.blobToNat32(assetIdBlob));
-                  let asset : AssetTypes.Asset = deps._Assets.get(assetid);
-                  return _processFile(Nat.toText(assetid), asset.payload);
+      // check if there's only on "argument" to it
+      if (path.size() == 1) {
+        let parts = Iter.toArray(Text.split(path[0], #text("?")));
+        // try and convert it to a Nat from Text
+        switch (Utils.natFromText(parts[0])) {
+          // if that works, use that
+          case (?tokenIndex) {
+            switch (deps._Tokens.getTokenDataFromIndex(Nat32.fromNat(tokenIndex))) {
+              case (?assetIdBlob) {
+                let assetid : Nat = Nat32.toNat(Utils.blobToNat32(assetIdBlob));
+                let asset : AssetTypes.Asset = deps._Assets.get(assetid);
+                // start custom
+                switch (_processAsset(request, asset)) {
+                  case (?response) {
+                    return response;
+                  };
+                  case (null) {};
                 };
-                case (_) {};
+                // end custom
+                return _processFile(Nat.toText(assetid), asset.payload);
               };
+              case (_) {};
             };
-            case (_) {};
           };
+          case (_) {};
         };
-        case (_) {};
       };
 
-      //Just show index
+      // Just show index
       var soldValue : Nat = Nat64.toNat(
         Array.foldLeft<MarketplaceTypes.Transaction, Nat64>(
           deps._Marketplace.getTransactions().toArray(),
@@ -237,6 +169,41 @@ module {
     /********************
     * INTERNAL METHODS *
     ********************/
+
+    func _processAsset(request : Types.HttpRequest, asset : AssetTypes.Asset) : ?Types.HttpResponse {
+      let t = switch (_getParam(request.url, "type")) {
+        case (?t) { t };
+        case (null) {
+          return null;
+        };
+      };
+      if (t == "thumbnail") {
+        switch (asset.thumbnail) {
+          case (?thumb) {
+            return ?{
+              status_code = 200;
+              headers = [("content-type", thumb.ctype)];
+              body = thumb.data[0];
+              streaming_strategy = null;
+            };
+          };
+          case (_) {};
+        };
+      } else if (t == "metadata") {
+        switch (asset.metadata) {
+          case (?metadata) {
+            return ?{
+              status_code = 200;
+              headers = [("content-type", metadata.ctype)];
+              body = metadata.data[0];
+              streaming_strategy = null;
+            };
+          };
+          case (_) {};
+        };
+      };
+      return null;
+    };
 
     private func _processFile(tokenid : ExtCore.TokenIdentifier, file : AssetTypes.File) : Types.HttpResponse {
       // start custom
