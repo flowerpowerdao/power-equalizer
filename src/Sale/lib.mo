@@ -382,8 +382,11 @@ module {
     // Set different price types here
     func getAddressBulkPrice(address : Types.AccountIdentifier) : [(Nat64, Nat64)] {
       if (Env.dutchAuctionEnabled) {
+        // dutch auction for everyone
         let everyone = Env.dutchAuctionFor == #everyone;
+        // dutch auction for whitelist (tier price is ignored), then salePrice for public sale
         let whitelist = Env.dutchAuctionFor == #whitelist and isWhitelisted(address);
+        // tier price for whitelist, then dutch auction for public sale
         let publicSale = Env.dutchAuctionFor == #publicSale and not isWhitelisted(address);
 
         if (everyone or whitelist or publicSale) {
@@ -403,9 +406,9 @@ module {
     func getCurrentDutchAuctionPrice() : Nat64 {
       let start = if (Env.dutchAuctionFor == #publicSale) {
         // if the dutch auction is for public sale only, we take the start time when the whitelist time has expired
-        Env.whitelistTime
+        Env.whitelistTime;
       } else {
-        Env.publicSaleStart
+        Env.publicSaleStart;
       };
       let timeSinceStart : Int = Time.now() - start; // how many nano seconds passed since the auction began
       // in the event that this function is called before the auction has started, return the starting price
@@ -440,10 +443,15 @@ module {
       };
     };
 
-    public func appendWhitelist(price: Nat64, whitelist : [Types.AccountIdentifier]) {
-      _whitelist.append(Utils.mapToBufferFromArray<Types.AccountIdentifier, (Nat64, Types.AccountIdentifier)>(whitelist, func(addr) {
-        (price, addr);
-      }));
+    public func appendWhitelist(price : Nat64, whitelist : [Types.AccountIdentifier]) {
+      _whitelist.append(
+        Utils.mapToBufferFromArray<Types.AccountIdentifier, (Nat64, Types.AccountIdentifier)>(
+          whitelist,
+          func(addr) {
+            (price, addr);
+          },
+        ),
+      );
     };
 
     func isWhitelisted(address : Types.AccountIdentifier) : Bool {
@@ -467,7 +475,7 @@ module {
       );
     };
 
-    func addToWhitelist(price: Nat64, address : Types.AccountIdentifier) : () {
+    func addToWhitelist(price : Nat64, address : Types.AccountIdentifier) : () {
       _whitelist.add((price, address));
     };
 
