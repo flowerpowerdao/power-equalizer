@@ -8,7 +8,6 @@ import Cap "mo:cap/Cap";
 
 import Assets "CanisterAssets";
 import AssetsTypes "CanisterAssets/types";
-import Buffer "./buffer";
 import EXT "Ext";
 import EXTTypes "Ext/types";
 import ExtCore "./toniq-labs/ext/Core";

@@ -8,9 +8,9 @@ import Nat64 "mo:base/Nat64";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Text "mo:base/Text";
+import Buffer "mo:base/Buffer";
 
 import AssetTypes "../CanisterAssets/types";
-import Buffer "../buffer";
 import Env "../Env";
 import ExtCore "../toniq-labs/ext/Core";
 import MarketplaceTypes "../Marketplace/types";
@@ -125,7 +125,7 @@ module {
       // Just show index
       var soldValue : Nat = Nat64.toNat(
         Array.foldLeft<MarketplaceTypes.Transaction, Nat64>(
-          deps._Marketplace.getTransactions().toArray(),
+          Buffer.toArray(deps._Marketplace.getTransactions()),
           0,
           func(b : Nat64, a : MarketplaceTypes.Transaction) : Nat64 {
             b + a.price;

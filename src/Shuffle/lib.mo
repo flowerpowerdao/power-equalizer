@@ -1,8 +1,8 @@
 import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Random "mo:base/Random";
+import Buffer "mo:base/Buffer";
 
-import Buffer "../buffer";
 import Types "types";
 import Utils "../utils";
 import Env "../Env";

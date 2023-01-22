@@ -8,7 +8,6 @@ import Principal "mo:base/Principal";
 import Encoding "mo:encoding/Binary";
 
 import ExtCore "../toniq-labs/ext/Core";
-import Buffer "../buffer";
 import Types "types";
 import Utils "../utils";
 

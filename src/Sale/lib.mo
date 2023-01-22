@@ -10,12 +10,12 @@ import Random "mo:base/Random";
 import Result "mo:base/Result";
 import Time "mo:base/Time";
 import TrieMap "mo:base/TrieMap";
+import Buffer "mo:base/Buffer";
 
 import AviateAccountIdentifier "mo:accountid/AccountIdentifier";
 import Root "mo:cap/Root";
 
 import AID "../toniq-labs/util/AccountIdentifier";
-import Buffer "../buffer";
 import Env "../Env";
 import Types "types";
 import Utils "../utils";
@@ -39,11 +39,11 @@ module {
 
     public func toStable() : Types.StableState {
       return {
-        _saleTransactionsState = _saleTransactions.toArray();
+        _saleTransactionsState = Buffer.toArray(_saleTransactions);
         _salesSettlementsState = Iter.toArray(_salesSettlements.entries());
-        _failedSalesState = _failedSales.toArray();
-        _tokensForSaleState = _tokensForSale.toArray();
-        _whitelistStable = _whitelist.toArray();
+        _failedSalesState = Buffer.toArray(_failedSales);
+        _tokensForSaleState = Buffer.toArray(_tokensForSale);
+        _whitelistStable = Buffer.toArray(_whitelist);
         _soldIcpState = _soldIcp;
         _soldState = _sold;
         _totalToSellState = _totalToSell;
@@ -338,11 +338,11 @@ module {
     };
 
     public func failedSales() : [(Types.AccountIdentifier, Types.SubAccount)] {
-      _failedSales.toArray();
+      Buffer.toArray(_failedSales);
     };
 
     public func saleTransactions() : [Types.SaleTransaction] {
-      _saleTransactions.toArray();
+      Buffer.toArray(_saleTransactions);
     };
 
     public func getSold() : Nat {
@@ -392,8 +392,11 @@ module {
     // Set different price types here
     func getAddressBulkPrice(address : Types.AccountIdentifier) : [(Nat64, Nat64)] {
       if (Env.dutchAuctionEnabled) {
+        // dutch auction for everyone
         let everyone = Env.dutchAuctionFor == #everyone;
+        // dutch auction for whitelist (tier price is ignored), then salePrice for public sale
         let whitelist = Env.dutchAuctionFor == #whitelist and isWhitelisted(address);
+        // tier price for whitelist, then dutch auction for public sale
         let publicSale = Env.dutchAuctionFor == #publicSale and not isWhitelisted(address);
 
         if (everyone or whitelist or publicSale) {
@@ -401,12 +404,10 @@ module {
         };
       };
 
-      let whitelisted = _whitelist.find(func(a) : Bool { a.1 == address });
-      switch (whitelisted) {
-        case (?whitelistedItem) {
-          return [(1, whitelistedItem.0)];
+      for (item in _whitelist.vals()) {
+        if (item.1 == address) {
+          return [(1, item.0)];
         };
-        case (null) {};
       };
 
       return [(1, Env.salePrice)];
@@ -415,9 +416,9 @@ module {
     func getCurrentDutchAuctionPrice() : Nat64 {
       let start = if (Env.dutchAuctionFor == #publicSale) {
         // if the dutch auction is for public sale only, we take the start time when the whitelist time has expired
-        Env.whitelistTime
+        Env.whitelistTime;
       } else {
-        Env.publicSaleStart
+        Env.publicSaleStart;
       };
       let timeSinceStart : Int = Time.now() - start; // how many nano seconds passed since the auction began
       // in the event that this function is called before the auction has started, return the starting price
@@ -452,23 +453,29 @@ module {
       };
     };
 
-    public func appendWhitelist(price: Nat64, whitelist : [Types.AccountIdentifier]) {
-      _whitelist.append(Utils.mapToBufferFromArray<Types.AccountIdentifier, (Nat64, Types.AccountIdentifier)>(whitelist, func(addr) {
-        (price, addr);
-      }));
+    public func appendWhitelist(price : Nat64, whitelist : [Types.AccountIdentifier]) {
+      _whitelist.append(
+        Utils.mapToBufferFromArray<Types.AccountIdentifier, (Nat64, Types.AccountIdentifier)>(
+          whitelist,
+          func(addr) {
+            (price, addr);
+          },
+        ),
+      );
     };
 
     func isWhitelisted(address : Types.AccountIdentifier) : Bool {
       if (Env.whitelistDiscountLimited == true and Time.now() >= Env.whitelistTime) {
         return false;
       };
-      Option.isSome(_whitelist.find(func(a) : Bool { a.1 == address }));
+      Buffer.forSome<(Nat64, Types.AccountIdentifier)>(_whitelist, func(a) : Bool { a.1 == address });
     };
 
+    // remove first occurrence from whitelist
     func removeFromWhitelist(address : Types.AccountIdentifier) : () {
       var found : Bool = false;
-      _whitelist.filterSelf(
-        func(a) : Bool {
+      _whitelist.filterEntries(
+        func(_, a) : Bool {
           if (found) { return true } else {
             if (a.1 != address) return true;
             found := true;
@@ -478,7 +485,7 @@ module {
       );
     };
 
-    func addToWhitelist(price: Nat64, address : Types.AccountIdentifier) : () {
+    func addToWhitelist(price : Nat64, address : Types.AccountIdentifier) : () {
       _whitelist.add((price, address));
     };
 

@@ -12,8 +12,8 @@ import Text "mo:base/Text";
 import TrieMap "mo:base/TrieMap";
 import Result "mo:base/Result";
 import Hex "mo:encoding/Hex";
+import Buffer "mo:base/Buffer";
 
-import Buffer "./buffer";
 import ExtCore "./toniq-labs/ext/Core";
 import BinaryEncoding "mo:encoding/Binary";
 

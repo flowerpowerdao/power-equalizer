@@ -2,9 +2,9 @@ import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";
 import TrieMap "mo:base/TrieMap";
 import Result "mo:base/Result";
+import Buffer "mo:base/Buffer";
 
 import AID "../toniq-labs/util/AccountIdentifier";
-import Buffer "../buffer";
 import ExtCore "../toniq-labs/ext/Core";
 import Types "types";
 import Utils "../utils";
@@ -29,7 +29,7 @@ module {
           Iter.map<(Types.AccountIdentifier, Buffer.Buffer<Types.TokenIndex>), (Types.AccountIdentifier, [Types.TokenIndex])>(
             _owners.entries(),
             func(owner) {
-              return (owner.0, owner.1.toArray());
+              return (owner.0, Buffer.toArray(owner.1));
             },
           ),
         );
@@ -203,7 +203,7 @@ module {
 
     func _removeFromUserTokens(tindex : Types.TokenIndex, owner : Types.AccountIdentifier) : () {
       switch (_owners.get(owner)) {
-        case (?ownersTokens) _owners.put(owner, ownersTokens.filter(func(a : Types.TokenIndex) : Bool { (a != tindex) }));
+        case (?ownersTokens) ownersTokens.filterEntries(func(_, a : Types.TokenIndex) : Bool { (a != tindex) });
         case (_) ();
       };
     };
