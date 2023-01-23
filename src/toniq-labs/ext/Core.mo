@@ -48,7 +48,7 @@ module ExtCore = {
     token : TokenIdentifier;
     amount : Balance;
     memo : Memo;
-    notify : Bool;
+    notify : Bool; // ignored
     subaccount : ?SubAccount;
   };
   public type TransferResponse = Result.Result<Balance, {

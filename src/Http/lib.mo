@@ -8,9 +8,9 @@ import Nat64 "mo:base/Nat64";
 import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Text "mo:base/Text";
+import Buffer "mo:base/Buffer";
 
 import AssetTypes "../CanisterAssets/types";
-import Buffer "../buffer";
 import Env "../Env";
 import ExtCore "../toniq-labs/ext/Core";
 import MarketplaceTypes "../Marketplace/types";
@@ -20,23 +20,6 @@ import Utils "../utils";
 module {
 
   public class HttpHandler(this : Principal, deps : Types.Dependencies, consts : Types.Constants) {
-
-    /*************
-    * CONSTANTS *
-    *************/
-
-    let NOT_FOUND : Types.HttpResponse = {
-      status_code = 404;
-      headers = [];
-      body = Blob.fromArray([]);
-      streaming_strategy = null;
-    };
-    let BAD_REQUEST : Types.HttpResponse = {
-      status_code = 400;
-      headers = [];
-      body = Blob.fromArray([]);
-      streaming_strategy = null;
-    };
 
     /********************
     * PUBLIC INTERFACE *
@@ -63,7 +46,7 @@ module {
           // start custom
           // we assume the seed animation video is stored in index 0
           // and thus uploaded first
-          if (not deps._Shuffle.isShuffled()) {
+          if (Env.delayedReveal and not deps._Shuffle.isShuffled()) {
             return _processFile(Nat.toText(0), deps._Assets.get(0).payload);
           };
           // end custom
@@ -71,42 +54,14 @@ module {
             case (?metadata) {
               let assetid : Nat = Nat32.toNat(Utils.blobToNat32(metadata));
               let asset : AssetTypes.Asset = deps._Assets.get(assetid);
-              switch (_getParam(request.url, "type")) {
-                case (?t) {
-                  // start custom
-                  switch (t) {
-                    case ("thumbnail") {
-                      switch (asset.thumbnail) {
-                        case (?thumb) {
-                          return {
-                            status_code = 200;
-                            headers = [("content-type", thumb.ctype)];
-                            body = thumb.data[0];
-                            streaming_strategy = null;
-                          };
-                        };
-                        case (_) {};
-                      };
-                    };
-                    case ("metadata") {
-                      switch (asset.metadata) {
-                        case (?metadata) {
-                          return {
-                            status_code = 200;
-                            headers = [("content-type", metadata.ctype)];
-                            body = metadata.data[0];
-                            streaming_strategy = null;
-                          };
-                        };
-                        case (_) {};
-                      };
-                    };
-                    case (_) {};
-                  };
-                  // end custom
+              // start custom
+              switch (_processAsset(request, asset)) {
+                case (?response) {
+                  return response;
                 };
-                case (_) {};
+                case (null) {};
               };
+              // end custom
               return _processFile(Nat.toText(assetid), asset.payload);
             };
             case (_) {};
@@ -119,42 +74,14 @@ module {
           switch (Utils.natFromText(atext)) {
             case (?assetid) {
               let asset : AssetTypes.Asset = deps._Assets.get(assetid);
-              switch (_getParam(request.url, "type")) {
-                case (?t) {
-                  // start custom
-                  switch (t) {
-                    case ("thumbnail") {
-                      switch (asset.thumbnail) {
-                        case (?thumb) {
-                          return {
-                            status_code = 200;
-                            headers = [("content-type", thumb.ctype)];
-                            body = thumb.data[0];
-                            streaming_strategy = null;
-                          };
-                        };
-                        case (_) {};
-                      };
-                    };
-                    case ("metadata") {
-                      switch (asset.metadata) {
-                        case (?metadata) {
-                          return {
-                            status_code = 200;
-                            headers = [("content-type", metadata.ctype)];
-                            body = metadata.data[0];
-                            streaming_strategy = null;
-                          };
-                        };
-                        case (_) {};
-                      };
-                    };
-                    case (_) {};
-                  };
-                  // end custom
+              // start custom
+              switch (_processAsset(request, asset)) {
+                case (?response) {
+                  return response;
                 };
-                case (_) {};
+                case (null) {};
               };
+              // end custom
               return _processFile(Nat.toText(assetid), asset.payload);
             };
             case (_) {};
@@ -167,33 +94,38 @@ module {
       * TOKEN INDEX LOOKUP *
       **********************/
 
-      // check if theres a path
-      switch (path.size()) {
-        // check if there's only on "argument" to it
-        case 1 {
-          // try and convert it to a Nat from Text
-          switch (Utils.natFromText(path[0])) {
-            // if that works, use that
-            case (?tokenIndex) {
-              switch (deps._Tokens.getTokenDataFromIndex(Nat32.fromNat(tokenIndex))) {
-                case (?assetIdBlob) {
-                  let assetid : Nat = Nat32.toNat(Utils.blobToNat32(assetIdBlob));
-                  let asset : AssetTypes.Asset = deps._Assets.get(assetid);
-                  return _processFile(Nat.toText(assetid), asset.payload);
+      // check if there's only on "argument" to it
+      if (path.size() == 1) {
+        let parts = Iter.toArray(Text.split(path[0], #text("?")));
+        // try and convert it to a Nat from Text
+        switch (Utils.natFromText(parts[0])) {
+          // if that works, use that
+          case (?tokenIndex) {
+            switch (deps._Tokens.getTokenDataFromIndex(Nat32.fromNat(tokenIndex))) {
+              case (?assetIdBlob) {
+                let assetid : Nat = Nat32.toNat(Utils.blobToNat32(assetIdBlob));
+                let asset : AssetTypes.Asset = deps._Assets.get(assetid);
+                // start custom
+                switch (_processAsset(request, asset)) {
+                  case (?response) {
+                    return response;
+                  };
+                  case (null) {};
                 };
-                case (_) {};
+                // end custom
+                return _processFile(Nat.toText(assetid), asset.payload);
               };
+              case (_) {};
             };
-            case (_) {};
           };
+          case (_) {};
         };
-        case (_) {};
       };
 
-      //Just show index
+      // Just show index
       var soldValue : Nat = Nat64.toNat(
         Array.foldLeft<MarketplaceTypes.Transaction, Nat64>(
-          deps._Marketplace.getTransactions().toArray(),
+          Buffer.toArray(deps._Marketplace.getTransactions()),
           0,
           func(b : Nat64, a : MarketplaceTypes.Transaction) : Nat64 {
             b + a.price;
@@ -205,11 +137,30 @@ module {
       } else {
         0;
       };
+
+      var whitelistTiersText = "";
+      for (whitelistTier in Env.whitelistTiers.vals()) {
+        whitelistTiersText #= whitelistTier.name # " " # _displayICP(Nat64.toNat(whitelistTier.price)) # "; ";
+      };
+
       return {
         status_code = 200;
         headers = [("content-type", "text/plain")];
         body = Text.encodeUtf8(
-          Env.collectionName # "\n" # "---\n" # "Cycle Balance:                            ~" # debug_show (Cycles.balance() / 1000000000000) # "T\n" # "Minted NFTs:                              " # debug_show (deps._Tokens.getNextTokenId()) # "\n" # "Assets:                                   " # debug_show (deps._Assets.size()) # "\n" # "---\n" # "ETH Flower Whitelist:                     " # debug_show (deps._Sale.ethFlowerWhitelistSize() : Nat) # "\n" # "MODCLUB Whitelist:                        " # debug_show (deps._Sale.modclubWhitelistSize() : Nat) # "\n" # "Total to sell:                            " # debug_show (deps._Marketplace.getTotalToSell()) # "\n" # "Remaining:                                " # debug_show (deps._Sale.availableTokens()) # "\n" # "Sold:                                     " # debug_show (deps._Marketplace.getSold()) # "\n" # "Sold (ICP):                               " # _displayICP(Nat64.toNat(deps._Sale.soldIcp())) # "\n" # "---\n" # "Marketplace Listings:                     " # debug_show (deps._Marketplace.tokenListingSize()) # "\n" # "Sold via Marketplace:                     " # debug_show (deps._Marketplace.transactionsSize()) # "\n" # "Sold via Marketplace in ICP:              " # _displayICP(soldValue) # "\n" # "Average Price ICP Via Marketplace:        " # _displayICP(avg) # "\n" # "Admin:                                    " # debug_show (consts.minter) # "\n",
+          Env.collectionName # "\n" # "---\n"
+          # "Cycle Balance:                            ~" # debug_show (Cycles.balance() / 1000000000000) # "T\n"
+          # "Minted NFTs:                              " # debug_show (deps._Tokens.getNextTokenId()) # "\n"
+          # "Assets:                                   " # debug_show (deps._Assets.size()) # "\n" # "---\n"
+          # "Whitelist Tiers:                          " # whitelistTiersText # "\n"
+          # "Total to sell:                            " # debug_show (deps._Sale.getTotalToSell()) # "\n"
+          # "Remaining:                                " # debug_show (deps._Sale.availableTokens()) # "\n"
+          # "Sold:                                     " # debug_show (deps._Sale.getSold()) # "\n"
+          # "Sold (ICP):                               " # _displayICP(Nat64.toNat(deps._Sale.soldIcp())) # "\n" # "---\n"
+          # "Marketplace Listings:                     " # debug_show (deps._Marketplace.tokenListingSize()) # "\n"
+          # "Sold via Marketplace:                     " # debug_show (deps._Marketplace.transactionsSize()) # "\n"
+          # "Sold via Marketplace in ICP:              " # _displayICP(soldValue) # "\n"
+          # "Average Price ICP Via Marketplace:        " # _displayICP(avg) # "\n"
+          # "Admin:                                    " # debug_show (consts.minter) # "\n",
         );
         streaming_strategy = null;
       };
@@ -218,6 +169,41 @@ module {
     /********************
     * INTERNAL METHODS *
     ********************/
+
+    func _processAsset(request : Types.HttpRequest, asset : AssetTypes.Asset) : ?Types.HttpResponse {
+      let t = switch (_getParam(request.url, "type")) {
+        case (?t) { t };
+        case (null) {
+          return null;
+        };
+      };
+      if (t == "thumbnail") {
+        switch (asset.thumbnail) {
+          case (?thumb) {
+            return ?{
+              status_code = 200;
+              headers = [("content-type", thumb.ctype)];
+              body = thumb.data[0];
+              streaming_strategy = null;
+            };
+          };
+          case (_) {};
+        };
+      } else if (t == "metadata") {
+        switch (asset.metadata) {
+          case (?metadata) {
+            return ?{
+              status_code = 200;
+              headers = [("content-type", metadata.ctype)];
+              body = metadata.data[0];
+              streaming_strategy = null;
+            };
+          };
+          case (_) {};
+        };
+      };
+      return null;
+    };
 
     private func _processFile(tokenid : ExtCore.TokenIdentifier, file : AssetTypes.File) : Types.HttpResponse {
       // start custom

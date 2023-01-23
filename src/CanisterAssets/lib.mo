@@ -3,14 +3,14 @@ import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import Random "mo:base/Random";
+import Buffer "mo:base/Buffer";
 
-import Buffer "../buffer";
 import Types "types";
 import Utils "../utils";
 
 module {
 
-  public class Factory(state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
+  public class Factory(state : Types.StableState, consts : Types.Constants) {
 
     /*********
     * STATE *
@@ -20,7 +20,7 @@ module {
 
     public func toStable() : Types.StableState {
       return {
-        _assetsState = _assets.toArray();
+        _assetsState = Buffer.toArray(_assets);
       };
     };
 

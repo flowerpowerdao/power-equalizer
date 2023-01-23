@@ -8,7 +8,6 @@ import Cap "mo:cap/Cap";
 
 import Assets "CanisterAssets";
 import AssetsTypes "CanisterAssets/types";
-import Buffer "./buffer";
 import EXT "Ext";
 import EXTTypes "Ext/types";
 import ExtCore "./toniq-labs/ext/Core";
@@ -22,6 +21,8 @@ import Shuffle "Shuffle";
 import ShuffleTypes "Shuffle/types";
 import TokenTypes "Tokens/types";
 import Tokens "Tokens";
+import Disburser "Disburser";
+import DisburserTypes "Disburser/types";
 import Utils "./utils";
 
 shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCanister {
@@ -31,17 +32,39 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   *********/
   type AccountIdentifier = ExtCore.AccountIdentifier;
   type SubAccount = ExtCore.SubAccount;
-  type AccountBalanceArgs = { account : AccountIdentifier };
+  type AccountBalanceArgs = { account : LedgerAccountIdentifier };
   type ICPTs = { e8s : Nat64 };
-  type SendArgs = {
-    memo : Nat64;
-    amount : ICPTs;
-    fee : ICPTs;
-    from_subaccount : ?SubAccount;
-    to : AccountIdentifier;
-    created_at_time : ?Time.Time;
-  };
 
+  // ledger types
+  type LedgerAccountIdentifier = [Nat8];
+  type BlockIndex = Nat64;
+  type Memo = Nat64;
+  type LedgerSubAccount = [Nat8];
+  type TimeStamp = {
+    timestamp_nanos : Nat64;
+  };
+  type Tokens = {
+    e8s : Nat64;
+  };
+  type TransferArgs = {
+    to : LedgerAccountIdentifier;
+    fee : Tokens;
+    memo : Memo;
+    from_subaccount : ?LedgerSubAccount;
+    created_at_time : ?TimeStamp;
+    amount : Tokens;
+  };
+  type TransferError = {
+    #TxTooOld : { allowed_window_nanos : Nat64 };
+    #BadFee : { expected_fee : Tokens };
+    #TxDuplicate : { duplicate_of : BlockIndex };
+    #TxCreatedInFuture;
+    #InsufficientFunds : { balance : Tokens };
+  };
+  type TransferResult = {
+    #Ok : BlockIndex;
+    #Err : TransferError;
+  };
   /****************
   * STABLE STATE *
   ****************/
@@ -60,6 +83,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   // Shuffle
   private stable var _shuffleState : ShuffleTypes.StableState = ShuffleTypes.newStableState();
+
+  // Disburser
+  private stable var _disburserState : DisburserTypes.StableState = DisburserTypes.newStableState();
 
   // Cap
   private stable var rootBucketId : ?Text = null;
@@ -86,6 +112,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
     // Canistergeek
     _canistergeekMonitorUD := ?canistergeekMonitor.preupgrade();
+
+    // Disburser
+    _disburserState := _Disburser.toStable();
   };
 
   system func postupgrade() {
@@ -107,6 +136,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     // Canistergeek
     canistergeekMonitor.postupgrade(_canistergeekMonitorUD);
     _canistergeekMonitorUD := null;
+
+    // Disburser
+    _disburserState := DisburserTypes.newStableState();
   };
 
   /*************
@@ -114,11 +146,8 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   *************/
 
   let LEDGER_CANISTER = actor "ryjl3-tyaaa-aaaaa-aaaba-cai" : actor {
-    account_balance_dfx : shared query AccountBalanceArgs -> async ICPTs;
-    send_dfx : shared SendArgs -> async Nat64;
-  };
-  let WHITELIST_CANISTER = actor "s7o6c-giaaa-aaaae-qac4a-cai" : actor {
-    getWhitelist : shared () -> async [Principal];
+    account_balance : shared query AccountBalanceArgs -> async ICPTs;
+    transfer : shared TransferArgs -> async TransferResult;
   };
   let CREATION_CYCLES : Nat = 1_000_000_000_000;
 
@@ -149,6 +178,26 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   private func validateCaller(principal : Principal) : () {
     assert (principal == Principal.fromText("ikywv-z7xvl-xavcg-ve6kg-dbbtx-wy3gy-qbtwp-7ylai-yl4lc-lwetg-kqe"));
+  };
+
+  // Disburser
+  let _Disburser = Disburser.Factory(
+    cid,
+    _disburserState,
+    {
+      LEDGER_CANISTER;
+    },
+  );
+
+  // queries
+  public query func getDisbursements() : async [DisburserTypes.Disbursement] {
+    _Disburser.getDisbursements();
+  };
+
+  // updates
+  public func cronDisbursements() : async () {
+    canistergeekMonitor.collectMetrics();
+    await _Disburser.cronDisbursements();
   };
 
   // Cap
@@ -190,95 +239,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     _Tokens.bearer(token);
   };
 
-  // Marketplace
-  let _Marketplace = Marketplace.Factory(
-    cid,
-    _marketplaceState,
-    {
-      _Tokens;
-      _Cap;
-    },
-    {
-      LEDGER_CANISTER;
-    },
-  );
-
-  // updates
-
-  // lock token and get address to pay
-  public shared ({ caller }) func lock(tokenid : MarketplaceTypes.TokenIdentifier, price : Nat64, address : MarketplaceTypes.AccountIdentifier, subaccount : MarketplaceTypes.SubAccount) : async Result.Result<MarketplaceTypes.AccountIdentifier, MarketplaceTypes.CommonError> {
-    canistergeekMonitor.collectMetrics();
-    // no caller check, anyone can lock
-    await _Marketplace.lock(caller, tokenid, price, address, subaccount);
-  };
-
-  // check payment and settle transfer token to user
-  public shared ({ caller }) func settle(tokenid : MarketplaceTypes.TokenIdentifier) : async Result.Result<(), MarketplaceTypes.CommonError> {
-    canistergeekMonitor.collectMetrics();
-    // no caller check, token will be sent to the address that was set on 'lock'
-    await _Marketplace.settle(caller, tokenid);
-  };
-
-  public shared ({ caller }) func list(request : MarketplaceTypes.ListRequest) : async Result.Result<(), MarketplaceTypes.CommonError> {
-    canistergeekMonitor.collectMetrics();
-    // checks caller == token_owner
-    await _Marketplace.list(caller, request);
-  };
-
-  public func cronDisbursements() : async () {
-    canistergeekMonitor.collectMetrics();
-    await _Marketplace.cronDisbursements();
-  };
-
-  public shared ({ caller }) func cronSettlements() : async () {
-    canistergeekMonitor.collectMetrics();
-    // caller will be stored to the Cap event, is that ok?
-    await _Marketplace.cronSettlements(caller);
-  };
-
-  // queries
-  public query func details(token : MarketplaceTypes.TokenIdentifier) : async Result.Result<(MarketplaceTypes.AccountIdentifier, ?MarketplaceTypes.Listing), MarketplaceTypes.CommonError> {
-    _Marketplace.details(token);
-  };
-
-  public query func transactions() : async [MarketplaceTypes.Transaction] {
-    _Marketplace.transactions();
-  };
-
-  public query func settlements() : async [(MarketplaceTypes.TokenIndex, MarketplaceTypes.AccountIdentifier, Nat64)] {
-    _Marketplace.settlements();
-  };
-
-  public query func listings() : async [(MarketplaceTypes.TokenIndex, MarketplaceTypes.Listing, MarketplaceTypes.Metadata)] {
-    _Marketplace.listings();
-  };
-
-  public query func allSettlements() : async [(MarketplaceTypes.TokenIndex, MarketplaceTypes.Settlement)] {
-    _Marketplace.allSettlements();
-  };
-
-  public query func stats() : async (Nat64, Nat64, Nat64, Nat64, Nat, Nat, Nat) {
-    _Marketplace.stats();
-  };
-
-  public query func viewDisbursements() : async [(MarketplaceTypes.TokenIndex, MarketplaceTypes.AccountIdentifier, MarketplaceTypes.SubAccount, Nat64)] {
-    _Marketplace.viewDisbursements();
-  };
-
-  public query func pendingCronJobs() : async [Nat] {
-    _Marketplace.pendingCronJobs();
-  };
-
-  public query func toAddress(p : Text, sa : Nat) : async AccountIdentifier {
-    _Marketplace.toAddress(p, sa);
-  };
-
   // Assets
   let _Assets = Assets.Factory(
     _assetsState,
-    {
-      _Tokens;
-    },
     {
       minter = init_minter;
     },
@@ -321,19 +284,18 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     await _Shuffle.shuffleAssets(caller);
   };
 
-  //Sale
+  // Sale
   let _Sale = Sale.Factory(
     cid,
     _saleState,
     {
       _Cap;
-      _Marketplace;
       _Shuffle;
       _Tokens;
+      _Disburser;
     },
     {
       LEDGER_CANISTER;
-      WHITELIST_CANISTER;
       minter = init_minter;
     },
   );
@@ -343,7 +305,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     canistergeekMonitor.collectMetrics();
     // checks caller == minter
     // prevents double mint
-    await _Sale.initMint(caller);
+    _Sale.initMint(caller);
   };
 
   public shared ({ caller }) func shuffleTokensForSale() : async () {
@@ -358,10 +320,10 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     _Sale.airdropTokens(caller, startIndex);
   };
 
-  public shared ({ caller }) func setTotalToSell() : async Nat {
+  public shared ({ caller }) func startSale() : async Nat {
     canistergeekMonitor.collectMetrics();
     // checks caller == minter
-    _Sale.setTotalToSell(caller);
+    _Sale.startSale(caller);
   };
 
   public func reserve(amount : Nat64, quantity : Nat64, address : SaleTypes.AccountIdentifier, _subaccountNOTUSED : SaleTypes.SubAccount) : async Result.Result<(SaleTypes.AccountIdentifier, Nat64), Text> {
@@ -400,6 +362,88 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   public query func salesSettings(address : AccountIdentifier) : async SaleTypes.SaleSettings {
     _Sale.salesSettings(address);
+  };
+
+  // Marketplace
+  let _Marketplace = Marketplace.Factory(
+    cid,
+    _marketplaceState,
+    {
+      _Tokens;
+      _Cap;
+      _Sale;
+      _Disburser;
+    },
+    {
+      LEDGER_CANISTER;
+    },
+  );
+
+  // updates
+
+  // lock token and get address to pay
+  public shared ({ caller }) func lock(tokenid : MarketplaceTypes.TokenIdentifier, price : Nat64, address : MarketplaceTypes.AccountIdentifier, subaccount : MarketplaceTypes.SubAccount) : async Result.Result<MarketplaceTypes.AccountIdentifier, MarketplaceTypes.CommonError> {
+    canistergeekMonitor.collectMetrics();
+    // no caller check, anyone can lock
+    await _Marketplace.lock(caller, tokenid, price, address, subaccount);
+  };
+
+  // check payment and settle transfer token to user
+  public shared ({ caller }) func settle(tokenid : MarketplaceTypes.TokenIdentifier) : async Result.Result<(), MarketplaceTypes.CommonError> {
+    canistergeekMonitor.collectMetrics();
+    // no caller check, token will be sent to the address that was set on 'lock'
+    await _Marketplace.settle(caller, tokenid);
+  };
+
+  public shared ({ caller }) func list(request : MarketplaceTypes.ListRequest) : async Result.Result<(), MarketplaceTypes.CommonError> {
+    canistergeekMonitor.collectMetrics();
+    // checks caller == token_owner
+    await _Marketplace.list(caller, request);
+  };
+
+  public shared ({ caller }) func cronSettlements() : async () {
+    canistergeekMonitor.collectMetrics();
+    // caller will be stored to the Cap event, is that ok?
+    await _Marketplace.cronSettlements(caller);
+  };
+
+  // queries
+  public query func details(token : MarketplaceTypes.TokenIdentifier) : async Result.Result<(MarketplaceTypes.AccountIdentifier, ?MarketplaceTypes.Listing), MarketplaceTypes.CommonError> {
+    _Marketplace.details(token);
+  };
+
+  public query func transactions() : async [MarketplaceTypes.Transaction] {
+    _Marketplace.transactions();
+  };
+
+  public query func settlements() : async [(MarketplaceTypes.TokenIndex, MarketplaceTypes.AccountIdentifier, Nat64)] {
+    _Marketplace.settlements();
+  };
+
+  public query func listings() : async [(MarketplaceTypes.TokenIndex, MarketplaceTypes.Listing, MarketplaceTypes.Metadata)] {
+    _Marketplace.listings();
+  };
+
+  public query func allSettlements() : async [(MarketplaceTypes.TokenIndex, MarketplaceTypes.Settlement)] {
+    _Marketplace.allSettlements();
+  };
+
+  public query func stats() : async (Nat64, Nat64, Nat64, Nat64, Nat, Nat, Nat) {
+    _Marketplace.stats();
+  };
+
+  public query func pendingCronJobs() : async {
+    disbursements : Nat;
+    failedSettlements : Nat;
+  } {
+    {
+      disbursements = _Disburser.pendingCronJobs();
+      failedSettlements = _Marketplace.pendingCronJobs();
+    };
+  };
+
+  public query func toAddress(p : Text, sa : Nat) : async AccountIdentifier {
+    _Marketplace.toAddress(p, sa);
   };
 
   // EXT
