@@ -18,54 +18,58 @@ import canisterIds from '../.dfx/local/canister_ids.json';
 
 
 export class User {
-	mainActor: ActorSubclass<_SERVICE_MAIN>;
-	icpActor: ActorSubclass<_SERVICE_ICP>;
-	identity: Secp256k1KeyIdentity;
-	principal: Principal;
-	account: number[];
-	accountId: string;
+  // mainActor: ActorSubclass<_SERVICE_MAIN>;
+  mainActor: _SERVICE_MAIN;
+  icpActor: _SERVICE_ICP;
+  identity: Secp256k1KeyIdentity;
+  principal: Principal;
+  account: number[];
+  accountId: string;
 
-	constructor(seed?: string) {
-		this.identity = generateIdentity(seed);
-		this.principal = this.identity.getPrincipal();
-		this.account = AccountIdentifier.fromPrincipal({principal: this.principal}).toNumbers();
-		this.accountId = AccountIdentifier.fromPrincipal({principal: this.principal}).toHex();
+  constructor(seed?: string) {
+    this.identity = generateIdentity(seed);
+    this.principal = this.identity.getPrincipal();
+    this.account = AccountIdentifier.fromPrincipal({principal: this.principal}).toNumbers();
+    this.accountId = AccountIdentifier.fromPrincipal({principal: this.principal}).toHex();
 
-		this.mainActor = Actor.createActor(idlFactoryMain, {
+    this.mainActor = Actor.createActor(idlFactoryMain, {
       agent: createAgent(this.identity),
       canisterId: canisterIds.staging.local,
     });
 
-		this.icpActor = Actor.createActor(idlFactoryIcp, {
+    this.icpActor = Actor.createActor(idlFactoryIcp, {
       agent: createAgent(this.identity),
       canisterId: canisterIds.ledger.local,
     });
-	}
+  }
 
-	async mintICP(amount: bigint) {
-		let minter = new User('minter');
+  async mintICP(amount: bigint) {
+    let minter = new User('minter');
+    
+    await minter.icpActor.transfer({
+      to: this.account,
+      amount: { e8s: amount },
+      created_at_time: [],
+      memo: 0n,
+      fee: { e8s: 0n },
+      from_subaccount: [],
+    });
+  }
 
-		await minter.icpActor.transfer({
-			to: this.account,
-			amount: { e8s: amount },
-			created_at_time: [],
-			memo: 0n,
-			fee: { e8s: 0n },
-			from_subaccount: [],
-		});
-	}
-
-	async sendICP(to: number[] | Uint8Array, amount: bigint) {
-		let res = await this.icpActor.transfer({
-			from_subaccount: [],
-			to: Array.from(to),
-			amount: { e8s: amount },
-			fee: { e8s: 10_000n },
-			memo: 0n,
-			created_at_time: [{ timestamp_nanos: BigInt(Date.now()) * 1_000_000n }],
-		});
-		if ('Err' in res) {
-			throw res.Err;
-		}
-	}
+  async sendICP(to: string | number[] | Uint8Array, amount: bigint) {
+    if (typeof to === 'string') {
+      to = AccountIdentifier.fromHex(to).toNumbers();
+    }
+    let res = await this.icpActor.transfer({
+      from_subaccount: [],
+      to: Array.from(to),
+      amount: { e8s: amount },
+      fee: { e8s: 10_000n },
+      memo: 0n,
+      created_at_time: [{ timestamp_nanos: BigInt(Date.now()) * 1_000_000n }],
+    });
+    if ('Err' in res) {
+      throw res.Err;
+    }
+  }
 }

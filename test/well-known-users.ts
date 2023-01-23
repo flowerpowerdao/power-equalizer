@@ -1,11 +1,11 @@
 import { User } from './user';
 
-export let ethFlowerWhitelist = Array(100).fill(0).map((_, i) => {
-   return new User(`ethFlowerWhitelist-${i}`);
+export let whitelistTier0 = Array(100).fill(0).map((_, i) => {
+   return new User(`whitelist-tier-0-${i}`);
 });
 
-export let modclubWhitelist = Array(100).fill(0).map((_, i) => {
-   return new User(`modclubWhitelist-${i}`);
+export let whitelistTier1 = Array(100).fill(0).map((_, i) => {
+   return new User(`whitelist-tier-1-${i}`);
 });
 
 export let airdrop = Array(100).fill(0).map((_, i) => {

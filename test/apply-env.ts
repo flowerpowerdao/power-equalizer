@@ -16,6 +16,9 @@ else {
     if (typeof val == 'bigint') {
       val = String(val);
     }
+    else if (String(val).startsWith('#')) {
+      val = val;
+    }
     else {
       val = JSON.stringify(val);
     }
