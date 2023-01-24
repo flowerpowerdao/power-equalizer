@@ -5,8 +5,8 @@ module {
   public let collectionName = "Pineapple Punks";
   public let placeholderContentLength = "1053832";
   public let teamAddress : ExtCore.AccountIdentifier = $teamAddress;
-  public let ecscrowDelay : Time.Time = $collectionSize; // 120 seconds
-  public let collectionSize : Nat32 = 7777;
+  public let ecscrowDelay : Time.Time = $ecscrowDelay; // 120 seconds
+  public let collectionSize : Nat32 = $collectionSize;
 
   public let salePrice : Nat64 = 700000000;
   public let salesFees : [(ExtCore.AccountIdentifier, Nat64)] = [

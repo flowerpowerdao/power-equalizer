@@ -168,7 +168,7 @@ module {
         amount = rem;
         tokenIndex = token;
       });
-      
+
       // add event to CAP
       let event : Root.IndefiniteEvent = {
         operation = "sale";

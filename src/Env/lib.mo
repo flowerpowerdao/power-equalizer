@@ -5,7 +5,7 @@ module {
   public let collectionName = "Pineapple Punks";
   public let placeholderContentLength = "1053832";
   public let teamAddress : ExtCore.AccountIdentifier = "c6650430117d586f5286a570e61f1fc987a4d2c4f75dad4d9ebfd0ad27e62485";
-  public let ecscrowDelay : Time.Time = 7777; // 120 seconds
+  public let ecscrowDelay : Time.Time = 120000000000; // 120 seconds
   public let collectionSize : Nat32 = 7777;
 
   public let salePrice : Nat64 = 700000000;
@@ -14,8 +14,8 @@ module {
     ("c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9", 1000), // Entrepot Fee
   ];
 
-  public let publicSaleStart : Time.Time = 1674475269009000000; // Start of first purchase (WL or other)
-  public let whitelistTime : Time.Time = 1674475269009000000; // Period for WL only discount. Set to publicSaleStart for no exclusive period
+  public let publicSaleStart : Time.Time = 1674567834762000000; // Start of first purchase (WL or other)
+  public let whitelistTime : Time.Time = 1674567834762000000; // Period for WL only discount. Set to publicSaleStart for no exclusive period
   public let marketDelay : Time.Time = 172800000000000; // How long to delay market opening (2 days after whitelist sale started or when sold out)
 
   // true - assets will be revealed after manually calling 'shuffleAssets'

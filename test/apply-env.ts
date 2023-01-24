@@ -5,13 +5,13 @@ let envName = process.argv[2];
 
 console.log(`Applying env '${envName}'...`);
 
-if (envName === 'production') {
-  copyFileSync(resolve(__dirname + '/../src/Env/production-env.mo'), resolve(__dirname + '/../src/Env/lib.mo'));
+if (envName === 'btcflower') {
+  copyFileSync(resolve(__dirname + '/../src/Env/.env.btcflower.mo'), resolve(__dirname + '/../src/Env/lib.mo'));
 }
 else {
-  let data = readFileSync(__dirname + '/../src/Env/template.mo').toString();
+  let data = readFileSync(__dirname + '/../src/Env/_template.mo').toString();
 
-  let env = require(`./${envName}/.env.ts`)
+  let env = require(`./${envName}/.env.${envName}.ts`);
   for (let [key, val] of Object.entries(env.default)) {
     if (typeof val == 'bigint') {
       val = String(val);
