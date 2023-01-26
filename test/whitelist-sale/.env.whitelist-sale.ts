@@ -8,11 +8,11 @@ export default {
   entrepotAddress: new User('entrepot').accountId,
   salePrice: 700000000n,
   publicSaleStart: BigInt(Date.now()) * 1_000_000n, // Start of first purchase (WL or other)
-  whitelistTime: BigInt(Date.now()) * 1_000_000n, // Period for WL only discount. Set to publicSaleStart for no exclusive period
+  whitelistTime: BigInt(Date.now()) * 1_000_000n * 2n, // Period for WL only discount. Set to publicSaleStart for no exclusive period
   marketDelay: 172_800_000_000_000n, // How long to delay market opening (2 days after whitelist sale started or when sold out)
   // true - assets will be revealed after manually calling 'shuffleAssets'
   // false - assets will be revealed immediately and assets shuffling will be disabled
-  delayedReveal: true, // Whitelist addresses are removed after purchase
+  delayedReveal: true,
   whitelistOneTimeOnly: true, // Whitelist addresses are removed after purchase
   whitelistDiscountLimited: true, // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
   dutchAuctionEnabled: false,

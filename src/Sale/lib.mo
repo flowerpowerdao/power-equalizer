@@ -476,8 +476,12 @@ module {
       var found : Bool = false;
       _whitelist.filterEntries(
         func(_, a) : Bool {
-          if (found) { return true } else {
-            if (a.1 != address) return true;
+          if (found) {
+            return true;
+          } else {
+            if (a.1 != address) {
+              return true;
+            };
             found := true;
             return false;
           };
