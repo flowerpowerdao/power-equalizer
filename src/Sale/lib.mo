@@ -240,13 +240,19 @@ module {
           };
           ignore deps._Cap.insert(event);
           // Payout
-          var bal : Nat64 = response.e8s - (10000 * 1); //Remove 2x tx fee
-          deps._Disburser.addDisbursement({
-            to = Env.teamAddress;
-            fromSubaccount = settlement.subaccount;
-            amount = bal;
-            tokenIndex = 0;
-          });
+          // remove total transaction fee from balance to be splitted
+          let bal : Nat64 = response.e8s - (10000 * Nat64.fromNat(Env.salesDistribution.size()));
+
+          // disbursement sales
+          for (f in Env.salesDistribution.vals()) {
+            var _fee : Nat64 = bal * f.1 / 100000;
+            deps._Disburser.addDisbursement({
+              to = f.0;
+              fromSubaccount = settlement.subaccount;
+              amount = _fee;
+              tokenIndex = 0;
+            });
+          };
           return #ok();
         };
       } else {
