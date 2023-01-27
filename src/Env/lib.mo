@@ -11,7 +11,7 @@ module {
   public let salePrice : Nat64 = 700000000;
   public let salesFees : [(ExtCore.AccountIdentifier, Nat64)] = [
     (teamAddress, 7500), // Royalty Fee
-    ("c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9", 1000), // Entrepot Fee
+    // ("c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9", 1000), // Entrepot Fee
   ];
 
   public let publicSaleStart : Time.Time = 1659276000000000000; // Start of first purchase (WL or other)
