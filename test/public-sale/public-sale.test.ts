@@ -1,19 +1,9 @@
 import { AccountIdentifier } from '@dfinity/nns';
 import { describe, test, expect } from 'vitest';
 import { User } from '../user';
-import { buyFromSale } from '../utils';
+import { buyFromSale, checkTokenCount } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
 import env from './.env.public-sale';
-
-async function checkTokenCount(user: User, count: number) {
-  let tokensRes = await user.mainActor.tokens(user.accountId);
-  expect(tokensRes).not.toHaveProperty('err');
-  if ('ok' in tokensRes) {
-    expect(tokensRes.ok.length).toBe(count);
-    let tokenIndex = tokensRes.ok.at(-1);
-    expect(tokenIndex).toBeGreaterThan(0);
-  }
-}
 
 describe('public sale', () => {
   test('try to list nft before marketplace opens', async () => {
