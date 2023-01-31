@@ -4,8 +4,6 @@ import { buyFromSale, checkTokenCount, tokenIdentifier } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
 import env from './.env.marketplace';
 
-import canisterIds from '../../.dfx/local/canister_ids.json';
-
 describe('list and delist nft', async () => {
   let user = new User;
   user.mintICP(1000_000_000n);
@@ -33,7 +31,7 @@ describe('list and delist nft', async () => {
     let res = await user.mainActor.list({
       from_subaccount: [],
       price: [1000_000n],
-      token: tokenIdentifier(canisterIds.staging.local, tokens[0]),
+      token: tokenIdentifier(tokens[0]),
     });
     expect(res).toHaveProperty('ok');
   });
@@ -42,7 +40,7 @@ describe('list and delist nft', async () => {
     let res = await user.mainActor.list({
       from_subaccount: [],
       price: [],
-      token: tokenIdentifier(canisterIds.staging.local, tokens[0]),
+      token: tokenIdentifier(tokens[0]),
     });
     expect(res).toHaveProperty('ok');
   });

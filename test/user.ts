@@ -45,7 +45,7 @@ export class User {
 
   async mintICP(amount: bigint) {
     let minter = new User('minter');
-    
+
     await minter.icpActor.transfer({
       to: this.account,
       amount: { e8s: amount },

@@ -1,4 +1,3 @@
-import { AccountIdentifier } from '@dfinity/nns';
 import { describe, test, expect } from 'vitest';
 import { User } from '../user';
 import { buyFromSale, checkTokenCount } from '../utils';
@@ -10,7 +9,7 @@ describe('public sale', () => {
     let user = new User;
     let res = await user.mainActor.list({
       price: [BigInt(1000)],
-      token: AccountIdentifier.fromPrincipal({ principal: new User().principal }).toHex(),
+      token:  new User().accountId,
       from_subaccount: [],
     });
     expect(res['err'].Other).toContain('can not list yet');

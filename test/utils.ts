@@ -2,6 +2,8 @@ import { Principal } from "@dfinity/principal";
 import { expect } from "vitest";
 import { User } from "./user";
 
+import canisterIds from '../.dfx/local/canister_ids.json';
+
 export async function buyFromSale(user: User) {
   let settings = await user.mainActor.salesSettings(user.accountId);
   let res = await user.mainActor.reserve(settings.price, 1n, user.accountId, new Uint8Array);
@@ -38,11 +40,11 @@ export let to32bits = (num) => {
 }
 
 // https://github.com/Toniq-Labs/ext-cli/blob/main/src/extjs.js#L20-L45
-export let tokenIdentifier = (principal, index) => {
+export let tokenIdentifier = (index) => {
   let padding = Buffer.from("\x0Atid");
   let array = new Uint8Array([
       ...padding,
-      ...Principal.fromText(principal).toUint8Array(),
+      ...Principal.fromText(canisterIds.staging.local).toUint8Array(),
       ...to32bits(index),
   ]);
   return Principal.fromUint8Array(array).toText();

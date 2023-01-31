@@ -14,7 +14,7 @@ describe('marketplace', () => {
     let res = await user.mainActor.list({
       from_subaccount: [],
       price: [1000_000n],
-      token: tokenIdentifier(canisterIds.staging.local, 123),
+      token: tokenIdentifier(123),
     });
 
     expect(res).toHaveProperty('err');

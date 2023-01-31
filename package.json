@@ -18,7 +18,8 @@
     "test:public-sale": "npm run env public-sale && npm run deploy-qq && npm run mint && npm run start-sale && vitest run public-sale",
     "test:whitelist-sale": "npm run env whitelist-sale && npm run deploy-qq && npm run mint && npm run start-sale && vitest run whitelist-sale",
     "test:marketplace": "npm run env marketplace && npm run deploy-qq && npm run mint && npm run start-sale && vitest run marketplace",
-    "test": "npm run test:pending-sale && npm run test:public-sale && npm run test:whitelist-sale && npm run test:marketplace"
+    "test:sold-out": "npm run env sold-out && npm run deploy-qq && npm run mint && npm run start-sale && vitest run sold-out",
+    "test": "npm run test:pending-sale && npm run test:public-sale && npm run test:whitelist-sale && npm run test:marketplace && npm run test:sold-out"
   },
   "devDependencies": {
     "@dfinity/agent": "^0.15.0",

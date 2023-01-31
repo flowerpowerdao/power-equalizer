@@ -1,4 +1,3 @@
-import { AccountIdentifier } from '@dfinity/nns';
 import { describe, test, expect } from 'vitest';
 import { User } from '../user';
 import { buyFromSale } from '../utils';

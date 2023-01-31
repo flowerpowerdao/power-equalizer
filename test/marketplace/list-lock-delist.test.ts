@@ -36,13 +36,13 @@ describe('list, lock and try to delist nft', async () => {
     let res = await seller.mainActor.list({
       from_subaccount: [],
       price: [1000_000n],
-      token: tokenIdentifier(canisterIds.staging.local, tokens[0]),
+      token: tokenIdentifier(tokens[0]),
     });
     expect(res).toHaveProperty('ok');
   });
 
   it('lock', async () => {
-    let lockRes = await buyer.mainActor.lock(tokenIdentifier(canisterIds.staging.local, tokens[0]), 1000_000n, buyer.accountId, new Uint8Array);
+    let lockRes = await buyer.mainActor.lock(tokenIdentifier(tokens[0]), 1000_000n, buyer.accountId, new Uint8Array);
     expect(lockRes).toHaveProperty('ok');
   });
 
@@ -50,7 +50,7 @@ describe('list, lock and try to delist nft', async () => {
     let delistRes = await seller.mainActor.list({
       from_subaccount: [],
       price: [],
-      token: tokenIdentifier(canisterIds.staging.local, tokens[0]),
+      token: tokenIdentifier(tokens[0]),
     });
     expect(delistRes).toHaveProperty('err');
   });
