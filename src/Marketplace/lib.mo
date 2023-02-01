@@ -40,6 +40,22 @@ module {
       };
     };
 
+    public func grow(n : Nat): Nat {
+      let token = Principal.toText(this);
+      let buyer = AID.fromPrincipal(this, null);
+      let time = Time.now();
+      for (i in Iter.range(1, n)) {
+        _transactions.add({
+          token = token;
+          seller = this;
+          price = 1000;
+          buyer = buyer;
+          time = time;
+        });
+      };
+      _transactions.size();
+    };
+
     // *** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
     public func lock(caller : Principal, tokenid : Types.TokenIdentifier, price : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount) : async Result.Result<Types.AccountIdentifier, Types.CommonError> {

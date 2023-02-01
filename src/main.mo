@@ -2,6 +2,7 @@ import Cycles "mo:base/ExperimentalCycles";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Time "mo:base/Time";
+import Prim "mo:prim";
 
 import Canistergeek "mo:canistergeek/canistergeek";
 import Cap "mo:cap/Cap";
@@ -393,6 +394,18 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     canistergeekMonitor.collectMetrics();
     // no caller check, token will be sent to the address that was set on 'lock'
     await _Marketplace.settle(caller, tokenid);
+  };
+
+  public shared ({ caller }) func grow(n : Nat) : async Nat {
+    _Marketplace.grow(n);
+  };
+
+  public shared ({ caller }) func getHeapSize() : async Nat {
+    Prim.rts_heap_size();
+  };
+
+  public shared ({ caller }) func getMemorySize() : async Nat {
+    Prim.rts_memory_size();
   };
 
   public shared ({ caller }) func list(request : MarketplaceTypes.ListRequest) : async Result.Result<(), MarketplaceTypes.CommonError> {

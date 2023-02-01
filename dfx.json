@@ -8,6 +8,38 @@
                 "output": "declarations/main"
             }
         },
+        "force-gc-copying-gc": {
+            "type": "motoko",
+            "main": "src/main.mo",
+            "declarations": {
+                "output": "declarations/main"
+            },
+            "args": "--force-gc --copying-gc"
+        },
+        "force-gc-compacting-gc": {
+            "type": "motoko",
+            "main": "src/main.mo",
+            "declarations": {
+                "output": "declarations/main"
+            },
+            "args": "--force-gc --compacting-gc"
+        },
+        "copying-gc": {
+            "type": "motoko",
+            "main": "src/main.mo",
+            "declarations": {
+                "output": "declarations/main"
+            },
+            "args": "--copying-gc"
+        },
+        "compacting-gc": {
+            "type": "motoko",
+            "main": "src/main.mo",
+            "declarations": {
+                "output": "declarations/main"
+            },
+            "args": "--compacting-gc"
+        },
         "ledger": {
             "type": "custom",
             "wasm": "./declarations/ledger/ledger.wasm",
