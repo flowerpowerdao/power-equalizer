@@ -16,7 +16,7 @@ let getMemorySize = (canister) => {
 
 let upgrade = (canister) => {
   try {
-    execSync(`dfx deploy ${canister} --updgrade-unchandged --argument '(principal "'$(dfx canister id ${canister})'")'`, {stdio: 'pipe'});
+    execSync(`dfx deploy ${canister} --upgrade-unchanged --argument '(principal "'$(dfx canister id ${canister})'")'`, {stdio: 'pipe'});
   } catch (e) {
     console.error(e.message);
     return false;
@@ -37,16 +37,16 @@ let canisters = [
 
 let transactionSizes = [
   20_000,
-  // 60_000,
-  // 100_000,
+  60_000,
+  100_000,
   200_000,
-  // 400_000,
-  // 800_000,
-  // 1_000_000,
-  // 1_400_000,
-  // 2_000_000,
-  // 2_800_000,
-  // 4_000_000,
+  400_000,
+  800_000,
+  1_000_000,
+  1_400_000,
+  2_000_000,
+  2_800_000,
+  4_000_000,
 ];
 let growSize = 20_000;
 
