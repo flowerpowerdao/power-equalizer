@@ -292,7 +292,7 @@ module {
             try {
               // check if subaccount holds icp
               let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance({
-                account = AviateAccountIdentifier.fromPrincipal(this, ?subaccount);
+                account = AviateAccountIdentifier.addHash(AviateAccountIdentifier.fromPrincipal(this, ?subaccount));
               });
               if (response.e8s > 10000) {
                 var bh = await consts.LEDGER_CANISTER.transfer({

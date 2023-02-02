@@ -119,7 +119,7 @@ module {
       };
 
       let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance({
-        account = AviateAccountIdentifier.fromPrincipal(this, ?settlement.subaccount);
+        account = AviateAccountIdentifier.addHash(AviateAccountIdentifier.fromPrincipal(this, ?settlement.subaccount));
       });
 
       // because of the await above, we check again if there is a settlement available for the token
