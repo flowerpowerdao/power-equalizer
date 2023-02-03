@@ -72,6 +72,7 @@ module {
           seller = listing.seller;
           price = listing.price;
           locked = ?(Time.now() + Env.ecscrowDelay);
+          marketplaceAddress = listing.marketplaceAddress;
         },
       );
 
@@ -87,7 +88,7 @@ module {
               // Atomic protection
               if (Option.isNull(_tokenListing.get(token))) {
                 return #err(#Other("Listing has sold"));
-              }
+              };
             };
           };
         };
@@ -100,6 +101,7 @@ module {
           price = listing.price;
           subaccount = subaccount;
           buyer = address;
+          marketplaceAddress = listing.marketplaceAddress;
         },
       );
       return #ok(paymentAddress);
@@ -146,11 +148,12 @@ module {
         };
       };
 
-      var bal : Nat64 = settlement.price - (10000 * Nat64.fromNat(Env.salesFees.size() + 1));
+      // deduct two extra transaction fees for marketplace fee and disbursment to seller
+      let bal : Nat64 = response.e8s - (10000 * Nat64.fromNat(Env.royalties.size() + 2));
       var rem = bal;
 
-      // disbursement of fees
-      for (f in Env.salesFees.vals()) {
+      // disbursement of royalties
+      for (f in Env.royalties.vals()) {
         var _fee : Nat64 = bal * f.1 / 100000;
         deps._Disburser.addDisbursement({
           to = f.0;
@@ -161,14 +164,26 @@ module {
         rem := rem - _fee : Nat64;
       };
 
+      //  disbursement of marketplace fee
+      let marketplaceFee = bal * Env.defaultMarketplaceFee.1 / 100000;
+      deps._Disburser.addDisbursement({
+        to = switch (settlement.marketplaceAddress) {
+          case (?marketplaceAddress) { marketplaceAddress }; // could be an incorrect address as provided by the person listing the nft
+          case (null) { Env.defaultMarketplaceFee.0 };
+        };
+        fromSubaccount = settlement.subaccount;
+        amount = marketplaceFee;
+        tokenIndex = token;
+      });
+
       // disbursement to the previous token owner
       deps._Disburser.addDisbursement({
         to = tokenOwner;
         fromSubaccount = settlement.subaccount;
-        amount = rem;
+        amount = rem - marketplaceFee;
         tokenIndex = token;
       });
-      
+
       // add event to CAP
       let event : Root.IndefiniteEvent = {
         operation = "sale";
@@ -243,6 +258,10 @@ module {
                   seller = caller;
                   price = price;
                   locked = null;
+                  marketplaceAddress = switch (request.marketplacePrincipal) {
+                    case (null) { null };
+                    case (?principal) { ?AID.fromPrincipal(principal, null) };
+                  };
                 },
               );
             };

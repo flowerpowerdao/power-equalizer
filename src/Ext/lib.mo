@@ -69,7 +69,7 @@ module {
     public func tokens_ext(aid : Types.AccountIdentifier) : Result.Result<[(Types.TokenIndex, ?MarketplaceTypes.Listing, ?Blob)], Types.CommonError> {
       switch (deps._Tokens.getTokensFromOwner(aid)) {
         case (?tokens) {
-          var resp : Buffer.Buffer<(Types.TokenIndex, ?Types.Listing, ?Blob)> = Buffer.Buffer(0);
+          var resp : Buffer.Buffer<(Types.TokenIndex, ?MarketplaceTypes.Listing, ?Blob)> = Buffer.Buffer(0);
           for (a in tokens.vals()) {
             resp.add((a, deps._Marketplace.getListingFromTokenListing(a), null));
           };

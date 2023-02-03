@@ -47,18 +47,21 @@ module {
     price : Nat64;
     subaccount : SubAccount;
     buyer : AccountIdentifier;
+    marketplaceAddress : ?AccountIdentifier;
   };
 
   public type Listing = {
     seller : Principal;
     price : Nat64;
     locked : ?Time;
+    marketplaceAddress : ?AccountIdentifier;
   };
 
   public type ListRequest = {
     token : TokenIdentifier;
     from_subaccount : ?SubAccount;
     price : ?Nat64;
+    marketplacePrincipal : ?Principal;
   };
 
   type LedgerAccountIdentifier = [Nat8];
