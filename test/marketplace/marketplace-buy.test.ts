@@ -1,10 +1,13 @@
+import { AccountIdentifier } from '@dfinity/nns';
 import { describe, test, expect, it } from 'vitest';
 import { User } from '../user';
 import { buyFromSale, checkTokenCount, tokenIdentifier } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
 import env from './.env.marketplace';
 
-describe('list, lock and try to delist nft', async () => {
+describe('buy on marketplace', async () => {
+  let price = 1_000_000n;
+
   let seller = new User;
   seller.mintICP(1000_000_000n);
 
@@ -33,36 +36,38 @@ describe('list, lock and try to delist nft', async () => {
   it('list', async () => {
     let res = await seller.mainActor.list({
       from_subaccount: [],
-      price: [1000_000n],
+      price: [price],
       token: tokenIdentifier(tokens[0]),
     });
     expect(res).toHaveProperty('ok');
   });
 
+  let paytoAddress: string;
   it('lock', async () => {
-    let lockRes = await buyer.mainActor.lock(tokenIdentifier(tokens[0]), 1000_000n, buyer.accountId, new Uint8Array);
+    let lockRes = await buyer.mainActor.lock(tokenIdentifier(tokens[0]), price, buyer.accountId, new Uint8Array);
     expect(lockRes).toHaveProperty('ok');
+    if ('ok' in lockRes) {
+      paytoAddress = lockRes.ok;
+    }
   });
 
-  it('try to lock twice', async () => {
+  it('transfer ICP', async () => {
+    await buyer.sendICP(paytoAddress, price);
+  });
+
+  it('settle by another user', async () => {
     let user = new User;
-    let lockRes = await user.mainActor.lock(tokenIdentifier(tokens[0]), 1000_000n, user.accountId, new Uint8Array);
-    expect(lockRes).toHaveProperty('err');
-    expect(lockRes['err'].Other).toBe('Listing is locked');
+    let res = await user.mainActor.settle(tokenIdentifier(tokens[0]));
+    expect(res).toHaveProperty('ok');
   });
 
-  it('try to delist', async () => {
-    let delistRes = await seller.mainActor.list({
-      from_subaccount: [],
-      price: [],
-      token: tokenIdentifier(tokens[0]),
-    });
-    expect(delistRes).toHaveProperty('err');
-    expect(delistRes['err'].Other).toBe('Listing is locked');
-
+  it('check seller token count', async () => {
+    await checkTokenCount(seller, 0)
   });
 
-  it('check token count', async () => {
-    await checkTokenCount(seller, 1)
+  it('check buyer token count', async () => {
+    await checkTokenCount(buyer, 1)
   });
+
+  // todo: check seller ICP balance
 });

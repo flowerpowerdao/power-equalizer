@@ -8,7 +8,7 @@ export async function buyFromSale(user: User) {
   let settings = await user.mainActor.salesSettings(user.accountId);
   let res = await user.mainActor.reserve(settings.price, 1n, user.accountId, new Uint8Array);
 
-  expect(res).not.toHaveProperty('err');
+  expect(res).toHaveProperty('ok');
 
   if ('ok' in res) {
     let paymentAddress = res.ok[0];
@@ -18,17 +18,19 @@ export async function buyFromSale(user: User) {
 
     await user.sendICP(paymentAddress, paymentAmount);
     let retrieveRes = await user.mainActor.retrieve(paymentAddress);
-    expect(retrieveRes).not.toHaveProperty('err');
+    expect(retrieveRes).toHaveProperty('ok');
   }
 }
 
 export async function checkTokenCount(user: User, count: number) {
   let tokensRes = await user.mainActor.tokens(user.accountId);
-  expect(tokensRes).not.toHaveProperty('err');
+  expect(tokensRes).toHaveProperty('ok');
   if ('ok' in tokensRes) {
     expect(tokensRes.ok.length).toBe(count);
-    let tokenIndex = tokensRes.ok.at(-1);
-    expect(tokenIndex).toBeGreaterThan(0);
+    if (count > 0) {
+      let tokenIndex = tokensRes.ok.at(-1);
+      expect(tokenIndex).toBeGreaterThan(0);
+    }
   }
 }
 
