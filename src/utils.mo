@@ -19,20 +19,6 @@ import BinaryEncoding "mo:encoding/Binary";
 
 module {
   /// Clone from any iterator of key-value pairs
-  // public func bufferHashMapFromIter<K, V1>(
-  //   iter : Iter.Iter<(K, [V1])>,
-  //   initCapacity : Nat,
-  //   keyEq : (K, K) -> Bool,
-  //   keyHash : K -> Hash.Hash
-  // ) : HashMap.HashMap<K, Buffer.Buffer<V1>> {
-  //   let h = HashMap.HashMap<K, Buffer.Buffer<V1>>(initCapacity, keyEq, keyHash);
-  //   for ((k, v) in iter) {
-  //     h.put(k, Buffer.fromArray<V1>(v));
-  //   };
-  //   h
-  // };
-
-  /// Clone from any iterator of key-value pairs
   public func bufferTrieMapFromIter<K, V1>(
     iter : Iter.Iter<(K, [V1])>,
     keyEq : (K, K) -> Bool,
