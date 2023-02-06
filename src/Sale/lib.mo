@@ -27,11 +27,11 @@ module {
     * STATE *
     *********/
 
-    private var _saleTransactions : Buffer.Buffer<Types.SaleTransaction> = Utils.bufferFromArray<Types.SaleTransaction>(state._saleTransactionsState);
+    private var _saleTransactions : Buffer.Buffer<Types.SaleTransaction> = Buffer.fromArray<Types.SaleTransaction>(state._saleTransactionsState);
     private var _salesSettlements : TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale> = TrieMap.fromEntries(state._salesSettlementsState.vals(), AID.equal, AID.hash);
-    private var _failedSales : Buffer.Buffer<(Types.AccountIdentifier, Types.SubAccount)> = Utils.bufferFromArray<(Types.AccountIdentifier, Types.SubAccount)>(state._failedSalesState);
-    private var _tokensForSale : Buffer.Buffer<Types.TokenIndex> = Utils.bufferFromArray<Types.TokenIndex>(state._tokensForSaleState);
-    private var _whitelist : Buffer.Buffer<(Nat64, Types.AccountIdentifier)> = Utils.bufferFromArray<(Nat64, Types.AccountIdentifier)>(state._whitelistStable);
+    private var _failedSales : Buffer.Buffer<(Types.AccountIdentifier, Types.SubAccount)> = Buffer.fromArray<(Types.AccountIdentifier, Types.SubAccount)>(state._failedSalesState);
+    private var _tokensForSale : Buffer.Buffer<Types.TokenIndex> = Buffer.fromArray<Types.TokenIndex>(state._tokensForSaleState);
+    private var _whitelist : Buffer.Buffer<(Nat64, Types.AccountIdentifier)> = Buffer.fromArray<(Nat64, Types.AccountIdentifier)>(state._whitelistStable);
     private var _soldIcp : Nat64 = state._soldIcpState;
     private var _sold : Nat = state._soldState;
     private var _totalToSell : Nat = state._totalToSellState;

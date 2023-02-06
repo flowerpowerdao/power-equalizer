@@ -18,16 +18,6 @@ import ExtCore "./toniq-labs/ext/Core";
 import BinaryEncoding "mo:encoding/Binary";
 
 module {
-
-  /// Create a Buffer from an Array
-  public func bufferFromArray<T>(array : [T]) : Buffer.Buffer<T> {
-    let buffer = Buffer.Buffer<T>(array.size());
-    for (element in Array.vals(array)) {
-      buffer.add(element);
-    };
-    return buffer;
-  };
-
   /// Create a Buffer from an Array
   public func mapToBufferFromArray<T, T2>(array : [T], f : T -> T2) : Buffer.Buffer<T2> {
     let buffer = Buffer.Buffer<T2>(array.size());
@@ -46,7 +36,7 @@ module {
   // ) : HashMap.HashMap<K, Buffer.Buffer<V1>> {
   //   let h = HashMap.HashMap<K, Buffer.Buffer<V1>>(initCapacity, keyEq, keyHash);
   //   for ((k, v) in iter) {
-  //     h.put(k, bufferFromArray<V1>(v));
+  //     h.put(k, Buffer.fromArray<V1>(v));
   //   };
   //   h
   // };
@@ -59,7 +49,7 @@ module {
   ) : TrieMap.TrieMap<K, Buffer.Buffer<V1>> {
     let h = TrieMap.TrieMap<K, Buffer.Buffer<V1>>(keyEq, keyHash);
     for ((k, v) in iter) {
-      h.put(k, bufferFromArray<V1>(v));
+      h.put(k, Buffer.fromArray<V1>(v));
     };
     h;
   };

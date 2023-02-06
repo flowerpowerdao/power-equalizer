@@ -28,7 +28,7 @@ module {
     * STATE *
     *********/
 
-    private var _transactions : Buffer.Buffer<Types.Transaction> = Utils.bufferFromArray(state._transactionsState);
+    private var _transactions : Buffer.Buffer<Types.Transaction> = Buffer.fromArray(state._transactionsState);
     private var _tokenSettlement : TrieMap.TrieMap<Types.TokenIndex, Types.Settlement> = TrieMap.fromEntries(state._tokenSettlementState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _tokenListing : TrieMap.TrieMap<Types.TokenIndex, Types.Listing> = TrieMap.fromEntries(state._tokenListingState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
 

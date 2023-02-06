@@ -16,7 +16,7 @@ module {
     * STATE *
     *********/
 
-    private var _assets : Buffer.Buffer<Types.Asset> = Utils.bufferFromArray(state._assetsState);
+    private var _assets : Buffer.Buffer<Types.Asset> = Buffer.fromArray(state._assetsState);
 
     public func toStable() : Types.StableState {
       return {
