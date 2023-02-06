@@ -459,15 +459,12 @@ module {
       };
     };
 
-    public func appendWhitelist(price : Nat64, whitelist : [Types.AccountIdentifier]) {
-      _whitelist.append(
-        Utils.mapToBufferFromArray<Types.AccountIdentifier, (Nat64, Types.AccountIdentifier)>(
-          whitelist,
-          func(addr) {
-            (price, addr);
-          },
-        ),
-      );
+    public func appendWhitelist(price : Nat64, addresses : [Types.AccountIdentifier]) {
+      let buffer = Buffer.Buffer<(Nat64, Types.AccountIdentifier)>(addresses.size());
+      for (address in addresses.vals()) {
+        buffer.add((price, address));
+      };
+      _whitelist.append(buffer);
     };
 
     func isWhitelisted(address : Types.AccountIdentifier) : Bool {

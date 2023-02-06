@@ -18,15 +18,6 @@ import ExtCore "./toniq-labs/ext/Core";
 import BinaryEncoding "mo:encoding/Binary";
 
 module {
-  /// Create a Buffer from an Array
-  public func mapToBufferFromArray<T, T2>(array : [T], f : T -> T2) : Buffer.Buffer<T2> {
-    let buffer = Buffer.Buffer<T2>(array.size());
-    for (element in Array.vals(array)) {
-      buffer.add(f(element));
-    };
-    return buffer;
-  };
-
   /// Clone from any iterator of key-value pairs
   // public func bufferHashMapFromIter<K, V1>(
   //   iter : Iter.Iter<(K, [V1])>,
