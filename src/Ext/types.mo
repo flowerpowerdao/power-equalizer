@@ -31,12 +31,6 @@ module {
 
   public type NotifyService = ExtCore.NotifyService;
 
-  public type Listing = {
-    seller : Principal;
-    price : Nat64;
-    locked : ?Time;
-  };
-
   public type Time = Time.Time;
 
   public type SubAccount = ExtCore.SubAccount;

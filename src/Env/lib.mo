@@ -2,21 +2,49 @@ import Time "mo:base/Time";
 import ExtCore "../toniq-labs/ext/Core";
 
 module {
+  // collaborator
+  public let clownAddress : ExtCore.AccountIdentifier = "979307078c971f6d82a302825ac07dc63a4f68ece99f24014d69d8ccec7b5d6f";
+  public let charityAddress : ExtCore.AccountIdentifier = "979307078c971f6d82a302825ac07dc63a4f68ece99f24014d69d8ccec7b5d6f";
+
+  // fpdao team
+  public let shamilAddress : ExtCore.AccountIdentifier = "d989e0edbaaace9e9f5d7b6f1eeaeb3243a0944cd2446bbf2c64434eb7a215b7";
+  public let moritzAddress : ExtCore.AccountIdentifier = "a555c4f1e300d5b8b8275c29ff9a8e06f746ed736edef52ecf2debf65f065e36";
+  public let ludoAddress : ExtCore.AccountIdentifier = "3ae5f4f296874c82a626cc0ee6cae31d608489e4ac25622a37117a629a81cfad";
+  public let andrewAddress : ExtCore.AccountIdentifier = "3ae5f4f296874c82a626cc0ee6cae31d608489e4ac25622a37117a629a81cfad";
+  public let evanAddress : ExtCore.AccountIdentifier = "3ae5f4f296874c82a626cc0ee6cae31d608489e4ac25622a37117a629a81cfad";
+
   public let collectionName = "Pineapple Punks";
   public let placeholderContentLength = "1053832";
-  public let teamAddress : ExtCore.AccountIdentifier = "c6650430117d586f5286a570e61f1fc987a4d2c4f75dad4d9ebfd0ad27e62485";
-  public let ecscrowDelay : Time.Time = 120000000000; // 120 seconds
+  public let ecscrowDelay : Time.Time = 120_000_000_000; // 120 seconds
   public let collectionSize : Nat32 = 7777;
 
   public let salePrice : Nat64 = 700000000;
-  public let salesFees : [(ExtCore.AccountIdentifier, Nat64)] = [
-    (teamAddress, 7500), // Royalty Fee
-    ("c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9", 1000), // Entrepot Fee
+
+  public let salesDistribution : [(ExtCore.AccountIdentifier, Nat64)] = [
+    (clownAddress, 45000),
+    (charityAddress, 10000),
+    (ludoAddress, 10125),
+    (moritzAddress, 10125),
+    (andrewAddress, 10125),
+    (evanAddress, 10125),
+    (shamilAddress, 4500),
   ];
 
-  public let publicSaleStart : Time.Time = 1674567834762000000; // Start of first purchase (WL or other)
-  public let whitelistTime : Time.Time = 1674567834762000000; // Period for WL only discount. Set to publicSaleStart for no exclusive period
-  public let marketDelay : Time.Time = 172800000000000; // How long to delay market opening (2 days after whitelist sale started or when sold out)
+  public let royalties : [(ExtCore.AccountIdentifier, Nat64)] = [
+    (clownAddress, 3375), // Royalty Fee
+    (charityAddress, 750), // Royalty Fee
+    (ludoAddress, 760), // Royalty Fee
+    (moritzAddress, 760), // Royalty Fee
+    (andrewAddress, 760), // Royalty Fee
+    (evanAddress, 760), // Royalty Fee
+    (shamilAddress, 337), // Royalty Fee
+  ];
+
+  public let defaultMarketplaceFee = ("c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9", 1000 : Nat64); // Entrepot Fee
+
+  public let publicSaleStart : Time.Time = 1659276000000000000; // Start of first purchase (WL or other)
+  public let whitelistTime : Time.Time = 1659362400000000000; // Period for WL only discount. Set to publicSaleStart for no exclusive period
+  public let marketDelay : Time.Time = 172_800_000_000_000; // How long to delay market opening (2 days after whitelist sale started or when sold out)
 
   // true - assets will be revealed after manually calling 'shuffleAssets'
   // false - assets will be revealed immediately and assets shuffling will be disabled
