@@ -197,13 +197,4 @@ module {
     };
     Array.tabulate<Nat8>(32, n_byte);
   };
-
-  public func ledgerAccountIdentifierFromText(accountIdentifier : Text) : Result.Result<[Nat8], Text> {
-    switch (Hex.decode(accountIdentifier)) {
-      case (#err(e)) { #err(e) };
-      case (#ok(bs)) {
-        #ok(bs);
-      };
-    };
-  };
 };

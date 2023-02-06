@@ -6,6 +6,7 @@ import List "mo:base/List";
 import Principal "mo:base/Principal";
 
 import Encoding "mo:encoding/Binary";
+import AviateAccountIdentifier "mo:accountid/AccountIdentifier";
 
 import ExtCore "../toniq-labs/ext/Core";
 import Types "types";
@@ -45,9 +46,9 @@ module {
 
             try {
               var res = await consts.LEDGER_CANISTER.transfer({
-                to = switch (Utils.ledgerAccountIdentifierFromText(disbursement.to)) {
+                to = switch (AviateAccountIdentifier.fromText(disbursement.to)) {
                   case (#ok(accountId)) {
-                    accountId : [Nat8];
+                    AviateAccountIdentifier.addHash(accountId);
                   };
                   case (#err(_)) {
                     // this should never happen because account ids are always created from within the
