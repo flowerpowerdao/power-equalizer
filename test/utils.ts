@@ -4,6 +4,14 @@ import { User } from "./user";
 
 import canisterIds from '../.dfx/local/canister_ids.json';
 
+export function applyFees(amount: bigint, fees: bigint[]) {
+  let result = amount;
+  for (let fee of fees) {
+    result -= amount * fee / 100_000n;
+  }
+  return result;
+}
+
 export async function buyFromSale(user: User) {
   let settings = await user.mainActor.salesSettings(user.accountId);
   let res = await user.mainActor.reserve(settings.price, 1n, user.accountId, new Uint8Array);

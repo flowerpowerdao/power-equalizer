@@ -11,7 +11,7 @@ export default {
   ecscrowDelay: 120_000_000_000n, // 120 seconds
   collectionSize: 7777n,
   defaultMarketplaceAddr: new User('marketplace').accountId,
-  defaultMarketplaceFee: 1000,
+  defaultMarketplaceFee: 1000n,
   salePrice: 700000000n,
   publicSaleStart: BigInt(Date.now()) * 1_000_000n, // Start of first purchase (WL or other)
   whitelistTime: BigInt(Date.now()) * 1_000_000n, // Period for WL only discount. Set to publicSaleStart for no exclusive period

@@ -1,21 +1,28 @@
 import { AccountIdentifier } from '@dfinity/nns';
 import { describe, test, expect, it } from 'vitest';
+import { ICP_FEE } from '../consts';
 import { User } from '../user';
-import { buyFromSale, checkTokenCount, tokenIdentifier } from '../utils';
+import { applyFees, buyFromSale, checkTokenCount, tokenIdentifier } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
 import env from './.env.marketplace';
 
 describe('buy on marketplace', async () => {
   let price = 1_000_000n;
+  let initialBalance = 1_000_000_000n;
 
   let seller = new User;
-  seller.mintICP(1000_000_000n);
+  await seller.mintICP(initialBalance);
 
   let buyer = new User;
-  buyer.mintICP(1000_000_000n);
+  await buyer.mintICP(initialBalance);
 
   it('buy from sale', async () => {
     await buyFromSale(seller)
+  });
+
+  it('check seller ICP balance', async () => {
+    let expectedBalance = initialBalance - env.salePrice - ICP_FEE;
+    expect(await seller.icpActor.account_balance({ account: seller.account })).toEqual({ e8s: expectedBalance });
   });
 
   it('check token count', async () => {
@@ -62,12 +69,27 @@ describe('buy on marketplace', async () => {
   });
 
   it('check seller token count', async () => {
-    await checkTokenCount(seller, 0)
+    await checkTokenCount(seller, 0);
   });
 
   it('check buyer token count', async () => {
-    await checkTokenCount(buyer, 1)
+    await checkTokenCount(buyer, 1);
   });
 
-  // todo: check seller ICP balance
+  it('check buyer ICP balance', async () => {
+    let expectedBalance = initialBalance - price - ICP_FEE;
+    expect(await buyer.icpActor.account_balance({ account: buyer.account })).toEqual({ e8s: expectedBalance });
+  });
+
+  it('cron settlements', async () => {
+    await seller.mainActor.cronSettlements();
+    await seller.mainActor.cronDisbursements();
+  });
+
+  it('check seller ICP balance', async () => {
+    let balanceAfterBuyOnSale = initialBalance - env.salePrice - ICP_FEE;
+    let transferFees = ICP_FEE * 4n; // 1 seller transfer, 1 marketplace transfer, 2 royalty transfers
+    let expectedBalance = balanceAfterBuyOnSale + applyFees(price - transferFees, [env.royalty0, env.royalty1, env.defaultMarketplaceFee]);
+    expect(await seller.icpActor.account_balance({ account: seller.account })).toEqual({ e8s: expectedBalance });
+  });
 });
