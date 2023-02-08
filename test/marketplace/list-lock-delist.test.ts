@@ -35,6 +35,7 @@ describe('list, lock and try to delist nft', async () => {
       from_subaccount: [],
       price: [1000_000n],
       token: tokenIdentifier(tokens[0]),
+      marketplacePrincipal: [],
     });
     expect(res).toHaveProperty('ok');
   });
@@ -56,6 +57,7 @@ describe('list, lock and try to delist nft', async () => {
       from_subaccount: [],
       price: [],
       token: tokenIdentifier(tokens[0]),
+      marketplacePrincipal: [],
     });
     expect(delistRes).toHaveProperty('err');
     expect(delistRes['err'].Other).toBe('Listing is locked');

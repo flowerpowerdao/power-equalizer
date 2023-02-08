@@ -22,6 +22,7 @@ describe('sold out', async () => {
       from_subaccount: [],
       price: [1000_000n],
       token: tokenIdentifier(tokens[0]),
+      marketplacePrincipal: [],
     });
 
     expect(listRes).toHaveProperty('err');
@@ -45,6 +46,7 @@ describe('sold out', async () => {
       from_subaccount: [],
       price: [1000_000n],
       token: tokenIdentifier(tokens[0]),
+      marketplacePrincipal: [],
     });
 
     expect(listRes).toHaveProperty('ok');

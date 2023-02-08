@@ -1,6 +1,6 @@
 type User = 
  variant {
-   address: AccountIdentifier;
+   address: AccountIdentifier__1;
    "principal": principal;
  };
 type UpdateCallsAggregatedData = vec nat64;
@@ -8,12 +8,12 @@ type TransferResponse =
  variant {
    err:
     variant {
-      CannotNotify: AccountIdentifier;
+      CannotNotify: AccountIdentifier__1;
       InsufficientBalance;
       InvalidToken: TokenIdentifier;
       Other: text;
       Rejected;
-      Unauthorized: AccountIdentifier;
+      Unauthorized: AccountIdentifier__1;
     };
    ok: Balance;
  };
@@ -23,19 +23,18 @@ type TransferRequest =
    from: User;
    memo: Memo;
    notify: bool;
-   subaccount: opt SubAccount;
+   subaccount: opt SubAccount__1;
    to: User;
    token: TokenIdentifier;
  };
 type Transaction = 
  record {
-   buyer: AccountIdentifier__1;
+   buyer: AccountIdentifier;
    price: nat64;
    seller: principal;
    time: Time;
    token: TokenIdentifier__1;
  };
-type TokenIndex__3 = nat32;
 type TokenIndex__2 = nat32;
 type TokenIndex__1 = nat32;
 type TokenIndex = nat32;
@@ -45,17 +44,15 @@ type TokenIdentifier__1 = text;
 type TokenIdentifier = text;
 type Time__1 = int;
 type Time = int;
-type SubAccount__3 = vec nat8;
 type SubAccount__2 = vec nat8;
 type SubAccount__1 = vec nat8;
 type SubAccount = vec nat8;
 type Settlement = 
  record {
-   buyer: AccountIdentifier__1;
-   marketplaceAddress: opt AccountIdentifier__1;
+   buyer: AccountIdentifier;
    price: nat64;
    seller: principal;
-   subaccount: SubAccount__2;
+   subaccount: SubAccount;
  };
 type SaleTransaction = 
  record {
@@ -85,27 +82,26 @@ type Sale =
    buyer: AccountIdentifier__4;
    expires: Time__1;
    price: nat64;
-   subaccount: SubAccount__1;
+   subaccount: SubAccount__2;
    tokens: vec TokenIndex__2;
-   whitelisted: bool;
  };
 type Result_9 = 
  variant {
    err: CommonError__2;
-   ok: AccountIdentifier__6;
+   ok: AccountIdentifier__5;
  };
 type Result_8 = 
  variant {
    err: CommonError__1;
    ok: record {
-         AccountIdentifier__1;
+         AccountIdentifier;
          opt Listing;
        };
  };
 type Result_7 = 
  variant {
    err: CommonError__1;
-   ok: AccountIdentifier__1;
+   ok: AccountIdentifier;
  };
 type Result_6 = 
  variant {
@@ -138,13 +134,13 @@ type Result_2 =
 type Result_1 = 
  variant {
    err: CommonError;
-   ok: vec TokenIndex;
+   ok: vec TokenIndex__1;
  };
 type Result = 
  variant {
    err: CommonError;
    ok: vec record {
-             TokenIndex;
+             TokenIndex__1;
              opt Listing;
              opt blob;
            };
@@ -188,14 +184,12 @@ type Memo = blob;
 type Listing = 
  record {
    locked: opt Time;
-   marketplaceAddress: opt AccountIdentifier__1;
    price: nat64;
    seller: principal;
  };
 type ListRequest = 
  record {
-   from_subaccount: opt SubAccount__2;
-   marketplacePrincipal: opt principal;
+   from_subaccount: opt SubAccount;
    price: opt nat64;
    token: TokenIdentifier__1;
  };
@@ -256,13 +250,6 @@ type File =
    data: vec blob;
  };
 type Extension = text;
-type Disbursement = 
- record {
-   amount: nat64;
-   fromSubaccount: SubAccount__3;
-   to: AccountIdentifier__5;
-   tokenIndex: TokenIndex__3;
- };
 type DailyMetricsData = 
  record {
    canisterCycles: NumericEntity;
@@ -306,7 +293,7 @@ type Canister =
    addAsset: (Asset) -> (nat);
    airdropTokens: (nat) -> ();
    allSettlements: () -> (vec record {
-                                TokenIndex__1;
+                                TokenIndex;
                                 Settlement;
                               }) query;
    availableCycles: () -> (nat) query;
@@ -322,21 +309,21 @@ type Canister =
    failedSales: () ->
     (vec record {
            AccountIdentifier__4;
-           SubAccount__1;
+           SubAccount__2;
          }) query;
    getCanisterMetrics: (GetMetricsParameters) -> (opt CanisterMetrics) query;
-   getDisbursements: () -> (vec Disbursement) query;
    getMinter: () -> (principal) query;
-   getRegistry: () -> (vec record {
-                             TokenIndex;
-                             AccountIdentifier__2;
-                           }) query;
+   getRegistry: () ->
+    (vec record {
+           TokenIndex__1;
+           AccountIdentifier__2;
+         }) query;
    getTokenToAssetMapping: () -> (vec record {
-                                        TokenIndex;
+                                        TokenIndex__1;
                                         text;
                                       }) query;
    getTokens: () -> (vec record {
-                           TokenIndex;
+                           TokenIndex__1;
                            Metadata;
                          }) query;
    http_request: (HttpRequest) -> (HttpResponse) query;
@@ -346,19 +333,15 @@ type Canister =
    initMint: () -> (Result_4);
    list: (ListRequest) -> (Result_3);
    listings: () -> (vec record {
-                          TokenIndex__1;
+                          TokenIndex;
                           Listing;
                           Metadata__1;
                         }) query;
-   lock: (TokenIdentifier__1, nat64, AccountIdentifier__1, SubAccount__2) ->
+   lock: (TokenIdentifier__1, nat64, AccountIdentifier, SubAccount) ->
     (Result_7);
    metadata: (TokenIdentifier__2) -> (Result_6) query;
-   pendingCronJobs: () ->
-    (record {
-       disbursements: nat;
-       failedSettlements: nat;
-     }) query;
-   reserve: (nat64, nat64, AccountIdentifier__4, SubAccount__1) -> (Result_5);
+   pendingCronJobs: () -> (vec nat) query;
+   reserve: (nat64, nat64, AccountIdentifier__4, SubAccount__2) -> (Result_5);
    retrieve: (AccountIdentifier__4) -> (Result_4);
    saleTransactions: () -> (vec SaleTransaction) query;
    salesSettings: (AccountIdentifier__3) -> (SaleSettings) query;
@@ -366,16 +349,16 @@ type Canister =
                                   AccountIdentifier__4;
                                   Sale;
                                 }) query;
+   setTotalToSell: () -> (nat);
    settle: (TokenIdentifier__1) -> (Result_3);
    settlements: () ->
     (vec record {
-           TokenIndex__1;
-           AccountIdentifier__1;
+           TokenIndex;
+           AccountIdentifier;
            nat64;
          }) query;
    shuffleAssets: () -> ();
    shuffleTokensForSale: () -> ();
-   startSale: () -> (nat);
    stats: () -> (nat64, nat64, nat64, nat64, nat, nat, nat) query;
    streamAsset: (nat, bool, blob) -> ();
    supply: () -> (Result_2) query;
@@ -385,6 +368,13 @@ type Canister =
    transactions: () -> (vec Transaction) query;
    transfer: (TransferRequest) -> (TransferResponse);
    updateThumb: (text, File) -> (opt nat);
+   viewDisbursements: () ->
+    (vec record {
+           TokenIndex;
+           AccountIdentifier;
+           SubAccount;
+           nat64;
+         }) query;
  };
 type Balance__1 = nat;
 type BalanceResponse = 
@@ -405,7 +395,6 @@ type Asset =
    payload: File;
    thumbnail: opt File;
  };
-type AccountIdentifier__6 = text;
 type AccountIdentifier__5 = text;
 type AccountIdentifier__4 = text;
 type AccountIdentifier__3 = text;

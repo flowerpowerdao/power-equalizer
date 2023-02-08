@@ -11,17 +11,35 @@ describe('public sale', () => {
       price: [BigInt(1000)],
       token:  new User().accountId,
       from_subaccount: [],
+      marketplacePrincipal: [],
     });
     expect(res['err'].Other).toContain('can not list yet');
   });
 
-  test('buy nft from sale', async () => {
+  test('try to buy from sale with insufficient funds', async () => {
     let user = new User;
     user.mintICP(1000_000_000n);
 
-    await buyFromSale(user);
+    let settings = await user.mainActor.salesSettings(user.accountId);
+    let res = await user.mainActor.reserve(settings.price, 1n, user.accountId, new Uint8Array);
 
-    await checkTokenCount(user, 1);
+    expect(res).toHaveProperty('ok');
+
+    if ('ok' in res) {
+      let paymentAddress = res.ok[0];
+      let paymentAmount = res.ok[1];
+      expect(paymentAddress.length).toBe(64);
+      expect(paymentAmount).toBe(settings.price);
+
+      await user.sendICP(paymentAddress, paymentAmount - 1n);
+      let retrieveRes = await user.mainActor.retrieve(paymentAddress);
+      expect(retrieveRes).toHaveProperty('err');
+      expect(retrieveRes['err']).toMatch(/Insufficient funds/i);
+    }
+
+    let tokensRes = await user.mainActor.tokens(user.accountId);
+    expect(tokensRes).toHaveProperty('err');
+    expect(tokensRes['err']['Other']).toBe('No tokens');
   });
 
   test('buy sequentially 2 nft from sale', async () => {

@@ -6,7 +6,7 @@ import { applyFees, buyFromSale, checkTokenCount, tokenIdentifier } from '../uti
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
 import env from './.env.marketplace';
 
-describe('buy on marketplace', async () => {
+describe('try to buy on marketplace with insufficient funds', async () => {
   let price = 1_000_000n;
   let initialBalance = 1_000_000_000n;
 
@@ -60,37 +60,21 @@ describe('buy on marketplace', async () => {
   });
 
   it('transfer ICP', async () => {
-    await buyer.sendICP(paytoAddress, price);
+    await buyer.sendICP(paytoAddress, price - 1n);
   });
 
-  it('settle by another user', async () => {
-    let user = new User;
-    let res = await user.mainActor.settle(tokenIdentifier(tokens[0]));
-    expect(res).toHaveProperty('ok');
+  it('try to settle', async () => {
+    let res = await buyer.mainActor.settle(tokenIdentifier(tokens[0]));
+    expect(res).toHaveProperty('err');
   });
 
   it('check seller token count', async () => {
-    await checkTokenCount(seller, 0);
+    await checkTokenCount(seller, 1);
   });
 
   it('check buyer token count', async () => {
-    await checkTokenCount(buyer, 1);
-  });
-
-  it('check buyer ICP balance', async () => {
-    let expectedBalance = initialBalance - price - ICP_FEE;
-    expect(await buyer.icpActor.account_balance({ account: buyer.account })).toEqual({ e8s: expectedBalance });
-  });
-
-  it('cron settlements', async () => {
-    await seller.mainActor.cronSettlements();
-    await seller.mainActor.cronDisbursements();
-  });
-
-  it('check seller ICP balance', async () => {
-    let balanceAfterBuyOnSale = initialBalance - env.salePrice - ICP_FEE;
-    let transferFees = ICP_FEE * 4n; // 1 seller transfer, 1 marketplace transfer, 2 royalty transfers
-    let expectedBalance = balanceAfterBuyOnSale + applyFees(price - transferFees, [env.royalty0, env.royalty1, env.defaultMarketplaceFee]);
-    expect(await seller.icpActor.account_balance({ account: seller.account })).toEqual({ e8s: expectedBalance });
+    let tokensRes = await buyer.mainActor.tokens(buyer.accountId);
+    expect(tokensRes).toHaveProperty('err');
+    expect(tokensRes['err']['Other']).toBe('No tokens');
   });
 });
