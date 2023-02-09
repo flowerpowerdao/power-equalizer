@@ -8,7 +8,7 @@
                 "output": "declarations/main"
             }
         },
-        "force-gc-copying-gc": {
+        "copying-force": {
             "type": "motoko",
             "main": "src/main.mo",
             "declarations": {
@@ -16,7 +16,7 @@
             },
             "args": "--force-gc --copying-gc"
         },
-        "force-gc-compacting-gc": {
+        "compacting-force": {
             "type": "motoko",
             "main": "src/main.mo",
             "declarations": {
@@ -24,7 +24,15 @@
             },
             "args": "--force-gc --compacting-gc"
         },
-        "copying-gc": {
+        "generational-force": {
+            "type": "motoko",
+            "main": "src/main.mo",
+            "declarations": {
+                "output": "declarations/main"
+            },
+            "args": "--force-gc --generational-gc"
+        },
+        "copying": {
             "type": "motoko",
             "main": "src/main.mo",
             "declarations": {
@@ -32,13 +40,21 @@
             },
             "args": "--copying-gc"
         },
-        "compacting-gc": {
+        "compacting": {
             "type": "motoko",
             "main": "src/main.mo",
             "declarations": {
                 "output": "declarations/main"
             },
             "args": "--compacting-gc"
+        },
+        "generational": {
+            "type": "motoko",
+            "main": "src/main.mo",
+            "declarations": {
+                "output": "declarations/main"
+            },
+            "args": "--generational-gc"
         },
         "ledger": {
             "type": "custom",

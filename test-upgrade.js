@@ -1,17 +1,58 @@
 let {execSync} = require('child_process');
 
+let reinstallEach = true;
+let growSize = 20_000;
+
+let canisters = [
+  'copying-force',
+  'compacting-force',
+  'generational-force',
+  // 'copying',
+  // 'compacting',
+  // 'generational',
+];
+
+let transactionSizes = [
+  40_000,
+  100_000,
+  400_000,
+  800_000,
+  1_000_000,
+  1_400_000,
+  2_000_000,
+  2_800_000,
+  3_400_000,
+  4_000_000,
+  5_000_000,
+];
+
 let grow = (canister, n) => {
-  execSync(`dfx canister call ${canister} grow ${n}`);
+  let res = execSync(`dfx canister call ${canister} grow ${n}`);
+  // console.log(res.toString().trim());
 }
 
 let getHeapSize = (canister) => {
-  let res = execSync(`dfx canister call ${canister} getHeapSize`);
-  return parseInt(res.toString().trim().match(/\d/g).join(''))
+  try {
+    let res = execSync(`dfx canister call ${canister} getHeapSize`);
+    return formatMemorySize(parseInt(res.toString().trim().match(/\d/g).join('')));
+  } catch (e) {
+    console.error(e.message);
+    return 'err';
+  }
 }
 
 let getMemorySize = (canister) => {
-  let res = execSync(`dfx canister call ${canister} getMemorySize`);
-  return parseInt(res.toString().trim().match(/\d/g).join(''))
+  try {
+    let res = execSync(`dfx canister call ${canister} getMemorySize`);
+    return formatMemorySize(parseInt(res.toString().trim().match(/\d/g).join('')));
+  } catch (e) {
+    console.error(e.message);
+    return 'err';
+  }
+}
+
+let formatMemorySize = (size) => {
+  return (size / 1024 / 1024).toFixed(2);
 }
 
 let upgrade = (canister) => {
@@ -28,62 +69,55 @@ let reinstall = (canister) => {
   execSync(`dfx deploy ${canister} --mode reinstall -y --argument '(principal "'$(dfx canister id ${canister})'")'`, {stdio: 'pipe'});
 }
 
-let canisters = [
-  'force-gc-copying-gc',
-  'force-gc-compacting-gc',
-  'copying-gc',
-  'compacting-gc',
-];
-
-let transactionSizes = [
-  20_000,
-  60_000,
-  100_000,
-  200_000,
-  400_000,
-  800_000,
-  1_000_000,
-  1_400_000,
-  2_000_000,
-  2_800_000,
-  4_000_000,
-];
-let growSize = 20_000;
-
+let currTransactions = 0;
 let logs = [];
 
 loop: for (let canister of canisters) {
   execSync(`dfx canister create ${canister}`);
 
   for (size of transactionSizes) {
-    console.log('-'.repeat(50));
+    try {
+      console.log('-'.repeat(50));
 
-    console.log('Reinstalling...');
-    reinstall(canister);
-    console.log('Reinstalled');
+      if (reinstallEach || size === transactionSizes[0]) {
+        console.log('Reinstalling...');
+        reinstall(canister);
+        console.log('Reinstalled');
+        currTransactions = 0;
+      }
 
-    console.log(`Growing transaction size to ${size}...`);
-    for (i = 0; i < size / growSize; i++) {
-      grow(canister, growSize);
-    }
+      console.log(`Growing transaction size to ${size.toLocaleString()}...`);
+      let iterCount = (size - currTransactions) / growSize;
+      for (i = 0; i < iterCount; i++) {
+        currTransactions += growSize;
+        grow(canister, growSize);
+      }
 
-    let log = {
-      'canister': canister,
-      'memory size before upgrade': `${(getMemorySize(canister) / 1024 / 1024).toFixed(2)} MB`,
-      // 'heap size before upgrade': `${getHeapSize() / 1024 / 1024} MB`,
-    };
+      let log = {
+        'gc': canister,
+        'transactions': currTransactions.toLocaleString(),
+        'reinstall': reinstallEach,
+        'memory': `${getMemorySize(canister)} MB`,
+        'heap': `${getHeapSize(canister)} MB`,
+      };
 
-    console.log('Upgrading...');
-    let upgraded = upgrade(canister);
+      console.log('Upgrading...');
+      let upgraded = upgrade(canister);
 
-    log['memory size after upgrade'] = `${(getMemorySize(canister) / 1024 / 1024).toFixed(2)} MB`;
-    // log['heap size before upgrade'] = `${getHeapSize() / 1024 / 1024} MB`;
-    log['upgrade successful'] = upgraded;
+      // grow(canister, 10);
 
-    logs.push(log);
-    console.table(logs);
+      log['upgrade successful'] = upgraded;
+      log['memory after upgrade'] = `${getMemorySize(canister)} MB`;
+      log['heap after upgrade'] = `${getHeapSize(canister)} MB`;
 
-    if (!upgraded) {
+      logs.push(log);
+      console.table(logs);
+
+      if (!upgraded) {
+        continue loop;
+      }
+    } catch (err) {
+      console.log('unexpected error', err);
       continue loop;
     }
   }
