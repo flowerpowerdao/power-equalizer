@@ -320,10 +320,10 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     _Sale.airdropTokens(caller, startIndex);
   };
 
-  public shared ({ caller }) func startSale() : async Nat {
+  public shared ({ caller }) func enableSale() : async Nat {
     canistergeekMonitor.collectMetrics();
     // checks caller == minter
-    _Sale.startSale(caller);
+    _Sale.enableSale(caller);
   };
 
   public func reserve(amount : Nat64, quantity : Nat64, address : SaleTypes.AccountIdentifier, _subaccountNOTUSED : SaleTypes.SubAccount) : async Result.Result<(SaleTypes.AccountIdentifier, Nat64), Text> {

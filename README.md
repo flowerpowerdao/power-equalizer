@@ -79,7 +79,38 @@ To have the same token identifiers for the same tokens, it is important to keep 
 
 So when executing `mintNFT`, the `to` address is taken from `registry.json` and the `asset` is taken from `tokens.json`. It's important here that the uploading of the assets is on order (start with flower 1, end with flower 2009) and that the `assets` index 0 is used by something other than an NFT asset (before it was the seed animation)! It's also crucial to remove `shuffleAssets` functionality from the canister!
 
-## testing 🧪
+## Testing 🧪
+Each test suite is deployed with its own env settings.
+
+First, start a local replica
+```
+npm run replica
+```
+
+To deploy and run all tests
+```
+npm run test
+```
+
+To deploy and run specific env tests
+```
+npm run test:pending-sale
+```
+
+To run tests without deployment (useful when writing tests)
+```
+npm run vitest
+```
+or
+```
+npm run vitest:watch
+```
+or to run specific test suite
+```
+npm run vitest pending-sale
+```
+
+## manual testing 🧪
 
 deploy the canister with
 

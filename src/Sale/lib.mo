@@ -107,7 +107,7 @@ module {
       };
     };
 
-    public func startSale(caller : Principal) : Nat {
+    public func enableSale(caller : Principal) : Nat {
       assert (caller == consts.minter and _totalToSell == 0);
       _totalToSell := _tokensForSale.size();
       _tokensForSale.size();
@@ -298,7 +298,7 @@ module {
             try {
               // check if subaccount holds icp
               let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance({
-                account = AviateAccountIdentifier.fromPrincipal(this, ?subaccount);
+                account = AviateAccountIdentifier.addHash(AviateAccountIdentifier.fromPrincipal(this, ?subaccount));
               });
               if (response.e8s > 10000) {
                 var bh = await consts.LEDGER_CANISTER.transfer({
@@ -479,8 +479,12 @@ module {
       var found : Bool = false;
       _whitelist.filterEntries(
         func(_, a) : Bool {
-          if (found) { return true } else {
-            if (a.1 != address) return true;
+          if (found) {
+            return true;
+          } else {
+            if (a.1 != address) {
+              return true;
+            };
             found := true;
             return false;
           };
