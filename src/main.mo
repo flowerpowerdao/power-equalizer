@@ -404,6 +404,10 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     Prim.rts_heap_size();
   };
 
+  public shared ({ caller }) func getMaxLiveSize() : async Nat {
+    Prim.rts_max_live_size();
+  };
+
   public shared ({ caller }) func getMemorySize() : async Nat {
     Prim.rts_memory_size();
   };
