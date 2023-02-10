@@ -154,17 +154,17 @@ module {
 
       // disbursement of royalties
       for (f in Env.royalties.vals()) {
-        var _fee : Nat64 = bal * f.1 / 100000;
+        let _fee : Nat64 = bal * f.1 / 100000;
         deps._Disburser.addDisbursement({
           to = f.0;
           fromSubaccount = settlement.subaccount;
           amount = _fee;
           tokenIndex = token;
         });
-        rem := rem - _fee : Nat64;
+        rem -= _fee : Nat64;
       };
 
-      //  disbursement of marketplace fee
+      // disbursement of marketplace fee
       let marketplaceFee = bal * Env.defaultMarketplaceFee.1 / 100000;
       deps._Disburser.addDisbursement({
         to = switch (settlement.marketplaceAddress) {
@@ -175,12 +175,13 @@ module {
         amount = marketplaceFee;
         tokenIndex = token;
       });
+      rem -= marketplaceFee;
 
-      // disbursement to the previous token owner
+      // disbursement to seller
       deps._Disburser.addDisbursement({
         to = tokenOwner;
         fromSubaccount = settlement.subaccount;
-        amount = rem - marketplaceFee;
+        amount = rem;
         tokenIndex = token;
       });
 
