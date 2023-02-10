@@ -1,6 +1,6 @@
 let { execSync } = require("child_process");
 
-let reinstallEach = true;
+let reinstallEach = false;
 let growSize = 20_000;
 
 let canisters = [
@@ -110,8 +110,8 @@ loop: for (let canister of canisters) {
         gc: canister,
         transactions: currTransactions.toLocaleString(),
         reinstall: reinstallEach,
-        "max live size": `${getMaxLiveSize(canister)} MB`,
-        "heap size": `${getHeapSize(canister)} MB`,
+        "max live": `${getMaxLiveSize(canister)} MB`,
+        "heap": `${getHeapSize(canister)} MB`,
         memory: `${getMemorySize(canister)} MB`,
       };
 
@@ -121,9 +121,9 @@ loop: for (let canister of canisters) {
       // grow(canister, 10);
 
       log["upgrade successful"] = upgraded;
-      log["max live size after upgrade"] = `${getMaxLiveSize(canister)} MB`;
-      log["max live size after upgrade"] = `${getHeapSize(canister)} MB`;
-      log["memory after upgrade"] = `${getMemorySize(canister)} MB`;
+      log["max live postupgrade"] = `${getMaxLiveSize(canister)} MB`;
+      log["heap postupgrade"] = `${getHeapSize(canister)} MB`;
+      log["memory postupgrade"] = `${getMemorySize(canister)} MB`;
 
       logs.push(log);
       console.table(logs);
