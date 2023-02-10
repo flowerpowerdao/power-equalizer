@@ -179,9 +179,9 @@ module {
       };
 
       let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance({
-        account = switch (Utils.ledgerAccountIdentifierFromText(paymentaddress)) {
+        account = switch (AviateAccountIdentifier.fromText(paymentaddress)) {
           case (#ok(accountId)) {
-            accountId : [Nat8];
+            AviateAccountIdentifier.addHash(accountId);
           };
           case (#err(_)) {
             // this should never happen because account ids are always created from within the
@@ -306,9 +306,9 @@ module {
                   amount = { e8s = response.e8s - 10000 };
                   fee = { e8s = 10000 };
                   from_subaccount = ?subaccount;
-                  to = switch (Utils.ledgerAccountIdentifierFromText(failedSale.0)) {
+                  to = switch (AviateAccountIdentifier.fromText(failedSale.0)) {
                     case (#ok(accountId)) {
-                      accountId : [Nat8];
+                      AviateAccountIdentifier.addHash(accountId);
                     };
                     case (#err(_)) {
                       // this should never happen because account ids are always created from within the
