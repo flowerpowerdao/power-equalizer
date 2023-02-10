@@ -194,7 +194,7 @@ module {
       let owner : ?Types.AccountIdentifier = getBearer(tindex);
 
       _registry.delete(tindex);
-      
+
       switch (owner) {
         case (?o) _removeFromUserTokens(tindex, o);
         case (_) {};
@@ -211,7 +211,7 @@ module {
     func _addToUserTokens(tindex : Types.TokenIndex, receiver : Types.AccountIdentifier) : () {
       let ownersTokensNew : Buffer.Buffer<Types.TokenIndex> = switch (_owners.get(receiver)) {
         case (?ownersTokens) { ownersTokens.add(tindex); ownersTokens };
-        case (_) Utils.bufferFromArray([tindex]);
+        case (_) Buffer.fromArray([tindex]);
       };
       _owners.put(receiver, ownersTokensNew);
     };

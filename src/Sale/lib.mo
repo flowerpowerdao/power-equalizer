@@ -27,11 +27,11 @@ module {
     * STATE *
     *********/
 
-    private var _saleTransactions : Buffer.Buffer<Types.SaleTransaction> = Utils.bufferFromArray<Types.SaleTransaction>(state._saleTransactionsState);
+    private var _saleTransactions : Buffer.Buffer<Types.SaleTransaction> = Buffer.fromArray<Types.SaleTransaction>(state._saleTransactionsState);
     private var _salesSettlements : TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale> = TrieMap.fromEntries(state._salesSettlementsState.vals(), AID.equal, AID.hash);
-    private var _failedSales : Buffer.Buffer<(Types.AccountIdentifier, Types.SubAccount)> = Utils.bufferFromArray<(Types.AccountIdentifier, Types.SubAccount)>(state._failedSalesState);
-    private var _tokensForSale : Buffer.Buffer<Types.TokenIndex> = Utils.bufferFromArray<Types.TokenIndex>(state._tokensForSaleState);
-    private var _whitelist : Buffer.Buffer<(Nat64, Types.AccountIdentifier)> = Utils.bufferFromArray<(Nat64, Types.AccountIdentifier)>(state._whitelistStable);
+    private var _failedSales : Buffer.Buffer<(Types.AccountIdentifier, Types.SubAccount)> = Buffer.fromArray<(Types.AccountIdentifier, Types.SubAccount)>(state._failedSalesState);
+    private var _tokensForSale : Buffer.Buffer<Types.TokenIndex> = Buffer.fromArray<Types.TokenIndex>(state._tokensForSaleState);
+    private var _whitelist : Buffer.Buffer<(Nat64, Types.AccountIdentifier)> = Buffer.fromArray<(Nat64, Types.AccountIdentifier)>(state._whitelistStable);
     private var _soldIcp : Nat64 = state._soldIcpState;
     private var _sold : Nat = state._soldState;
     private var _totalToSell : Nat = state._totalToSellState;
@@ -107,7 +107,7 @@ module {
       };
     };
 
-    public func startSale(caller : Principal) : Nat {
+    public func enableSale(caller : Principal) : Nat {
       assert (caller == consts.minter and _totalToSell == 0);
       _totalToSell := _tokensForSale.size();
       _tokensForSale.size();
@@ -179,9 +179,9 @@ module {
       };
 
       let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance({
-        account = switch (Utils.ledgerAccountIdentifierFromText(paymentaddress)) {
+        account = switch (AviateAccountIdentifier.fromText(paymentaddress)) {
           case (#ok(accountId)) {
-            accountId : [Nat8];
+            AviateAccountIdentifier.addHash(accountId);
           };
           case (#err(_)) {
             // this should never happen because account ids are always created from within the
@@ -240,13 +240,19 @@ module {
           };
           ignore deps._Cap.insert(event);
           // Payout
-          var bal : Nat64 = response.e8s - (10000 * 1); //Remove 2x tx fee
-          deps._Disburser.addDisbursement({
-            to = Env.teamAddress;
-            fromSubaccount = settlement.subaccount;
-            amount = bal;
-            tokenIndex = 0;
-          });
+          // remove total transaction fee from balance to be splitted
+          let bal : Nat64 = response.e8s - (10000 * Nat64.fromNat(Env.salesDistribution.size()));
+
+          // disbursement sales
+          for (f in Env.salesDistribution.vals()) {
+            var _fee : Nat64 = bal * f.1 / 100000;
+            deps._Disburser.addDisbursement({
+              to = f.0;
+              fromSubaccount = settlement.subaccount;
+              amount = _fee;
+              tokenIndex = 0;
+            });
+          };
           return #ok();
         };
       } else {
@@ -292,7 +298,7 @@ module {
             try {
               // check if subaccount holds icp
               let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance({
-                account = AviateAccountIdentifier.fromPrincipal(this, ?subaccount);
+                account = AviateAccountIdentifier.addHash(AviateAccountIdentifier.fromPrincipal(this, ?subaccount));
               });
               if (response.e8s > 10000) {
                 var bh = await consts.LEDGER_CANISTER.transfer({
@@ -300,9 +306,9 @@ module {
                   amount = { e8s = response.e8s - 10000 };
                   fee = { e8s = 10000 };
                   from_subaccount = ?subaccount;
-                  to = switch (Utils.ledgerAccountIdentifierFromText(failedSale.0)) {
+                  to = switch (AviateAccountIdentifier.fromText(failedSale.0)) {
                     case (#ok(accountId)) {
-                      accountId : [Nat8];
+                      AviateAccountIdentifier.addHash(accountId);
                     };
                     case (#err(_)) {
                       // this should never happen because account ids are always created from within the
@@ -453,15 +459,12 @@ module {
       };
     };
 
-    public func appendWhitelist(price : Nat64, whitelist : [Types.AccountIdentifier]) {
-      _whitelist.append(
-        Utils.mapToBufferFromArray<Types.AccountIdentifier, (Nat64, Types.AccountIdentifier)>(
-          whitelist,
-          func(addr) {
-            (price, addr);
-          },
-        ),
-      );
+    public func appendWhitelist(price : Nat64, addresses : [Types.AccountIdentifier]) {
+      let buffer = Buffer.Buffer<(Nat64, Types.AccountIdentifier)>(addresses.size());
+      for (address in addresses.vals()) {
+        buffer.add((price, address));
+      };
+      _whitelist.append(buffer);
     };
 
     func isWhitelisted(address : Types.AccountIdentifier) : Bool {

@@ -28,7 +28,7 @@ module {
     * STATE *
     *********/
 
-    private var _transactions : Buffer.Buffer<Types.Transaction> = Utils.bufferFromArray(state._transactionsState);
+    private var _transactions : Buffer.Buffer<Types.Transaction> = Buffer.fromArray(state._transactionsState);
     private var _tokenSettlement : TrieMap.TrieMap<Types.TokenIndex, Types.Settlement> = TrieMap.fromEntries(state._tokenSettlementState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _tokenListing : TrieMap.TrieMap<Types.TokenIndex, Types.Listing> = TrieMap.fromEntries(state._tokenListingState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
 
@@ -88,6 +88,7 @@ module {
           seller = listing.seller;
           price = listing.price;
           locked = ?(Time.now() + Env.ecscrowDelay);
+          marketplaceAddress = listing.marketplaceAddress;
         },
       );
 
@@ -103,7 +104,7 @@ module {
               // Atomic protection
               if (Option.isNull(_tokenListing.get(token))) {
                 return #err(#Other("Listing has sold"));
-              }
+              };
             };
           };
         };
@@ -116,6 +117,7 @@ module {
           price = listing.price;
           subaccount = subaccount;
           buyer = address;
+          marketplaceAddress = listing.marketplaceAddress;
         },
       );
       return #ok(paymentAddress);
@@ -135,7 +137,7 @@ module {
       };
 
       let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance({
-        account = AviateAccountIdentifier.fromPrincipal(this, ?settlement.subaccount);
+        account = AviateAccountIdentifier.addHash(AviateAccountIdentifier.fromPrincipal(this, ?settlement.subaccount));
       });
 
       // because of the await above, we check again if there is a settlement available for the token
@@ -162,22 +164,36 @@ module {
         };
       };
 
-      var bal : Nat64 = settlement.price - (10000 * Nat64.fromNat(Env.salesFees.size() + 1));
+      // deduct two extra transaction fees for marketplace fee and disbursment to seller
+      let bal : Nat64 = response.e8s - (10000 * Nat64.fromNat(Env.royalties.size() + 2));
       var rem = bal;
 
-      // disbursement of fees
-      for (f in Env.salesFees.vals()) {
-        var _fee : Nat64 = bal * f.1 / 100000;
+      // disbursement of royalties
+      for (f in Env.royalties.vals()) {
+        let _fee : Nat64 = bal * f.1 / 100000;
         deps._Disburser.addDisbursement({
           to = f.0;
           fromSubaccount = settlement.subaccount;
           amount = _fee;
           tokenIndex = token;
         });
-        rem := rem - _fee : Nat64;
+        rem -= _fee : Nat64;
       };
 
-      // disbursement to the previous token owner
+      // disbursement of marketplace fee
+      let marketplaceFee = bal * Env.defaultMarketplaceFee.1 / 100000;
+      deps._Disburser.addDisbursement({
+        to = switch (settlement.marketplaceAddress) {
+          case (?marketplaceAddress) { marketplaceAddress }; // could be an incorrect address as provided by the person listing the nft
+          case (null) { Env.defaultMarketplaceFee.0 };
+        };
+        fromSubaccount = settlement.subaccount;
+        amount = marketplaceFee;
+        tokenIndex = token;
+      });
+      rem -= marketplaceFee;
+
+      // disbursement to seller
       deps._Disburser.addDisbursement({
         to = tokenOwner;
         fromSubaccount = settlement.subaccount;
@@ -259,6 +275,10 @@ module {
                   seller = caller;
                   price = price;
                   locked = null;
+                  marketplaceAddress = switch (request.marketplacePrincipal) {
+                    case (null) { null };
+                    case (?principal) { ?AID.fromPrincipal(principal, null) };
+                  };
                 },
               );
             };

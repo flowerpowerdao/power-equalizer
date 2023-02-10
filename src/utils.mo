@@ -18,39 +18,6 @@ import ExtCore "./toniq-labs/ext/Core";
 import BinaryEncoding "mo:encoding/Binary";
 
 module {
-
-  /// Create a Buffer from an Array
-  public func bufferFromArray<T>(array : [T]) : Buffer.Buffer<T> {
-    let buffer = Buffer.Buffer<T>(array.size());
-    for (element in Array.vals(array)) {
-      buffer.add(element);
-    };
-    return buffer;
-  };
-
-  /// Create a Buffer from an Array
-  public func mapToBufferFromArray<T, T2>(array : [T], f : T -> T2) : Buffer.Buffer<T2> {
-    let buffer = Buffer.Buffer<T2>(array.size());
-    for (element in Array.vals(array)) {
-      buffer.add(f(element));
-    };
-    return buffer;
-  };
-
-  /// Clone from any iterator of key-value pairs
-  // public func bufferHashMapFromIter<K, V1>(
-  //   iter : Iter.Iter<(K, [V1])>,
-  //   initCapacity : Nat,
-  //   keyEq : (K, K) -> Bool,
-  //   keyHash : K -> Hash.Hash
-  // ) : HashMap.HashMap<K, Buffer.Buffer<V1>> {
-  //   let h = HashMap.HashMap<K, Buffer.Buffer<V1>>(initCapacity, keyEq, keyHash);
-  //   for ((k, v) in iter) {
-  //     h.put(k, bufferFromArray<V1>(v));
-  //   };
-  //   h
-  // };
-
   /// Clone from any iterator of key-value pairs
   public func bufferTrieMapFromIter<K, V1>(
     iter : Iter.Iter<(K, [V1])>,
@@ -59,7 +26,7 @@ module {
   ) : TrieMap.TrieMap<K, Buffer.Buffer<V1>> {
     let h = TrieMap.TrieMap<K, Buffer.Buffer<V1>>(keyEq, keyHash);
     for ((k, v) in iter) {
-      h.put(k, bufferFromArray<V1>(v));
+      h.put(k, Buffer.fromArray<V1>(v));
     };
     h;
   };
@@ -196,14 +163,5 @@ module {
       Nat8.fromIntWrap(n / 2 ** shift);
     };
     Array.tabulate<Nat8>(32, n_byte);
-  };
-
-  public func ledgerAccountIdentifierFromText(accountIdentifier : Text) : Result.Result<[Nat8], Text> {
-    switch (Hex.decode(accountIdentifier)) {
-      case (#err(e)) { #err(e) };
-      case (#ok(bs)) {
-        #ok(bs);
-      };
-    };
   };
 };

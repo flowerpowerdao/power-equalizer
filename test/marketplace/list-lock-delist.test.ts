@@ -4,8 +4,6 @@ import { buyFromSale, checkTokenCount, tokenIdentifier } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
 import env from './.env.marketplace';
 
-import canisterIds from '../../.dfx/local/canister_ids.json';
-
 describe('list, lock and try to delist nft', async () => {
   let seller = new User;
   seller.mintICP(1000_000_000n);
@@ -37,6 +35,7 @@ describe('list, lock and try to delist nft', async () => {
       from_subaccount: [],
       price: [1000_000n],
       token: tokenIdentifier(tokens[0]),
+      marketplacePrincipal: [],
     });
     expect(res).toHaveProperty('ok');
   });
@@ -46,13 +45,23 @@ describe('list, lock and try to delist nft', async () => {
     expect(lockRes).toHaveProperty('ok');
   });
 
+  it('try to lock twice', async () => {
+    let user = new User;
+    let lockRes = await user.mainActor.lock(tokenIdentifier(tokens[0]), 1000_000n, user.accountId, new Uint8Array);
+    expect(lockRes).toHaveProperty('err');
+    expect(lockRes['err'].Other).toBe('Listing is locked');
+  });
+
   it('try to delist', async () => {
     let delistRes = await seller.mainActor.list({
       from_subaccount: [],
       price: [],
       token: tokenIdentifier(tokens[0]),
+      marketplacePrincipal: [],
     });
     expect(delistRes).toHaveProperty('err');
+    expect(delistRes['err'].Other).toBe('Listing is locked');
+
   });
 
   it('check token count', async () => {
