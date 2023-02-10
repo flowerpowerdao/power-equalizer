@@ -4,6 +4,10 @@ import { User } from "./user";
 
 import canisterIds from '../.dfx/local/canister_ids.json';
 
+export function feeOf(amount: bigint, fee: bigint) {
+  return amount * fee / 100_000n;
+}
+
 export function applyFees(amount: bigint, fees: bigint[]) {
   let result = amount;
   for (let fee of fees) {
