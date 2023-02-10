@@ -67,7 +67,7 @@ fi
 
 # add the other assets
 upload_assets() {
-    for asset in {$k..$(($k+$batch_size-1))}; do  
+    for asset in {$k..$(($k+$batch_size-1))}; do
         if [ $asset -gt $number_of_assets ];
             then break;
         fi;
@@ -75,7 +75,7 @@ upload_assets() {
         dfx canister --network $network call --async $mode addAsset '(record {
             name = "'$asset'";
             payload = record {
-                ctype = "image/svg+xml"; 
+                ctype = "image/svg+xml";
                 data = vec {blob "
                     <svg xmlns=\"http://www.w3.org/2000/svg\">
                         <script>
@@ -92,7 +92,7 @@ upload_assets() {
                 };
             };
             thumbnail = opt record {
-                ctype = "image/svg+xml"; 
+                ctype = "image/svg+xml";
                 data = vec {blob "
                     <svg xmlns=\"http://www.w3.org/2000/svg\">
                         <script>
@@ -109,7 +109,7 @@ upload_assets() {
                 };
             };
             metadata = opt record {
-                ctype = "application/json"; 
+                ctype = "application/json";
                 data = vec {blob "'"$(cat assets/metadata.json | jq ".[$j]" | sed 's/"/\\"/g')"'"
                 };
             };
@@ -125,7 +125,7 @@ while [ $k -le $number_of_assets ]; do
 done
 jobs
 wait
-echo "done" 
+echo "done"
 
 # init cap
 echo "initiating cap ..."
@@ -147,9 +147,9 @@ dfx canister --network $network call $mode airdropTokens 0
 echo "airdrop tokens ..."
 dfx canister --network $network call $mode airdropTokens 1500
 
-# start sale
-echo "start sale ..."
-dfx canister --network $network call $mode startSale
+# enable sale
+echo "enable sale ..."
+dfx canister --network $network call $mode enableSale
 
 # check the asset that are linked to the tokens
 for i in {0..9}

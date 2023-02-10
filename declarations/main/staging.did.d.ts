@@ -77,7 +77,7 @@ export interface Canister {
   >,
   'shuffleAssets' : ActorMethod<[], undefined>,
   'shuffleTokensForSale' : ActorMethod<[], undefined>,
-  'startSale' : ActorMethod<[], bigint>,
+  'enableSale' : ActorMethod<[], bigint>,
   'stats' : ActorMethod<
     [],
     [bigint, bigint, bigint, bigint, bigint, bigint, bigint]

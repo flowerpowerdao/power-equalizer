@@ -107,7 +107,7 @@ module {
       };
     };
 
-    public func startSale(caller : Principal) : Nat {
+    public func enableSale(caller : Principal) : Nat {
       assert (caller == consts.minter and _totalToSell == 0);
       _totalToSell := _tokensForSale.size();
       _tokensForSale.size();

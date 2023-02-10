@@ -357,7 +357,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'shuffleAssets' : IDL.Func([], [], []),
     'shuffleTokensForSale' : IDL.Func([], [], []),
-    'startSale' : IDL.Func([], [IDL.Nat], []),
+    'enableSale' : IDL.Func([], [IDL.Nat], []),
     'stats' : IDL.Func(
         [],
         [IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat, IDL.Nat, IDL.Nat],
