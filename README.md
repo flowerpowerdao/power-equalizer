@@ -9,14 +9,14 @@
 
 ## pre launch
 
--   ~~check all addresses and parameters in `deploy.zsh`~~
--   ~~adapt `Env/lib.mo` to your needs~~
--   ~~add canister to DAB~~
--   ~~send collection details to entrepot via form~~
--   ~~top canister up with cycles~~
--   ~~add canister to tip jar~~
--   ~~run off chain backup script with mainnet canister id~~
--   ~~run disburse script with mainnet canister id~~
+[ ]   check all addresses and parameters in `deploy.zsh`
+[ ]   adapt `Env/lib.mo` to your needs
+[ ]   add canister to DAB
+[ ]   send collection details to entrepot via form
+[ ]   top canister up with cycles
+[ ]   add canister to tip jar
+[ ]   run off chain backup script with mainnet canister id
+[ ]   run disburse script with mainnet canister id
 
 ## launch
 
