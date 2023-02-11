@@ -7,6 +7,7 @@ import TokenTypes "../Tokens/types";
 import Tokens "../Tokens";
 import Sale "../Sale";
 import Disburser "../Disburser";
+import LedgerTypes "../Ledger/types";
 
 module {
 
@@ -15,7 +16,13 @@ module {
       _transactionsState : [Transaction] = [];
       _tokenSettlementState : [(TokenTypes.TokenIndex, Settlement)] = [];
       _tokenListingState : [(TokenTypes.TokenIndex, Listing)] = [];
+      _frontendsState : [(Text, Frontend)] = [];
     };
+  };
+
+  public type Frontend = {
+    fee : Nat64;
+    accountIdentifier : AccountIdentifier;
   };
 
   public type AccountIdentifier = ExtCore.AccountIdentifier;
@@ -32,8 +39,6 @@ module {
 
   public type TokenIndex = ExtCore.TokenIndex;
 
-  public type ICPTs = { e8s : Nat64 };
-
   public type Transaction = {
     token : TokenIdentifier;
     seller : Principal;
@@ -47,30 +52,30 @@ module {
     price : Nat64;
     subaccount : SubAccount;
     buyer : AccountIdentifier;
-    marketplaceAddress : ?AccountIdentifier;
+    sellerFrontend : ?Text;
+    buyerFrontend : ?Text;
   };
 
   public type Listing = {
     seller : Principal;
     price : Nat64;
     locked : ?Time;
-    marketplaceAddress : ?AccountIdentifier;
+    sellerFrontend : ?Text;
+    buyerFrontend : ?Text;
   };
 
   public type ListRequest = {
     token : TokenIdentifier;
     from_subaccount : ?SubAccount;
     price : ?Nat64;
-    marketplacePrincipal : ?Principal;
+    frontendIdentifier : ?Text;
   };
-
-  type LedgerAccountIdentifier = [Nat8];
-  public type AccountBalanceArgs = { account : LedgerAccountIdentifier };
 
   public type StableState = {
     _transactionsState : [Transaction];
     _tokenSettlementState : [(TokenIndex, Settlement)];
     _tokenListingState : [(TokenIndex, Listing)];
+    _frontendsState : [(Text, Frontend)];
   };
 
   public type Dependencies = {
@@ -81,9 +86,8 @@ module {
   };
 
   public type Constants = {
-    LEDGER_CANISTER : actor {
-      account_balance : shared query AccountBalanceArgs -> async ICPTs;
-    };
+    LEDGER_CANISTER : LedgerTypes.LEDGER_CANISTER;
+    minter : Principal;
   };
 
 };

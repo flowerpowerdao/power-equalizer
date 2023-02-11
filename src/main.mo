@@ -24,6 +24,7 @@ import Tokens "Tokens";
 import Disburser "Disburser";
 import DisburserTypes "Disburser/types";
 import Utils "./utils";
+import LedgerTypes "Ledger/types";
 
 shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCanister {
 
@@ -32,39 +33,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   *********/
   type AccountIdentifier = ExtCore.AccountIdentifier;
   type SubAccount = ExtCore.SubAccount;
-  type AccountBalanceArgs = { account : LedgerAccountIdentifier };
-  type ICPTs = { e8s : Nat64 };
 
-  // ledger types
-  type LedgerAccountIdentifier = [Nat8];
-  type BlockIndex = Nat64;
-  type Memo = Nat64;
-  type LedgerSubAccount = [Nat8];
-  type TimeStamp = {
-    timestamp_nanos : Nat64;
-  };
-  type Tokens = {
-    e8s : Nat64;
-  };
-  type TransferArgs = {
-    to : LedgerAccountIdentifier;
-    fee : Tokens;
-    memo : Memo;
-    from_subaccount : ?LedgerSubAccount;
-    created_at_time : ?TimeStamp;
-    amount : Tokens;
-  };
-  type TransferError = {
-    #TxTooOld : { allowed_window_nanos : Nat64 };
-    #BadFee : { expected_fee : Tokens };
-    #TxDuplicate : { duplicate_of : BlockIndex };
-    #TxCreatedInFuture;
-    #InsufficientFunds : { balance : Tokens };
-  };
-  type TransferResult = {
-    #Ok : BlockIndex;
-    #Err : TransferError;
-  };
   /****************
   * STABLE STATE *
   ****************/
@@ -145,10 +114,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   * CONSTANTS *
   *************/
 
-  let LEDGER_CANISTER = actor "ryjl3-tyaaa-aaaaa-aaaba-cai" : actor {
-    account_balance : shared query AccountBalanceArgs -> async ICPTs;
-    transfer : shared TransferArgs -> async TransferResult;
-  };
+  let LEDGER_CANISTER = actor "ryjl3-tyaaa-aaaaa-aaaba-cai" : LedgerTypes.LEDGER_CANISTER;
   let CREATION_CYCLES : Nat = 1_000_000_000_000;
 
   /***********
@@ -376,16 +342,17 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     },
     {
       LEDGER_CANISTER;
+      minter = init_minter;
     },
   );
 
   // updates
 
   // lock token and get address to pay
-  public shared ({ caller }) func lock(tokenid : MarketplaceTypes.TokenIdentifier, price : Nat64, address : MarketplaceTypes.AccountIdentifier, subaccount : MarketplaceTypes.SubAccount) : async Result.Result<MarketplaceTypes.AccountIdentifier, MarketplaceTypes.CommonError> {
+  public shared ({ caller }) func lock(tokenid : MarketplaceTypes.TokenIdentifier, price : Nat64, address : MarketplaceTypes.AccountIdentifier, subaccount : MarketplaceTypes.SubAccount, frontendIdentifier : ?Text) : async Result.Result<MarketplaceTypes.AccountIdentifier, MarketplaceTypes.CommonError> {
     canistergeekMonitor.collectMetrics();
     // no caller check, anyone can lock
-    await _Marketplace.lock(caller, tokenid, price, address, subaccount);
+    await _Marketplace.lock(caller, tokenid, price, address, subaccount, frontendIdentifier);
   };
 
   // check payment and settle transfer token to user
@@ -405,6 +372,22 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     canistergeekMonitor.collectMetrics();
     // caller will be stored to the Cap event, is that ok?
     await _Marketplace.cronSettlements(caller);
+  };
+
+  public shared ({ caller }) func putFrontend(identifier : Text, frontend : MarketplaceTypes.Frontend) : async () {
+    canistergeekMonitor.collectMetrics();
+    // checks caller == minter
+    _Marketplace.putFrontend(caller, identifier, frontend);
+  };
+
+  public shared ({ caller }) func deleteFrontend(identifier : Text) : async () {
+    canistergeekMonitor.collectMetrics();
+    // checks caller == minter
+    _Marketplace.deleteFrontend(caller, identifier);
+  };
+
+  public shared func frontends() : async [(Text, MarketplaceTypes.Frontend)] {
+    _Marketplace.frontends();
   };
 
   // queries
@@ -442,8 +425,8 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     };
   };
 
-  public query func toAddress(p : Text, sa : Nat) : async AccountIdentifier {
-    _Marketplace.toAddress(p, sa);
+  public query func toAccountIdentifier(p : Text, sa : Nat) : async AccountIdentifier {
+    _Marketplace.toAccountIdentifier(p, sa);
   };
 
   // EXT
