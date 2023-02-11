@@ -39,8 +39,6 @@ module {
 
   public type TokenIndex = ExtCore.TokenIndex;
 
-  public type ICPTs = { e8s : Nat64 };
-
   public type Transaction = {
     token : TokenIdentifier;
     seller : Principal;
@@ -73,9 +71,6 @@ module {
     frontendIdentifier : ?Text;
   };
 
-  type LedgerAccountIdentifier = [Nat8];
-  public type AccountBalanceArgs = { account : LedgerAccountIdentifier };
-
   public type StableState = {
     _transactionsState : [Transaction];
     _tokenSettlementState : [(TokenIndex, Settlement)];
@@ -91,9 +86,7 @@ module {
   };
 
   public type Constants = {
-    LEDGER_CANISTER : actor {
-      account_balance : shared query AccountBalanceArgs -> async ICPTs;
-    };
+    LEDGER_CANISTER : LedgerTypes.LEDGER_CANISTER;
     minter : Principal;
   };
 

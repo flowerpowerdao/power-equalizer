@@ -127,7 +127,7 @@ module {
         };
       };
 
-      let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance({
+      let response = await consts.LEDGER_CANISTER.account_balance({
         account = addHash(fromPrincipal(this, ?settlement.subaccount));
       });
 
