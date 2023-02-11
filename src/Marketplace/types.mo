@@ -7,6 +7,7 @@ import TokenTypes "../Tokens/types";
 import Tokens "../Tokens";
 import Sale "../Sale";
 import Disburser "../Disburser";
+import LedgerTypes "../Ledger/types";
 
 module {
 
@@ -16,6 +17,11 @@ module {
       _tokenSettlementState : [(TokenTypes.TokenIndex, Settlement)] = [];
       _tokenListingState : [(TokenTypes.TokenIndex, Listing)] = [];
     };
+  };
+
+  public type MarketplaceFee = {
+    fee : Nat64;
+    feeRecipient : LedgerTypes.LedgerAccountIdentifier;
   };
 
   public type AccountIdentifier = ExtCore.AccountIdentifier;

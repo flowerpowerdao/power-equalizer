@@ -24,6 +24,7 @@ import Tokens "Tokens";
 import Disburser "Disburser";
 import DisburserTypes "Disburser/types";
 import Utils "./utils";
+import LedgerTypes "Ledger/types";
 
 shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCanister {
 
@@ -32,39 +33,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   *********/
   type AccountIdentifier = ExtCore.AccountIdentifier;
   type SubAccount = ExtCore.SubAccount;
-  type AccountBalanceArgs = { account : LedgerAccountIdentifier };
-  type ICPTs = { e8s : Nat64 };
 
-  // ledger types
-  type LedgerAccountIdentifier = [Nat8];
-  type BlockIndex = Nat64;
-  type Memo = Nat64;
-  type LedgerSubAccount = [Nat8];
-  type TimeStamp = {
-    timestamp_nanos : Nat64;
-  };
-  type Tokens = {
-    e8s : Nat64;
-  };
-  type TransferArgs = {
-    to : LedgerAccountIdentifier;
-    fee : Tokens;
-    memo : Memo;
-    from_subaccount : ?LedgerSubAccount;
-    created_at_time : ?TimeStamp;
-    amount : Tokens;
-  };
-  type TransferError = {
-    #TxTooOld : { allowed_window_nanos : Nat64 };
-    #BadFee : { expected_fee : Tokens };
-    #TxDuplicate : { duplicate_of : BlockIndex };
-    #TxCreatedInFuture;
-    #InsufficientFunds : { balance : Tokens };
-  };
-  type TransferResult = {
-    #Ok : BlockIndex;
-    #Err : TransferError;
-  };
   /****************
   * STABLE STATE *
   ****************/
@@ -145,10 +114,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   * CONSTANTS *
   *************/
 
-  let LEDGER_CANISTER = actor "ryjl3-tyaaa-aaaaa-aaaba-cai" : actor {
-    account_balance : shared query AccountBalanceArgs -> async ICPTs;
-    transfer : shared TransferArgs -> async TransferResult;
-  };
+  let LEDGER_CANISTER = actor "ryjl3-tyaaa-aaaaa-aaaba-cai" : LedgerTypes.LEDGER_CANISTER;
   let CREATION_CYCLES : Nat = 1_000_000_000_000;
 
   /***********
