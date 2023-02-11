@@ -269,6 +269,9 @@ module {
           };
           switch (request.price) {
             case (?price) {
+              if (price < 1_000_000) {
+                return #err(#Other("Price too low. Minimum price is 0.01 ICP "));
+              };
               _tokenListing.put(
                 token,
                 {
