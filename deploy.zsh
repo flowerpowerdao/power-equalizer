@@ -20,12 +20,12 @@ then
 echo "production deployment ..."
 dfx canister --network $network create $mode
 ID=$(dfx canister --network $network id $mode)
-dfx deploy --network $network --argument "(principal \"$ID\")" $mode
+DFX_MOC_PATH="$(vessel bin)/moc" dfx deploy --network $network --argument "(principal \"$ID\")" $mode
 else
 echo "staging deployment ..."
 dfx canister --network $network create $mode
 ID=$(dfx canister --network $network id $mode)
-yes yes| dfx deploy --network $network --argument "(principal \"$ID\")" --mode=reinstall $mode
+yes yes| DFX_MOC_PATH="$(vessel bin)/moc" dfx deploy --network $network --argument "(principal \"$ID\")" --mode=reinstall $mode
 fi
 
 
