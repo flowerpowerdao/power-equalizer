@@ -6,12 +6,13 @@ import Nat64 "mo:base/Nat64";
 import Nat8 "mo:base/Nat8";
 import TrieMap "mo:base/TrieMap";
 import Option "mo:base/Option";
+import Text "mo:base/Text";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Time "mo:base/Time";
 import Buffer "mo:base/Buffer";
 
-import AviateAccountIdentifier "mo:accountid/AccountIdentifier";
+import { fromPrincipal; addHash; fromText } "mo:accountid/AccountIdentifier";
 import Encoding "mo:encoding/Binary";
 import Root "mo:cap/Root";
 
@@ -31,18 +32,22 @@ module {
     private var _transactions : Buffer.Buffer<Types.Transaction> = Buffer.fromArray(state._transactionsState);
     private var _tokenSettlement : TrieMap.TrieMap<Types.TokenIndex, Types.Settlement> = TrieMap.fromEntries(state._tokenSettlementState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _tokenListing : TrieMap.TrieMap<Types.TokenIndex, Types.Listing> = TrieMap.fromEntries(state._tokenListingState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    private var _frontends : TrieMap.TrieMap<Text, Types.Frontend> = TrieMap.fromEntries(state._frontendsState.vals(), Text.equal, Text.hash);
 
     public func toStable() : Types.StableState {
       return {
         _transactionsState = Buffer.toArray(_transactions);
         _tokenSettlementState = Iter.toArray(_tokenSettlement.entries());
         _tokenListingState = Iter.toArray(_tokenListing.entries());
+        _frontendsState = Iter.toArray(_frontends.entries());
       };
     };
 
-    // *** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
+    /********************
+    * PUBLIC INTERFACE *
+    ********************/
 
-    public func lock(caller : Principal, tokenid : Types.TokenIdentifier, price : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount) : async Result.Result<Types.AccountIdentifier, Types.CommonError> {
+    public func lock(caller : Principal, tokenid : Types.TokenIdentifier, price : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount, frontendIdentifier : ?Text) : async Result.Result<Types.AccountIdentifier, Types.CommonError> {
       if (ExtCore.TokenIdentifier.isPrincipal(tokenid, this) == false) {
         return #err(#InvalidToken(tokenid));
       };
@@ -72,7 +77,8 @@ module {
           seller = listing.seller;
           price = listing.price;
           locked = ?(Time.now() + Env.ecscrowDelay);
-          marketplaceAddress = listing.marketplaceAddress;
+          sellerFrontend = listing.sellerFrontend;
+          buyerFrontend = frontendIdentifier;
         },
       );
 
@@ -101,7 +107,8 @@ module {
           price = listing.price;
           subaccount = subaccount;
           buyer = address;
-          marketplaceAddress = listing.marketplaceAddress;
+          sellerFrontend = listing.sellerFrontend;
+          buyerFrontend = frontendIdentifier;
         },
       );
       return #ok(paymentAddress);
@@ -121,7 +128,7 @@ module {
       };
 
       let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance({
-        account = AviateAccountIdentifier.addHash(AviateAccountIdentifier.fromPrincipal(this, ?settlement.subaccount));
+        account = addHash(fromPrincipal(this, ?settlement.subaccount));
       });
 
       // because of the await above, we check again if there is a settlement available for the token
@@ -164,18 +171,27 @@ module {
         rem -= _fee : Nat64;
       };
 
-      // disbursement of marketplace fee
-      let marketplaceFee = bal * Env.defaultMarketplaceFee.1 / 100000;
+      // disburse seller frontend fee
+      let sellerFrontend = getFrontend(settlement.sellerFrontend);
+      let sellerFrontendFee = bal * sellerFrontend.fee / 100000;
       deps._Disburser.addDisbursement({
-        to = switch (settlement.marketplaceAddress) {
-          case (?marketplaceAddress) { marketplaceAddress }; // could be an incorrect address as provided by the person listing the nft
-          case (null) { Env.defaultMarketplaceFee.0 };
-        };
+        to = sellerFrontend.accountIdentifier;
         fromSubaccount = settlement.subaccount;
-        amount = marketplaceFee;
+        amount = sellerFrontendFee;
         tokenIndex = token;
       });
-      rem -= marketplaceFee;
+      rem -= sellerFrontendFee;
+
+      // disburse buyer frontend fee
+      let buyerFrontend = getFrontend(settlement.buyerFrontend);
+      let buyerFrontendFee = bal * buyerFrontend.fee / 100000;
+      deps._Disburser.addDisbursement({
+        to = buyerFrontend.accountIdentifier;
+        fromSubaccount = settlement.subaccount;
+        amount = buyerFrontendFee;
+        tokenIndex = token;
+      });
+      rem -= buyerFrontendFee;
 
       // disbursement to seller
       deps._Disburser.addDisbursement({
@@ -259,10 +275,8 @@ module {
                   seller = caller;
                   price = price;
                   locked = null;
-                  marketplaceAddress = switch (request.marketplacePrincipal) {
-                    case (null) { null };
-                    case (?principal) { ?AID.fromPrincipal(principal, null) };
-                  };
+                  sellerFrontend = request.frontendIdentifier;
+                  buyerFrontend = null;
                 },
               );
             };
@@ -368,11 +382,52 @@ module {
       unlockedSettlements().size(); // those are the settlements that exceeded their 2 min lock time
     };
 
-    public func toAddress(p : Text, sa : Nat) : Types.AccountIdentifier {
+    public func toAccountIdentifier(p : Text, sa : Nat) : Types.AccountIdentifier {
       AID.fromPrincipal(Principal.fromText(p), ?Utils.natToSubAccount(sa));
     };
 
-    // *** ** ** ** ** ** ** ** ** * * INTERNAL METHODS * ** ** ** ** ** ** ** ** ** ** /
+    public func putFrontend(caller : Principal, identifier : Text, frontend : Types.Frontend) {
+      assert (caller == consts.minter);
+      assert (validFrontendFee(frontend));
+      _frontends.put(identifier, frontend);
+    };
+
+    public func deleteFrontend(caller : Principal, identifier : Text) {
+      assert (caller == consts.minter);
+      _frontends.delete(identifier);
+    };
+
+    public func frontends() : [(Text, Types.Frontend)] {
+      Iter.toArray(_frontends.entries());
+    };
+
+    /********************
+    * INTERNAL METHODS *
+    ********************/
+
+    func validFrontendFee(frontend : Types.Frontend) : Bool {
+      frontend.fee <= 500 and frontend.fee >= 0
+    };
+
+    func getFrontend(identifier : ?Text) : Types.Frontend {
+      let defaultFrontend : Types.Frontend = {
+        fee = Env.defaultMarketplaceFee.1;
+        accountIdentifier = Env.defaultMarketplaceFee.0;
+      };
+
+      // disbursement of marketplace fee
+      let frontend : Types.Frontend = switch (
+        do ? {
+          switch (_frontends.get(identifier!)) {
+            case (?frontend) frontend;
+            case _ defaultFrontend;
+          };
+        },
+      ) {
+        case (?frontend) { frontend };
+        case _ defaultFrontend;
+      };
+    };
 
     // getters & setters
     public func transactionsSize() : Nat {

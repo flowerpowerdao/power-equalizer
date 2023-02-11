@@ -342,16 +342,17 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     },
     {
       LEDGER_CANISTER;
+      minter = init_minter;
     },
   );
 
   // updates
 
   // lock token and get address to pay
-  public shared ({ caller }) func lock(tokenid : MarketplaceTypes.TokenIdentifier, price : Nat64, address : MarketplaceTypes.AccountIdentifier, subaccount : MarketplaceTypes.SubAccount) : async Result.Result<MarketplaceTypes.AccountIdentifier, MarketplaceTypes.CommonError> {
+  public shared ({ caller }) func lock(tokenid : MarketplaceTypes.TokenIdentifier, price : Nat64, address : MarketplaceTypes.AccountIdentifier, subaccount : MarketplaceTypes.SubAccount, frontendIdentifier : ?Text) : async Result.Result<MarketplaceTypes.AccountIdentifier, MarketplaceTypes.CommonError> {
     canistergeekMonitor.collectMetrics();
     // no caller check, anyone can lock
-    await _Marketplace.lock(caller, tokenid, price, address, subaccount);
+    await _Marketplace.lock(caller, tokenid, price, address, subaccount, frontendIdentifier);
   };
 
   // check payment and settle transfer token to user
@@ -371,6 +372,22 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     canistergeekMonitor.collectMetrics();
     // caller will be stored to the Cap event, is that ok?
     await _Marketplace.cronSettlements(caller);
+  };
+
+  public shared ({ caller }) func putFrontend(identifier : Text, frontend : MarketplaceTypes.Frontend) : async () {
+    canistergeekMonitor.collectMetrics();
+    // checks caller == minter
+    _Marketplace.putFrontend(caller, identifier, frontend);
+  };
+
+  public shared ({ caller }) func deleteFrontend(identifier : Text) : async () {
+    canistergeekMonitor.collectMetrics();
+    // checks caller == minter
+    _Marketplace.deleteFrontend(caller, identifier);
+  };
+
+  public shared func frontends() : async [(Text, MarketplaceTypes.Frontend)] {
+    _Marketplace.frontends();
   };
 
   // queries
@@ -408,8 +425,8 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     };
   };
 
-  public query func toAddress(p : Text, sa : Nat) : async AccountIdentifier {
-    _Marketplace.toAddress(p, sa);
+  public query func toAccountIdentifier(p : Text, sa : Nat) : async AccountIdentifier {
+    _Marketplace.toAccountIdentifier(p, sa);
   };
 
   // EXT
