@@ -125,21 +125,21 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   private let canistergeekMonitor = Canistergeek.Monitor();
 
   /**
-  * Returns collected data based on passed parameters.
-  * Called from browser.
-  */
-  public query ({ caller }) func getCanisterMetrics(parameters : Canistergeek.GetMetricsParameters) : async ?Canistergeek.CanisterMetrics {
+    * Returns canister information based on passed parameters.
+    * Called from browser.
+    */
+  public query ({ caller }) func getCanistergeekInformation(request : Canistergeek.GetInformationRequest) : async Canistergeek.GetInformationResponse {
     validateCaller(caller);
-    canistergeekMonitor.getMetrics(parameters);
+    Canistergeek.getInformation(?canistergeekMonitor, null, request);
   };
 
   /**
-  * Force collecting the data at current time.
-  * Called from browser or any canister "update" method.
-  */
-  public shared ({ caller }) func collectCanisterMetrics() : async () {
+    * Updates canister information based on passed parameters at current time.
+    * Called from browser or any canister "update" method.
+    */
+  public shared ({ caller }) func updateCanistergeekInformation(request : Canistergeek.UpdateInformationRequest) : async () {
     validateCaller(caller);
-    canistergeekMonitor.collectMetrics();
+    canistergeekMonitor.updateInformation(request);
   };
 
   private func validateCaller(principal : Principal) : () {
