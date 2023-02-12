@@ -143,7 +143,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   };
 
   private func validateCaller(principal : Principal) : () {
-    assert (principal == Principal.fromText("ikywv-z7xvl-xavcg-ve6kg-dbbtx-wy3gy-qbtwp-7ylai-yl4lc-lwetg-kqe"));
+    assert (principal == Principal.fromText("onkyj-ezxuw-tbqva-ictbu-dhdpw-hdcj4-4wxn7-tfo77-hh6qc-b3dng-pqe"));
   };
 
   // Disburser

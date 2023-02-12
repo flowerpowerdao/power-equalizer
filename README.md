@@ -1,19 +1,14 @@
 ![photo_2022-08-04 23 41 19](https://user-images.githubusercontent.com/32162112/182957869-8479f309-283d-4d81-af9f-2d34acbac27e.jpeg)
 
-# pineapple punks nft 🌼
-
-> :warning: **If you use this for another NFT project**: MAKE SURE YOU DELETE THE `canister_ids.json` FIRST!
-
-# TO-DOs
+# power equalizer 🌼
 
 ## pre launch
 
-- [ ] check all addresses and parameters in `deploy.zsh`
 - [ ] adapt `Env/lib.mo` to your needs
+- [ ] check all addresses and parameters in `deploy.zsh`
 - [ ] add canister to DAB
 - [ ] send collection details to entrepot via form
 - [ ] top canister up with cycles
-- [ ] add canister to tip jar
 - [ ] run off chain backup script with mainnet canister id
 - [ ] run disburse script with mainnet canister id
 
@@ -23,17 +18,10 @@
 - check if all assets uploaded correctly by calling the canisters `getTokenToAssetMapping()` method
 - call `shuffleAssets` at desired time (usually 24 hours after market opens)
 
-## structure
+## deploy 📚
 
-- the `main` branch contains the logic that is currently deployed on mainnet
-
-## quick deploy 🏃‍♀️
-
-- To quickly reinstall (**WIPES ALL STATE**) the NFT staging canister locally run `dfx deploy staging --mode reinstall`
-
-## sophisticated deploy 📚
-
-- use `make` to run the standard local deploy, use `make deploy-staging-ic` to deploy the staging canister to the mainnet, by default it deploys the NFT staging canister locally and uses `assets/output.mp4` and `metadata.json` as file paths
+- use `make` to run the standard local deploy
+- use `make deploy-staging-ic` to deploy the staging canister to the mainnet, by default it deploys the NFT staging canister locally and uses `assets/output.mp4` and `metadata.json` as file paths
   - `metadata.json` **MUST NOT** contain a mint number! (use `cat mymetadata.json| sed '/mint/ d' > metadata.json` to remove the mint number)
   - note that you need [ext](#ext) installed
 - The `deploy.zsh` adds another oracle to the NFT canister because the script in the source SVG won't be executed the way it's currently structured. Make sure you use the correct API endpoint there as well!
