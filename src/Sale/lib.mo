@@ -178,7 +178,7 @@ module {
         return #err("Nothing to settle");
       };
 
-      let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance({
+      let response : Types.Tokens = await consts.LEDGER_CANISTER.account_balance({
         account = switch (AviateAccountIdentifier.fromText(paymentaddress)) {
           case (#ok(accountId)) {
             AviateAccountIdentifier.addHash(accountId);
@@ -297,7 +297,7 @@ module {
             let subaccount = failedSale.1;
             try {
               // check if subaccount holds icp
-              let response : Types.ICPTs = await consts.LEDGER_CANISTER.account_balance({
+              let response : Types.Tokens = await consts.LEDGER_CANISTER.account_balance({
                 account = AviateAccountIdentifier.addHash(AviateAccountIdentifier.fromPrincipal(this, ?subaccount));
               });
               if (response.e8s > 10000) {

@@ -1,73 +1,60 @@
 ![photo_2022-08-04 23 41 19](https://user-images.githubusercontent.com/32162112/182957869-8479f309-283d-4d81-af9f-2d34acbac27e.jpeg)
 
-
-# pineapple punks nft 🌼
-
-> :warning: **If you use this for another NFT project**: MAKE SURE YOU DELETE THE `canister_ids.json` FIRST!
-
-# TO-DOs
+# power equalizer 🌼
 
 ## pre launch
 
--   ~~check all addresses and parameters in `deploy.zsh`~~
--   ~~adapt `Env/lib.mo` to your needs~~
--   ~~add canister to DAB~~
--   ~~send collection details to entrepot via form~~
--   ~~top canister up with cycles~~
--   ~~add canister to tip jar~~
--   ~~run off chain backup script with mainnet canister id~~
--   ~~run disburse script with mainnet canister id~~
+- [ ] adapt `Env/lib.mo` to your needs
+- [ ] check all addresses and parameters in `deploy.zsh`
+- [ ] add canister to DAB
+- [ ] send collection details to entrepot via form
+- [ ] top canister up with cycles
+- [ ] run off chain backup script with mainnet canister id
+- [ ] run disburse script with mainnet canister id
 
 ## launch
 
--   run `make deploy-production-ic-full`
--   check if all assets uploaded correctly by calling the canisters `getTokenToAssetMapping()` method
--   call `shuffleAssets` at desired time (usually 24 hours after market opens)
+- run `make deploy-production-ic-full`
+- check if all assets uploaded correctly by calling the canisters `getTokenToAssetMapping()` method
+- call `shuffleAssets` at desired time (usually 24 hours after market opens)
 
-## structure
+## deploy 📚
 
--   the `main` branch contains the logic that is currently deployed on mainnet
-
-## quick deploy 🏃‍♀️
-
--   To quickly reinstall (**WIPES ALL STATE**) the NFT staging canister locally run `dfx deploy staging --mode reinstall`
-
-## sophisticated deploy 📚
-
--   use `make` to run the standard local deploy, use `make deploy-staging-ic` to deploy the staging canister to the mainnet, by default it deploys the NFT staging canister locally and uses `assets/output.mp4` and `metadata.json` as file paths
-    -   `metadata.json` **MUST NOT** contain a mint number! (use `cat mymetadata.json| sed '/mint/ d' > metadata.json` to remove the mint number)
-    -   note that you need [ext](#ext) installed
--   The `deploy.zsh` adds another oracle to the NFT canister because the script in the source SVG won't be executed the way it's currently structured. Make sure you use the correct API endpoint there as well!
-    -   note: this script is not allowed to contain any `&` or `>` characters!
-    -   make sure you change the asset canister url and the currency fetched from the oracle
--   make sure you create and `assets` folder and provide the `seed.mp4` file and the `metadata.json` file and specify their names in the script accordingly
--   the weird looking `sed` when uploading the metadata is escaping `"` characters and the variable `$j` is needed for the correct index (`j=$i-1`)
+- use `make` to run the standard local deploy
+- use `make deploy-staging-ic` to deploy the staging canister to the mainnet, by default it deploys the NFT staging canister locally and uses `assets/output.mp4` and `metadata.json` as file paths
+  - `metadata.json` **MUST NOT** contain a mint number! (use `cat mymetadata.json| sed '/mint/ d' > metadata.json` to remove the mint number)
+  - note that you need [ext](#ext) installed
+- The `deploy.zsh` adds another oracle to the NFT canister because the script in the source SVG won't be executed the way it's currently structured. Make sure you use the correct API endpoint there as well!
+  - note: this script is not allowed to contain any `&` or `>` characters!
+  - make sure you change the asset canister url and the currency fetched from the oracle
+- make sure you create and `assets` folder and provide the `seed.mp4` file and the `metadata.json` file and specify their names in the script accordingly
+- the weird looking `sed` when uploading the metadata is escaping `"` characters and the variable `$j` is needed for the correct index (`j=$i-1`)
 
 ## caveats 🕳
 
--   The canister code is written in a way that the seed animation _ALWAYS_ has to be the first asset uploaded to the canister.
--   The seed animation video needs to be encoded in a way that it can be played on iOS devices, use `HandBrake` for that or `ffmpeg`
+- The canister code is written in a way that the seed animation _ALWAYS_ has to be the first asset uploaded to the canister.
+- The seed animation video needs to be encoded in a way that it can be played on iOS devices, use `HandBrake` for that or `ffmpeg`
 
 ## vessel 🚢
 
--   Run `vessel verify --version 0.6.28` to verify everything still builds correctly after adding a new depdenceny
--   To use `vessels`s moc version when deploying, use `DFX_MOC_PATH="$(vessel bin)/moc" dfx deploy`
+- Run `vessel verify --version 0.6.28` to verify everything still builds correctly after adding a new depdenceny
+- To use `vessels`s moc version when deploying, use `DFX_MOC_PATH="$(vessel bin)/moc" dfx deploy`
 
 ## shuffle 🔀
 
--   The shuffle uses the random beacon to derive a random seed for the PRNG
--   It basically shuffles all the assets in the `assets` stable variable
--   The link inside the canister is
+- The shuffle uses the random beacon to derive a random seed for the PRNG
+- It basically shuffles all the assets in the `assets` stable variable
+- The link inside the canister is
 
 ```
 tokenIndex -> assetIndex
 assetIndex -> NFT
 ```
 
--   initially the `tokenIndex` matches the `assetIndex` (`assetIndex` = `tokenIndex+1`) and the `assetIndex` matches the `NFT` (`NFT` = `assetIndex+1`)
--   but after the shuffle the `assetIndex` and the `NFT` mint number no longer match
--   so so token at `tokenIndex` still points to the same asset at `assetIndex`, but this asset no longer has the same `NFT` mint number
--   we can always retrieve the `NFT` mint number from the `_asset[index].name` property which we specify when adding an asset to the canister
+- initially the `tokenIndex` matches the `assetIndex` (`assetIndex` = `tokenIndex+1`) and the `assetIndex` matches the `NFT` (`NFT` = `assetIndex+1`)
+- but after the shuffle the `assetIndex` and the `NFT` mint number no longer match
+- so so token at `tokenIndex` still points to the same asset at `assetIndex`, but this asset no longer has the same `NFT` mint number
+- we can always retrieve the `NFT` mint number from the `_asset[index].name` property which we specify when adding an asset to the canister
 
 ## off-chain backup ⛓
 
@@ -80,32 +67,41 @@ To have the same token identifiers for the same tokens, it is important to keep 
 So when executing `mintNFT`, the `to` address is taken from `registry.json` and the `asset` is taken from `tokens.json`. It's important here that the uploading of the assets is on order (start with flower 1, end with flower 2009) and that the `assets` index 0 is used by something other than an NFT asset (before it was the seed animation)! It's also crucial to remove `shuffleAssets` functionality from the canister!
 
 ## Testing 🧪
+
 Each test suite is deployed with its own env settings.
 
 First, start a local replica
+
 ```
 npm run replica
 ```
 
 To deploy and run all tests
+
 ```
 npm run test
 ```
 
 To deploy and run specific env tests
+
 ```
 npm run test:pending-sale
 ```
 
 To run tests without deployment (useful when writing tests)
+
 ```
 npm run vitest
 ```
+
 or
+
 ```
 npm run vitest:watch
 ```
+
 or to run specific test suite
+
 ```
 npm run vitest pending-sale
 ```
@@ -172,6 +168,6 @@ to get the tokenid from the canister and index do the following
 
 ## settlements
 
--   if there's a settlement that didn't work, we can call the `settlements` query method and then `settle` using the index to settle the transaction
+- if there's a settlement that didn't work, we can call the `settlements` query method and then `settle` using the index to settle the transaction
 
--   if there a salesSettelemnts that didnt work, we call the `salesSettlements` query method and then `retrieve` using the address to settle the transaction
+- if there a salesSettelemnts that didnt work, we call the `salesSettlements` query method and then `retrieve` using the address to settle the transaction
