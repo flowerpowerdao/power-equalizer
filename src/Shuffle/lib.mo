@@ -43,9 +43,9 @@ module {
         var randomIndex = randGen.next() % currentIndex;
         assert (randomIndex < currentIndex);
         currentIndex -= 1;
-        // we never want to touch the 0 index
-        // as it contains the seed video
-        if (randomIndex == 0) {
+        // for delayed reveal we never want to touch the 0 index
+        // as it contains the placeholder
+        if (Env.delayedReveal and randomIndex == 0) {
           randomIndex += 1;
         };
         assert ((randomIndex != 0) and (currentIndex != 0));
