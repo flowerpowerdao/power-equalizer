@@ -59,15 +59,14 @@ module {
     // *** ** ** ** ** ** ** ** ** * * INTERNAL METHODS * ** ** ** ** ** ** ** ** ** ** /
 
     public func shuffleTokens(tokens : Buffer.Buffer<Types.TokenIndex>, seed : Blob) : Buffer.Buffer<Types.TokenIndex> {
-      // use seed to generate a truly random number
-      var randomNumber : Nat8 = Random.byteFrom(seed);
+      // use that seed to create random number generator
+      let randGen = Utils.prngStrong(seed);
+      // get the number of available tokens
       var currentIndex : Nat = tokens.size();
 
       while (currentIndex != 1) {
-        // create a pseudo random number between 0-99
-        randomNumber := Utils.prng(randomNumber);
-        // use that number to calculate a random index between 0 and currentIndex
-        var randomIndex : Nat = Int.abs(Float.toInt(Float.floor(Float.fromInt(Utils.fromNat8ToInt(randomNumber) * currentIndex / 100))));
+        // use a random number to calculate a random index between 0 and currentIndex
+        var randomIndex = randGen.next() % currentIndex;
         assert (randomIndex < currentIndex);
         currentIndex -= 1;
         let temporaryValue = tokens.get(currentIndex);
