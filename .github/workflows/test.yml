@@ -14,7 +14,8 @@ jobs:
         with:
           vessel-version: 0.6.3
           dfx-version: 0.13.0
-      - name: Build and Deploy Frontend
+      - name: test
         run: |
+            npm install
             npm run replica
             npm run test
