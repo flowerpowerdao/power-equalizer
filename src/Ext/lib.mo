@@ -10,6 +10,7 @@ import Root "mo:cap/Root";
 import AID "../toniq-labs/util/AccountIdentifier";
 import ExtCore "../toniq-labs/ext/Core";
 import MarketplaceTypes "../Marketplace/types";
+import Env "../Env";
 import Types "types";
 
 module {
@@ -52,8 +53,9 @@ module {
 
     public func getTokenToAssetMapping() : [(Types.TokenIndex, Text)] {
       var resp : Buffer.Buffer<(Types.TokenIndex, Text)> = Buffer.Buffer(0);
+      let startIndex = if (Env.delayedReveal) { 1 } else { 0 };
       for (e in deps._Tokens.getTokenMetadata().entries()) {
-        let assetid = deps._Assets.get(Nat32.toNat(e.0) +1).name;
+        let assetid = deps._Assets.get(Nat32.toNat(e.0) + startIndex).name;
         resp.add((e.0, assetid));
       };
       Buffer.toArray(resp);
@@ -117,7 +119,7 @@ module {
           if (AID.equal(owner, token_owner) == false) {
             return #err(#Unauthorized(owner));
           };
-          
+
           // start custom
           let event : Root.IndefiniteEvent = {
             operation = "transfer";
