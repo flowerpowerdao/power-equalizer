@@ -11,7 +11,7 @@ describe('public sale', () => {
       price: [BigInt(1000)],
       token:  new User().accountId,
       from_subaccount: [],
-      marketplacePrincipal: [],
+      frontendIdentifier: [],
     });
     expect(res['err'].Other).toContain('can not list yet');
   });

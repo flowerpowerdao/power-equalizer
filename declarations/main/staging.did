@@ -1,10 +1,12 @@
-type User =
+type User = 
  variant {
    address: AccountIdentifier;
    "principal": principal;
  };
+type UpdateInformationRequest = record {
+                                  metrics: opt CollectMetricsRequestType;};
 type UpdateCallsAggregatedData = vec nat64;
-type TransferResponse =
+type TransferResponse = 
  variant {
    err:
     variant {
@@ -17,7 +19,7 @@ type TransferResponse =
     };
    ok: Balance;
  };
-type TransferRequest =
+type TransferRequest = 
  record {
    amount: Balance;
    from: User;
@@ -27,7 +29,7 @@ type TransferRequest =
    to: User;
    token: TokenIdentifier;
  };
-type Transaction =
+type Transaction = 
  record {
    buyer: AccountIdentifier__1;
    price: nat64;
@@ -49,15 +51,28 @@ type SubAccount__3 = vec nat8;
 type SubAccount__2 = vec nat8;
 type SubAccount__1 = vec nat8;
 type SubAccount = vec nat8;
-type Settlement =
+type StatusResponse = 
+ record {
+   cycles: opt nat64;
+   heap_memory_size: opt nat64;
+   memory_size: opt nat64;
+ };
+type StatusRequest = 
+ record {
+   cycles: bool;
+   heap_memory_size: bool;
+   memory_size: bool;
+ };
+type Settlement = 
  record {
    buyer: AccountIdentifier__1;
-   marketplaceAddress: opt AccountIdentifier__1;
+   buyerFrontend: opt text;
    price: nat64;
    seller: principal;
+   sellerFrontend: opt text;
    subaccount: SubAccount__2;
  };
-type SaleTransaction =
+type SaleTransaction = 
  record {
    buyer: AccountIdentifier__4;
    price: nat64;
@@ -65,7 +80,7 @@ type SaleTransaction =
    time: Time__1;
    tokens: vec TokenIndex__2;
  };
-type SaleSettings =
+type SaleSettings = 
  record {
    bulkPricing: vec record {
                       nat64;
@@ -80,7 +95,7 @@ type SaleSettings =
    whitelist: bool;
    whitelistTime: Time__1;
  };
-type Sale =
+type Sale = 
  record {
    buyer: AccountIdentifier__4;
    expires: Time__1;
@@ -89,12 +104,12 @@ type Sale =
    tokens: vec TokenIndex__2;
    whitelisted: bool;
  };
-type Result_9 =
+type Result_9 = 
  variant {
    err: CommonError__2;
    ok: AccountIdentifier__6;
  };
-type Result_8 =
+type Result_8 = 
  variant {
    err: CommonError__1;
    ok: record {
@@ -102,17 +117,17 @@ type Result_8 =
          opt Listing;
        };
  };
-type Result_7 =
+type Result_7 = 
  variant {
    err: CommonError__1;
    ok: AccountIdentifier__1;
  };
-type Result_6 =
+type Result_6 = 
  variant {
    err: CommonError;
    ok: Metadata;
  };
-type Result_5 =
+type Result_5 = 
  variant {
    err: text;
    ok: record {
@@ -120,27 +135,27 @@ type Result_5 =
          nat64;
        };
  };
-type Result_4 =
+type Result_4 = 
  variant {
    err: text;
    ok;
  };
-type Result_3 =
+type Result_3 = 
  variant {
    err: CommonError__1;
    ok;
  };
-type Result_2 =
+type Result_2 = 
  variant {
    err: CommonError;
    ok: Balance__1;
  };
-type Result_1 =
+type Result_1 = 
  variant {
    err: CommonError;
    ok: vec TokenIndex;
  };
-type Result =
+type Result = 
  variant {
    err: CommonError;
    ok: vec record {
@@ -149,7 +164,7 @@ type Result =
              opt blob;
            };
  };
-type NumericEntity =
+type NumericEntity = 
  record {
    avg: nat64;
    first: nat64;
@@ -157,12 +172,15 @@ type NumericEntity =
    max: nat64;
    min: nat64;
  };
-type MetricsGranularity =
+type Nanos = nat64;
+type MetricsResponse = record {metrics: opt CanisterMetrics;};
+type MetricsRequest = record {parameters: GetMetricsParameters;};
+type MetricsGranularity = 
  variant {
    daily;
    hourly;
  };
-type Metadata__1 =
+type Metadata__1 = 
  variant {
    fungible:
     record {
@@ -173,7 +191,7 @@ type Metadata__1 =
     };
    nonfungible: record {metadata: opt blob;};
  };
-type Metadata =
+type Metadata = 
  variant {
    fungible:
     record {
@@ -185,17 +203,23 @@ type Metadata =
    nonfungible: record {metadata: opt blob;};
  };
 type Memo = blob;
-type Listing =
+type LogMessagesData = 
  record {
+   message: text;
+   timeNanos: Nanos;
+ };
+type Listing = 
+ record {
+   buyerFrontend: opt text;
    locked: opt Time;
-   marketplaceAddress: opt AccountIdentifier__1;
    price: nat64;
    seller: principal;
+   sellerFrontend: opt text;
  };
-type ListRequest =
+type ListRequest = 
  record {
    from_subaccount: opt SubAccount__2;
-   marketplacePrincipal: opt principal;
+   frontendIdentifier: opt text;
    price: opt nat64;
    token: TokenIdentifier__1;
  };
@@ -205,33 +229,33 @@ type HttpStreamingStrategy = variant {
                                   callback: func () -> ();
                                   token: HttpStreamingCallbackToken;
                                 };};
-type HttpStreamingCallbackToken =
+type HttpStreamingCallbackToken = 
  record {
    content_encoding: text;
    index: nat;
    key: text;
    sha256: opt blob;
  };
-type HttpStreamingCallbackResponse =
+type HttpStreamingCallbackResponse = 
  record {
    body: blob;
    token: opt HttpStreamingCallbackToken;
  };
-type HttpResponse =
+type HttpResponse = 
  record {
    body: blob;
    headers: vec HeaderField;
    status_code: nat16;
    streaming_strategy: opt HttpStreamingStrategy;
  };
-type HttpRequest =
+type HttpRequest = 
  record {
    body: blob;
    headers: vec HeaderField;
    method: text;
    url: text;
  };
-type HourlyMetricsData =
+type HourlyMetricsData = 
  record {
    canisterCycles: CanisterCyclesAggregatedData;
    canisterHeapMemorySize: CanisterHeapMemoryAggregatedData;
@@ -239,31 +263,68 @@ type HourlyMetricsData =
    timeMillis: int;
    updateCalls: UpdateCallsAggregatedData;
  };
-type HeaderField =
+type HeaderField = 
  record {
    text;
    text;
  };
-type GetMetricsParameters =
+type GetMetricsParameters = 
  record {
    dateFromMillis: nat;
    dateToMillis: nat;
    granularity: MetricsGranularity;
  };
-type File =
+type GetLogMessagesParameters = 
+ record {
+   count: nat32;
+   filter: opt GetLogMessagesFilter;
+   fromTimeNanos: opt Nanos;
+ };
+type GetLogMessagesFilter = 
+ record {
+   analyzeCount: nat32;
+   messageContains: opt text;
+   messageRegex: opt text;
+ };
+type GetLatestLogMessagesParameters = 
+ record {
+   count: nat32;
+   filter: opt GetLogMessagesFilter;
+   upToTimeNanos: opt Nanos;
+ };
+type GetInformationResponse = 
+ record {
+   logs: opt CanisterLogResponse;
+   metrics: opt MetricsResponse;
+   status: opt StatusResponse;
+   version: opt nat;
+ };
+type GetInformationRequest = 
+ record {
+   logs: opt CanisterLogRequest;
+   metrics: opt MetricsRequest;
+   status: opt StatusRequest;
+   version: bool;
+ };
+type Frontend = 
+ record {
+   accountIdentifier: AccountIdentifier__1;
+   fee: nat64;
+ };
+type File = 
  record {
    ctype: text;
    data: vec blob;
  };
 type Extension = text;
-type Disbursement =
+type Disbursement = 
  record {
    amount: nat64;
    fromSubaccount: SubAccount__3;
    to: AccountIdentifier__5;
    tokenIndex: TokenIndex__3;
  };
-type DailyMetricsData =
+type DailyMetricsData = 
  record {
    canisterCycles: NumericEntity;
    canisterHeapMemorySize: NumericEntity;
@@ -271,36 +332,69 @@ type DailyMetricsData =
    timeMillis: int;
    updateCalls: nat64;
  };
-type CommonError__3 =
+type CommonError__3 = 
  variant {
    InvalidToken: TokenIdentifier;
    Other: text;
  };
-type CommonError__2 =
+type CommonError__2 = 
  variant {
    InvalidToken: TokenIdentifier;
    Other: text;
  };
-type CommonError__1 =
+type CommonError__1 = 
  variant {
    InvalidToken: TokenIdentifier;
    Other: text;
  };
-type CommonError =
+type CommonError = 
  variant {
    InvalidToken: TokenIdentifier;
    Other: text;
  };
-type CanisterMetricsData =
+type CollectMetricsRequestType = 
+ variant {
+   force;
+   normal;
+ };
+type CanisterMetricsData = 
  variant {
    daily: vec DailyMetricsData;
    hourly: vec HourlyMetricsData;
  };
 type CanisterMetrics = record {data: CanisterMetricsData;};
 type CanisterMemoryAggregatedData = vec nat64;
+type CanisterLogResponse = 
+ variant {
+   messages: CanisterLogMessages;
+   messagesInfo: CanisterLogMessagesInfo;
+ };
+type CanisterLogRequest = 
+ variant {
+   getLatestMessages: GetLatestLogMessagesParameters;
+   getMessages: GetLogMessagesParameters;
+   getMessagesInfo;
+ };
+type CanisterLogMessagesInfo = 
+ record {
+   count: nat32;
+   features: vec opt CanisterLogFeature;
+   firstTimeNanos: opt Nanos;
+   lastTimeNanos: opt Nanos;
+ };
+type CanisterLogMessages = 
+ record {
+   data: vec LogMessagesData;
+   lastAnalyzedMessageTimeNanos: opt Nanos;
+ };
+type CanisterLogFeature = 
+ variant {
+   filterMessageByContains;
+   filterMessageByRegex;
+ };
 type CanisterHeapMemoryAggregatedData = vec nat64;
 type CanisterCyclesAggregatedData = vec nat64;
-type Canister =
+type Canister = 
  service {
    acceptCycles: () -> ();
    addAsset: (Asset) -> (nat);
@@ -312,19 +406,25 @@ type Canister =
    availableCycles: () -> (nat) query;
    balance: (BalanceRequest) -> (BalanceResponse) query;
    bearer: (TokenIdentifier__3) -> (Result_9) query;
-   collectCanisterMetrics: () -> ();
    cronDisbursements: () -> ();
    cronFailedSales: () -> ();
    cronSalesSettlements: () -> ();
    cronSettlements: () -> ();
+   deleteFrontend: (text) -> ();
    details: (TokenIdentifier__1) -> (Result_8) query;
+   enableSale: () -> (nat);
    extensions: () -> (vec Extension) query;
    failedSales: () ->
     (vec record {
            AccountIdentifier__4;
            SubAccount__1;
          }) query;
-   getCanisterMetrics: (GetMetricsParameters) -> (opt CanisterMetrics) query;
+   frontends: () -> (vec record {
+                           text;
+                           Frontend;
+                         });
+   getCanistergeekInformation: (GetInformationRequest) ->
+    (GetInformationResponse) query;
    getDisbursements: () -> (vec Disbursement) query;
    getMinter: () -> (principal) query;
    getRegistry: () -> (vec record {
@@ -350,14 +450,15 @@ type Canister =
                           Listing;
                           Metadata__1;
                         }) query;
-   lock: (TokenIdentifier__1, nat64, AccountIdentifier__1, SubAccount__2) ->
-    (Result_7);
+   lock: (TokenIdentifier__1, nat64, AccountIdentifier__1, SubAccount__2,
+    opt text) -> (Result_7);
    metadata: (TokenIdentifier__2) -> (Result_6) query;
    pendingCronJobs: () ->
     (record {
        disbursements: nat;
        failedSettlements: nat;
      }) query;
+   putFrontend: (text, Frontend) -> ();
    reserve: (nat64, nat64, AccountIdentifier__4, SubAccount__1) -> (Result_5);
    retrieve: (AccountIdentifier__4) -> (Result_4);
    saleTransactions: () -> (vec SaleTransaction) query;
@@ -375,30 +476,30 @@ type Canister =
          }) query;
    shuffleAssets: () -> ();
    shuffleTokensForSale: () -> ();
-   enableSale: () -> (nat);
    stats: () -> (nat64, nat64, nat64, nat64, nat, nat, nat) query;
    streamAsset: (nat, bool, blob) -> ();
    supply: () -> (Result_2) query;
-   toAddress: (text, nat) -> (AccountIdentifier__3) query;
+   toAccountIdentifier: (text, nat) -> (AccountIdentifier__3) query;
    tokens: (AccountIdentifier__2) -> (Result_1) query;
    tokens_ext: (AccountIdentifier__2) -> (Result) query;
    transactions: () -> (vec Transaction) query;
    transfer: (TransferRequest) -> (TransferResponse);
+   updateCanistergeekInformation: (UpdateInformationRequest) -> ();
    updateThumb: (text, File) -> (opt nat);
  };
 type Balance__1 = nat;
-type BalanceResponse =
+type BalanceResponse = 
  variant {
    err: CommonError__3;
    ok: Balance;
  };
-type BalanceRequest =
+type BalanceRequest = 
  record {
    token: TokenIdentifier;
    user: User;
  };
 type Balance = nat;
-type Asset =
+type Asset = 
  record {
    metadata: opt File;
    name: text;

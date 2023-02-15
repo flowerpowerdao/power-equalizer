@@ -27,17 +27,19 @@ export interface Canister {
   'availableCycles' : ActorMethod<[], bigint>,
   'balance' : ActorMethod<[BalanceRequest], BalanceResponse>,
   'bearer' : ActorMethod<[TokenIdentifier__3], Result_9>,
-  'collectCanisterMetrics' : ActorMethod<[], undefined>,
   'cronDisbursements' : ActorMethod<[], undefined>,
   'cronFailedSales' : ActorMethod<[], undefined>,
   'cronSalesSettlements' : ActorMethod<[], undefined>,
   'cronSettlements' : ActorMethod<[], undefined>,
+  'deleteFrontend' : ActorMethod<[string], undefined>,
   'details' : ActorMethod<[TokenIdentifier__1], Result_8>,
+  'enableSale' : ActorMethod<[], bigint>,
   'extensions' : ActorMethod<[], Array<Extension>>,
   'failedSales' : ActorMethod<[], Array<[AccountIdentifier__4, SubAccount__1]>>,
-  'getCanisterMetrics' : ActorMethod<
-    [GetMetricsParameters],
-    [] | [CanisterMetrics]
+  'frontends' : ActorMethod<[], Array<[string, Frontend]>>,
+  'getCanistergeekInformation' : ActorMethod<
+    [GetInformationRequest],
+    GetInformationResponse
   >,
   'getDisbursements' : ActorMethod<[], Array<Disbursement>>,
   'getMinter' : ActorMethod<[], Principal>,
@@ -54,7 +56,13 @@ export interface Canister {
   'list' : ActorMethod<[ListRequest], Result_3>,
   'listings' : ActorMethod<[], Array<[TokenIndex__1, Listing, Metadata__1]>>,
   'lock' : ActorMethod<
-    [TokenIdentifier__1, bigint, AccountIdentifier__1, SubAccount__2],
+    [
+      TokenIdentifier__1,
+      bigint,
+      AccountIdentifier__1,
+      SubAccount__2,
+      [] | [string],
+    ],
     Result_7
   >,
   'metadata' : ActorMethod<[TokenIdentifier__2], Result_6>,
@@ -62,6 +70,7 @@ export interface Canister {
     [],
     { 'failedSettlements' : bigint, 'disbursements' : bigint }
   >,
+  'putFrontend' : ActorMethod<[string, Frontend], undefined>,
   'reserve' : ActorMethod<
     [bigint, bigint, AccountIdentifier__4, SubAccount__1],
     Result_5
@@ -77,26 +86,48 @@ export interface Canister {
   >,
   'shuffleAssets' : ActorMethod<[], undefined>,
   'shuffleTokensForSale' : ActorMethod<[], undefined>,
-  'enableSale' : ActorMethod<[], bigint>,
   'stats' : ActorMethod<
     [],
     [bigint, bigint, bigint, bigint, bigint, bigint, bigint]
   >,
   'streamAsset' : ActorMethod<[bigint, boolean, Uint8Array], undefined>,
   'supply' : ActorMethod<[], Result_2>,
-  'toAddress' : ActorMethod<[string, bigint], AccountIdentifier__3>,
+  'toAccountIdentifier' : ActorMethod<[string, bigint], AccountIdentifier__3>,
   'tokens' : ActorMethod<[AccountIdentifier__2], Result_1>,
   'tokens_ext' : ActorMethod<[AccountIdentifier__2], Result>,
   'transactions' : ActorMethod<[], Array<Transaction>>,
   'transfer' : ActorMethod<[TransferRequest], TransferResponse>,
+  'updateCanistergeekInformation' : ActorMethod<
+    [UpdateInformationRequest],
+    undefined
+  >,
   'updateThumb' : ActorMethod<[string, File], [] | [bigint]>,
 }
 export type CanisterCyclesAggregatedData = BigUint64Array;
 export type CanisterHeapMemoryAggregatedData = BigUint64Array;
+export type CanisterLogFeature = { 'filterMessageByContains' : null } |
+  { 'filterMessageByRegex' : null };
+export interface CanisterLogMessages {
+  'data' : Array<LogMessagesData>,
+  'lastAnalyzedMessageTimeNanos' : [] | [Nanos],
+}
+export interface CanisterLogMessagesInfo {
+  'features' : Array<[] | [CanisterLogFeature]>,
+  'lastTimeNanos' : [] | [Nanos],
+  'count' : number,
+  'firstTimeNanos' : [] | [Nanos],
+}
+export type CanisterLogRequest = { 'getMessagesInfo' : null } |
+  { 'getMessages' : GetLogMessagesParameters } |
+  { 'getLatestMessages' : GetLatestLogMessagesParameters };
+export type CanisterLogResponse = { 'messagesInfo' : CanisterLogMessagesInfo } |
+  { 'messages' : CanisterLogMessages };
 export type CanisterMemoryAggregatedData = BigUint64Array;
 export interface CanisterMetrics { 'data' : CanisterMetricsData }
 export type CanisterMetricsData = { 'hourly' : Array<HourlyMetricsData> } |
   { 'daily' : Array<DailyMetricsData> };
+export type CollectMetricsRequestType = { 'force' : null } |
+  { 'normal' : null };
 export type CommonError = { 'InvalidToken' : TokenIdentifier } |
   { 'Other' : string };
 export type CommonError__1 = { 'InvalidToken' : TokenIdentifier } |
@@ -120,6 +151,37 @@ export interface Disbursement {
 }
 export type Extension = string;
 export interface File { 'data' : Array<Uint8Array>, 'ctype' : string }
+export interface Frontend {
+  'fee' : bigint,
+  'accountIdentifier' : AccountIdentifier__1,
+}
+export interface GetInformationRequest {
+  'status' : [] | [StatusRequest],
+  'metrics' : [] | [MetricsRequest],
+  'logs' : [] | [CanisterLogRequest],
+  'version' : boolean,
+}
+export interface GetInformationResponse {
+  'status' : [] | [StatusResponse],
+  'metrics' : [] | [MetricsResponse],
+  'logs' : [] | [CanisterLogResponse],
+  'version' : [] | [bigint],
+}
+export interface GetLatestLogMessagesParameters {
+  'upToTimeNanos' : [] | [Nanos],
+  'count' : number,
+  'filter' : [] | [GetLogMessagesFilter],
+}
+export interface GetLogMessagesFilter {
+  'analyzeCount' : number,
+  'messageRegex' : [] | [string],
+  'messageContains' : [] | [string],
+}
+export interface GetLogMessagesParameters {
+  'count' : number,
+  'filter' : [] | [GetLogMessagesFilter],
+  'fromTimeNanos' : [] | [Nanos],
+}
 export interface GetMetricsParameters {
   'dateToMillis' : bigint,
   'granularity' : MetricsGranularity,
@@ -163,16 +225,18 @@ export type HttpStreamingStrategy = {
   };
 export interface ListRequest {
   'token' : TokenIdentifier__1,
+  'frontendIdentifier' : [] | [string],
   'from_subaccount' : [] | [SubAccount__2],
-  'marketplacePrincipal' : [] | [Principal],
   'price' : [] | [bigint],
 }
 export interface Listing {
+  'sellerFrontend' : [] | [string],
   'locked' : [] | [Time],
-  'marketplaceAddress' : [] | [AccountIdentifier__1],
   'seller' : Principal,
+  'buyerFrontend' : [] | [string],
   'price' : bigint,
 }
+export interface LogMessagesData { 'timeNanos' : Nanos, 'message' : string }
 export type Memo = Uint8Array;
 export type Metadata = {
     'fungible' : {
@@ -194,6 +258,9 @@ export type Metadata__1 = {
   { 'nonfungible' : { 'metadata' : [] | [Uint8Array] } };
 export type MetricsGranularity = { 'hourly' : null } |
   { 'daily' : null };
+export interface MetricsRequest { 'parameters' : GetMetricsParameters }
+export interface MetricsResponse { 'metrics' : [] | [CanisterMetrics] }
+export type Nanos = bigint;
 export interface NumericEntity {
   'avg' : bigint,
   'max' : bigint,
@@ -250,11 +317,22 @@ export interface SaleTransaction {
   'price' : bigint,
 }
 export interface Settlement {
+  'sellerFrontend' : [] | [string],
   'subaccount' : SubAccount__2,
-  'marketplaceAddress' : [] | [AccountIdentifier__1],
   'seller' : Principal,
+  'buyerFrontend' : [] | [string],
   'buyer' : AccountIdentifier__1,
   'price' : bigint,
+}
+export interface StatusRequest {
+  'memory_size' : boolean,
+  'cycles' : boolean,
+  'heap_memory_size' : boolean,
+}
+export interface StatusResponse {
+  'memory_size' : [] | [bigint],
+  'cycles' : [] | [bigint],
+  'heap_memory_size' : [] | [bigint],
 }
 export type SubAccount = Uint8Array;
 export type SubAccount__1 = Uint8Array;
@@ -296,6 +374,9 @@ export type TransferResponse = { 'ok' : Balance } |
       { 'Other' : string }
   };
 export type UpdateCallsAggregatedData = BigUint64Array;
+export interface UpdateInformationRequest {
+  'metrics' : [] | [CollectMetricsRequestType],
+}
 export type User = { 'principal' : Principal } |
   { 'address' : AccountIdentifier };
 export interface _SERVICE extends Canister {}
