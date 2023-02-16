@@ -32,7 +32,7 @@ describe('list and delist nft', async () => {
       from_subaccount: [],
       price: [1000_000n],
       token: tokenIdentifier(tokens[0]),
-      marketplacePrincipal: [],
+      frontendIdentifier: [],
     });
     expect(res).toHaveProperty('ok');
   });
@@ -42,7 +42,7 @@ describe('list and delist nft', async () => {
       from_subaccount: [],
       price: [],
       token: tokenIdentifier(tokens[0]),
-      marketplacePrincipal: [],
+      frontendIdentifier: [],
     });
     expect(res).toHaveProperty('ok');
   });

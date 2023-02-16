@@ -35,19 +35,19 @@ describe('list, lock and try to delist nft', async () => {
       from_subaccount: [],
       price: [1000_000n],
       token: tokenIdentifier(tokens[0]),
-      marketplacePrincipal: [],
+      frontendIdentifier: [],
     });
     expect(res).toHaveProperty('ok');
   });
 
   it('lock', async () => {
-    let lockRes = await buyer.mainActor.lock(tokenIdentifier(tokens[0]), 1000_000n, buyer.accountId, new Uint8Array);
+    let lockRes = await buyer.mainActor.lock(tokenIdentifier(tokens[0]), 1000_000n, buyer.accountId, new Uint8Array, []);
     expect(lockRes).toHaveProperty('ok');
   });
 
   it('try to lock twice', async () => {
     let user = new User;
-    let lockRes = await user.mainActor.lock(tokenIdentifier(tokens[0]), 1000_000n, user.accountId, new Uint8Array);
+    let lockRes = await user.mainActor.lock(tokenIdentifier(tokens[0]), 1000_000n, user.accountId, new Uint8Array, []);
     expect(lockRes).toHaveProperty('err');
     expect(lockRes['err'].Other).toBe('Listing is locked');
   });
@@ -57,7 +57,7 @@ describe('list, lock and try to delist nft', async () => {
       from_subaccount: [],
       price: [],
       token: tokenIdentifier(tokens[0]),
-      marketplacePrincipal: [],
+      frontendIdentifier: [],
     });
     expect(delistRes).toHaveProperty('err');
     expect(delistRes['err'].Other).toBe('Listing is locked');
