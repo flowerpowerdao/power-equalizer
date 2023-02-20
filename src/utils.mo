@@ -124,7 +124,7 @@ module {
 
     return {
       next = func() {
-        current := (current * 1103515245 + 12345 % ((2 ** 64) -1));
+        current := (current * 1103515245 + 12345) % ((2 ** 64) -1);
         return current;
       };
     };
