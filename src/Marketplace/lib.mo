@@ -43,17 +43,18 @@ module {
       };
     };
 
-    public func grow(n : Nat): Nat {
-      let token = Principal.toText(this);
-      let buyer = AID.fromPrincipal(this, null);
-      let time = Time.now();
+    public func grow(n : Nat) : Nat {
       for (i in Iter.range(1, n)) {
+        let token = "abc";
+        let seller = Principal.fromText("aaaaa-aa");
+        let buyer = "abc";
+        let time = Time.now();
         _transactions.add({
-          token = token;
-          seller = this;
+          token;
+          seller;
           price = 1000;
-          buyer = buyer;
-          time = time;
+          buyer;
+          time;
         });
       };
       _transactions.size();

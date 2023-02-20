@@ -1,7 +1,8 @@
-let { execSync } = require("child_process");
+let { execSync, spawn } = require("child_process");
+const { performance } = require("perf_hooks");
 
-let reinstallEach = false;
-let growSize = 20_000;
+let reinstallEach = true;
+let growSize = 1_000;
 
 let canisters = [
   "copying-force",
@@ -18,7 +19,7 @@ let transactionSizes = [
 ];
 
 let grow = (canister, n) => {
-  let res = execSync(`dfx canister call ${canister} grow ${n}`);
+  return `dfx canister call ${canister} grow ${n}`;
   // console.log(res.toString().trim());
 };
 
@@ -77,7 +78,7 @@ let upgrade = (canister) => {
 
 let reinstall = (canister) => {
   execSync(
-    `dfx deploy ${canister} --mode reinstall -y --argument '(principal "'$(dfx canister id ${canister})'")'`,
+    `DFX_MOC_PATH="$(vessel bin)/moc" dfx deploy ${canister} --mode reinstall -y --argument '(principal "'$(dfx canister id ${canister})'")'`,
     { stdio: "pipe" }
   );
 };
@@ -85,57 +86,112 @@ let reinstall = (canister) => {
 let currTransactions = 0;
 let logs = [];
 
-loop: for (let canister of canisters) {
-  execSync(`dfx canister create ${canister}`);
+async function main() {
+  loop: for (let canister of canisters) {
+    execSync(`dfx canister create ${canister}`);
 
-  for (size of transactionSizes) {
-    try {
-      console.log("-".repeat(50));
+    for (size of transactionSizes) {
+      try {
+        console.log("-".repeat(50));
 
-      if (reinstallEach || size === transactionSizes[0]) {
-        console.log("Reinstalling...");
-        reinstall(canister);
-        console.log("Reinstalled");
-        currTransactions = 0;
-      }
+        if (reinstallEach || size === transactionSizes[0]) {
+          console.log("Reinstalling...");
+          reinstall(canister);
+          console.log("Reinstalled");
+          currTransactions = 0;
+        }
 
-      console.log(`Growing transaction size to ${size.toLocaleString()}...`);
-      let iterCount = (size - currTransactions) / growSize;
-      for (i = 0; i < iterCount; i++) {
-        currTransactions += growSize;
-        grow(canister, growSize);
-      }
+        console.log(`Growing transaction size to ${size.toLocaleString()}...`);
+        const totalStart = performance.now();
+        let iterCount = (size - currTransactions) / growSize / 50;
+        for (i = 0; i < iterCount; i++) {
+          currTransactions += growSize * 50;
+          // Create 50 shell commands
+          const commands = Array.from({ length: 50 }, () =>
+            grow(canister, growSize)
+          );
 
-      let log = {
-        gc: canister,
-        transactions: currTransactions.toLocaleString(),
-        reinstall: reinstallEach,
-        "max live": `${getMaxLiveSize(canister)} MB`,
-        "heap": `${getHeapSize(canister)} MB`,
-        memory: `${getMemorySize(canister)} MB`,
-      };
+          const promises = commands.map((command) => {
+            return new Promise((resolve, reject) => {
+              const child = spawn(command, { shell: true });
 
-      console.log("Upgrading...");
-      let upgraded = upgrade(canister);
+              child.stdout.on("data", (data) => {
+                // console.log(`stdout: ${data}`);
+              });
 
-      // grow(canister, 10);
+              child.stderr.on("data", (data) => {
+                console.error(`stderr: ${data}`);
+              });
 
-      log["upgrade successful"] = upgraded;
-      log["max live postupgrade"] = `${getMaxLiveSize(canister)} MB`;
-      log["heap postupgrade"] = `${getHeapSize(canister)} MB`;
-      log["memory postupgrade"] = `${getMemorySize(canister)} MB`;
+              child.on("error", (error) => {
+                reject(error);
+              });
 
-      logs.push(log);
-      console.table(logs);
+              child.on("close", (code) => {
+                if (code === 0) {
+                  resolve();
+                } else {
+                  reject(`Command failed with code ${code}`);
+                }
+              });
+            });
+          });
 
-      if (!upgraded) {
+          console.log("await all commands in parallel");
+
+          // Execute all commands in parallel
+          const start = performance.now();
+
+          await Promise.all(promises)
+            .then(() => {
+              console.log("All commands executed successfully");
+            })
+            .catch((error) => {
+              console.error(`Error executing commands: ${error}`);
+            });
+          const end = performance.now();
+          const elapsed = (end - start) / 1000;
+
+          console.log(`Method took ${elapsed} seconds to execute`);
+        }
+        const totalEnd = performance.now();
+        const elapsed = (end - start) / 1000;
+
+        console.log(`Took ${elapsed} seconds to execute`);
+
+        let log = {
+          gc: canister,
+          transactions: currTransactions.toLocaleString(),
+          reinstall: reinstallEach,
+          "max live": `${getMaxLiveSize(canister)} MB`,
+          heap: `${getHeapSize(canister)} MB`,
+          memory: `${getMemorySize(canister)} MB`,
+        };
+
+        console.log("Upgrading...");
+        let upgraded = upgrade(canister);
+
+        // grow(canister, 10);
+
+        log["upgrade successful"] = upgraded;
+        log["max live postupgrade"] = `${getMaxLiveSize(canister)} MB`;
+        log["heap postupgrade"] = `${getHeapSize(canister)} MB`;
+        log["memory postupgrade"] = `${getMemorySize(canister)} MB`;
+
+        logs.push(log);
+        console.table(logs);
+
+        if (!upgraded) {
+          continue loop;
+        }
+      } catch (err) {
+        console.log("unexpected error", err);
         continue loop;
       }
-    } catch (err) {
-      console.log("unexpected error", err);
-      continue loop;
     }
   }
 }
+
+main();
 
 console.log("done");
