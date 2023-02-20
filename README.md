@@ -6,7 +6,7 @@
 
 - [ ] adapt `Env/lib.mo` to your needs
 - [ ] check all addresses and parameters in `deploy.zsh`
-- [ ] add canister to DAB
+- [ ] add canister to [DAB](https://forum.dfinity.org/t/is-dab-still-accepting-nft-registrations/18197/3?u=cryptoschindler)
 - [ ] send collection details to entrepot via form
 - [ ] top canister up with cycles
 - [ ] run off chain backup script with mainnet canister id
