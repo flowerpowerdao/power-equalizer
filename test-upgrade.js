@@ -155,7 +155,7 @@ async function main() {
           console.log(`Method took ${elapsed} seconds to execute`);
         }
         const totalEnd = performance.now();
-        const elapsed = (end - start) / 1000;
+        const elapsed = (totalEnd- totalStart) / 1000;
 
         console.log(`Took ${elapsed} seconds to execute`);
 
