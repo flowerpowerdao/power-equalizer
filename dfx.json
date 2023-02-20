@@ -28,7 +28,7 @@
     "defaults": {
         "build": {
             "packtool": "vessel sources",
-            "args": ""
+            "args": "--trap-on-call-error"
         }
     }
 }
