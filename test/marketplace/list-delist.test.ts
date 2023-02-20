@@ -27,10 +27,20 @@ describe('list and delist nft', async () => {
     expect(tokens).toHaveLength(1);
   });
 
-  it('list', async () => {
+  it('try to list at price < 0.01 ICP', async () => {
     let res = await user.mainActor.list({
       from_subaccount: [],
-      price: [1000_000n],
+      price: [BigInt(0.005e8)],
+      token: tokenIdentifier(tokens[0]),
+      frontendIdentifier: [],
+    });
+    expect(res).toHaveProperty('err');
+  });
+
+  it('list at price 0.01 ICP', async () => {
+    let res = await user.mainActor.list({
+      from_subaccount: [],
+      price: [BigInt(0.01e8)],
       token: tokenIdentifier(tokens[0]),
       frontendIdentifier: [],
     });
