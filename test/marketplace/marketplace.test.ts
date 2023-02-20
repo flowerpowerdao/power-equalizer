@@ -13,7 +13,7 @@ describe('marketplace', () => {
       from_subaccount: [],
       price: [1000_000n],
       token: tokenIdentifier(123),
-      marketplacePrincipal: [],
+      frontendIdentifier: [],
     });
 
     expect(res).toHaveProperty('err');

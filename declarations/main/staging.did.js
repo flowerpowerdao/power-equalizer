@@ -13,9 +13,10 @@ export const idlFactory = ({ IDL }) => {
   const SubAccount__2 = IDL.Vec(IDL.Nat8);
   const AccountIdentifier__1 = IDL.Text;
   const Settlement = IDL.Record({
+    'sellerFrontend' : IDL.Opt(IDL.Text),
     'subaccount' : SubAccount__2,
-    'marketplaceAddress' : IDL.Opt(AccountIdentifier__1),
     'seller' : IDL.Principal,
+    'buyerFrontend' : IDL.Opt(IDL.Text),
     'buyer' : AccountIdentifier__1,
     'price' : IDL.Nat64,
   });
@@ -51,9 +52,10 @@ export const idlFactory = ({ IDL }) => {
   const TokenIdentifier__1 = IDL.Text;
   const Time = IDL.Int;
   const Listing = IDL.Record({
+    'sellerFrontend' : IDL.Opt(IDL.Text),
     'locked' : IDL.Opt(Time),
-    'marketplaceAddress' : IDL.Opt(AccountIdentifier__1),
     'seller' : IDL.Principal,
+    'buyerFrontend' : IDL.Opt(IDL.Text),
     'price' : IDL.Nat64,
   });
   const CommonError__1 = IDL.Variant({
@@ -67,6 +69,15 @@ export const idlFactory = ({ IDL }) => {
   const Extension = IDL.Text;
   const AccountIdentifier__4 = IDL.Text;
   const SubAccount__1 = IDL.Vec(IDL.Nat8);
+  const Frontend = IDL.Record({
+    'fee' : IDL.Nat64,
+    'accountIdentifier' : AccountIdentifier__1,
+  });
+  const StatusRequest = IDL.Record({
+    'memory_size' : IDL.Bool,
+    'cycles' : IDL.Bool,
+    'heap_memory_size' : IDL.Bool,
+  });
   const MetricsGranularity = IDL.Variant({
     'hourly' : IDL.Null,
     'daily' : IDL.Null,
@@ -75,6 +86,39 @@ export const idlFactory = ({ IDL }) => {
     'dateToMillis' : IDL.Nat,
     'granularity' : MetricsGranularity,
     'dateFromMillis' : IDL.Nat,
+  });
+  const MetricsRequest = IDL.Record({ 'parameters' : GetMetricsParameters });
+  const GetLogMessagesFilter = IDL.Record({
+    'analyzeCount' : IDL.Nat32,
+    'messageRegex' : IDL.Opt(IDL.Text),
+    'messageContains' : IDL.Opt(IDL.Text),
+  });
+  const Nanos = IDL.Nat64;
+  const GetLogMessagesParameters = IDL.Record({
+    'count' : IDL.Nat32,
+    'filter' : IDL.Opt(GetLogMessagesFilter),
+    'fromTimeNanos' : IDL.Opt(Nanos),
+  });
+  const GetLatestLogMessagesParameters = IDL.Record({
+    'upToTimeNanos' : IDL.Opt(Nanos),
+    'count' : IDL.Nat32,
+    'filter' : IDL.Opt(GetLogMessagesFilter),
+  });
+  const CanisterLogRequest = IDL.Variant({
+    'getMessagesInfo' : IDL.Null,
+    'getMessages' : GetLogMessagesParameters,
+    'getLatestMessages' : GetLatestLogMessagesParameters,
+  });
+  const GetInformationRequest = IDL.Record({
+    'status' : IDL.Opt(StatusRequest),
+    'metrics' : IDL.Opt(MetricsRequest),
+    'logs' : IDL.Opt(CanisterLogRequest),
+    'version' : IDL.Bool,
+  });
+  const StatusResponse = IDL.Record({
+    'memory_size' : IDL.Opt(IDL.Nat64),
+    'cycles' : IDL.Opt(IDL.Nat64),
+    'heap_memory_size' : IDL.Opt(IDL.Nat64),
   });
   const UpdateCallsAggregatedData = IDL.Vec(IDL.Nat64);
   const CanisterHeapMemoryAggregatedData = IDL.Vec(IDL.Nat64);
@@ -106,6 +150,35 @@ export const idlFactory = ({ IDL }) => {
     'daily' : IDL.Vec(DailyMetricsData),
   });
   const CanisterMetrics = IDL.Record({ 'data' : CanisterMetricsData });
+  const MetricsResponse = IDL.Record({ 'metrics' : IDL.Opt(CanisterMetrics) });
+  const CanisterLogFeature = IDL.Variant({
+    'filterMessageByContains' : IDL.Null,
+    'filterMessageByRegex' : IDL.Null,
+  });
+  const CanisterLogMessagesInfo = IDL.Record({
+    'features' : IDL.Vec(IDL.Opt(CanisterLogFeature)),
+    'lastTimeNanos' : IDL.Opt(Nanos),
+    'count' : IDL.Nat32,
+    'firstTimeNanos' : IDL.Opt(Nanos),
+  });
+  const LogMessagesData = IDL.Record({
+    'timeNanos' : Nanos,
+    'message' : IDL.Text,
+  });
+  const CanisterLogMessages = IDL.Record({
+    'data' : IDL.Vec(LogMessagesData),
+    'lastAnalyzedMessageTimeNanos' : IDL.Opt(Nanos),
+  });
+  const CanisterLogResponse = IDL.Variant({
+    'messagesInfo' : CanisterLogMessagesInfo,
+    'messages' : CanisterLogMessages,
+  });
+  const GetInformationResponse = IDL.Record({
+    'status' : IDL.Opt(StatusResponse),
+    'metrics' : IDL.Opt(MetricsResponse),
+    'logs' : IDL.Opt(CanisterLogResponse),
+    'version' : IDL.Opt(IDL.Nat),
+  });
   const AccountIdentifier__5 = IDL.Text;
   const TokenIndex__3 = IDL.Nat32;
   const SubAccount__3 = IDL.Vec(IDL.Nat8);
@@ -158,8 +231,8 @@ export const idlFactory = ({ IDL }) => {
   const Result_4 = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
   const ListRequest = IDL.Record({
     'token' : TokenIdentifier__1,
+    'frontendIdentifier' : IDL.Opt(IDL.Text),
     'from_subaccount' : IDL.Opt(SubAccount__2),
-    'marketplacePrincipal' : IDL.Opt(IDL.Principal),
     'price' : IDL.Opt(IDL.Nat64),
   });
   const Result_3 = IDL.Variant({ 'ok' : IDL.Null, 'err' : CommonError__1 });
@@ -256,6 +329,13 @@ export const idlFactory = ({ IDL }) => {
       'Other' : IDL.Text,
     }),
   });
+  const CollectMetricsRequestType = IDL.Variant({
+    'force' : IDL.Null,
+    'normal' : IDL.Null,
+  });
+  const UpdateInformationRequest = IDL.Record({
+    'metrics' : IDL.Opt(CollectMetricsRequestType),
+  });
   const Canister = IDL.Service({
     'acceptCycles' : IDL.Func([], [], []),
     'addAsset' : IDL.Func([Asset], [IDL.Nat], []),
@@ -268,21 +348,23 @@ export const idlFactory = ({ IDL }) => {
     'availableCycles' : IDL.Func([], [IDL.Nat], ['query']),
     'balance' : IDL.Func([BalanceRequest], [BalanceResponse], ['query']),
     'bearer' : IDL.Func([TokenIdentifier__3], [Result_9], ['query']),
-    'collectCanisterMetrics' : IDL.Func([], [], []),
     'cronDisbursements' : IDL.Func([], [], []),
     'cronFailedSales' : IDL.Func([], [], []),
     'cronSalesSettlements' : IDL.Func([], [], []),
     'cronSettlements' : IDL.Func([], [], []),
+    'deleteFrontend' : IDL.Func([IDL.Text], [], []),
     'details' : IDL.Func([TokenIdentifier__1], [Result_8], ['query']),
+    'enableSale' : IDL.Func([], [IDL.Nat], []),
     'extensions' : IDL.Func([], [IDL.Vec(Extension)], ['query']),
     'failedSales' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(AccountIdentifier__4, SubAccount__1))],
         ['query'],
       ),
-    'getCanisterMetrics' : IDL.Func(
-        [GetMetricsParameters],
-        [IDL.Opt(CanisterMetrics)],
+    'frontends' : IDL.Func([], [IDL.Vec(IDL.Tuple(IDL.Text, Frontend))], []),
+    'getCanistergeekInformation' : IDL.Func(
+        [GetInformationRequest],
+        [GetInformationResponse],
         ['query'],
       ),
     'getDisbursements' : IDL.Func([], [IDL.Vec(Disbursement)], ['query']),
@@ -317,7 +399,13 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'lock' : IDL.Func(
-        [TokenIdentifier__1, IDL.Nat64, AccountIdentifier__1, SubAccount__2],
+        [
+          TokenIdentifier__1,
+          IDL.Nat64,
+          AccountIdentifier__1,
+          SubAccount__2,
+          IDL.Opt(IDL.Text),
+        ],
         [Result_7],
         [],
       ),
@@ -332,6 +420,7 @@ export const idlFactory = ({ IDL }) => {
         ],
         ['query'],
       ),
+    'putFrontend' : IDL.Func([IDL.Text, Frontend], [], []),
     'reserve' : IDL.Func(
         [IDL.Nat64, IDL.Nat64, AccountIdentifier__4, SubAccount__1],
         [Result_5],
@@ -357,7 +446,6 @@ export const idlFactory = ({ IDL }) => {
       ),
     'shuffleAssets' : IDL.Func([], [], []),
     'shuffleTokensForSale' : IDL.Func([], [], []),
-    'enableSale' : IDL.Func([], [IDL.Nat], []),
     'stats' : IDL.Func(
         [],
         [IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat, IDL.Nat, IDL.Nat],
@@ -365,7 +453,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'streamAsset' : IDL.Func([IDL.Nat, IDL.Bool, IDL.Vec(IDL.Nat8)], [], []),
     'supply' : IDL.Func([], [Result_2], ['query']),
-    'toAddress' : IDL.Func(
+    'toAccountIdentifier' : IDL.Func(
         [IDL.Text, IDL.Nat],
         [AccountIdentifier__3],
         ['query'],
@@ -374,6 +462,11 @@ export const idlFactory = ({ IDL }) => {
     'tokens_ext' : IDL.Func([AccountIdentifier__2], [Result], ['query']),
     'transactions' : IDL.Func([], [IDL.Vec(Transaction)], ['query']),
     'transfer' : IDL.Func([TransferRequest], [TransferResponse], []),
+    'updateCanistergeekInformation' : IDL.Func(
+        [UpdateInformationRequest],
+        [],
+        [],
+      ),
     'updateThumb' : IDL.Func([IDL.Text, File], [IDL.Opt(IDL.Nat)], []),
   });
   return Canister;

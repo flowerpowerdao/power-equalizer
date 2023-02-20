@@ -45,14 +45,14 @@ describe('buy on marketplace', async () => {
       from_subaccount: [],
       price: [price],
       token: tokenIdentifier(tokens[0]),
-      marketplacePrincipal: [],
+      frontendIdentifier: [],
     });
     expect(res).toHaveProperty('ok');
   });
 
   let paytoAddress: string;
   it('lock', async () => {
-    let lockRes = await buyer.mainActor.lock(tokenIdentifier(tokens[0]), price, buyer.accountId, new Uint8Array);
+    let lockRes = await buyer.mainActor.lock(tokenIdentifier(tokens[0]), price, buyer.accountId, new Uint8Array, []);
     expect(lockRes).toHaveProperty('ok');
     if ('ok' in lockRes) {
       paytoAddress = lockRes.ok;
@@ -89,8 +89,8 @@ describe('buy on marketplace', async () => {
 
   it('check seller ICP balance', async () => {
     let balanceAfterBuyOnSale = initialBalance - env.salePrice - ICP_FEE;
-    let transferFees = ICP_FEE * 4n; // 1 seller transfer, 1 marketplace transfer, 2 royalty transfers
-    let expectedBalance = balanceAfterBuyOnSale + applyFees(price - transferFees, [env.royalty0, env.royalty1, env.defaultMarketplaceFee]);
+    let transferFees = ICP_FEE * 5n; // 1 seller transfer, 2 marketplace transfers(seller + buyer), 2 royalty transfers
+    let expectedBalance = balanceAfterBuyOnSale + applyFees(price - transferFees, [env.royalty0, env.royalty1, env.defaultMarketplaceFee * 2n]);
     expect(await seller.icpActor.account_balance({ account: seller.account })).toEqual({ e8s: expectedBalance });
   });
 });

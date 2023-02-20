@@ -45,14 +45,14 @@ describe('try to buy on marketplace with insufficient funds', async () => {
       from_subaccount: [],
       price: [price],
       token: tokenIdentifier(tokens[0]),
-      marketplacePrincipal: [],
+      frontendIdentifier: [],
     });
     expect(res).toHaveProperty('ok');
   });
 
   let paytoAddress: string;
   it('lock', async () => {
-    let lockRes = await buyer.mainActor.lock(tokenIdentifier(tokens[0]), price, buyer.accountId, new Uint8Array);
+    let lockRes = await buyer.mainActor.lock(tokenIdentifier(tokens[0]), price, buyer.accountId, new Uint8Array, []);
     expect(lockRes).toHaveProperty('ok');
     if ('ok' in lockRes) {
       paytoAddress = lockRes.ok;
