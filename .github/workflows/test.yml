@@ -1,0 +1,21 @@
+name: Run tests
+
+on: [pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: aviate-labs/setup-dfx@v0.2.3
+        with:
+          vessel-version: 0.6.3
+          dfx-version: 0.13.0
+      - name: test
+        run: |
+            npm install
+            npm run replica
+            npm run test
