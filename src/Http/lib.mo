@@ -44,7 +44,7 @@ module {
       switch (_getParam(request.url, "tokenid")) {
         case (?tokenid) {
           // start custom
-          // we assume the seed animation video is stored in index 0
+          // we assume the placeholder is stored in index 0
           // and thus uploaded first
           if (Env.delayedReveal and not deps._Shuffle.isShuffled()) {
             return _processFile(Nat.toText(0), deps._Assets.get(0).payload);

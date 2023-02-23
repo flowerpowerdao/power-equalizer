@@ -109,12 +109,6 @@ module {
     );
   };
 
-  /// a pseudo random number generator that returns Nat8 between 0 and 99
-  public func prng(current : Nat8) : Nat8 {
-    let next : Int = fromNat8ToInt(current) * 1103515245 + 12345;
-    return _fromIntToNat8(next) % 100;
-  };
-
   /// creates a pseudo random number generator that returns Nat between 0 and (2^64)-1
   public func prngStrong(seed : Blob) : { next() : Nat } {
     assert (seed.size() == 32);
@@ -124,7 +118,7 @@ module {
 
     return {
       next = func() {
-        current := (current * 1103515245 + 12345 % ((2 ** 64) -1));
+        current := (current * 1103515245 + 12345) % ((2 ** 64) -1);
         return current;
       };
     };
