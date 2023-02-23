@@ -115,9 +115,10 @@ describe('sale and royalty fees', async () => {
     expect(await buyer.icpActor.account_balance({ account: buyer.account })).toEqual({ e8s: expectedBalance });
   });
 
-  it('cron settlements and cronDisbursements', async () => {
-    await seller.mainActor.cronSettlements();
-    await seller.mainActor.cronDisbursements();
+  it('wait for timers', async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 3000);
+    });
   });
 
   let transferFees = ICP_FEE * 5n; // 1 seller transfer, 2 marketplace transfers(seller + buyer), 2 royalty transfers

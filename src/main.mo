@@ -2,6 +2,7 @@ import Cycles "mo:base/ExperimentalCycles";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Time "mo:base/Time";
+import Timer "mo:base/Timer";
 
 import Canistergeek "mo:canistergeek/canistergeek";
 import Cap "mo:cap/Cap";
@@ -25,6 +26,7 @@ import Disburser "Disburser";
 import DisburserTypes "Disburser/types";
 import Utils "./utils";
 import LedgerTypes "Ledger/types";
+import Env "./Env";
 
 shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCanister {
 
@@ -61,6 +63,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   // Canistergeek
   stable var _canistergeekMonitorUD : ?Canistergeek.UpgradeData = null;
+
+  // timers
+  stable var _timerId = 0;
 
   //State functions
   system func preupgrade() {
@@ -108,6 +113,24 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
     // Disburser
     _disburserState := DisburserTypes.newStableState();
+
+    _setTimers();
+  };
+
+  public shared ({caller}) func setTimers() {
+    assert (caller == init_minter);
+    _setTimers();
+  };
+
+  func _setTimers() {
+    Timer.cancelTimer(_timerId);
+
+    _timerId := Timer.recurringTimer(Env.timersInterval, func(): async () {
+      ignore cronSettlements();
+      ignore cronDisbursements();
+      ignore cronSalesSettlements();
+      ignore cronFailedSales();
+    });
   };
 
   /*************
@@ -271,6 +294,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     canistergeekMonitor.collectMetrics();
     // checks caller == minter
     // prevents double mint
+    _setTimers();
     _Sale.initMint(caller);
   };
 
