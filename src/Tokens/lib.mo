@@ -83,11 +83,9 @@ module {
 
     public func mintCollection(collectionSize : Nat32) {
       /* for delayedReveal we start with asset 1, as index 0 contains the placeholder and is not being shuffled */
-      let startIndex: Nat32 = if (Env.delayedReveal) { 1 } else { 0 };
+      let startIndex : Nat32 = if (Env.delayedReveal) { 1 } else { 0 };
       while (getNextTokenId() < collectionSize) {
-        putTokenMetadata(getNextTokenId(), #nonfungible({
-          metadata = ?Utils.nat32ToBlob(getNextTokenId() + startIndex)
-        }));
+        putTokenMetadata(getNextTokenId(), #nonfungible({ metadata = ?Utils.nat32ToBlob(if (Env.singleAssetCollection) startIndex else getNextTokenId() + startIndex) }));
         transferTokenToUser(getNextTokenId(), "0000");
         incrementSupply();
         incrementNextTokenId();
@@ -206,7 +204,7 @@ module {
     func _removeFromUserTokens(tindex : Types.TokenIndex, owner : Types.AccountIdentifier) : () {
       switch (_owners.get(owner)) {
         case (?ownersTokens) ownersTokens.filterEntries(func(_, a : Types.TokenIndex) : Bool { (a != tindex) });
-        case (_) ();
+        case (_)();
       };
     };
 

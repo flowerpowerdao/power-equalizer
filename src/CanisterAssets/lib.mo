@@ -7,6 +7,7 @@ import Buffer "mo:base/Buffer";
 
 import Types "types";
 import Utils "../utils";
+import Env "../Env";
 
 module {
 
@@ -79,7 +80,15 @@ module {
     };
 
     public func addAsset(caller : Principal, asset : Types.Asset) : Nat {
-      assert (caller == consts.minter);
+      assert (
+        caller == consts.minter and (
+          if (Env.singleAssetCollection) {
+            if (Env.delayedReveal) { _assets.size() < 2 } else {
+              _assets.size() == 0;
+            };
+          } else { true },
+        ),
+      );
       _assets.add(asset);
       _assets.size() - 1;
     };
