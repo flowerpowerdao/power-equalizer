@@ -1,4 +1,4 @@
-![photo_2022-08-04 23 41 19](https://user-images.githubusercontent.com/32162112/182957869-8479f309-283d-4d81-af9f-2d34acbac27e.jpeg)
+![BP_FPDAO_Logo_BlackOnWhite_sRGB_2](https://user-images.githubusercontent.com/32162112/221128811-5484d430-c357-49e8-8b25-0f04695a5691.svg)
 
 # power equalizer 🌼
 
