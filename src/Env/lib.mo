@@ -2,6 +2,8 @@ import Time "mo:base/Time";
 import ExtCore "../toniq-labs/ext/Core";
 
 module {
+  public let timersInterval = #seconds(60);
+
   let beneficiary0 : ExtCore.AccountIdentifier = "58842a4424f706f3465e8d9aa7bb6507a1c2d8810b1a9f43f0c94087b62b86ed";
   let beneficiary1 : ExtCore.AccountIdentifier = "24fc8fbcf345bc6a2ba14bbd323fc041c8ad400cc48b1e69cb53dd612afd0d81";
 

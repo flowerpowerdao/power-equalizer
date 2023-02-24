@@ -2,7 +2,7 @@ import Time "mo:base/Time";
 import ExtCore "../toniq-labs/ext/Core";
 
 module {
-  public let timersInterval = #seconds(10);
+  public let timersInterval = #seconds(60);
 
   // collaborator
   let clownAddress : ExtCore.AccountIdentifier = "979307078c971f6d82a302825ac07dc63a4f68ece99f24014d69d8ccec7b5d6f";
