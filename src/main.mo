@@ -117,11 +117,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     _setTimers();
   };
 
-  public shared ({caller}) func setTimers() {
-    assert (caller == init_minter);
-    _setTimers();
-  };
-
   func _setTimers() {
     Timer.cancelTimer(_timerId);
 
