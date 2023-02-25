@@ -5,12 +5,11 @@
 ## pre launch
 
 - [ ] adapt `Env/lib.mo` to your needs
-- [ ] check all addresses and parameters in `deploy.zsh`
-- [ ] add canister to [DAB](https://forum.dfinity.org/t/is-dab-still-accepting-nft-registrations/18197/3?u=cryptoschindler)
+- [ ] add canister to [DAB](https://docs.google.com/forms/d/e/1FAIpQLSc-0BL9FMRtI0HhWj4g7CCYjf3TMr4_K_qqmagjzkUH_CKczw/viewform)
 - [ ] send collection details to entrepot via form
 - [ ] top canister up with cycles
 - [ ] run off chain backup script with mainnet canister id
-- [ ] run disburse script with mainnet canister id
+- [ ] setup auto topup of canisters
 
 ## launch
 
@@ -19,6 +18,207 @@
 - call `shuffleAssets` at desired time (usually 24 hours after market opens)
 
 ## deploy 📚
+
+We are using a makefile to simplify the deployment of canisters for different scenarios.
+
+```
+# makefile
+deploy-locally:
+	./deploy.zsh
+
+deploy-staging-ic:
+	./deploy.zsh ic
+
+deploy-staging-ic-full:
+	./deploy.zsh ic 7777
+
+deploy-production-ic-full:
+	./deploy.zsh ic 7777 production
+```
+
+This `makefile` calls the `deploy.zsh` script.
+
+```
+# deploy.zsh
+#!/bin/zsh
+# stream asset to the canister using this
+# https://gist.github.com/jorgenbuilder/6d32ef665b84457a9be2063224b754fb
+file="assets/output.mp4"
+filename=$(echo $file | sed -E "s/.+\///")
+fileextension=$(echo $file | sed -E "s/.+\.//")
+mime="video/$fileextension"
+network=${1:-local}
+number_of_assets=${2:-10}
+mode=${3:-staging}
+threshold="100000"
+asset_canister_url="https://zt63f-rqaaa-aaaae-qadaq-cai.raw.ic0.app/"
+
+dfx stop
+dfx start --background --clean
+
+# reset the canister state
+if [[ "$mode" == "production" ]]
+then
+echo "production deployment ..."
+dfx canister --network $network create $mode
+ID=$(dfx canister --network $network id $mode)
+DFX_MOC_PATH="$(vessel bin)/moc" dfx deploy --network $network --argument "(principal \"$ID\")" $mode
+else
+echo "staging deployment ..."
+dfx canister --network $network create $mode
+ID=$(dfx canister --network $network id $mode)
+yes yes| DFX_MOC_PATH="$(vessel bin)/moc" dfx deploy --network $network --argument "(principal \"$ID\")" --mode=reinstall $mode
+fi
+
+
+# first create the asset calling addAsset
+echo "creating asset..."
+asset_id=$(dfx canister --network $network call $mode addAsset "(record { \
+    name = \"$filename\"; \
+    payload = record {
+        ctype = \"$mime\"; \
+        data = vec {\
+}}})")
+
+asset_id=$(echo $asset_id | tr -d -c 0-9)
+echo $asset_id
+
+# then chunk the file and upload it to the asset
+# id using streamAsset
+i=0
+byteSize=${#$(od -An -v -tuC $file)[@]}
+echo "$network Uploading asset \"$filename\", size: $byteSize"
+while [ $i -le $byteSize ]; do
+    echo "chunk #$(($i/$threshold+1))..."
+    dfx canister --network $network call $mode streamAsset "($asset_id, \
+        false, \
+        vec { $(for byte in ${(j:;:)$(od -An -v -tuC $file)[@]:$i:$threshold}; echo "$byte;") }\
+    )"
+    # dfx canister call staging addAsset "( vec {\
+    #     vec { $(for byte in ${(j:;:)$(od -An -v -tuC $file)[@]:$i:$threshold}; echo "$byte;") };\
+    # })"
+    i=$(($i+$threshold))
+done
+
+if [[ "$network" == "ic" ]]
+then
+open "https://$(dfx canister --network $network id $mode).raw.ic0.app/?asset=0"
+else
+open "http://127.0.0.1:4943/?canisterId=$(dfx canister --network $network id $mode)&asset=0"
+fi
+
+# add the other assets
+upload_assets() {
+    for asset in {$k..$(($k+$batch_size-1))}; do
+        if [ $asset -gt $number_of_assets ];
+            then break;
+        fi;
+        j=$asset-1;
+        dfx canister --network $network call --async $mode addAsset '(record {
+            name = "'$asset'";
+            payload = record {
+                ctype = "image/svg+xml";
+                data = vec {blob "
+                    <svg xmlns=\"http://www.w3.org/2000/svg\">
+                        <script>
+                            fetch(\"'$asset_canister_url$asset'.svg\")
+                            .then(response =&gt; response.text())
+                            .then(text =&gt; {
+                                let parser = new DOMParser();
+                                let doc = parser.parseFromString( text, \"image/svg+xml\" );
+                                document.getElementsByTagName(\"svg\")[0].appendChild( doc.getElementsByTagName(\"svg\")[0] );
+                            })
+                            .catch(err =&gt; console.log(err))
+                        </script>
+                    </svg>"
+                };
+            };
+            thumbnail = opt record {
+                ctype = "image/svg+xml";
+                data = vec {blob "
+                    <svg xmlns=\"http://www.w3.org/2000/svg\">
+                        <script>
+                            fetch(\"'$asset_canister_url$asset'_thumbnail.svg\")
+                            .then(response =&gt; response.text())
+                            .then(text =&gt; {
+                                let parser = new DOMParser();
+                                let doc = parser.parseFromString( text, \"image/svg+xml\" );
+                                document.getElementsByTagName(\"svg\")[0].appendChild( doc.getElementsByTagName(\"svg\")[0] );
+                            })
+                            .catch(err =&gt; console.log(err))
+                        </script>
+                    </svg>"
+                };
+            };
+            metadata = opt record {
+                ctype = "application/json";
+                data = vec {blob "'"$(cat assets/metadata.json | jq ".[$j]" | sed 's/"/\\"/g')"'"
+                };
+            };
+        })' &>/dev/null
+    done
+}
+
+batch_size=1000
+k=1
+while [ $k -le $number_of_assets ]; do
+    upload_assets &
+    k=$(($k+$batch_size))
+done
+jobs
+wait
+echo "done"
+
+# init cap
+echo "initiating cap ..."
+dfx canister --network $network call $mode initCap
+
+# init mint
+echo "initiating mint ..."
+dfx canister --network $network call $mode initMint
+
+# shuffle Tokens For Sale
+echo "shuffle Tokens For Sale ..."
+dfx canister --network $network call $mode shuffleTokensForSale
+
+# airdrop tokens
+echo "airdrop tokens ..."
+dfx canister --network $network call $mode airdropTokens 0
+
+# airdrop tokens
+echo "airdrop tokens ..."
+dfx canister --network $network call $mode airdropTokens 1500
+
+# enable sale
+echo "enable sale ..."
+dfx canister --network $network call $mode enableSale
+
+# check the asset that are linked to the tokens
+for i in {0..9}
+do
+        tokenid=$(ext tokenid $(dfx canister --network $network id $mode) $i | sed -n  2p)
+		tokenid=$(echo $tokenid | tr -dc '[:alnum:]-')
+		tokenid="${tokenid:3:-2}"
+		echo "https://$(dfx canister --network $network id $mode).raw.ic0.app/?tokenid=$tokenid"
+done
+
+# now shuffle the assets using the random beacon
+# echo "shuffling assets"
+# dfx canister --network $network call staging shuffleAssets
+
+# check the assets again to see if we now indeed
+# see the correct assets
+# for i in {0..9}
+# do
+#         tokenid=$(ext tokenid $(dfx canister --network ic id staging) $i | sed -n  2p)
+# 		tokenid=$(echo $tokenid | tr -dc '[:alnum:]-')
+# 		tokenid="${tokenid:3:-2}"
+# 		curl "$(dfx canister --network ic id staging).raw.ic0.app/?tokenid=$tokenid"
+# 		echo "\n"
+# done
+```
+
+Because the `makefile` and `deploy.zsh` are pretty opinated, we are not including them in the repo. You can use node or python scripts to deploy the canisters and upload the assets, make sure you mimic the functinoality of the `makefile` and `deploy.zsh` scripts. The following bulletpoints are tips and tricks if you stick to our way of uploading assets.
 
 - use `make` to run the standard local deploy
 - use `make deploy-staging-ic` to deploy the staging canister to the mainnet, by default it deploys the NFT staging canister locally and uses `assets/output.mp4` and `metadata.json` as file paths
@@ -32,25 +232,26 @@
 
 ## caveats 🕳
 
-- The canister code is written in a way that the seed animation _ALWAYS_ has to be the first asset uploaded to the canister.
+- The canister code is written in a way that the seed animation _ALWAYS_ has to be the first asset uploaded to the canister if you are doing a `delayedReveal`
 - The seed animation video needs to be encoded in a way that it can be played on iOS devices, use `HandBrake` for that or `ffmpeg`
 
 ## vessel 🚢
 
-- Run `vessel verify --version 0.6.28` to verify everything still builds correctly after adding a new depdenceny
+- Run `vessel verify --version 0.8.1` to verify everything still builds correctly after adding a new depdenceny
 - To use `vessels`s moc version when deploying, use `DFX_MOC_PATH="$(vessel bin)/moc" dfx deploy`
 
 ## shuffle 🔀
 
 - The shuffle uses the random beacon to derive a random seed for the PRNG
 - It basically shuffles all the assets in the `assets` stable variable
-- The link inside the canister is
+- The linking inside the canister is
 
 ```
 tokenIndex -> assetIndex
-assetIndex -> NFT
+asset[assetIndex] -> NFT
 ```
 
+- by shuffling the assets, we are actually changing the mapping from `tokenIndex` to `NFT`
 - initially the `tokenIndex` matches the `assetIndex` (`assetIndex` = `tokenIndex+1`) and the `assetIndex` matches the `NFT` (`NFT` = `assetIndex+1`)
 - but after the shuffle the `assetIndex` and the `NFT` mint number no longer match
 - so so token at `tokenIndex` still points to the same asset at `assetIndex`, but this asset no longer has the same `NFT` mint number
