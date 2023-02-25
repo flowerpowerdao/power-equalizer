@@ -59,10 +59,10 @@ describe('public sale', () => {
     let settings = await user.mainActor.salesSettings(user.accountId);
 
     await Promise.all([
-      await buyFromSale(user),
-      await buyFromSale(user),
-      await buyFromSale(user),
-      await buyFromSale(user),
+      buyFromSale(user),
+      buyFromSale(user),
+      buyFromSale(user),
+      buyFromSale(user),
     ]);
 
     await checkTokenCount(user, 4);
