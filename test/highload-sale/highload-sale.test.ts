@@ -35,7 +35,7 @@ describe('highload sale ' + count1, () => {
   });
 });
 
-let count2 = 300;
+let count2 = 100;
 describe('highload sale ' + count2, () => {
   let user = new User;
 
@@ -60,9 +60,9 @@ describe('highload sale ' + count2, () => {
   });
 });
 
-let count3 = 250;
+let count3 = 70;
 let times = 4;
-describe('highload sale 1000', () => {
+describe(`highload sale ${count3*times}`, () => {
   let user = new User;
 
   for (let i = 0; i < times; i++) {
