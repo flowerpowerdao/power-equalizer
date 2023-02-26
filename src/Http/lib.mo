@@ -140,7 +140,7 @@ module {
 
       var whitelistTiersText = "";
       for (whitelistTier in Env.whitelistTiers.vals()) {
-        whitelistTiersText #= whitelistTier.name # " " # _displayICP(Nat64.toNat(whitelistTier.price)) # "; ";
+        whitelistTiersText #= whitelistTier.name # " " # _displayICP(Nat64.toNat(whitelistTier.price)) # "start: " # debug_show (whitelistTier.slot.start) # ", end: " # debug_show (whitelistTier.slot.end) # "; ";
       };
 
       return {

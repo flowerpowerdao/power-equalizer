@@ -196,10 +196,15 @@ dfx canister --network $network call $mode enableSale
 # check the asset that are linked to the tokens
 for i in {0..9}
 do
-        tokenid=$(ext tokenid $(dfx canister --network $network id $mode) $i | sed -n  2p)
+    tokenid=$(ext tokenid $(dfx canister --network $network id $mode) $i | sed -n  2p)
 		tokenid=$(echo $tokenid | tr -dc '[:alnum:]-')
 		tokenid="${tokenid:3:-2}"
-		echo "https://$(dfx canister --network $network id $mode).raw.ic0.app/?tokenid=$tokenid"
+    if [[ "$network" == "ic" ]]
+    then
+      echo "https://$(dfx canister --network $network id $mode).raw.ic0.app/?tokenid=$tokenid"
+    else
+      echo "http://127.0.0.1:4943/?canisterId=$(dfx canister --network $network id $mode)&tokenid=$tokenid"
+    fi
 done
 
 # now shuffle the assets using the random beacon
