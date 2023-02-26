@@ -11,6 +11,7 @@ import Result "mo:base/Result";
 import Time "mo:base/Time";
 import TrieMap "mo:base/TrieMap";
 import Buffer "mo:base/Buffer";
+import { isSome } "mo:base/Option";
 
 import AviateAccountIdentifier "mo:accountid/AccountIdentifier";
 import Root "mo:cap/Root";
@@ -31,7 +32,7 @@ module {
     private var _salesSettlements : TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale> = TrieMap.fromEntries(state._salesSettlementsState.vals(), AID.equal, AID.hash);
     private var _failedSales : Buffer.Buffer<(Types.AccountIdentifier, Types.SubAccount)> = Buffer.fromArray<(Types.AccountIdentifier, Types.SubAccount)>(state._failedSalesState);
     private var _tokensForSale : Buffer.Buffer<Types.TokenIndex> = Buffer.fromArray<Types.TokenIndex>(state._tokensForSaleState);
-    private var _whitelist : Buffer.Buffer<(Nat64, Types.AccountIdentifier)> = Buffer.fromArray<(Nat64, Types.AccountIdentifier)>(state._whitelistStable);
+    private var _whitelist : Buffer.Buffer<(Nat64, Types.AccountIdentifier, Types.WhitelistSlot)> = Buffer.fromArray<(Nat64, Types.AccountIdentifier, Types.WhitelistSlot)>(state._whitelistStable);
     private var _soldIcp : Nat64 = state._soldIcpState;
     private var _sold : Nat = state._soldState;
     private var _totalToSell : Nat = state._totalToSellState;
@@ -66,7 +67,7 @@ module {
 
       // turn whitelist into buffer for better performance
       for (whitelistTier in Env.whitelistTiers.vals()) {
-        appendWhitelist(whitelistTier.price, whitelistTier.whitelist);
+        appendWhitelist(whitelistTier.price, whitelistTier.whitelist, whitelistTier.slot);
       };
 
       // get initial token indices (this will return all tokens as all of them are owned by "0000")
@@ -154,11 +155,6 @@ module {
       // after payment. otherwise someone could stall the sale by reserving all
       // the tokens without paying for them
       let tokens : [Types.TokenIndex] = tempNextTokens(quantity);
-      if (Env.whitelistOneTimeOnly == true) {
-        if (isWhitelisted(address)) {
-          removeFromWhitelist(address);
-        };
-      };
       _salesSettlements.put(
         paymentAddress,
         {
@@ -166,10 +162,18 @@ module {
           price = total;
           subaccount = subaccount;
           buyer = address;
-          whitelisted = isWhitelisted(address);
           expires = Time.now() + Env.ecscrowDelay;
+          slot = getSlot(address);
         },
       );
+
+      // remove address from whitelist
+      if (Env.whitelistOneTimeOnly == true) {
+        if (isWhitelisted(address)) {
+          removeFromWhitelist(address);
+        };
+      };
+
       #ok((paymentAddress, total));
     };
 
@@ -261,9 +265,11 @@ module {
           _failedSales.add((settlement.buyer, settlement.subaccount));
           _salesSettlements.delete(paymentaddress);
 
-          // return to whitelist
-          if (Env.whitelistOneTimeOnly and settlement.whitelisted) {
-            addToWhitelist(settlement.price, settlement.buyer);
+          // add back to whitelist
+          if (Env.whitelistOneTimeOnly and isSome(settlement.slot)) {
+            ignore do ? {
+              addToWhitelist(settlement.price, settlement.buyer, settlement.slot!);
+            };
           };
           return #err("Expired");
         } else {
@@ -410,8 +416,13 @@ module {
         };
       };
 
+      // we have to make sure to only return prices that are available in the current whitelist slot
+      // if i had a wl in the first slot, but now we are in slot 2, i should not be able to buy at the price of slot 1
+
+      // this method assumes the wl prices are added in ascending order, so the cheapest wl price in the earliest slot
+      // is always the first one.
       for (item in _whitelist.vals()) {
-        if (item.1 == address) {
+        if (item.1 == address and item.2.start >= Time.now() and item.2.end <= Time.now()) {
           return [(1, item.0)];
         };
       };
@@ -459,22 +470,43 @@ module {
       };
     };
 
-    public func appendWhitelist(price : Nat64, addresses : [Types.AccountIdentifier]) {
-      let buffer = Buffer.Buffer<(Nat64, Types.AccountIdentifier)>(addresses.size());
+    public func appendWhitelist(price : Nat64, addresses : [Types.AccountIdentifier], slot : Types.WhitelistSlot) {
+      let buffer = Buffer.Buffer<(Nat64, Types.AccountIdentifier, Types.WhitelistSlot)>(addresses.size());
       for (address in addresses.vals()) {
-        buffer.add((price, address));
+        buffer.add((price, address, slot));
       };
       _whitelist.append(buffer);
     };
 
+    // this method is timesensitive now and only returns true, iff the address is whitelist
+    // in the current slot
     func isWhitelisted(address : Types.AccountIdentifier) : Bool {
       if (Env.whitelistDiscountLimited == true and Time.now() >= Env.whitelistTime) {
         return false;
       };
-      Buffer.forSome<(Nat64, Types.AccountIdentifier)>(_whitelist, func(a) : Bool { a.1 == address });
+      for (element in _whitelist.vals()) {
+        if (element.1 == address and Time.now() >= element.2.start and Time.now() <= element.2.end) {
+          return true;
+        };
+      };
+      return false;
+    };
+
+    func getSlot(address : Types.AccountIdentifier) : ?Types.WhitelistSlot {
+      if (Env.whitelistDiscountLimited == true and Time.now() >= Env.whitelistTime) {
+        return null;
+      };
+      for (element in _whitelist.vals()) {
+        if (element.1 == address and Time.now() >= element.2.start and Time.now() <= element.2.end) {
+          return ?element.2;
+        };
+      };
+      return null;
     };
 
     // remove first occurrence from whitelist
+    // when removing, we have to make sure we remove the correct whitelist spot in the correct slot
+    // could be that there is an unused wl spot from an earlier slot in the list
     func removeFromWhitelist(address : Types.AccountIdentifier) : () {
       var found : Bool = false;
       _whitelist.filterEntries(
@@ -485,6 +517,11 @@ module {
             if (a.1 != address) {
               return true;
             };
+            // if there are whitelist spots from slots that are not active anymore, remove them
+            // without stopping the loop to decrease cost
+            if (a.2.end < Time.now()) {
+              return false;
+            };
             found := true;
             return false;
           };
@@ -492,8 +529,8 @@ module {
       );
     };
 
-    func addToWhitelist(price : Nat64, address : Types.AccountIdentifier) : () {
-      _whitelist.add((price, address));
+    func addToWhitelist(price : Nat64, address : Types.AccountIdentifier, slot : Types.WhitelistSlot) : () {
+      _whitelist.add((price, address, slot));
     };
 
     func mintCollection(collectionSize : Nat32) {
