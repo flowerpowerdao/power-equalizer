@@ -367,10 +367,13 @@ module {
 
     public func salesSettings(address : Types.AccountIdentifier) : Types.SaleSettings {
       var startTime = Env.whitelistTime;
+      var endTime: Int = 0;
       // for whitelisted user return nearest and cheapest slot start time
-      for (item in _whitelist.vals()) {
+      label l for (item in _whitelist.vals()) {
         if (item.1 == address and Time.now() <= item.2.end) {
           startTime := item.2.start;
+          endTime := item.2.end;
+          break l;
         };
       };
 
@@ -381,6 +384,7 @@ module {
         sold = _sold;
         totalToSell = _totalToSell;
         startTime = startTime;
+        endTime = endTime;
         whitelistTime = Env.whitelistTime;
         whitelist = isWhitelisted(address);
         bulkPricing = getAddressBulkPrice(address);
