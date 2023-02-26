@@ -88,6 +88,7 @@ module {
     sold : Nat;
     remaining : Nat;
     startTime : Time;
+    endTime : Time;
     whitelistTime : Time;
     whitelist : Bool;
     totalToSell : Nat;
