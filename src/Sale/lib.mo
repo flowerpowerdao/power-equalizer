@@ -422,7 +422,7 @@ module {
       // this method assumes the wl prices are added in ascending order, so the cheapest wl price in the earliest slot
       // is always the first one.
       for (item in _whitelist.vals()) {
-        if (item.1 == address and item.2.start >= Time.now() and item.2.end <= Time.now()) {
+        if (item.1 == address and Time.now() >= item.2.start and Time.now() <= item.2.end) {
           return [(1, item.0)];
         };
       };
