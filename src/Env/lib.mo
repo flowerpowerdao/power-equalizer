@@ -44,8 +44,8 @@ module {
 
   public let defaultMarketplaceFee = ("c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9", 500 : Nat64); // Entrepot Fee
 
-  public let publicSaleStart : Time.Time = 1677412800000000000; // Start of first purchase (WL or other)
-  public let whitelistTime : Time.Time = 1677502800000000000; // Period for WL only discount. Set to publicSaleStart for no exclusive period
+  public let publicSaleStart : Time.Time = 1677427200000000000; // Start of first purchase (WL or other)
+  public let whitelistTime : Time.Time = 1677556800000000000; // Period for WL only discount. Set to publicSaleStart for no exclusive period
   public let marketDelay : Time.Time = 172_800_000_000_000; // How long to delay market opening (2 days after whitelist sale started or when sold out)
 
   public type WhitelistSlot = {
@@ -57,14 +57,14 @@ module {
   // the start of the first slot has to be the publicSaleStart, the end of the last slot the whitelistTime
   let firstHour = {
     start = publicSaleStart;
-    end = 1677416400000000000;
+    end = 1677470400000000000;
   };
   let triology = {
-    start = 1677416400000000001;
-    end = 1677459600000000000;
+    start = 1677470400000000001;
+    end = 1677513600000000000;
   };
   let flowers = {
-    start = 1677459600000000001;
+    start = 1677513600000000001;
     end = whitelistTime;
   };
 
