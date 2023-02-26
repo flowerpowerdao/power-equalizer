@@ -44,15 +44,15 @@ describe('whitelist slot 1', () => {
     let user = lucky[3];
     await user.mintICP(100_000_000_000n);
 
-    // tier 0 price
+    // tier 1 price
     let settings = await user.mainActor.salesSettings(user.accountId);
     expect(settings.price).toBe(env.whitelistTier0Price);
 
     await buyFromSale(user);
 
-    // tier 1 has not started so it should be sale price
+    // tier 2 price
     settings = await user.mainActor.salesSettings(user.accountId);
-    expect(settings.price).toBe(env.salePrice);
+    expect(settings.price).toBe(env.whitelistTier1Price);
   });
 
   test('try to buy after spot from slot 1 was used and slot 2 has not started yet', async () => {

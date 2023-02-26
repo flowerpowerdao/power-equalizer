@@ -366,13 +366,21 @@ module {
     };
 
     public func salesSettings(address : Types.AccountIdentifier) : Types.SaleSettings {
+      var startTime = Env.whitelistTime;
+      // for whitelisted user return nearest and cheapest slot start time
+      for (item in _whitelist.vals()) {
+        if (item.1 == address and Time.now() <= item.2.end) {
+          startTime := item.2.start;
+        };
+      };
+
       return {
         price = getAddressPrice(address);
         salePrice = Env.salePrice;
         remaining = availableTokens();
         sold = _sold;
         totalToSell = _totalToSell;
-        startTime = Env.publicSaleStart;
+        startTime = startTime;
         whitelistTime = Env.whitelistTime;
         whitelist = isWhitelisted(address);
         bulkPricing = getAddressBulkPrice(address);
@@ -422,7 +430,7 @@ module {
       // this method assumes the wl prices are added in ascending order, so the cheapest wl price in the earliest slot
       // is always the first one.
       for (item in _whitelist.vals()) {
-        if (item.1 == address and Time.now() >= item.2.start and Time.now() <= item.2.end) {
+        if (item.1 == address and Time.now() <= item.2.end) {
           return [(1, item.0)];
         };
       };
