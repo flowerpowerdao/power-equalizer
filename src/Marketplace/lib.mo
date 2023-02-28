@@ -76,7 +76,7 @@ module {
         {
           seller = listing.seller;
           price = listing.price;
-          locked = ?(Time.now() + Env.ecscrowDelay);
+          locked = ?(Time.now() + Env.escrowDelay);
           sellerFrontend = listing.sellerFrontend;
           buyerFrontend = frontendIdentifier;
         },

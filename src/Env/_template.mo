@@ -9,7 +9,7 @@ module {
 
   public let collectionName = "Pineapple Punks";
   public let placeholderContentLength = "1053832";
-  public let ecscrowDelay : Time.Time = $ecscrowDelay; // 120 seconds
+  public let escrowDelay : Time.Time = $escrowDelay; // 120 seconds
   public let collectionSize : Nat32 = $collectionSize;
 
   public let salePrice : Nat64 = 700000000;
