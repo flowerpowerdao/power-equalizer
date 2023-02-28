@@ -7,6 +7,7 @@ import Shuffle "../Shuffle";
 import Tokens "../Tokens";
 import Disburser "../Disburser";
 import LedgerTypes "../Ledger/types";
+import Env "../Env"
 
 module {
 
@@ -16,7 +17,7 @@ module {
       _salesSettlementsState : [(AccountIdentifier, Sale)] = [];
       _failedSalesState : [(AccountIdentifier, SubAccount)] = [];
       _tokensForSaleState : [TokenIndex] = [];
-      _whitelistStable : [(Nat64, AccountIdentifier)] = [];
+      _whitelistStable : [(Nat64, AccountIdentifier, WhitelistSlot)] = [];
       _soldIcpState : Nat64 = 0;
       _soldState : Nat = 0;
       _totalToSellState : Nat = 0;
@@ -29,7 +30,7 @@ module {
     _salesSettlementsState : [(AccountIdentifier, Sale)];
     _failedSalesState : [(AccountIdentifier, SubAccount)];
     _tokensForSaleState : [TokenIndex];
-    _whitelistStable : [(Nat64, AccountIdentifier)];
+    _whitelistStable : [(Nat64, AccountIdentifier, WhitelistSlot)];
     _soldIcpState : Nat64;
     _soldState : Nat;
     _totalToSellState : Nat;
@@ -47,6 +48,8 @@ module {
     LEDGER_CANISTER : LedgerTypes.LEDGER_CANISTER;
     minter : Principal;
   };
+
+  public type WhitelistSlot = Env.WhitelistSlot;
 
   public type AccountIdentifier = ExtCore.AccountIdentifier;
 
@@ -67,8 +70,8 @@ module {
     price : Nat64;
     subaccount : SubAccount;
     buyer : AccountIdentifier;
-    whitelisted : Bool;
     expires : Time;
+    slot : ?WhitelistSlot;
   };
 
   public type SaleTransaction = {
@@ -85,6 +88,7 @@ module {
     sold : Nat;
     remaining : Nat;
     startTime : Time;
+    endTime : Time;
     whitelistTime : Time;
     whitelist : Bool;
     totalToSell : Nat;

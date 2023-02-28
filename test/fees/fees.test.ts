@@ -2,13 +2,9 @@ import { AccountIdentifier } from '@dfinity/nns';
 import { describe, test, expect, it } from 'vitest';
 import { ICP_FEE } from '../consts';
 import { User } from '../user';
-import { applyFees, buyFromSale, checkTokenCount, feeOf, tokenIdentifier } from '../utils';
+import { applyFees, buyFromSale, checkTokenCount, feeOf, toAccount, tokenIdentifier } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
 import env from './.env.fees';
-
-let toAccount = (address: string) => {
-  return { account: AccountIdentifier.fromHex(address).toNumbers() };
-}
 
 describe('sale and royalty fees', async () => {
   let price = 1_000_000n;
@@ -78,14 +74,14 @@ describe('sale and royalty fees', async () => {
       from_subaccount: [],
       price: [price],
       token: tokenIdentifier(tokens[0]),
-      marketplacePrincipal: [],
+      frontendIdentifier: [],
     });
     expect(res).toHaveProperty('ok');
   });
 
   let paytoAddress: string;
   it('lock', async () => {
-    let lockRes = await buyer.mainActor.lock(tokenIdentifier(tokens[0]), price, buyer.accountId, new Uint8Array);
+    let lockRes = await buyer.mainActor.lock(tokenIdentifier(tokens[0]), price, buyer.accountId, new Uint8Array, []);
     expect(lockRes).toHaveProperty('ok');
     if ('ok' in lockRes) {
       paytoAddress = lockRes.ok;
@@ -115,16 +111,17 @@ describe('sale and royalty fees', async () => {
     expect(await buyer.icpActor.account_balance({ account: buyer.account })).toEqual({ e8s: expectedBalance });
   });
 
-  it('cron settlements and cronDisbursements', async () => {
-    await seller.mainActor.cronSettlements();
-    await seller.mainActor.cronDisbursements();
+  it('wait for timers', async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 3000);
+    });
   });
 
-  let transferFees = ICP_FEE * 4n; // 1 seller transfer, 1 marketplace transfer, 2 royalty transfers
+  let transferFees = ICP_FEE * 5n; // 1 seller transfer, 2 marketplace transfers(seller + buyer), 2 royalty transfers
 
   it('check seller ICP balance', async () => {
     let balanceAfterBuyOnSale = initialBalance - env.salePrice - ICP_FEE;
-    let expectedBalance = balanceAfterBuyOnSale + applyFees(price - transferFees, [env.royalty0, env.royalty1, env.defaultMarketplaceFee]);
+    let expectedBalance = balanceAfterBuyOnSale + applyFees(price - transferFees, [env.royalty0, env.royalty1, env.defaultMarketplaceFee * 2n]);
     expect(await seller.icpActor.account_balance({ account: seller.account })).toEqual({ e8s: expectedBalance });
   });
 
@@ -141,6 +138,6 @@ describe('sale and royalty fees', async () => {
   });
 
   it('check defaultMarketplace royalty fee disbursement', async () => {
-    expect(await seller.icpActor.account_balance(toAccount(env.defaultMarketplaceAddr))).toEqual({ e8s: feeOf(price - transferFees, env.defaultMarketplaceFee) });
+    expect(await seller.icpActor.account_balance(toAccount(env.defaultMarketplaceAddr))).toEqual({ e8s: feeOf(price - transferFees, env.defaultMarketplaceFee * 2n) });
   });
 });

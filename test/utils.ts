@@ -3,6 +3,7 @@ import { expect } from "vitest";
 import { User } from "./user";
 
 import canisterIds from '../.dfx/local/canister_ids.json';
+import { AccountIdentifier } from "@dfinity/nns";
 
 export function feeOf(amount: bigint, fee: bigint) {
   return amount * fee / 100_000n;
@@ -63,3 +64,7 @@ export let tokenIdentifier = (index) => {
   ]);
   return Principal.fromUint8Array(array).toText();
 };
+
+export let toAccount = (address: string) => {
+  return { account: AccountIdentifier.fromHex(address).toNumbers() };
+}

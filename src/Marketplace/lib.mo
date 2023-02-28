@@ -170,8 +170,8 @@ module {
         };
       };
 
-      // deduct two extra transaction fees for marketplace fee and disbursment to seller
-      let bal : Nat64 = response.e8s - (10000 * Nat64.fromNat(Env.royalties.size() + 2));
+      // deduct 3 extra transaction fees for marketplace(seller + buyer) fee and disbursment to seller
+      let bal : Nat64 = response.e8s - (10000 * Nat64.fromNat(Env.royalties.size() + 3));
       var rem = bal;
 
       // disbursement of royalties

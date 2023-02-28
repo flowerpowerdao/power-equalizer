@@ -8,6 +8,7 @@ import AID "../toniq-labs/util/AccountIdentifier";
 import ExtCore "../toniq-labs/ext/Core";
 import Types "types";
 import Utils "../utils";
+import Env "../Env";
 
 module {
   public class Factory(this : Principal, state : Types.StableState, consts : Types.Constants) {
@@ -81,10 +82,11 @@ module {
     *******************/
 
     public func mintCollection(collectionSize : Nat32) {
+      /* for delayedReveal we start with asset 1, as index 0 contains the placeholder and is not being shuffled */
+      let startIndex: Nat32 = if (Env.delayedReveal) { 1 } else { 0 };
       while (getNextTokenId() < collectionSize) {
         putTokenMetadata(getNextTokenId(), #nonfungible({
-          /* we start with asset 1, as index 0 */ /* contains the seed animation and is not being shuffled */
-          metadata = ?Utils.nat32ToBlob(getNextTokenId() + 1)
+          metadata = ?Utils.nat32ToBlob(getNextTokenId() + startIndex)
         }));
         transferTokenToUser(getNextTokenId(), "0000");
         incrementSupply();

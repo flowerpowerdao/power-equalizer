@@ -11,7 +11,7 @@ describe('public sale', () => {
       price: [BigInt(1000)],
       token:  new User().accountId,
       from_subaccount: [],
-      marketplacePrincipal: [],
+      frontendIdentifier: [],
     });
     expect(res['err'].Other).toContain('can not list yet');
   });
@@ -59,10 +59,10 @@ describe('public sale', () => {
     let settings = await user.mainActor.salesSettings(user.accountId);
 
     await Promise.all([
-      await buyFromSale(user),
-      await buyFromSale(user),
-      await buyFromSale(user),
-      await buyFromSale(user),
+      buyFromSale(user),
+      buyFromSale(user),
+      buyFromSale(user),
+      buyFromSale(user),
     ]);
 
     await checkTokenCount(user, 4);
