@@ -50,6 +50,10 @@ module {
   // false - assets will be revealed immediately and assets shuffling will be disabled
   public let delayedReveal = $delayedReveal;
 
+  // true - the entire collection will consists of only one asset, meaning all NFTs look the same
+  // false - there are at least two different assets in the collection
+  public let singleAssetCollection = $singleAssetCollection;
+
   public let whitelistOneTimeOnly : Bool = $whitelistOneTimeOnly; // Whitelist addresses are removed after purchase
   public let whitelistDiscountLimited : Bool = $whitelistDiscountLimited; // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
 
