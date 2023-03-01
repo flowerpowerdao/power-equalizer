@@ -19,6 +19,9 @@ export default {
   // true - assets will be revealed after manually calling 'shuffleAssets'
   // false - assets will be revealed immediately and assets shuffling will be disabled
   delayedReveal: true,
+  // true - the entire collection will consists of only one asset, meaning all NFTs look the same
+  // false - there are at least two different assets in the collection
+  singleAssetCollection: false,
   whitelistOneTimeOnly: true, // Whitelist addresses are removed after purchase
   whitelistDiscountLimited: true, // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
   dutchAuctionEnabled: false,

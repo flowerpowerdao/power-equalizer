@@ -80,15 +80,14 @@ module {
     };
 
     public func addAsset(caller : Principal, asset : Types.Asset) : Nat {
-      assert (
-        caller == consts.minter and (
-          if (Env.singleAssetCollection) {
-            if (Env.delayedReveal) { _assets.size() < 2 } else {
-              _assets.size() == 0;
-            };
-          } else { true },
-        ),
-      );
+      assert (caller == consts.minter);
+      if (Env.singleAssetCollection) {
+        if (Env.delayedReveal) {
+          assert (_assets.size() < 2);
+        } else {
+          assert (_assets.size() == 0);
+        };
+      };
       _assets.add(asset);
       _assets.size() - 1;
     };
