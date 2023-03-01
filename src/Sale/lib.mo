@@ -162,7 +162,7 @@ module {
           price = total;
           subaccount = subaccount;
           buyer = address;
-          expires = Time.now() + Env.ecscrowDelay;
+          expires = Time.now() + Env.escrowDelay;
           slot = getSlot(address);
         },
       );

@@ -9,7 +9,7 @@ export default {
   salesDistribution1: 10125n,
   royalty0: 3375n,
   royalty1: 750n,
-  ecscrowDelay: 120_000_000_000n, // 120 seconds
+  escrowDelay: 120_000_000_000n, // 120 seconds
   collectionSize: 7777n,
   defaultMarketplaceAddr: new User('marketplace').accountId,
   defaultMarketplaceFee: 1000n,
