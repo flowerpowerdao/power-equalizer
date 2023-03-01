@@ -24,10 +24,10 @@
     "test:marketplace": "npm run env marketplace && npm run deploy-qq && npm run mint && vitest run marketplace",
     "test:fees": "npm run env fees && npm run deploy-qq && npm run mint && vitest run fees",
     "test:sold-out": "npm run env sold-out && npm run deploy-qq && npm run mint && vitest run sold-out",
-    "test:single-asset": "npm run env single-asset && npm run deploy-qq && npm run mint && vitest run single-asset",
+    "test:single-asset": "npm run env single-asset && npm run deploy-qq && npm run mint && vitest run single-asset.test.ts",
     "test:multi-asset": "npm run env multi-asset && npm run deploy-qq && npm run mint-2 && vitest run multi-asset",
     "test:single-asset-delayed-reveal": "npm run env single-asset-delayed-reveal && npm run deploy-qq && npm run mint-2 && dfx canister call staging shuffleTokensForSale && vitest run single-asset-delayed-reveal",
-    "test": "npm run single-asset && npm run multi-asset && npm run single-asset-delayed-reveal && npm run test:pending-sale && npm run test:public-sale && npm run test:highload-sale && npm run test:whitelist-sale && npm run test:whitelist-slots && npm run test:marketplace && npm run test:fees && npm run test:sold-out"
+    "test": "npm run test:single-asset && npm run test:multi-asset && npm run test:single-asset-delayed-reveal && npm run test:pending-sale && npm run test:public-sale && npm run test:highload-sale && npm run test:whitelist-sale && npm run test:whitelist-slots && npm run test:marketplace && npm run test:fees && npm run test:sold-out"
   },
   "devDependencies": {
     "@dfinity/agent": "^0.15.0",
