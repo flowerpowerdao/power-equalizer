@@ -2,6 +2,8 @@ import Time "mo:base/Time";
 import ExtCore "../toniq-labs/ext/Core";
 
 module {
+  public let timersInterval = #seconds($timersInterval);
+
   let beneficiary0 : ExtCore.AccountIdentifier = $beneficiary0;
   let beneficiary1 : ExtCore.AccountIdentifier = $beneficiary1;
 
@@ -27,6 +29,22 @@ module {
   public let publicSaleStart : Time.Time = $publicSaleStart; // Start of first purchase (WL or other)
   public let whitelistTime : Time.Time = $whitelistTime; // Period for WL only discount. Set to publicSaleStart for no exclusive period
   public let marketDelay : Time.Time = $marketDelay; // How long to delay market opening (2 days after whitelist sale started or when sold out)
+
+  public type WhitelistSlot = {
+    start : Time.Time;
+    end : Time.Time;
+  };
+
+  // this allows you to create slots for whitelists. one slots can contain multiple whitelist.
+  // the start of the first slot has to be the publicSaleStart, the end of the last slot the whitelistTime
+  let whitelistSlot1 = {
+    start = $whitelistSlot1_start;
+    end = $whitelistSlot1_end;
+  };
+  let whitelistSlot2 = {
+    start = $whitelistSlot2_start;
+    end = $whitelistSlot2_end;
+  };
 
   // true - assets will be revealed after manually calling 'shuffleAssets'
   // false - assets will be revealed immediately and assets shuffling will be disabled
@@ -61,6 +79,7 @@ module {
     name : Text;
     price : Nat64;
     whitelist : [ExtCore.AccountIdentifier];
+    slot : WhitelistSlot;
   };
 
   // order from lower price to higher price
@@ -69,11 +88,13 @@ module {
       name = $whitelistTier0Name;
       price = $whitelistTier0Price;
       whitelist = $whitelistTier0Whitelist;
+      slot = whitelistSlot1;
     },
     {
       name = $whitelistTier1Name;
       price = $whitelistTier1Price;
       whitelist = $whitelistTier1Whitelist;
+      slot = whitelistSlot2;
     },
   ];
 };

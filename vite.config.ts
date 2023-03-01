@@ -3,6 +3,6 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   test: {
-    testTimeout: 60000,
+    testTimeout: 1000 * 60 * 2,
   },
 });

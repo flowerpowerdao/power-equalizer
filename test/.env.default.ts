@@ -2,6 +2,7 @@ import { User } from './user';
 import { beneficiaries, airdrop, whitelistTier0, whitelistTier1 } from './well-known-users';
 
 export default {
+  timersInterval: 10, // seconds
   beneficiary0: beneficiaries[0].accountId,
   beneficiary1: beneficiaries[1].accountId,
   salesDistribution0: 45000n,
@@ -16,6 +17,10 @@ export default {
   publicSaleStart: BigInt(Date.now()) * 1_000_000n, // Start of first purchase (WL or other)
   whitelistTime: BigInt(Date.now()) * 1_000_000n, // Period for WL only discount. Set to publicSaleStart for no exclusive period
   marketDelay: 172_800_000_000_000n, // How long to delay market opening (2 days after whitelist sale started or when sold out)
+  whitelistSlot1_start: BigInt(Date.now()) * 1_000_000n,
+  whitelistSlot1_end: BigInt(Date.now()) * 1_000_000n,
+  whitelistSlot2_start: BigInt(Date.now()) * 1_000_000n,
+  whitelistSlot2_end: BigInt(Date.now()) * 1_000_000n,
   // true - assets will be revealed after manually calling 'shuffleAssets'
   // false - assets will be revealed immediately and assets shuffling will be disabled
   delayedReveal: true,

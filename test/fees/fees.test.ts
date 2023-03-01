@@ -2,13 +2,9 @@ import { AccountIdentifier } from '@dfinity/nns';
 import { describe, test, expect, it } from 'vitest';
 import { ICP_FEE } from '../consts';
 import { User } from '../user';
-import { applyFees, buyFromSale, checkTokenCount, feeOf, tokenIdentifier } from '../utils';
+import { applyFees, buyFromSale, checkTokenCount, feeOf, toAccount, tokenIdentifier } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
 import env from './.env.fees';
-
-let toAccount = (address: string) => {
-  return { account: AccountIdentifier.fromHex(address).toNumbers() };
-}
 
 describe('sale and royalty fees', async () => {
   let price = 1_000_000n;
@@ -115,9 +111,10 @@ describe('sale and royalty fees', async () => {
     expect(await buyer.icpActor.account_balance({ account: buyer.account })).toEqual({ e8s: expectedBalance });
   });
 
-  it('cron settlements and cronDisbursements', async () => {
-    await seller.mainActor.cronSettlements();
-    await seller.mainActor.cronDisbursements();
+  it('wait for timers', async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 3000);
+    });
   });
 
   let transferFees = ICP_FEE * 5n; // 1 seller transfer, 2 marketplace transfers(seller + buyer), 2 royalty transfers

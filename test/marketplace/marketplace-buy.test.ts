@@ -82,9 +82,10 @@ describe('buy on marketplace', async () => {
     expect(await buyer.icpActor.account_balance({ account: buyer.account })).toEqual({ e8s: expectedBalance });
   });
 
-  it('cron settlements', async () => {
-    await seller.mainActor.cronSettlements();
-    await seller.mainActor.cronDisbursements();
+  it('wait for timers', async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 3000);
+    });
   });
 
   it('check seller ICP balance', async () => {
