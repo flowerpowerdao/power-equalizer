@@ -35,11 +35,24 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   *********/
   type AccountIdentifier = ExtCore.AccountIdentifier;
   type SubAccount = ExtCore.SubAccount;
+  type StableChunk = {
+    #v1: {
+      token : TokenTypes.Stable;
+      sale : SaleTypes.Stable;
+      marketplace : MarketplaceTypes.Stable;
+      assets : AssetsTypes.Stable;
+      shuffle : ShuffleTypes.Stable;
+      disburser : DisburserTypes.Stable;
+    };
+  };
 
   /****************
   * STABLE STATE *
   ****************/
 
+  stable var _stableChunks : [var StableChunk] = [var];
+
+  // TODO: remove after upgrade vvv
   // Tokens
   private stable var _tokenState : TokenTypes.StableState = TokenTypes.newStableState();
 
@@ -57,6 +70,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   // Disburser
   private stable var _disburserState : DisburserTypes.StableState = DisburserTypes.newStableState();
+  // TODO: remove after upgrade ^^^
 
   // Cap
   private stable var rootBucketId : ?Text = null;
@@ -67,31 +81,23 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   // timers
   stable var _timerId = 0;
 
-  //State functions
+  // State functions
   system func preupgrade() {
-    // Tokens
-    _tokenState := _Tokens.toStable();
-
-    // Sale
-    _saleState := _Sale.toStable();
-
-    // Marketplace
-    _marketplaceState := _Marketplace.toStable();
-
-    // Assets
-    _assetsState := _Assets.toStable();
-
-    // Shuffle
-    _shuffleState := _Shuffle.toStable();
+    _stableChunks := Array.tabulateVar(_getChunkCount(100_000), func() = toStable(i));
 
     // Canistergeek
     _canistergeekMonitorUD := ?canistergeekMonitor.preupgrade();
-
-    // Disburser
-    _disburserState := _Disburser.toStable();
   };
 
   system func postupgrade() {
+    // TODO: remove after upgrade vvv
+    _Tokens(#legacy(_tokenState));
+    _Sale(#legacy(_saleState));
+    _Marketplace(#legacy(_marketplaceState));
+    _Assets(#legacy(_assetsState));
+    _Shuffle(#legacy(_shuffleState));
+    _Disburser(#legacy(_disburserState));
+
     // Tokens
     _tokenState := TokenTypes.newStableState();
 
@@ -107,14 +113,61 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     // Shuffle
     _shuffleState := ShuffleTypes.newStableState();
 
+    // Disburser
+    _disburserState := DisburserTypes.newStableState();
+    // TODO: remove after upgrade ^^^
+
     // Canistergeek
     canistergeekMonitor.postupgrade(_canistergeekMonitorUD);
     _canistergeekMonitorUD := null;
 
-    // Disburser
-    _disburserState := DisburserTypes.newStableState();
+    for (i in _stableChunks.keys()) {
+      _loadStable(_stableChunks[i]);
+    };
+    _stableChunks := [var];
 
     _setTimers();
+  };
+
+  func _getChunkCount(chunkSize : Nat) : Nat {
+    _Marketplace.getChunkCount(chunkSize);
+  };
+
+  func _toStable(chunkIndex : Nat) : StableChunk {
+    #v1({
+      tokens = _Tokens.toStable(chunkIndex);
+      sale = _Sale.toStable(chunkIndex);
+      marketplace = _Marketplace.toStable(chunkIndex);
+      assets = _Assets.toStable(chunkIndex);
+      shuffle = _Shuffle.toStable(chunkIndex);
+      disburser = _Disburser.toStable(chunkIndex);
+    });
+  };
+
+  func _loadStable(chunk : StableChunk): async () {
+    switch (chunk) {
+      case (#v1(data)) {
+        _Tokens.loadStable(data.tokens);
+        _Sale.loadStable(data.sale);
+        _Marketplace.loadStable(data.marketplace);
+        _Assets.loadStable(data.assets);
+        _Shuffle.loadStable(data.shuffle);
+        _Disburser.loadStable(data.disburser);
+      };
+    };
+  };
+
+  // backup
+  public func getChunkCount(chunkSize : Nat) : async Nat {
+    _getChunkCount(chunkSize);
+  };
+
+  public func backupChunk(chunkIndex : Nat) : async StableChunk {
+    _toStable(chunkIndex);
+  };
+
+  public func restoreChunk(chunk : StableChunk): async () {
+    _loadStable(chunk);
   };
 
   func _setTimers() {
@@ -167,7 +220,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   // Disburser
   let _Disburser = Disburser.Factory(
     cid,
-    _disburserState,
     {
       LEDGER_CANISTER;
     },
@@ -208,7 +260,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   // Tokens
   let _Tokens = Tokens.Factory(
     cid,
-    _tokenState,
     {
       minter = init_minter;
     },
@@ -225,7 +276,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   // Assets
   let _Assets = Assets.Factory(
-    _assetsState,
     {
       minter = init_minter;
     },
@@ -251,7 +301,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   // Shuffle
   let _Shuffle = Shuffle.Factory(
-    _shuffleState,
     {
       _Assets;
       _Tokens;
@@ -271,7 +320,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   // Sale
   let _Sale = Sale.Factory(
     cid,
-    _saleState,
     {
       _Cap;
       _Shuffle;
@@ -352,7 +400,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   // Marketplace
   let _Marketplace = Marketplace.Factory(
     cid,
-    _marketplaceState,
     {
       _Tokens;
       _Cap;

@@ -23,7 +23,7 @@ import Types "types";
 import Utils "../utils";
 
 module {
-  public class Factory(this : Principal, state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
+  public class Factory(this : Principal, deps : Types.Dependencies, consts : Types.Constants) {
 
     /*********
     * STATE *
@@ -34,12 +34,53 @@ module {
     private var _tokenListing : TrieMap.TrieMap<Types.TokenIndex, Types.Listing> = TrieMap.fromEntries(state._tokenListingState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
     private var _frontends : TrieMap.TrieMap<Text, Types.Frontend> = TrieMap.fromEntries(state._frontendsState.vals(), Text.equal, Text.hash);
 
-    public func toStable() : Types.StableState {
-      return {
-        _transactionsState = Buffer.toArray(_transactions);
-        _tokenSettlementState = Iter.toArray(_tokenSettlement.entries());
-        _tokenListingState = Iter.toArray(_tokenListing.entries());
-        _frontendsState = Iter.toArray(_frontends.entries());
+    public func getChunkCount(chunkSize : Nat) {
+      var count = _transactions.size() / chunkSize;
+      if (_transactions.size() % chunkSize != 0) {
+        count += 1;
+      };
+      count;
+    };
+
+    public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
+      if (chunkIndex == 0) {
+        let start = chunkSize * chunkIndex;
+        let transactionChunk = Buffer.subBuffer(_transactions, start, Nat.min(chunkSize, _transactions.size() - start));
+
+        return ?#v1({
+          transactionCount = _transactions.size();
+          transactionChunk;
+          tokenSettlement = Iter.toArray(_tokenSettlement.entries());
+          tokenListing = Iter.toArray(_tokenListing.entries());
+          frontends = Iter.toArray(_frontends.entries());
+        });
+      }
+      else if (chunkIndex <= getChunkCount(chunkSize)) {
+        return ?#v1_chunk({ transactionChunk });
+      };
+      null;
+    };
+
+    public func loadStableChunk(chunk : Types.StableChunk) {
+      switch (chunk) {
+        // TODO: remove after upgrade vvv
+        case (?#legacy(data)) {
+          _transactions := Buffer.fromArray(state._transactionsState);
+          _tokenSettlement := TrieMap.fromEntries(state._tokenSettlementState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+          _tokenListing := TrieMap.fromEntries(state._tokenListingState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+          _frontends := TrieMap.fromEntries(state._frontendsState.vals(), Text.equal, Text.hash);
+        };
+        // TODO: remove after upgrade ^^^
+        case (?#v1(data)) {
+          _transactions := Buffer.Buffer<Types.Transaction>(data.transactionCount);
+          _transactions.append(data.transactionChunk);
+          _tokenSettlement := TrieMap.fromEntries(data.tokenSettlement.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+          _tokenListing := TrieMap.fromEntries(data.tokenListing.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+          _frontends := TrieMap.fromEntries(data.frontends.vals(), Text.equal, Text.hash);
+        };
+        case (?#v1_chunk(data)) {
+          _transactions.append(data.transactionChunk);
+        };
       };
     };
 
