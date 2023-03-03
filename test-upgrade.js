@@ -192,7 +192,7 @@ async function main() {
         const totalEnd = performance.now();
         const elapsed = (totalEnd - totalStart) / 1000;
 
-        console.log(`Took ${elapsed} seconds to execute`);
+        console.log(`Took a total of ${elapsed} seconds to execute`);
 
         let log = {
           gc: canister,
