@@ -20,7 +20,7 @@ module {
     };
   };
 
-  type StableChunk = ?{
+  public type StableChunk = ?{
     #legacy: StableState; // TODO: remove after upgrade
     #v1: {
       transactionCount : Nat;
@@ -40,17 +40,11 @@ module {
   };
 
   public type AccountIdentifier = ExtCore.AccountIdentifier;
-
   public type Time = Time.Time;
-
   public type TokenIdentifier = TokenTypes.TokenIdentifier;
-
   public type Metadata = TokenTypes.Metadata;
-
   public type SubAccount = ExtCore.SubAccount;
-
   public type CommonError = ExtCore.CommonError;
-
   public type TokenIndex = ExtCore.TokenIndex;
 
   public type Transaction = {

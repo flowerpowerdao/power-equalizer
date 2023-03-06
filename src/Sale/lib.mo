@@ -22,33 +22,63 @@ import Types "types";
 import Utils "../utils";
 
 module {
-  public class Factory(this : Principal, state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
+  public class Factory(this : Principal, deps : Types.Dependencies, consts : Types.Constants) {
 
     /*********
     * STATE *
     *********/
 
-    private var _saleTransactions : Buffer.Buffer<Types.SaleTransaction> = Buffer.fromArray<Types.SaleTransaction>(state._saleTransactionsState);
-    private var _salesSettlements : TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale> = TrieMap.fromEntries(state._salesSettlementsState.vals(), AID.equal, AID.hash);
-    private var _failedSales : Buffer.Buffer<(Types.AccountIdentifier, Types.SubAccount)> = Buffer.fromArray<(Types.AccountIdentifier, Types.SubAccount)>(state._failedSalesState);
-    private var _tokensForSale : Buffer.Buffer<Types.TokenIndex> = Buffer.fromArray<Types.TokenIndex>(state._tokensForSaleState);
-    private var _whitelist : Buffer.Buffer<(Nat64, Types.AccountIdentifier, Types.WhitelistSlot)> = Buffer.fromArray<(Nat64, Types.AccountIdentifier, Types.WhitelistSlot)>(state._whitelistStable);
-    private var _soldIcp : Nat64 = state._soldIcpState;
-    private var _sold : Nat = state._soldState;
-    private var _totalToSell : Nat = state._totalToSellState;
-    private var _nextSubAccount : Nat = state._nextSubAccountState;
+    var _saleTransactions = Buffer.Buffer<Types.SaleTransaction>(0);
+    var _salesSettlements = TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale>(AID.equal, AID.hash);
+    var _failedSales = Buffer.Buffer<(Types.AccountIdentifier, Types.SubAccount)>(0);
+    var _tokensForSale = Buffer.Buffer<Types.TokenIndex>(0);
+    var _whitelist = Buffer.Buffer<(Nat64, Types.AccountIdentifier, Types.WhitelistSlot)>(0);
+    var _soldIcp = 0 : Nat64;
+    var _sold = 0 : Nat;
+    var _totalToSell = 0 : Nat;
+    var _nextSubAccount = 0 : Nat;
 
-    public func toStable() : Types.StableState {
-      return {
-        _saleTransactionsState = Buffer.toArray(_saleTransactions);
-        _salesSettlementsState = Iter.toArray(_salesSettlements.entries());
-        _failedSalesState = Buffer.toArray(_failedSales);
-        _tokensForSaleState = Buffer.toArray(_tokensForSale);
-        _whitelistStable = Buffer.toArray(_whitelist);
-        _soldIcpState = _soldIcp;
-        _soldState = _sold;
-        _totalToSellState = _totalToSell;
-        _nextSubAccountState = _nextSubAccount;
+    public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
+      ?#v1({
+        saleTransactions = Buffer.toArray(_saleTransactions);
+        salesSettlements = Iter.toArray(_salesSettlements.entries());
+        failedSales = Buffer.toArray(_failedSales);
+        tokensForSale = Buffer.toArray(_tokensForSale);
+        whitelist = Buffer.toArray(_whitelist);
+        soldIcp = _soldIcp;
+        sold = _sold;
+        totalToSell = _totalToSell;
+        nextSubAccount = _nextSubAccount;
+      });
+    };
+
+    public func loadStableChunk(chunk : Types.StableChunk) {
+      switch (chunk) {
+        // TODO: remove after upgrade vvv
+        case (?#legacy(state)) {
+          _saleTransactions := Buffer.fromArray<Types.SaleTransaction>(state._saleTransactionsState);
+          _salesSettlements := TrieMap.fromEntries(state._salesSettlementsState.vals(), AID.equal, AID.hash);
+          _failedSales := Buffer.fromArray<(Types.AccountIdentifier, Types.SubAccount)>(state._failedSalesState);
+          _tokensForSale := Buffer.fromArray<Types.TokenIndex>(state._tokensForSaleState);
+          _whitelist := Buffer.fromArray<(Nat64, Types.AccountIdentifier, Types.WhitelistSlot)>(state._whitelistStable);
+          _soldIcp := state._soldIcpState;
+          _sold := state._soldState;
+          _totalToSell := state._totalToSellState;
+          _nextSubAccount := state._nextSubAccountState;
+        };
+        // TODO: remove after upgrade ^^^
+        case (?#v1(data)) {
+          _saleTransactions := Buffer.fromArray<Types.SaleTransaction>(data.saleTransactions);
+          _salesSettlements := TrieMap.fromEntries(data.salesSettlements.vals(), AID.equal, AID.hash);
+          _failedSales := Buffer.fromArray<(Types.AccountIdentifier, Types.SubAccount)>(data.failedSales);
+          _tokensForSale := Buffer.fromArray<Types.TokenIndex>(data.tokensForSale);
+          _whitelist := Buffer.fromArray<(Nat64, Types.AccountIdentifier, Types.WhitelistSlot)>(data.whitelist);
+          _soldIcp := data.soldIcp;
+          _sold := data.sold;
+          _totalToSell := data.totalToSell;
+          _nextSubAccount := data.nextSubAccount;
+        };
+        case (null) {};
       };
     };
 

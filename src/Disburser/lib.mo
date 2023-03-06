@@ -13,17 +13,37 @@ import Types "types";
 import Utils "../utils";
 
 module {
-  public class Factory(this : Principal, state : Types.StableState, consts : Types.Constants) {
+  public class Factory(this : Principal, consts : Types.Constants) {
 
     /*********
     * STATE *
     *********/
 
-    private var _disbursements : List.List<Types.Disbursement> = List.fromArray(state._disbursementsState);
+    var _disbursements = List.nil<Types.Disbursement>();
 
     public func toStable() : Types.StableState {
       return {
         _disbursementsState = List.toArray(_disbursements);
+      };
+    };
+
+    public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
+      ?#v1({
+        disbursements = List.toArray(_disbursements);
+      });
+    };
+
+    public func loadStableChunk(chunk : Types.StableChunk) {
+      switch (chunk) {
+        // TODO: remove after upgrade vvv
+        case (?#legacy(state)) {
+          _disbursements := List.fromArray(state._disbursementsState);
+        };
+        // TODO: remove after upgrade ^^^
+        case (?#v1(data)) {
+          _disbursements := List.fromArray(data.disbursements);
+        };
+        case (null) {};
       };
     };
 

@@ -2,6 +2,7 @@ import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
 import List "mo:base/List";
+import Nat "mo:base/Nat";
 import Nat64 "mo:base/Nat64";
 import Nat8 "mo:base/Nat8";
 import TrieMap "mo:base/TrieMap";
@@ -29,12 +30,12 @@ module {
     * STATE *
     *********/
 
-    private var _transactions : Buffer.Buffer<Types.Transaction> = Buffer.fromArray(state._transactionsState);
-    private var _tokenSettlement : TrieMap.TrieMap<Types.TokenIndex, Types.Settlement> = TrieMap.fromEntries(state._tokenSettlementState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-    private var _tokenListing : TrieMap.TrieMap<Types.TokenIndex, Types.Listing> = TrieMap.fromEntries(state._tokenListingState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-    private var _frontends : TrieMap.TrieMap<Text, Types.Frontend> = TrieMap.fromEntries(state._frontendsState.vals(), Text.equal, Text.hash);
+    var _transactions : Buffer.Buffer<Types.Transaction> = Buffer.Buffer(0);
+    var _tokenSettlement : TrieMap.TrieMap<Types.TokenIndex, Types.Settlement> = TrieMap.TrieMap(ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    var _tokenListing : TrieMap.TrieMap<Types.TokenIndex, Types.Listing> = TrieMap.TrieMap(ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    var _frontends : TrieMap.TrieMap<Text, Types.Frontend> = TrieMap.TrieMap(Text.equal, Text.hash);
 
-    public func getChunkCount(chunkSize : Nat) {
+    public func getChunkCount(chunkSize : Nat) : Nat {
       var count = _transactions.size() / chunkSize;
       if (_transactions.size() % chunkSize != 0) {
         count += 1;
@@ -43,10 +44,10 @@ module {
     };
 
     public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
-      if (chunkIndex == 0) {
-        let start = chunkSize * chunkIndex;
-        let transactionChunk = Buffer.subBuffer(_transactions, start, Nat.min(chunkSize, _transactions.size() - start));
+      let start = chunkSize * chunkIndex;
+      let transactionChunk = Buffer.toArray(Buffer.subBuffer(_transactions, start, Nat.min(chunkSize, _transactions.size() - start)));
 
+      if (chunkIndex == 0) {
         return ?#v1({
           transactionCount = _transactions.size();
           transactionChunk;
@@ -57,14 +58,16 @@ module {
       }
       else if (chunkIndex <= getChunkCount(chunkSize)) {
         return ?#v1_chunk({ transactionChunk });
+      }
+      else {
+        null;
       };
-      null;
     };
 
     public func loadStableChunk(chunk : Types.StableChunk) {
       switch (chunk) {
         // TODO: remove after upgrade vvv
-        case (?#legacy(data)) {
+        case (?#legacy(state)) {
           _transactions := Buffer.fromArray(state._transactionsState);
           _tokenSettlement := TrieMap.fromEntries(state._tokenSettlementState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
           _tokenListing := TrieMap.fromEntries(state._tokenListingState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
@@ -73,14 +76,15 @@ module {
         // TODO: remove after upgrade ^^^
         case (?#v1(data)) {
           _transactions := Buffer.Buffer<Types.Transaction>(data.transactionCount);
-          _transactions.append(data.transactionChunk);
+          _transactions.append(Buffer.fromArray(data.transactionChunk));
           _tokenSettlement := TrieMap.fromEntries(data.tokenSettlement.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
           _tokenListing := TrieMap.fromEntries(data.tokenListing.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
           _frontends := TrieMap.fromEntries(data.frontends.vals(), Text.equal, Text.hash);
         };
         case (?#v1_chunk(data)) {
-          _transactions.append(data.transactionChunk);
+          _transactions.append(Buffer.fromArray(data.transactionChunk));
         };
+        case (null) {};
       };
     };
 
