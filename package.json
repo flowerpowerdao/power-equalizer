@@ -27,14 +27,18 @@
     "test:single-asset": "npm run env single-asset && npm run deploy-qq && npm run mint && vitest run single-asset.test.ts",
     "test:multi-asset": "npm run env multi-asset && npm run deploy-qq && npm run mint-2 && vitest run multi-asset",
     "test:single-asset-delayed-reveal": "npm run env single-asset-delayed-reveal && npm run deploy-qq && npm run mint-2 && dfx canister call staging shuffleTokensForSale && vitest run single-asset-delayed-reveal",
-    "test": "npm run test:single-asset && npm run test:multi-asset && npm run test:single-asset-delayed-reveal && npm run test:pending-sale && npm run test:public-sale && npm run test:highload-sale && npm run test:whitelist-sale && npm run test:whitelist-slots && npm run test:marketplace && npm run test:fees && npm run test:sold-out"
+    "test": "npm run test:single-asset && npm run test:multi-asset && npm run test:single-asset-delayed-reveal && npm run test:pending-sale && npm run test:public-sale && npm run test:highload-sale && npm run test:whitelist-sale && npm run test:whitelist-slots && npm run test:marketplace && npm run test:fees && npm run test:sold-out",
+    "backup": "ts-node ./backup/backup.ts",
+    "restore": "ts-node ./backup/restore.ts"
   },
   "devDependencies": {
     "@dfinity/agent": "^0.15.0",
     "@dfinity/identity": "^0.15.0",
-    "@dfinity/identity-secp256k1": "^0.15.1",
+    "@dfinity/identity-secp256k1": "^0.15.4",
     "@dfinity/nns": "^0.10.0",
     "@dfinity/principal": "^0.15.0",
+    "minimist": "^1.2.8",
+    "pem-file": "^1.0.1",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.4",
     "vitest": "^0.25.6"
