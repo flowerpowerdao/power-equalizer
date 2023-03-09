@@ -40,12 +40,17 @@ module {
       if (_transactions.size() % chunkSize != 0) {
         count += 1;
       };
-      count;
+      Nat.max(1, count);
     };
 
     public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
       let start = chunkSize * chunkIndex;
-      let transactionChunk = Buffer.toArray(Buffer.subBuffer(_transactions, start, Nat.min(chunkSize, _transactions.size() - start)));
+      let transactionChunk = if (_transactions.size() == 0) {
+        []
+      }
+      else {
+        Buffer.toArray(Buffer.subBuffer(_transactions, start, Nat.min(chunkSize, _transactions.size() - start)));
+      };
 
       if (chunkIndex == 0) {
         return ?#v1({

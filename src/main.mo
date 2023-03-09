@@ -4,6 +4,9 @@ import Array "mo:base/Array";
 import Result "mo:base/Result";
 import Time "mo:base/Time";
 import Timer "mo:base/Timer";
+import Debug "mo:base/Debug";
+import Random "mo:base/Random";
+import Nat "mo:base/Nat";
 
 import Canistergeek "mo:canistergeek/canistergeek";
 import Cap "mo:cap/Cap";
@@ -28,8 +31,6 @@ import DisburserTypes "Disburser/types";
 import Utils "./utils";
 import LedgerTypes "Ledger/types";
 import Env "./Env";
-import Debug "mo:base/Debug";
-import Random "mo:base/Random";
 
 shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCanister {
 
@@ -137,7 +138,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   };
 
   func _getChunkCount(chunkSize : Nat) : Nat {
-    _Marketplace.getChunkCount(chunkSize);
+    Nat.max(1, _Marketplace.getChunkCount(chunkSize));
   };
 
   func _toStableChunk(chunkSize : Nat, chunkIndex : Nat) : StableChunk {
