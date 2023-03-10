@@ -579,7 +579,7 @@ type Canister =
                                 Settlement;
                               }) query;
    availableCycles: () -> (nat) query;
-   backupChunk: (nat, nat) -> (StableChunk);
+   backupChunk: (nat, nat) -> (StableChunk) query;
    balance: (BalanceRequest) -> (BalanceResponse) query;
    bearer: (TokenIdentifier__3) -> (Result_9) query;
    cronDisbursements: () -> ();
@@ -595,13 +595,14 @@ type Canister =
            AccountIdentifier__4;
            SubAccount__1;
          }) query;
+   finishRestore: () -> ();
    frontends: () -> (vec record {
                            text;
                            Frontend;
                          });
    getCanistergeekInformation: (GetInformationRequest) ->
     (GetInformationResponse) query;
-   getChunkCount: (nat) -> (nat);
+   getChunkCount: (nat) -> (nat) query;
    getDisbursements: () -> (vec Disbursement) query;
    getMinter: () -> (principal) query;
    getRegistry: () -> (vec record {

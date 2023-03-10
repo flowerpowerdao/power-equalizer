@@ -1,40 +1,21 @@
 import fs from 'fs';
 import path from 'path';
 import minimist from 'minimist';
-import { Actor, HttpAgent } from '@dfinity/agent';
+import { Principal } from '@dfinity/principal';
 
-// @ts-ignore
-import { idlFactory as idlFactoryMain } from '../declarations/main/staging.did.js';
-import { _SERVICE as _SERVICE_MAIN } from '../declarations/main/staging.did';
+import { getActor } from './actor.js';
 
 let argv = minimist(process.argv.slice(2));
 let network = argv.network || 'local';
-let host = network == 'ic' ? 'https://ic0.app' : 'http://127.0.0.1:4943';
-let out = argv.out || new Date().toISOString().replaceAll(':', '-').replace('T', '_').replace('Z', '').slice(0, -4);
+let file = argv.file || new Date().toISOString().replaceAll(':', '-').replace('T', '_').replace('Z', '').slice(0, -4) + '.json';
 let chunkSize = argv['chunk-size'] ? BigInt(argv['chunk-size']) : 10_000n;
 
-let canisterId = '';
-if (network == 'ic') {
-  canisterId = JSON.parse(fs.readFileSync('canister_ids.json').toString()).production.ic;
-}
-else {
-  canisterId = JSON.parse(fs.readFileSync('.dfx/local/canister_ids.json').toString()).staging.local;
-}
+let mainActor = getActor(network);
 
-let agent = new HttpAgent({ host });
-if (network == 'local') {
-  agent.fetchRootKey();
-}
-
-let mainActor = Actor.createActor(idlFactoryMain, {
-  agent: agent,
-  canisterId,
-});
-
-let backup = async () => {
+export let backup = async ({network, file, chunkSize}) => {
   console.log(`Network: ${network}`);
   console.log(`Chunk size: ${chunkSize}`);
-  console.log(`Backup name: ${out}`);
+  console.log(`Backup file: ${file}`);
 
   let chunkCount = await mainActor.getChunkCount(chunkSize);
 
@@ -43,27 +24,26 @@ let backup = async () => {
   let chunks = [];
   for (let i = 0; i < chunkCount; i++) {
     console.log(`Loading chunk ${i + 1}`);
-    let chunk = await mainActor.backupChunk(chunkSize, i);
+    let chunk = await mainActor.backupChunk(chunkSize, BigInt(i));
     chunks.push(chunk);
   }
 
   fs.mkdirSync(path.resolve('backup/data/'), {recursive: true});
-  fs.writeFileSync(`backup/data/${out}.json`, JSON.stringify(chunks, (_, val) => {
-    if (typeof val === 'bigint') {
-      return { _isBigInt: true, _str: String(val) };
-    }
-    else if (val instanceof Uint8Array) {
+  fs.writeFileSync(`backup/data/${file}`, JSON.stringify(chunks, (_, val) => {
+    if (val instanceof Uint8Array) {
       return Array.from(val)
-    }
-    else if (val instanceof Uint32Array) {
+    } else if (val instanceof Uint32Array) {
       return Array.from(val)
-    }
-    else {
+    } else if (typeof val === 'bigint') {
+      return `###bigint:${String(val)}`;
+    } else if (val instanceof Principal) {
+      return `###principal:${val.toText()}`;
+    } else {
       return val;
     }
   }, '  '));
 
-  console.log(`Backup successfully saved to backup/data/${out}.json`);
+  console.log(`Backup successfully saved to backup/data/${file}`);
 }
 
-backup();
+backup({network, file, chunkSize});

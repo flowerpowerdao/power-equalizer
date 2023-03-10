@@ -166,8 +166,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   };
 
   // backup
-  stable var restoreEnabled = false;
-  // stable var restoreKey = "";
+  var restoreEnabled = Env.restoreEnabled;
 
   public query func getChunkCount(chunkSize : Nat) : async Nat {
     _getChunkCount(chunkSize);
@@ -187,7 +186,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   public shared ({ caller }) func finishRestore(): async () {
     assert (caller == init_minter);
-    _trapIfRestoring();
+    if (restoreEnabled == false) {
+      Debug.trap("Restore disabled");
+    };
     restoreEnabled := false;
   };
 

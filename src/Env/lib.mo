@@ -2,6 +2,7 @@ import Time "mo:base/Time";
 import ExtCore "../toniq-labs/ext/Core";
 
 module {
+  public let restoreEnabled = false; // must be 'false' (see backup/README.md for details)
   public let timersInterval = #seconds(5);
 
   let beneficiary0 : ExtCore.AccountIdentifier = "58842a4424f706f3465e8d9aa7bb6507a1c2d8810b1a9f43f0c94087b62b86ed";
