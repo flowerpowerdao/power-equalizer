@@ -3,16 +3,21 @@ import path from 'path';
 import minimist from 'minimist';
 import { Principal } from '@dfinity/principal';
 
-import { getActor } from './actor.js';
+import { getActor } from './actor';
 import { type StableChunk } from '../declarations/main/staging.did';
-
+import {decode} from './pem';
 
 let argv = minimist(process.argv.slice(2));
 let network = argv.network || 'local';
 let file = argv.file;
+let pemData = argv.pem;
 
 if (!file) {
   throw new Error('Missing --file argument')
+}
+
+if (!pemData) {
+  throw new Error('Missing --pem argument')
 }
 
 let filePath = path.resolve(__dirname, 'data', file);
@@ -20,10 +25,12 @@ if (!fs.existsSync(filePath)) {
   throw new Error(`File ${filePath} not found`);
 }
 
-let mainActor = getActor(network);
+let identity = decode(pemData);
+let mainActor = getActor(network, identity);
 
 export let restore = async ({network, file}) => {
   console.log(`Network: ${network}`);
+  console.log(`Identity: ${identity.getPrincipal().toText()}`);
   console.log(`Backup file: ${file}`);
 
   let text = fs.readFileSync(filePath).toString();

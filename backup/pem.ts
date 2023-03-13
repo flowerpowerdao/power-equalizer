@@ -1,6 +1,6 @@
 import fs from 'fs';
-import {Ed25519KeyIdentity} from '@dfinity/identity';
-import {Secp256k1KeyIdentity} from '@dfinity/identity-secp256k1';
+import { Ed25519KeyIdentity } from '@dfinity/identity';
+import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 import pemfile from 'pem-file';
 
 export function decodeFile(file: string) {
