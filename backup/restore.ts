@@ -51,8 +51,6 @@ export let restore = async ({network, file}) => {
     await mainActor.restoreChunk(chunks[i]);
   }
 
-  await mainActor.finishRestore();
-
   console.log(`Restore successful`);
 }
 

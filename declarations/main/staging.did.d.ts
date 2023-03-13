@@ -38,7 +38,6 @@ export interface Canister {
   'enableSale' : ActorMethod<[], bigint>,
   'extensions' : ActorMethod<[], Array<Extension>>,
   'failedSales' : ActorMethod<[], Array<[AccountIdentifier__4, SubAccount__1]>>,
-  'finishRestore' : ActorMethod<[], undefined>,
   'frontends' : ActorMethod<[], Array<[string, Frontend]>>,
   'getCanistergeekInformation' : ActorMethod<
     [GetInformationRequest],

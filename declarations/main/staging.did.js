@@ -484,7 +484,6 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(AccountIdentifier__4, SubAccount__1))],
         ['query'],
       ),
-    'finishRestore' : IDL.Func([], [], []),
     'frontends' : IDL.Func([], [IDL.Vec(IDL.Tuple(IDL.Text, Frontend))], []),
     'getCanistergeekInformation' : IDL.Func(
         [GetInformationRequest],
