@@ -595,7 +595,6 @@ type Canister =
            AccountIdentifier__4;
            SubAccount__1;
          }) query;
-   finishRestore: () -> ();
    frontends: () -> (vec record {
                            text;
                            Frontend;
@@ -617,6 +616,7 @@ type Canister =
                            TokenIndex;
                            Metadata__1;
                          }) query;
+   grow: (nat) -> (nat);
    http_request: (HttpRequest) -> (HttpResponse) query;
    http_request_streaming_callback: (HttpStreamingCallbackToken) ->
     (HttpStreamingCallbackResponse) query;

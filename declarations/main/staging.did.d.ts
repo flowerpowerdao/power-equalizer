@@ -49,6 +49,7 @@ export interface Canister {
   'getRegistry' : ActorMethod<[], Array<[TokenIndex, AccountIdentifier__2]>>,
   'getTokenToAssetMapping' : ActorMethod<[], Array<[TokenIndex, string]>>,
   'getTokens' : ActorMethod<[], Array<[TokenIndex, Metadata__1]>>,
+  'grow' : ActorMethod<[bigint], bigint>,
   'http_request' : ActorMethod<[HttpRequest], HttpResponse>,
   'http_request_streaming_callback' : ActorMethod<
     [HttpStreamingCallbackToken],

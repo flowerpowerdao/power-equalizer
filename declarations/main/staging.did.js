@@ -508,6 +508,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(TokenIndex, Metadata__1))],
         ['query'],
       ),
+    'grow' : IDL.Func([IDL.Nat], [IDL.Nat], []),
     'http_request' : IDL.Func([HttpRequest], [HttpResponse], ['query']),
     'http_request_streaming_callback' : IDL.Func(
         [HttpStreamingCallbackToken],

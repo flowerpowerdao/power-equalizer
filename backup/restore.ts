@@ -5,7 +5,7 @@ import { Principal } from '@dfinity/principal';
 
 import { getActor } from './actor';
 import { type StableChunk } from '../declarations/main/staging.did';
-import {decode} from './pem';
+import { decode } from './pem';
 
 let argv = minimist(process.argv.slice(2));
 let network = argv.network || 'local';

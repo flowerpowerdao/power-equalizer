@@ -3,7 +3,7 @@ import path from 'path';
 import minimist from 'minimist';
 import { Principal } from '@dfinity/principal';
 
-import { getActor } from './actor.js';
+import { getActor } from './actor';
 
 let argv = minimist(process.argv.slice(2));
 let network = argv.network || 'local';
