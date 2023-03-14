@@ -52,6 +52,11 @@ let additions = [
   , version = "v0.0.7"
   , dependencies = ["base"] : List Text
   },
+  { name = "fuzz"
+  , repo = "https://github.com/ZenVoich/fuzz"
+  , version = "main"
+  , dependencies = ["base"] : List Text
+  },
 ] : List Package
 
 let overrides = [] : List Package
