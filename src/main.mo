@@ -496,6 +496,11 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     _Marketplace.frontends();
   };
 
+  public shared ({ caller }) func grow(n : Nat) : async Nat {
+    assert (Env.test);
+    _Marketplace.grow(n);
+  };
+
   // queries
   public query func details(token : MarketplaceTypes.TokenIdentifier) : async Result.Result<(MarketplaceTypes.AccountIdentifier, ?MarketplaceTypes.Listing), MarketplaceTypes.CommonError> {
     _Marketplace.details(token);

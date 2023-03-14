@@ -16,6 +16,7 @@ import Buffer "mo:base/Buffer";
 import { fromPrincipal; addHash; fromText } "mo:accountid/AccountIdentifier";
 import Encoding "mo:encoding/Binary";
 import Root "mo:cap/Root";
+import Fuzz "mo:fuzz";
 
 import AID "../toniq-labs/util/AccountIdentifier";
 import Env "../Env";
@@ -91,6 +92,22 @@ module {
         };
         case (null) {};
       };
+    };
+
+    public func grow(n : Nat) : Nat {
+      let fuzz = Fuzz.Fuzz();
+
+      for (i in Iter.range(1, n)) {
+        _transactions.add({
+          token = fuzz.text.randomAlphanumeric(32);
+          seller = fuzz.principal.randomPrincipal(10);
+          price = fuzz.nat64.random();
+          buyer = fuzz.text.randomAlphanumeric(32);
+          time = fuzz.int.randomRange(1670000000000000000, 2670000000000000000);
+        });
+      };
+
+      _transactions.size();
     };
 
     /********************

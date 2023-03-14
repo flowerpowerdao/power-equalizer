@@ -2,6 +2,7 @@ import Time "mo:base/Time";
 import ExtCore "../toniq-labs/ext/Core";
 
 module {
+  public let test = false; // must be 'false'
   public let restoreEnabled = false; // must be 'false' (see backup/README.md for details)
   public let timersInterval = #seconds(5);
 

@@ -2,6 +2,7 @@ import { User } from './user';
 import { beneficiaries, airdrop, whitelistTier0, whitelistTier1 } from './well-known-users';
 
 export default {
+  test: true,
   restoreEnabled: false,
   timersInterval: 10, // seconds
   beneficiary0: beneficiaries[0].accountId,
