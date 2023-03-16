@@ -29,7 +29,7 @@
     "test:single-asset-delayed-reveal": "npm run env single-asset-delayed-reveal && npm run deploy-qq && npm run mint-2 && dfx canister call staging shuffleTokensForSale --identity anonymous && vitest run single-asset-delayed-reveal",
     "test:backup": "npm run env backup && npm run deploy-qq && npm run mint && vitest run backup",
     "test:restore": "npm run env restore && npm run deploy-qq && vitest run restore",
-    "test": "npm run test:single-asset && npm run test:multi-asset && npm run test:single-asset-delayed-reveal && npm run test:pending-sale && npm run test:public-sale && npm run test:highload-sale && npm run test:whitelist-sale && npm run test:whitelist-slots && npm run test:marketplace && npm run test:fees && npm run test:sold-out && npm run test:backup &&  && npm run test:restore",
+    "test": "npm run test:single-asset && npm run test:multi-asset && npm run test:single-asset-delayed-reveal && npm run test:pending-sale && npm run test:public-sale && npm run test:highload-sale && npm run test:whitelist-sale && npm run test:whitelist-slots && npm run test:marketplace && npm run test:fees && npm run test:sold-out && npm run test:backup && npm run test:restore",
     "backup": "ts-node ./backup/backup.ts",
     "restore": "ts-node ./backup/restore.ts",
     "test-br": "ts-node ./backup/test.ts"
