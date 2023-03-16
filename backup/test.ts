@@ -7,33 +7,32 @@ let network = 'local';
 let mainActor = getActor(network);
 
 let test = async () => {
-  let growSize = 20_000n;
-  let chunkSize = 30_000n;
+  let growSize = 2_001n;
+  let growCount = 6;
+  let chunkSize = 10_020n;
 
   console.log('Reinstall');
-  execSync('npm run deploy:staging');
+  execSync('npm run deploy:staging -- -qqqq');
 
-  let curSize = 0n;
-  for (let i = 0; i < 50; i++) {
-    console.log(`Grow up to ${curSize + growSize}`);
-    await mainActor.grow(growSize);
-    curSize += growSize;
+  for (let i = 0; i < growCount; i++) {
+    let count = await mainActor.grow(growSize);
+    console.log(`Grown to ${count}`);
   }
 
   console.log('Backup before');
-  execSync(`npm run backup -- --file a.json --chunk-size ${chunkSize}`);
+  execSync(`npm run backup -- --file a.json --chunk-size ${chunkSize}`, { stdio: 'inherit' });
 
   console.log('Reinstall');
-  execSync('npm run deploy:staging');
+  execSync('npm run deploy:staging -- -qqqq');
 
-  console.log('Backup before');
-  execSync('npm run restore -- --file a.json --pem');
+  console.log('Restore');
+  execSync('npm run restore -- --file a.json', { stdio: 'inherit' });
 
   console.log('Backup after');
-  execSync(`npm run backup -- --file b.json --chunk-size ${chunkSize}`);
+  execSync(`npm run backup -- --file b.json --chunk-size ${chunkSize}`, { stdio: 'inherit' });
 
   console.log('Compare backups');
-  if (readFileSync('a.json').toString() !== readFileSync('b.json').toString()) {
+  if (readFileSync(__dirname + '/data/a.json').toString() !== readFileSync(__dirname + '/data/b.json').toString()) {
     throw 'a.json and b.json backups are different!';
   }
 

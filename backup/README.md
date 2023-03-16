@@ -15,6 +15,9 @@ The backup file will be saved in `data` folder.
 
 `--chunk-size <size>` - chunk size(number of items). *Default* `10000`
 
+Chunk size > 30k => backup fails
+Chunk size > 15k => restore fails
+
 ### Example with arguments
 ```
 npm run backup -- --network ic --file 2023-01-01.json --chunk-size 5000

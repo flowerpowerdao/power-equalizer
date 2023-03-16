@@ -9,6 +9,7 @@ let argv = minimist(process.argv.slice(2));
 let network = argv.network || 'local';
 let file = argv.file || new Date().toISOString().replaceAll(':', '-').replace('T', '_').replace('Z', '').slice(0, -4) + '.json';
 let chunkSize = argv['chunk-size'] ? BigInt(argv['chunk-size']) : 10_000n;
+let pretty = network == 'local';
 
 let mainActor = getActor(network);
 
@@ -31,9 +32,9 @@ export let backup = async ({network, file, chunkSize}) => {
   fs.mkdirSync(path.resolve('backup/data/'), {recursive: true});
   fs.writeFileSync(`backup/data/${file}`, JSON.stringify(chunks, (_, val) => {
     if (val instanceof Uint8Array) {
-      return Array.from(val)
+      return Array.from(val);
     } else if (val instanceof Uint32Array) {
-      return Array.from(val)
+      return Array.from(val);
     } else if (typeof val === 'bigint') {
       return `###bigint:${String(val)}`;
     } else if (val instanceof Principal) {
@@ -41,7 +42,7 @@ export let backup = async ({network, file, chunkSize}) => {
     } else {
       return val;
     }
-  }, '  '));
+  }, pretty && '  '));
 
   console.log(`Backup successfully saved to backup/data/${file}`);
 }

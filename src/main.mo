@@ -89,6 +89,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   // State functions
   system func preupgrade() {
     let chunkSize = 100_000;
+
     _stableChunks := Array.tabulateVar<StableChunk>(_getChunkCount(chunkSize), func(i : Nat) {
       _toStableChunk(chunkSize, i);
     });
