@@ -72,14 +72,6 @@ module {
 
     public func loadStableChunk(chunk : Types.StableChunk) {
       switch (chunk) {
-        // TODO: remove after upgrade vvv
-        case (?#legacy(state)) {
-          _transactions := Buffer.fromArray(state._transactionsState);
-          _tokenSettlement := TrieMap.fromEntries(state._tokenSettlementState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-          _tokenListing := TrieMap.fromEntries(state._tokenListingState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-          _frontends := TrieMap.fromEntries(state._frontendsState.vals(), Text.equal, Text.hash);
-        };
-        // TODO: remove after upgrade ^^^
         case (?#v1(data)) {
           _transactions := Buffer.Buffer<Types.Transaction>(data.transactionCount);
           _transactions.append(Buffer.fromArray(data.transactionChunk));

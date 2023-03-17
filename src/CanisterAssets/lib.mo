@@ -27,11 +27,6 @@ module {
 
     public func loadStableChunk(chunk : Types.StableChunk) {
       switch (chunk) {
-        // TODO: remove after upgrade vvv
-        case (?#legacy(state)) {
-          _assets := Buffer.fromArray(state._assetsState);
-        };
-        // TODO: remove after upgrade ^^^
         case (?#v1(data)) {
           _assets := Buffer.fromArray(data.assets);
         };

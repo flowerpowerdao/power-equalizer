@@ -40,12 +40,6 @@ export const idlFactory = ({ IDL }) => {
     'buyer' : AccountIdentifier__1,
     'price' : IDL.Nat64,
   });
-  const StableState__2 = IDL.Record({
-    '_frontendsState' : IDL.Vec(IDL.Tuple(IDL.Text, Frontend)),
-    '_tokenSettlementState' : IDL.Vec(IDL.Tuple(TokenIndex__1, Settlement)),
-    '_transactionsState' : IDL.Vec(Transaction),
-    '_tokenListingState' : IDL.Vec(IDL.Tuple(TokenIndex__1, Listing)),
-  });
   const StableChunk__3 = IDL.Opt(
     IDL.Variant({
       'v1' : IDL.Record({
@@ -56,29 +50,17 @@ export const idlFactory = ({ IDL }) => {
         'transactionCount' : IDL.Nat,
       }),
       'v1_chunk' : IDL.Record({ 'transactionChunk' : IDL.Vec(Transaction) }),
-      'legacy' : StableState__2,
     })
   );
-  const StableState = IDL.Record({ '_assetsState' : IDL.Vec(Asset) });
   const StableChunk__1 = IDL.Opt(
-    IDL.Variant({
-      'v1' : IDL.Record({ 'assets' : IDL.Vec(Asset) }),
-      'legacy' : StableState,
-    })
+    IDL.Variant({ 'v1' : IDL.Record({ 'assets' : IDL.Vec(Asset) }) })
   );
-  const Time__1 = IDL.Int;
-  const TokenIndex__2 = IDL.Nat32;
   const AccountIdentifier__4 = IDL.Text;
-  const SaleTransaction = IDL.Record({
-    'time' : Time__1,
-    'seller' : IDL.Principal,
-    'tokens' : IDL.Vec(TokenIndex__2),
-    'buyer' : AccountIdentifier__4,
-    'price' : IDL.Nat64,
-  });
   const Time__2 = IDL.Int;
   const WhitelistSlot = IDL.Record({ 'end' : Time__2, 'start' : Time__2 });
+  const Time__1 = IDL.Int;
   const SubAccount__1 = IDL.Vec(IDL.Nat8);
+  const TokenIndex__2 = IDL.Nat32;
   const Sale = IDL.Record({
     'expires' : Time__1,
     'slot' : IDL.Opt(WhitelistSlot),
@@ -87,25 +69,16 @@ export const idlFactory = ({ IDL }) => {
     'buyer' : AccountIdentifier__4,
     'price' : IDL.Nat64,
   });
-  const StableState__3 = IDL.Record({
-    '_salesSettlementsState' : IDL.Vec(IDL.Tuple(AccountIdentifier__4, Sale)),
-    '_soldIcpState' : IDL.Nat64,
-    '_saleTransactionsState' : IDL.Vec(SaleTransaction),
-    '_totalToSellState' : IDL.Nat,
-    '_soldState' : IDL.Nat,
-    '_tokensForSaleState' : IDL.Vec(TokenIndex__2),
-    '_failedSalesState' : IDL.Vec(
-      IDL.Tuple(AccountIdentifier__4, SubAccount__1)
-    ),
-    '_nextSubAccountState' : IDL.Nat,
-    '_whitelistStable' : IDL.Vec(
-      IDL.Tuple(IDL.Nat64, AccountIdentifier__4, WhitelistSlot)
-    ),
+  const SaleTransaction = IDL.Record({
+    'time' : Time__1,
+    'seller' : IDL.Principal,
+    'tokens' : IDL.Vec(TokenIndex__2),
+    'buyer' : AccountIdentifier__4,
+    'price' : IDL.Nat64,
   });
   const StableChunk__4 = IDL.Opt(
     IDL.Variant({
       'v1' : IDL.Record({
-        'saleTransactions' : IDL.Vec(SaleTransaction),
         'whitelist' : IDL.Vec(
           IDL.Tuple(IDL.Nat64, AccountIdentifier__4, WhitelistSlot)
         ),
@@ -113,11 +86,15 @@ export const idlFactory = ({ IDL }) => {
         'totalToSell' : IDL.Nat,
         'failedSales' : IDL.Vec(IDL.Tuple(AccountIdentifier__4, SubAccount__1)),
         'sold' : IDL.Nat,
+        'saleTransactionChunk' : IDL.Vec(SaleTransaction),
+        'saleTransactionCount' : IDL.Nat,
         'nextSubAccount' : IDL.Nat,
         'soldIcp' : IDL.Nat64,
         'tokensForSale' : IDL.Vec(TokenIndex__2),
       }),
-      'legacy' : StableState__3,
+      'v1_chunk' : IDL.Record({
+        'saleTransactionChunk' : IDL.Vec(SaleTransaction),
+      }),
     })
   );
   const AccountIdentifier__5 = IDL.Text;
@@ -129,13 +106,9 @@ export const idlFactory = ({ IDL }) => {
     'fromSubaccount' : SubAccount__2,
     'amount' : IDL.Nat64,
   });
-  const StableState__1 = IDL.Record({
-    '_disbursementsState' : IDL.Vec(Disbursement),
-  });
   const StableChunk__2 = IDL.Opt(
     IDL.Variant({
       'v1' : IDL.Record({ 'disbursements' : IDL.Vec(Disbursement) }),
-      'legacy' : StableState__1,
     })
   );
   const AccountIdentifier__6 = IDL.Text;
@@ -150,15 +123,6 @@ export const idlFactory = ({ IDL }) => {
     'nonfungible' : IDL.Record({ 'metadata' : IDL.Opt(IDL.Vec(IDL.Nat8)) }),
   });
   const Balance__2 = IDL.Nat;
-  const StableState__5 = IDL.Record({
-    '_nextTokenIdState' : TokenIndex__4,
-    '_ownersState' : IDL.Vec(
-      IDL.Tuple(AccountIdentifier__6, IDL.Vec(TokenIndex__4))
-    ),
-    '_supplyState' : Balance__2,
-    '_registryState' : IDL.Vec(IDL.Tuple(TokenIndex__4, AccountIdentifier__6)),
-    '_tokenMetadataState' : IDL.Vec(IDL.Tuple(TokenIndex__4, Metadata)),
-  });
   const StableChunk__6 = IDL.Opt(
     IDL.Variant({
       'v1' : IDL.Record({
@@ -170,15 +134,10 @@ export const idlFactory = ({ IDL }) => {
         'registry' : IDL.Vec(IDL.Tuple(TokenIndex__4, AccountIdentifier__6)),
         'nextTokenId' : TokenIndex__4,
       }),
-      'legacy' : StableState__5,
     })
   );
-  const StableState__4 = IDL.Record({ '_isShuffledState' : IDL.Bool });
   const StableChunk__5 = IDL.Opt(
-    IDL.Variant({
-      'v1' : IDL.Record({ 'isShuffled' : IDL.Bool }),
-      'legacy' : StableState__4,
-    })
+    IDL.Variant({ 'v1' : IDL.Record({ 'isShuffled' : IDL.Bool }) })
   );
   const StableChunk = IDL.Variant({
     'v1' : IDL.Record({

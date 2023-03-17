@@ -19,22 +19,9 @@ module {
   };
 
   public type StableChunk = ?{
-    #legacy: StableState; // TODO: remove after upgrade
     #v1: {
       disbursements : [Disbursement];
     };
-  };
-
-  // TODO: remove after upgrade
-  public func newStableState() : StableState {
-    return {
-      _disbursementsState = [];
-    };
-  };
-
-  // TODO: remove after upgrade
-  public type StableState = {
-    _disbursementsState : [Disbursement];
   };
 
   public type Constants = {

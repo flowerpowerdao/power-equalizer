@@ -4,19 +4,7 @@ import ExtCommon "../toniq-labs/ext/Common";
 import ExtCore "../toniq-labs/ext/Core";
 
 module {
-  // TODO: remove after upgrade
-  public func newStableState() : StableState {
-    return {
-      _tokenMetadataState : [(TokenIndex, Metadata)] = [];
-      _ownersState : [(AccountIdentifier, [TokenIndex])] = [];
-      _registryState : [(TokenIndex, AccountIdentifier)] = [];
-      _nextTokenIdState : TokenIndex = 0;
-      _supplyState : Balance = 0;
-    };
-  };
-
   public type StableChunk = ?{
-    #legacy: StableState; // TODO: remove after upgrade
     #v1: {
       tokenMetadata : [(TokenIndex, Metadata)];
       owners : [(AccountIdentifier, [TokenIndex])];
@@ -41,15 +29,6 @@ module {
     seller : Principal;
     price : Nat64;
     locked : ?Time;
-  };
-
-  // TODO: remove after upgrade
-  public type StableState = {
-    _tokenMetadataState : [(TokenIndex, Metadata)];
-    _ownersState : [(AccountIdentifier, [TokenIndex])];
-    _registryState : [(TokenIndex, AccountIdentifier)];
-    _nextTokenIdState : TokenIndex;
-    _supplyState : Balance;
   };
 
   public type Constants = {

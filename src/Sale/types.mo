@@ -10,23 +10,7 @@ import LedgerTypes "../Ledger/types";
 import Env "../Env"
 
 module {
-  // TODO: remove after upgrade
-  public func newStableState() : StableState {
-    return {
-      _saleTransactionsState : [SaleTransaction] = [];
-      _salesSettlementsState : [(AccountIdentifier, Sale)] = [];
-      _failedSalesState : [(AccountIdentifier, SubAccount)] = [];
-      _tokensForSaleState : [TokenIndex] = [];
-      _whitelistStable : [(Nat64, AccountIdentifier, WhitelistSlot)] = [];
-      _soldIcpState : Nat64 = 0;
-      _soldState : Nat = 0;
-      _totalToSellState : Nat = 0;
-      _nextSubAccountState : Nat = 0;
-    };
-  };
-
   public type StableChunk = ?{
-    #legacy: StableState; // TODO: remove after upgrade
     #v1: {
       saleTransactionCount : Nat;
       saleTransactionChunk : [SaleTransaction];
@@ -42,19 +26,6 @@ module {
     #v1_chunk: {
       saleTransactionChunk : [SaleTransaction];
     };
-  };
-
-  // TODO: remove after upgrade
-  public type StableState = {
-    _saleTransactionsState : [SaleTransaction];
-    _salesSettlementsState : [(AccountIdentifier, Sale)];
-    _failedSalesState : [(AccountIdentifier, SubAccount)];
-    _tokensForSaleState : [TokenIndex];
-    _whitelistStable : [(Nat64, AccountIdentifier, WhitelistSlot)];
-    _soldIcpState : Nat64;
-    _soldState : Nat;
-    _totalToSellState : Nat;
-    _nextSubAccountState : Nat;
   };
 
   public type Dependencies = {

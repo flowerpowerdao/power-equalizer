@@ -70,95 +70,33 @@ type StatusRequest =
    heap_memory_size: bool;
    memory_size: bool;
  };
-type StableState__5 = 
- record {
-   _nextTokenIdState: TokenIndex__4;
-   _ownersState: vec record {
-                       AccountIdentifier__6;
-                       vec TokenIndex__4;
-                     };
-   _registryState: vec record {
-                         TokenIndex__4;
-                         AccountIdentifier__6;
-                       };
-   _supplyState: Balance__2;
-   _tokenMetadataState: vec record {
-                              TokenIndex__4;
-                              Metadata;
-                            };
- };
-type StableState__4 = record {_isShuffledState: bool;};
-type StableState__3 = 
- record {
-   _failedSalesState: vec record {
-                            AccountIdentifier__4;
-                            SubAccount__1;
-                          };
-   _nextSubAccountState: nat;
-   _saleTransactionsState: vec SaleTransaction;
-   _salesSettlementsState: vec record {
-                                 AccountIdentifier__4;
-                                 Sale;
-                               };
-   _soldIcpState: nat64;
-   _soldState: nat;
-   _tokensForSaleState: vec TokenIndex__2;
-   _totalToSellState: nat;
-   _whitelistStable: vec record {
-                           nat64;
-                           AccountIdentifier__4;
-                           WhitelistSlot;
-                         };
- };
-type StableState__2 = 
- record {
-   _frontendsState: vec record {
-                          text;
-                          Frontend;
-                        };
-   _tokenListingState: vec record {
-                             TokenIndex__1;
-                             Listing;
-                           };
-   _tokenSettlementState: vec record {
-                                TokenIndex__1;
-                                Settlement;
+type StableChunk__6 = opt
+                       variant {
+                         v1:
+                          record {
+                            nextTokenId: TokenIndex__4;
+                            owners:
+                             vec
+                              record {
+                                AccountIdentifier__6;
+                                vec TokenIndex__4;
                               };
-   _transactionsState: vec Transaction;
- };
-type StableState__1 = record {_disbursementsState: vec Disbursement;};
-type StableState = record {_assetsState: vec Asset;};
-type StableChunk__6 = 
- opt
-  variant {
-    legacy: StableState__5;
-    v1:
-     record {
-       nextTokenId: TokenIndex__4;
-       owners: vec record {
-                     AccountIdentifier__6;
-                     vec TokenIndex__4;
-                   };
-       registry: vec record {
-                       TokenIndex__4;
-                       AccountIdentifier__6;
-                     };
-       supply: Balance__2;
-       tokenMetadata: vec record {
-                            TokenIndex__4;
-                            Metadata;
-                          };
-     };
-  };
-type StableChunk__5 = 
- opt variant {
-       legacy: StableState__4;
-       v1: record {isShuffled: bool;};
-     };
+                            registry:
+                             vec record {
+                                   TokenIndex__4;
+                                   AccountIdentifier__6;
+                                 };
+                            supply: Balance__2;
+                            tokenMetadata:
+                             vec record {
+                                   TokenIndex__4;
+                                   Metadata;
+                                 };
+                          };};
+type StableChunk__5 = opt variant {v1: record {isShuffled: bool;};};
 type StableChunk__4 = 
  opt
   variant {
-    legacy: StableState__3;
     v1:
      record {
        failedSales: vec record {
@@ -166,7 +104,8 @@ type StableChunk__4 =
                           SubAccount__1;
                         };
        nextSubAccount: nat;
-       saleTransactions: vec SaleTransaction;
+       saleTransactionChunk: vec SaleTransaction;
+       saleTransactionCount: nat;
        salesSettlements: vec record {
                                AccountIdentifier__4;
                                Sale;
@@ -181,11 +120,11 @@ type StableChunk__4 =
                         WhitelistSlot;
                       };
      };
+    v1_chunk: record {saleTransactionChunk: vec SaleTransaction;};
   };
 type StableChunk__3 = 
  opt
   variant {
-    legacy: StableState__2;
     v1:
      record {
        frontends: vec record {
@@ -205,17 +144,10 @@ type StableChunk__3 =
      };
     v1_chunk: record {transactionChunk: vec Transaction;};
   };
-type StableChunk__2 = 
- opt
-  variant {
-    legacy: StableState__1;
-    v1: record {disbursements: vec Disbursement;};
-  };
-type StableChunk__1 = 
- opt variant {
-       legacy: StableState;
-       v1: record {assets: vec Asset;};
-     };
+type StableChunk__2 = opt
+                       variant {
+                         v1: record {disbursements: vec Disbursement;};};
+type StableChunk__1 = opt variant {v1: record {assets: vec Asset;};};
 type StableChunk = variant {
                      v1:
                       record {

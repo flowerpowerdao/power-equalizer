@@ -10,18 +10,7 @@ import Disburser "../Disburser";
 import LedgerTypes "../Ledger/types";
 
 module {
-  // TODO: remove after upgrade
-  public func newStableState() : StableState {
-    return {
-      _transactionsState : [Transaction] = [];
-      _tokenSettlementState : [(TokenTypes.TokenIndex, Settlement)] = [];
-      _tokenListingState : [(TokenTypes.TokenIndex, Listing)] = [];
-      _frontendsState : [(Text, Frontend)] = [];
-    };
-  };
-
   public type StableChunk = ?{
-    #legacy: StableState; // TODO: remove after upgrade
     #v1: {
       transactionCount : Nat;
       transactionChunk : [Transaction];
@@ -77,14 +66,6 @@ module {
     from_subaccount : ?SubAccount;
     price : ?Nat64;
     frontendIdentifier : ?Text;
-  };
-
-  // TODO: remove after upgrade
-  public type StableState = {
-    _transactionsState : [Transaction];
-    _tokenSettlementState : [(TokenIndex, Settlement)];
-    _tokenListingState : [(TokenIndex, Listing)];
-    _frontendsState : [(Text, Frontend)];
   };
 
   public type Dependencies = {

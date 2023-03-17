@@ -57,26 +57,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   stable var _stableChunks : [var StableChunk] = [var];
 
-  // TODO: remove after upgrade vvv
-  // Tokens
-  private stable var _tokenState : TokenTypes.StableState = TokenTypes.newStableState();
-
-  // Sale
-  private stable var _saleState : SaleTypes.StableState = SaleTypes.newStableState();
-
-  // Marketplace
-  private stable var _marketplaceState : MarketplaceTypes.StableState = MarketplaceTypes.newStableState();
-
-  // Assets
-  private stable var _assetsState : AssetsTypes.StableState = AssetsTypes.newStableState();
-
-  // Shuffle
-  private stable var _shuffleState : ShuffleTypes.StableState = ShuffleTypes.newStableState();
-
-  // Disburser
-  private stable var _disburserState : DisburserTypes.StableState = DisburserTypes.newStableState();
-  // TODO: remove after upgrade ^^^
-
   // Cap
   private stable var rootBucketId : ?Text = null;
 
@@ -99,33 +79,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   };
 
   system func postupgrade() {
-    // TODO: remove after upgrade vvv
-    _Tokens.loadStableChunk(?#legacy(_tokenState));
-    _Sale.loadStableChunk(?#legacy(_saleState));
-    _Marketplace.loadStableChunk(?#legacy(_marketplaceState));
-    _Assets.loadStableChunk(?#legacy(_assetsState));
-    _Shuffle.loadStableChunk(?#legacy(_shuffleState));
-    _Disburser.loadStableChunk(?#legacy(_disburserState));
-
-    // Tokens
-    _tokenState := TokenTypes.newStableState();
-
-    // Sale
-    _saleState := SaleTypes.newStableState();
-
-    // Marketplace
-    _marketplaceState := MarketplaceTypes.newStableState();
-
-    // Assets
-    _assetsState := AssetsTypes.newStableState();
-
-    // Shuffle
-    _shuffleState := ShuffleTypes.newStableState();
-
-    // Disburser
-    _disburserState := DisburserTypes.newStableState();
-    // TODO: remove after upgrade ^^^
-
     // Canistergeek
     canistergeekMonitor.postupgrade(_canistergeekMonitorUD);
     _canistergeekMonitorUD := null;
