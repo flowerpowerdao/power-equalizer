@@ -379,17 +379,19 @@ export type StableChunk__3 = [] | [
 export type StableChunk__4 = [] | [
   {
       'v1' : {
-        'saleTransactions' : Array<SaleTransaction>,
         'whitelist' : Array<[bigint, AccountIdentifier__4, WhitelistSlot]>,
         'salesSettlements' : Array<[AccountIdentifier__4, Sale]>,
         'totalToSell' : bigint,
         'failedSales' : Array<[AccountIdentifier__4, SubAccount__1]>,
         'sold' : bigint,
+        'saleTransactionChunk' : Array<SaleTransaction>,
+        'saleTransactionCount' : bigint,
         'nextSubAccount' : bigint,
         'soldIcp' : bigint,
         'tokensForSale' : Uint32Array | number[],
       }
     } |
+    { 'v1_chunk' : { 'saleTransactionChunk' : Array<SaleTransaction> } } |
     { 'legacy' : StableState__3 }
 ];
 export type StableChunk__5 = [] | [

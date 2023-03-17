@@ -166,7 +166,8 @@ type StableChunk__4 =
                           SubAccount__1;
                         };
        nextSubAccount: nat;
-       saleTransactions: vec SaleTransaction;
+       saleTransactionChunk: vec SaleTransaction;
+       saleTransactionCount: nat;
        salesSettlements: vec record {
                                AccountIdentifier__4;
                                Sale;
@@ -181,6 +182,7 @@ type StableChunk__4 =
                         WhitelistSlot;
                       };
      };
+    v1_chunk: record {saleTransactionChunk: vec SaleTransaction;};
   };
 type StableChunk__3 = 
  opt

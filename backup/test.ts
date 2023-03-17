@@ -19,7 +19,7 @@ let test = async () => {
     console.log(`Grown to ${count}`);
   }
 
-  console.log('Backup before');
+  console.log('Backup to a.json');
   execSync(`npm run backup -- --file a.json --chunk-size ${chunkSize}`, { stdio: 'inherit' });
 
   console.log('Reinstall');
@@ -28,7 +28,7 @@ let test = async () => {
   console.log('Restore');
   execSync('npm run restore -- --file a.json', { stdio: 'inherit' });
 
-  console.log('Backup after');
+  console.log('Backup to b.json');
   execSync(`npm run backup -- --file b.json --chunk-size ${chunkSize}`, { stdio: 'inherit' });
 
   console.log('Compare backups');
