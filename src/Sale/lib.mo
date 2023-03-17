@@ -1,7 +1,7 @@
 import Array "mo:base/Array";
 import Iter "mo:base/Iter";
 import List "mo:base/List";
-import Nat "mo:base/Nat16";
+import Nat "mo:base/Nat";
 import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
 import Option "mo:base/Option";
@@ -15,6 +15,7 @@ import { isSome } "mo:base/Option";
 
 import AviateAccountIdentifier "mo:accountid/AccountIdentifier";
 import Root "mo:cap/Root";
+import Fuzz "mo:fuzz";
 
 import AID "../toniq-labs/util/AccountIdentifier";
 import Env "../Env";
@@ -38,18 +39,43 @@ module {
     var _totalToSell = 0 : Nat;
     var _nextSubAccount = 0 : Nat;
 
+    public func getChunkCount(chunkSize : Nat) : Nat {
+      var count: Nat = _saleTransactions.size() / chunkSize;
+      if (_saleTransactions.size() % chunkSize != 0) {
+        count += 1;
+      };
+      Nat.max(1, count);
+    };
+
     public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
-      ?#v1({
-        saleTransactions = Buffer.toArray(_saleTransactions);
-        salesSettlements = Iter.toArray(_salesSettlements.entries());
-        failedSales = Buffer.toArray(_failedSales);
-        tokensForSale = Buffer.toArray(_tokensForSale);
-        whitelist = Buffer.toArray(_whitelist);
-        soldIcp = _soldIcp;
-        sold = _sold;
-        totalToSell = _totalToSell;
-        nextSubAccount = _nextSubAccount;
-      });
+      let start = chunkSize * chunkIndex;
+      let saleTransactionChunk = if (_saleTransactions.size() == 0) {
+        []
+      }
+      else {
+        Buffer.toArray(Buffer.subBuffer(_saleTransactions, start, Nat.min(chunkSize, _saleTransactions.size() - start)));
+      };
+
+      if (chunkIndex == 0) {
+        ?#v1({
+          saleTransactionCount = _saleTransactions.size();
+          saleTransactionChunk;
+          salesSettlements = Iter.toArray(_salesSettlements.entries());
+          failedSales = Buffer.toArray(_failedSales);
+          tokensForSale = Buffer.toArray(_tokensForSale);
+          whitelist = Buffer.toArray(_whitelist);
+          soldIcp = _soldIcp;
+          sold = _sold;
+          totalToSell = _totalToSell;
+          nextSubAccount = _nextSubAccount;
+        });
+      }
+      else if (chunkIndex <= getChunkCount(chunkSize)) {
+        return ?#v1_chunk({ saleTransactionChunk });
+      }
+      else {
+        null;
+      };
     };
 
     public func loadStableChunk(chunk : Types.StableChunk) {
@@ -68,7 +94,8 @@ module {
         };
         // TODO: remove after upgrade ^^^
         case (?#v1(data)) {
-          _saleTransactions := Buffer.fromArray<Types.SaleTransaction>(data.saleTransactions);
+          _saleTransactions := Buffer.Buffer<Types.SaleTransaction>(data.saleTransactionCount);
+          _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
           _salesSettlements := TrieMap.fromEntries(data.salesSettlements.vals(), AID.equal, AID.hash);
           _failedSales := Buffer.fromArray<(Types.AccountIdentifier, Types.SubAccount)>(data.failedSales);
           _tokensForSale := Buffer.fromArray<Types.TokenIndex>(data.tokensForSale);
@@ -78,8 +105,27 @@ module {
           _totalToSell := data.totalToSell;
           _nextSubAccount := data.nextSubAccount;
         };
+        case (?#v1_chunk(data)) {
+          _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
+        };
         case (null) {};
       };
+    };
+
+    public func grow(n : Nat) : Nat {
+      let fuzz = Fuzz.Fuzz();
+
+      for (i in Iter.range(1, n)) {
+        _saleTransactions.add({
+          tokens = [fuzz.nat32.random()];
+          seller = fuzz.principal.randomPrincipal(10);
+          price = fuzz.nat64.random();
+          buyer = fuzz.text.randomAlphanumeric(32);
+          time = fuzz.int.randomRange(1670000000000000000, 2670000000000000000);
+        });
+      };
+
+      _saleTransactions.size();
     };
 
     // *** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /

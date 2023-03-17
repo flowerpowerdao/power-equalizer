@@ -139,7 +139,9 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   };
 
   func _getChunkCount(chunkSize : Nat) : Nat {
-    Nat.max(1, _Marketplace.getChunkCount(chunkSize));
+    var count = Nat.max(1, _Marketplace.getChunkCount(chunkSize));
+    count := Nat.max(count, _Sale.getChunkCount(chunkSize));
+    count;
   };
 
   func _toStableChunk(chunkSize : Nat, chunkIndex : Nat) : StableChunk {
@@ -499,6 +501,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   public shared ({ caller }) func grow(n : Nat) : async Nat {
     assert (Env.test);
+    ignore _Sale.grow(n);
     _Marketplace.grow(n);
   };
 

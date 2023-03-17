@@ -28,7 +28,8 @@ module {
   public type StableChunk = ?{
     #legacy: StableState; // TODO: remove after upgrade
     #v1: {
-      saleTransactions : [SaleTransaction];
+      saleTransactionCount : Nat;
+      saleTransactionChunk : [SaleTransaction];
       salesSettlements : [(AccountIdentifier, Sale)];
       failedSales : [(AccountIdentifier, SubAccount)];
       tokensForSale : [TokenIndex];
@@ -37,6 +38,9 @@ module {
       sold : Nat;
       totalToSell : Nat;
       nextSubAccount : Nat;
+    };
+    #v1_chunk: {
+      saleTransactionChunk : [SaleTransaction];
     };
   };
 
