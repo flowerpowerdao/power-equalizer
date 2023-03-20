@@ -115,6 +115,9 @@ module {
     };
 
     public func reserve(amount : Nat64, quantity : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount) : Result.Result<(Types.AccountIdentifier, Nat64), Text> {
+      if (Env.openEdition and Time.now() > Env.saleEnd) {
+        return #err("The sale has ended");
+      };
       if (Time.now() < Env.publicSaleStart) {
         return #err("The sale has not started yet");
       };

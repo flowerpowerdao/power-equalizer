@@ -3,6 +3,7 @@ import Principal "mo:base/Principal";
 import TrieMap "mo:base/TrieMap";
 import Result "mo:base/Result";
 import Buffer "mo:base/Buffer";
+import Debug "mo:base/Debug";
 
 import AID "../toniq-labs/util/AccountIdentifier";
 import ExtCore "../toniq-labs/ext/Core";
@@ -82,6 +83,22 @@ module {
     *******************/
 
     public func mintCollection(collectionSize : Nat32) {
+      if (Env.openEdition and Env.saleEnd == 0) {
+        Debug.trap("Open edition must have a sale end date");
+      };
+      if (Env.openEdition and Env.collectionSize != 0) {
+        Debug.trap("Open edition must have a collection size of 0");
+      };
+      if (Env.openEdition and not Env.singleAssetCollection) {
+        Debug.trap("Open edition must be a single asset collection");
+      };
+      if (not Env.openEdition and Env.saleEnd != 0) {
+        Debug.trap("Sale end date must be 0 for non-open editions");
+      };
+      if (not Env.openEdition and Env.collectionSize == 0) {
+        Debug.trap("Collection size must be greater than 0 for non-open editions");
+      };
+
       /* for delayedReveal we start with asset 1, as index 0 contains the placeholder and is not being shuffled */
       let startIndex : Nat32 = if (Env.delayedReveal) { 1 } else { 0 };
       while (getNextTokenId() < collectionSize) {
