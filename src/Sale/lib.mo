@@ -400,6 +400,9 @@ module {
 
     // getters & setters
     public func availableTokens() : Nat {
+      if (Env.openEdition) {
+        return 1;
+      };
       _tokensForSale.size();
     };
 
@@ -469,6 +472,14 @@ module {
     };
 
     func nextTokens(qty : Nat64) : [Types.TokenIndex] {
+      if (Env.openEdition) {
+        deps._Tokens.mintNextToken();
+        _tokensForSale := switch (deps._Tokens.getTokensFromOwner("0000")) {
+          case (?t) t;
+          case (_) Buffer.Buffer<Types.TokenIndex>(0);
+        };
+      };
+
       if (_tokensForSale.size() >= Nat64.toNat(qty)) {
         var ret : List.List<Types.TokenIndex> = List.nil();
         while (List.size(ret) < Nat64.toNat(qty)) {
