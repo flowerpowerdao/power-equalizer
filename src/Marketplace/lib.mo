@@ -117,6 +117,15 @@ module {
         return #err(#Other("Listing is locked"));
       };
 
+      switch (frontendIdentifier) {
+        case (?frontendIdentifier) {
+          if (_frontends.get(frontendIdentifier) == null) {
+            return #err(#Other("Unknown frontend identifier"));
+          };
+        };
+        case (null) {};
+      };
+
       let listing = switch (_tokenListing.get(token)) {
         case (?listing) { listing };
         case (null) {
@@ -305,6 +314,15 @@ module {
 
       if (_isLocked(token)) {
         return #err(#Other("Listing is locked"));
+      };
+
+      switch (request.frontendIdentifier) {
+        case (?frontendIdentifier) {
+          if (_frontends.get(frontendIdentifier) == null) {
+            return #err(#Other("Unknown frontend identifier"));
+          };
+        };
+        case (null) {};
       };
 
       switch (_tokenSettlement.get(token)) {
