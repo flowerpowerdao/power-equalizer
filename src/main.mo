@@ -132,9 +132,13 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
     if (Env.delayedReveal) {
       let revealTime = Env.publicSaleStart + Env.revealDelay;
-      var delay = Int.abs(Int.max(0, revealTime - Time.now()));
+      let delay = Int.abs(Int.max(0, revealTime - Time.now()));
 
-      _revealTimerId := Timer.setTimer(#nanoseconds(delay), func(): async () {
+      // add random delay up to 60 minutes
+      let minute = 1_000_000_000 * 60;
+      let randDelay = Int.abs(Time.now() % 60 * minute);
+
+      _revealTimerId := Timer.setTimer(#nanoseconds(delay + randDelay), func(): async () {
         ignore _Shuffle.shuffleAssets();
       });
     };
