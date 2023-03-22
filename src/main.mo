@@ -1,6 +1,7 @@
 import Cycles "mo:base/ExperimentalCycles";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
+import Int "mo:base/Int";
 import Time "mo:base/Time";
 import Timer "mo:base/Timer";
 
@@ -66,6 +67,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   // timers
   stable var _timerId = 0;
+  stable var _revealTimerId = 0;
 
   //State functions
   system func preupgrade() {
@@ -119,6 +121,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   func _setTimers() {
     Timer.cancelTimer(_timerId);
+    Timer.cancelTimer(_revealTimerId);
 
     _timerId := Timer.recurringTimer(Env.timersInterval, func(): async () {
       ignore cronSettlements();
@@ -126,6 +129,15 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
       ignore cronSalesSettlements();
       ignore cronFailedSales();
     });
+
+    if (Env.delayedReveal) {
+      let revealTime = Env.publicSaleStart + Env.revealDelay;
+      var delay = Int.abs(Int.max(0, revealTime - Time.now()));
+
+      _revealTimerId := Timer.setTimer(#nanoseconds(delay), func(): async () {
+        ignore _Shuffle.shuffleAssets();
+      });
+    };
   };
 
   /*************
@@ -260,13 +272,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
       minter = init_minter;
     },
   );
-
-  public shared ({ caller }) func shuffleAssets() : async () {
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    // prevents double shuffle
-    await _Shuffle.shuffleAssets(caller);
-  };
 
   // Sale
   let _Sale = Sale.Factory(

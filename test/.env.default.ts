@@ -21,9 +21,11 @@ export default {
   whitelistSlot1_end: BigInt(Date.now()) * 1_000_000n,
   whitelistSlot2_start: BigInt(Date.now()) * 1_000_000n,
   whitelistSlot2_end: BigInt(Date.now()) * 1_000_000n,
-  // true - assets will be revealed after manually calling 'shuffleAssets'
+  // true - assets will be revealed after 'revealDelay'
   // false - assets will be revealed immediately and assets shuffling will be disabled
   delayedReveal: true,
+  // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
+  revealDelay: 86400000000000n, // 86400000000000 == 24 hours
   // true - the entire collection will consists of only one asset, meaning all NFTs look the same
   // false - there are at least two different assets in the collection
   singleAssetCollection: false,
