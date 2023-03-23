@@ -129,6 +129,12 @@ describe('list and buy on different marketplace frontends', async () => {
     yumiBalance += yumiFee;
   });
 
+  it('wait for timers', async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 3000);
+    });
+  });
+
   it('check marketplaces royalty fee disbursement', async () => {
     expect(await seller.icpActor.account_balance({ account: yumi.account })).toEqual({ e8s: feeOf(price - transferFees, yumiBalance) });
     expect(await seller.icpActor.account_balance({ account: jelly.account })).toEqual({ e8s: feeOf(price - transferFees, jellyBalance) });
@@ -137,6 +143,12 @@ describe('list and buy on different marketplace frontends', async () => {
   it('buy on Yumi token #1 listed on Yumi', async () => {
     await buyFromMarketplace(buyer, tokenIdentifier(tokens[1]), price, ['yumi']);
     yumiBalance += yumiFee * 2n;
+  });
+
+  it('wait for timers', async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 3000);
+    });
   });
 
   it('check marketplaces royalty fee disbursement', async () => {
@@ -150,6 +162,12 @@ describe('list and buy on different marketplace frontends', async () => {
     jellyBalance += jellyFee;
   });
 
+  it('wait for timers', async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 3000);
+    });
+  });
+
   it('check marketplaces royalty fee disbursement', async () => {
     expect(await seller.icpActor.account_balance({ account: yumi.account })).toEqual({ e8s: feeOf(price - transferFees, yumiBalance) });
     expect(await seller.icpActor.account_balance({ account: jelly.account })).toEqual({ e8s: feeOf(price - transferFees, jellyBalance) });
@@ -158,6 +176,12 @@ describe('list and buy on different marketplace frontends', async () => {
   it('buy on Jelly token #3 listed on Jelly', async () => {
     await buyFromMarketplace(buyer, tokenIdentifier(tokens[3]), price, ['jelly']);
     jellyBalance += jellyFee * 2n;
+  });
+
+  it('wait for timers', async () => {
+    await new Promise((resolve) => {
+      setTimeout(resolve, 3000);
+    });
   });
 
   it('check marketplaces royalty fee disbursement', async () => {
