@@ -370,7 +370,7 @@ module {
 
     public func salesSettings(address : Types.AccountIdentifier) : Types.SaleSettings {
       var startTime = Env.whitelistTime;
-      var endTime: Int = 0;
+      var endTime: Int = Env.saleEnd;
       // for whitelisted user return nearest and cheapest slot start time
       label l for (item in _whitelist.vals()) {
         if (item.1 == address and Time.now() <= item.2.end) {
