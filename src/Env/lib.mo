@@ -30,6 +30,13 @@ module {
   public let whitelistTime : Time.Time = 1677345075058000000; // Period for WL only discount. Set to publicSaleStart for no exclusive period
   public let marketDelay : Time.Time = 172800000000000; // How long to delay market opening (2 days after whitelist sale started or when sold out)
 
+  // open edition
+  // true - no definite collection size and can be minted in an ongoing effort until 'saleEnd' (need to set collectionSize = 0)
+  // false - fixed collection size
+  public let openEdition = false;
+  // when the sale ends (set to '0' if openEdition = false)
+  public let saleEnd : Time.Time = 0;
+
   public type WhitelistSlot = {
     start : Time.Time;
     end : Time.Time;

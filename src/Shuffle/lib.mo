@@ -38,7 +38,7 @@ module {
       var currentIndex : Nat = deps._Assets.size();
 
       // shuffle the assets array using the random beacon
-      while (currentIndex != 1) {
+      while (currentIndex > 1) {
         // use a random number to calculate a random index between 0 and currentIndex
         var randomIndex = randGen.next() % currentIndex;
         assert (randomIndex < currentIndex);
@@ -64,7 +64,7 @@ module {
       // get the number of available tokens
       var currentIndex : Nat = tokens.size();
 
-      while (currentIndex != 1) {
+      while (currentIndex > 1) {
         // use a random number to calculate a random index between 0 and currentIndex
         var randomIndex = randGen.next() % currentIndex;
         assert (randomIndex < currentIndex);
