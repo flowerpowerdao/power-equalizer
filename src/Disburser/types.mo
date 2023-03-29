@@ -4,7 +4,6 @@ import Assets "../CanisterAssets";
 import ExtCore "../toniq-labs/ext/Core";
 import Tokens "../Tokens";
 import TokenTypes "../Tokens/types";
-import LedgerTypes "../Ledger/types";
 
 module {
   public type AccountIdentifier = ExtCore.AccountIdentifier;
@@ -28,9 +27,5 @@ module {
 
   public type StableState = {
     _disbursementsState : [Disbursement];
-  };
-
-  public type Constants = {
-    LEDGER_CANISTER : LedgerTypes.LEDGER_CANISTER;
   };
 };

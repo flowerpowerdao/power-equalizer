@@ -6,7 +6,6 @@ import ExtCore "../toniq-labs/ext/Core";
 import Shuffle "../Shuffle";
 import Tokens "../Tokens";
 import Disburser "../Disburser";
-import LedgerTypes "../Ledger/types";
 import Env "../Env"
 
 module {
@@ -45,7 +44,6 @@ module {
   };
 
   public type Constants = {
-    LEDGER_CANISTER : LedgerTypes.LEDGER_CANISTER;
     minter : Principal;
   };
 
@@ -63,7 +61,9 @@ module {
 
   public type Time = Time.Time;
 
-  public type Tokens = LedgerTypes.Tokens;
+  public type Tokens = {
+    e8s : Nat64;
+  };
 
   public type Sale = {
     tokens : [TokenIndex];
