@@ -2,7 +2,7 @@ import Time "mo:base/Time";
 import ExtCore "../toniq-labs/ext/Core";
 
 module {
-  public let timersInterval = #seconds(10);
+  public let timersInterval = #seconds(5);
 
   let beneficiary0 : ExtCore.AccountIdentifier = "58842a4424f706f3465e8d9aa7bb6507a1c2d8810b1a9f43f0c94087b62b86ed";
   let beneficiary1 : ExtCore.AccountIdentifier = "24fc8fbcf345bc6a2ba14bbd323fc041c8ad400cc48b1e69cb53dd612afd0d81";
@@ -10,7 +10,7 @@ module {
   public let collectionName = "Pineapple Punks";
   public let placeholderContentLength = "1053832";
   public let escrowDelay : Time.Time = 120000000000; // 120 seconds
-  public let collectionSize : Nat32 = 7777;
+  public let collectionSize : Nat32 = 100000;
 
   public let salePrice : Nat64 = 700000000;
 
@@ -26,8 +26,8 @@ module {
 
   public let defaultMarketplaceFee = ("ccfe146bb249b6c59e8c5ae71a1b59ddf85d9f9034611427b696f8b25d7b826a", 1000 : Nat64); // Entrepot Fee
 
-  public let publicSaleStart : Time.Time = 4105119600000000000; // Start of first purchase (WL or other)
-  public let whitelistTime : Time.Time = 4105119600000000000; // Period for WL only discount. Set to publicSaleStart for no exclusive period
+  public let publicSaleStart : Time.Time = 1680278366274000000; // Start of first purchase (WL or other)
+  public let whitelistTime : Time.Time = 1680278366274000000; // Period for WL only discount. Set to publicSaleStart for no exclusive period
   public let marketDelay : Time.Time = 172800000000000; // How long to delay market opening (2 days after whitelist sale started or when sold out)
 
   // open edition
@@ -45,12 +45,12 @@ module {
   // this allows you to create slots for whitelists. one slots can contain multiple whitelist.
   // the start of the first slot has to be the publicSaleStart, the end of the last slot the whitelistTime
   let whitelistSlot1 = {
-    start = 4105119600000000000;
-    end = 8210239200000000000;
+    start = 1680278366274000000;
+    end = 1680278366274000000;
   };
   let whitelistSlot2 = {
-    start = 4105119600000000000;
-    end = 8210239200000000000;
+    start = 1680278366274000000;
+    end = 1680278366274000000;
   };
 
   // true - assets will be revealed after manually calling 'shuffleAssets'
