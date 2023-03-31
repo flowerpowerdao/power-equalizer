@@ -391,6 +391,7 @@ module {
         whitelistTime = Env.whitelistTime;
         whitelist = isWhitelisted(address);
         bulkPricing = getAddressBulkPrice(address);
+        openEdition = Env.openEdition;
       } : Types.SaleSettings;
     };
 
