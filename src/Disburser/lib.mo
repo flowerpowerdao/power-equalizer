@@ -1,3 +1,5 @@
+import Ledger "canister:ledger";
+
 import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Random "mo:base/Random";
@@ -13,7 +15,7 @@ import Types "types";
 import Utils "../utils";
 
 module {
-  public class Factory(this : Principal, state : Types.StableState, consts : Types.Constants) {
+  public class Factory(this : Principal, state : Types.StableState) {
 
     /*********
     * STATE *
@@ -45,10 +47,10 @@ module {
             _disbursements := newDisbursements;
 
             try {
-              var res = await consts.LEDGER_CANISTER.transfer({
+              var res = await Ledger.transfer({
                 to = switch (AviateAccountIdentifier.fromText(disbursement.to)) {
                   case (#ok(accountId)) {
-                    AviateAccountIdentifier.addHash(accountId);
+                    Blob.fromArray(AviateAccountIdentifier.addHash(accountId));
                   };
                   case (#err(_)) {
                     // this should never happen because account ids are always created from within the
@@ -57,7 +59,7 @@ module {
                     continue payloop;
                   };
                 };
-                from_subaccount = ?disbursement.fromSubaccount;
+                from_subaccount = ?Blob.fromArray(disbursement.fromSubaccount);
                 amount = { e8s = disbursement.amount };
                 fee = { e8s = 10000 };
                 created_at_time = null;
