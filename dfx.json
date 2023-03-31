@@ -1,34 +1,39 @@
 {
-    "version": 1,
-    "canisters": {
-        "staging": {
-            "type": "motoko",
-            "main": "src/main.mo",
-            "declarations": {
-                "output": "declarations/main"
-            }
-        },
-        "ledger": {
-            "type": "custom",
-            "wasm": "./declarations/ledger/ledger.wasm",
-            "candid": "./declarations/ledger/ledger.private.did",
-            "build": "",
-            "remote": {
-                "candid": "./declarations/ledger/ledger.public.did",
-                "id": {
-                    "ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
-                }
-            }
-        },
-        "production": {
-            "type": "motoko",
-            "main": "src/main.mo"
-        }
+  "version": 1,
+  "canisters": {
+    "staging": {
+      "type": "motoko",
+      "main": "src/main.mo",
+      "declarations": {
+        "output": "declarations/main"
+      },
+      "dependencies": [
+        "ledger"
+      ]
     },
-    "defaults": {
-        "build": {
-            "packtool": "vessel sources",
-            "args": "--trap-on-call-error"
+    "ledger": {
+      "type": "custom",
+      "wasm": "declarations/ledger/ledger.wasm",
+      "candid": "declarations/ledger/ledger.public.did",
+      "remote": {
+        "candid": "declarations/ledger/ledger.public.did",
+        "id": {
+          "ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
         }
+      }
+    },
+    "production": {
+      "type": "motoko",
+      "main": "src/main.mo",
+      "dependencies": [
+        "ledger"
+      ]
     }
+  },
+  "defaults": {
+    "build": {
+      "packtool": "vessel sources",
+      "args": "--trap-on-call-error"
+    }
+  }
 }
