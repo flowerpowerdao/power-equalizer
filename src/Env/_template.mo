@@ -53,9 +53,11 @@ module {
     end = $whitelistSlot2_end;
   };
 
-  // true - assets will be revealed after manually calling 'shuffleAssets'
+  // true - assets will be revealed after 'revealDelay'
   // false - assets will be revealed immediately and assets shuffling will be disabled
   public let delayedReveal = $delayedReveal;
+  // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
+  public let revealDelay : Time.Time = $revealDelay; // 86400000000000 == 24 hours
 
   // true - the entire collection will consists of only one asset, meaning all NFTs look the same
   // false - there are at least two different assets in the collection
