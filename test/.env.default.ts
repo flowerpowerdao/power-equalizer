@@ -19,13 +19,21 @@ export default {
   publicSaleStart: BigInt(Date.now()) * 1_000_000n, // Start of first purchase (WL or other)
   whitelistTime: BigInt(Date.now()) * 1_000_000n, // Period for WL only discount. Set to publicSaleStart for no exclusive period
   marketDelay: 172_800_000_000_000n, // How long to delay market opening (2 days after whitelist sale started or when sold out)
+  // open edition
+  // true - no definite collection size and can be minted in an ongoing effort until 'saleEnd' (need to set collectionSize = 0)
+  // false - fixed collection size
+  openEdition: false,
+  // when the sale ends (set to '0' if openEdition = false)
+  saleEnd: 0,
   whitelistSlot1_start: BigInt(Date.now()) * 1_000_000n,
   whitelistSlot1_end: BigInt(Date.now()) * 1_000_000n,
   whitelistSlot2_start: BigInt(Date.now()) * 1_000_000n,
   whitelistSlot2_end: BigInt(Date.now()) * 1_000_000n,
-  // true - assets will be revealed after manually calling 'shuffleAssets'
+  // true - assets will be revealed after 'revealDelay'
   // false - assets will be revealed immediately and assets shuffling will be disabled
   delayedReveal: true,
+  // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
+  revealDelay: 86400000000000n, // 86400000000000 == 24 hours
   // true - the entire collection will consists of only one asset, meaning all NFTs look the same
   // false - there are at least two different assets in the collection
   singleAssetCollection: false,

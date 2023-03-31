@@ -27,9 +27,4 @@ describe('method calls restricted to admin/minter', () => {
       payload: { data: [new Uint8Array], ctype: '' },
     })).rejects.toThrow(/assertion failed/);
   });
-
-  test('should try to call shuffleAssets', async () => {
-    let user = new User;
-    await expect(user.mainActor.shuffleAssets()).rejects.toThrow(/assertion failed/);
-  });
 });

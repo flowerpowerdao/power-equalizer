@@ -2,6 +2,7 @@ import Cycles "mo:base/ExperimentalCycles";
 import Principal "mo:base/Principal";
 import Array "mo:base/Array";
 import Result "mo:base/Result";
+import Int "mo:base/Int";
 import Time "mo:base/Time";
 import Timer "mo:base/Timer";
 import Debug "mo:base/Debug";
@@ -65,6 +66,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   // timers
   stable var _timerId = 0;
+  stable var _revealTimerId = 0;
 
   // State functions
   system func preupgrade() {
@@ -147,6 +149,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   // timers
   func _setTimers() {
     Timer.cancelTimer(_timerId);
+    Timer.cancelTimer(_revealTimerId);
 
     _timerId := Timer.recurringTimer(Env.timersInterval, func(): async () {
       ignore cronSettlements();
@@ -154,6 +157,19 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
       ignore cronSalesSettlements();
       ignore cronFailedSales();
     });
+
+    if (Env.delayedReveal and not _Shuffle.isShuffled()) {
+      let revealTime = Env.publicSaleStart + Env.revealDelay;
+      let delay = Int.abs(Int.max(0, revealTime - Time.now()));
+
+      // add random delay up to 60 minutes
+      let minute = 1_000_000_000 * 60;
+      let randDelay = Int.abs(Time.now() % 60 * minute);
+
+      _revealTimerId := Timer.setTimer(#nanoseconds(delay + randDelay), func(): async () {
+        ignore _Shuffle.shuffleAssets();
+      });
+    };
   };
 
   /*************
@@ -290,14 +306,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
       minter = init_minter;
     },
   );
-
-  public shared ({ caller }) func shuffleAssets() : async () {
-    _trapIfRestoreEnabled();
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    // prevents double shuffle
-    await _Shuffle.shuffleAssets(caller);
-  };
 
   // Sale
   let _Sale = Sale.Factory(
