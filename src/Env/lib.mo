@@ -10,7 +10,7 @@ module {
   public let collectionName = "Pineapple Punks";
   public let placeholderContentLength = "1053832";
   public let escrowDelay : Time.Time = 120000000000; // 120 seconds
-  public let collectionSize : Nat32 = 5;
+  public let collectionSize : Nat32 = 7777;
 
   public let salePrice : Nat64 = 700000000;
 
@@ -26,8 +26,8 @@ module {
 
   public let defaultMarketplaceFee = ("ccfe146bb249b6c59e8c5ae71a1b59ddf85d9f9034611427b696f8b25d7b826a", 1000 : Nat64); // Entrepot Fee
 
-  public let publicSaleStart : Time.Time = 1680252938594000000; // Start of first purchase (WL or other)
-  public let whitelistTime : Time.Time = 1680252938595000000; // Period for WL only discount. Set to publicSaleStart for no exclusive period
+  public let publicSaleStart : Time.Time = 4105119600000000000; // Start of first purchase (WL or other)
+  public let whitelistTime : Time.Time = 4105119600000000000; // Period for WL only discount. Set to publicSaleStart for no exclusive period
   public let marketDelay : Time.Time = 172800000000000; // How long to delay market opening (2 days after whitelist sale started or when sold out)
 
   // open edition
@@ -45,21 +45,21 @@ module {
   // this allows you to create slots for whitelists. one slots can contain multiple whitelist.
   // the start of the first slot has to be the publicSaleStart, the end of the last slot the whitelistTime
   let whitelistSlot1 = {
-    start = 1680252938595000000;
-    end = 1680252938595000000;
+    start = 4105119600000000000;
+    end = 8210239200000000000;
   };
   let whitelistSlot2 = {
-    start = 1680252938595000000;
-    end = 1680252938595000000;
+    start = 4105119600000000000;
+    end = 8210239200000000000;
   };
 
   // true - assets will be revealed after manually calling 'shuffleAssets'
   // false - assets will be revealed immediately and assets shuffling will be disabled
-  public let delayedReveal = false;
+  public let delayedReveal = true;
 
   // true - the entire collection will consists of only one asset, meaning all NFTs look the same
   // false - there are at least two different assets in the collection
-  public let singleAssetCollection = true;
+  public let singleAssetCollection = false;
 
   public let whitelistOneTimeOnly : Bool = true; // Whitelist addresses are removed after purchase
   public let whitelistDiscountLimited : Bool = true; // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
