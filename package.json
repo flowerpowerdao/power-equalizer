@@ -30,7 +30,7 @@
     "test:sold-out": "npm run env sold-out && npm run deploy-qq && npm run mint && vitest run sold-out",
     "test:single-asset": "npm run env single-asset && npm run deploy-qq && npm run mint && vitest run single-asset.test.ts",
     "test:multi-asset": "npm run env multi-asset && npm run deploy-qq && npm run mint-2 && vitest run multi-asset",
-    "test:single-asset-delayed-reveal": "npm run env single-asset-delayed-reveal && npm run deploy-qq && npm run mint-2 && dfx canister call staging shuffleTokensForSale --identity anonymous && vitest run single-asset-delayed-reveal",
+    "test:single-asset-delayed-reveal": "npm run env single-asset-delayed-reveal && npm run deploy-qq && npm run mint-2 && dfx canister call staging shuffleTokensForSale && vitest run single-asset-delayed-reveal",
     "test:open-edition": "npm run env open-edition && npm run deploy-qq && npm run mint && vitest run open-edition",
     "test:backup": "npm run env backup && npm run deploy-qq && npm run mint && vitest run backup",
     "test:restore": "npm run env restore && npm run deploy-qq && vitest run restore",
