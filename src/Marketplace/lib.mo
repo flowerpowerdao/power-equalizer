@@ -1,3 +1,5 @@
+import Ledger "canister:ledger";
+
 import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
@@ -186,8 +188,8 @@ module {
         };
       };
 
-      let response = await consts.LEDGER_CANISTER.account_balance({
-        account = addHash(fromPrincipal(this, ?settlement.subaccount));
+      let response = await Ledger.account_balance({
+        account = Blob.fromArray(addHash(fromPrincipal(this, ?settlement.subaccount)));
       });
 
       // because of the await above, we check again if there is a settlement available for the token

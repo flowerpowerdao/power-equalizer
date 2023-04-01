@@ -7,7 +7,6 @@ import TokenTypes "../Tokens/types";
 import Tokens "../Tokens";
 import Sale "../Sale";
 import Disburser "../Disburser";
-import LedgerTypes "../Ledger/types";
 
 module {
   public type StableChunk = ?{
@@ -76,7 +75,6 @@ module {
   };
 
   public type Constants = {
-    LEDGER_CANISTER : LedgerTypes.LEDGER_CANISTER;
     minter : Principal;
   };
 

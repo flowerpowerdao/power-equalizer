@@ -1,4 +1,7 @@
+import Ledger "canister:ledger";
+
 import Array "mo:base/Array";
+import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
 import List "mo:base/List";
 import Nat "mo:base/Nat";
@@ -248,10 +251,10 @@ module {
         return #err("Nothing to settle");
       };
 
-      let response : Types.Tokens = await consts.LEDGER_CANISTER.account_balance({
+      let response : Types.Tokens = await Ledger.account_balance({
         account = switch (AviateAccountIdentifier.fromText(paymentaddress)) {
           case (#ok(accountId)) {
-            AviateAccountIdentifier.addHash(accountId);
+            Blob.fromArray(AviateAccountIdentifier.addHash(accountId));
           };
           case (#err(_)) {
             // this should never happen because account ids are always created from within the
@@ -369,18 +372,18 @@ module {
             let subaccount = failedSale.1;
             try {
               // check if subaccount holds icp
-              let response : Types.Tokens = await consts.LEDGER_CANISTER.account_balance({
-                account = AviateAccountIdentifier.addHash(AviateAccountIdentifier.fromPrincipal(this, ?subaccount));
+              let response : Types.Tokens = await Ledger.account_balance({
+                account = Blob.fromArray(AviateAccountIdentifier.addHash(AviateAccountIdentifier.fromPrincipal(this, ?subaccount)));
               });
               if (response.e8s > 10000) {
-                var bh = await consts.LEDGER_CANISTER.transfer({
+                var bh = await Ledger.transfer({
                   memo = 0;
                   amount = { e8s = response.e8s - 10000 };
                   fee = { e8s = 10000 };
-                  from_subaccount = ?subaccount;
+                  from_subaccount = ?Blob.fromArray(subaccount);
                   to = switch (AviateAccountIdentifier.fromText(failedSale.0)) {
                     case (#ok(accountId)) {
-                      AviateAccountIdentifier.addHash(accountId);
+                      Blob.fromArray(AviateAccountIdentifier.addHash(accountId));
                     };
                     case (#err(_)) {
                       // this should never happen because account ids are always created from within the

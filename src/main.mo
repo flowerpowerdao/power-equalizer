@@ -30,7 +30,6 @@ import Tokens "Tokens";
 import Disburser "Disburser";
 import DisburserTypes "Disburser/types";
 import Utils "./utils";
-import LedgerTypes "Ledger/types";
 import Env "./Env";
 
 shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCanister {
@@ -176,7 +175,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   * CONSTANTS *
   *************/
 
-  let LEDGER_CANISTER = actor "ryjl3-tyaaa-aaaaa-aaaba-cai" : LedgerTypes.LEDGER_CANISTER;
   let CREATION_CYCLES : Nat = 1_000_000_000_000;
 
   /***********
@@ -212,9 +210,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   // Disburser
   let _Disburser = Disburser.Factory(
     cid,
-    {
-      LEDGER_CANISTER;
-    },
   );
 
   // queries
@@ -317,7 +312,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
       _Disburser;
     },
     {
-      LEDGER_CANISTER;
       minter = init_minter;
     },
   );
@@ -405,7 +399,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
       _Disburser;
     },
     {
-      LEDGER_CANISTER;
       minter = init_minter;
     },
   );
