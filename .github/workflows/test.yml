@@ -21,6 +21,7 @@ jobs:
           dfx-version: 0.13.0
       - name: test
         run: |
+            dfx identity use anonymous
             npm install
             npm run replica
             npm run test
