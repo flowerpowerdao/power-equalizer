@@ -5,8 +5,8 @@
   "scripts": {
     "start": "npm run replica && npm run deploy && npm run mint",
     "replica": "dfx stop && rm -rf .dfx && dfx start --clean --background && dfx canister create staging && dfx canister create ledger",
-    "deploy": " npm run deploy:staging && npm run deploy:ledger",
-    "deploy-qq": "npm run deploy:staging-reinstall -- -qq && npm run deploy:ledger-reinstall -- -qq",
+    "deploy": " npm run deploy:ledger && npm run deploy:staging",
+    "deploy-qq": "npm run deploy:ledger-reinstall -- -qq && npm run deploy:staging-reinstall -- -qq",
     "deploy:staging": "dfx canister create staging && DFX_MOC_PATH=\"$(vessel bin)/moc\" dfx deploy staging --argument '(principal \"'$(dfx canister id staging)'\")'",
     "deploy:staging-reinstall": "dfx canister create staging && DFX_MOC_PATH=\"$(vessel bin)/moc\" dfx deploy staging --mode reinstall -y --argument '(principal \"'$(dfx canister id staging)'\")'",
     "upgrade:staging": "dfx canister stop staging && DFX_MOC_PATH=\"$(vessel bin)/moc\" dfx deploy staging --upgrade-unchanged --argument '(principal \"'$(dfx canister id staging)'\")' && dfx canister start staging",
