@@ -15,7 +15,6 @@
 
 - run `make deploy-production-ic-full`
 - check if all assets uploaded correctly by calling the canisters `getTokenToAssetMapping()` method
-- call `shuffleAssets` at desired time (usually 24 hours after market opens)
 
 ## deploy 📚
 
@@ -207,10 +206,7 @@ do
     fi
 done
 
-# now shuffle the assets using the random beacon
-# echo "shuffling assets"
-# dfx canister --network $network call staging shuffleAssets
-
+# after assets are shuffled and revealed
 # check the assets again to see if we now indeed
 # see the correct assets
 # for i in {0..9}
@@ -270,7 +266,7 @@ Note that the indices of the json outputs represent the indices of the internal 
 
 To have the same token identifiers for the same tokens, it is important to keep the order of the minting when reinstantiating the canister.
 
-So when executing `mintNFT`, the `to` address is taken from `registry.json` and the `asset` is taken from `tokens.json`. It's important here that the uploading of the assets is on order (start with flower 1, end with flower 2009) and that the `assets` index 0 is used by something other than an NFT asset (before it was the seed animation)! It's also crucial to remove `shuffleAssets` functionality from the canister!
+So when executing `mintNFT`, the `to` address is taken from `registry.json` and the `asset` is taken from `tokens.json`. It's important here that the uploading of the assets is on order (start with flower 1, end with flower 2009) and that the `assets` index 0 is used by something other than an NFT asset (before it was the seed animation)!
 
 ## Testing 🧪
 

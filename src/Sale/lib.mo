@@ -1,4 +1,7 @@
+import Ledger "canister:ledger";
+
 import Array "mo:base/Array";
+import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
 import List "mo:base/List";
 import Nat "mo:base/Nat";
@@ -178,6 +181,9 @@ module {
     };
 
     public func reserve(amount : Nat64, quantity : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount) : Result.Result<(Types.AccountIdentifier, Nat64), Text> {
+      if (Env.openEdition and Time.now() > Env.saleEnd) {
+        return #err("The sale has ended");
+      };
       if (Time.now() < Env.publicSaleStart) {
         return #err("The sale has not started yet");
       };
@@ -245,10 +251,10 @@ module {
         return #err("Nothing to settle");
       };
 
-      let response : Types.Tokens = await consts.LEDGER_CANISTER.account_balance({
+      let response : Types.Tokens = await Ledger.account_balance({
         account = switch (AviateAccountIdentifier.fromText(paymentaddress)) {
           case (#ok(accountId)) {
-            AviateAccountIdentifier.addHash(accountId);
+            Blob.fromArray(AviateAccountIdentifier.addHash(accountId));
           };
           case (#err(_)) {
             // this should never happen because account ids are always created from within the
@@ -366,18 +372,18 @@ module {
             let subaccount = failedSale.1;
             try {
               // check if subaccount holds icp
-              let response : Types.Tokens = await consts.LEDGER_CANISTER.account_balance({
-                account = AviateAccountIdentifier.addHash(AviateAccountIdentifier.fromPrincipal(this, ?subaccount));
+              let response : Types.Tokens = await Ledger.account_balance({
+                account = Blob.fromArray(AviateAccountIdentifier.addHash(AviateAccountIdentifier.fromPrincipal(this, ?subaccount)));
               });
               if (response.e8s > 10000) {
-                var bh = await consts.LEDGER_CANISTER.transfer({
+                var bh = await Ledger.transfer({
                   memo = 0;
                   amount = { e8s = response.e8s - 10000 };
                   fee = { e8s = 10000 };
-                  from_subaccount = ?subaccount;
+                  from_subaccount = ?Blob.fromArray(subaccount);
                   to = switch (AviateAccountIdentifier.fromText(failedSale.0)) {
                     case (#ok(accountId)) {
-                      AviateAccountIdentifier.addHash(accountId);
+                      Blob.fromArray(AviateAccountIdentifier.addHash(accountId));
                     };
                     case (#err(_)) {
                       // this should never happen because account ids are always created from within the
@@ -430,7 +436,7 @@ module {
 
     public func salesSettings(address : Types.AccountIdentifier) : Types.SaleSettings {
       var startTime = Env.whitelistTime;
-      var endTime: Int = 0;
+      var endTime: Int = Env.saleEnd;
       // for whitelisted user return nearest and cheapest slot start time
       label l for (item in _whitelist.vals()) {
         if (item.1 == address and Time.now() <= item.2.end) {
@@ -451,6 +457,7 @@ module {
         whitelistTime = Env.whitelistTime;
         whitelist = isWhitelisted(address);
         bulkPricing = getAddressBulkPrice(address);
+        openEdition = Env.openEdition;
       } : Types.SaleSettings;
     };
 
@@ -460,6 +467,9 @@ module {
 
     // getters & setters
     public func availableTokens() : Nat {
+      if (Env.openEdition) {
+        return 1;
+      };
       _tokensForSale.size();
     };
 
@@ -529,6 +539,14 @@ module {
     };
 
     func nextTokens(qty : Nat64) : [Types.TokenIndex] {
+      if (Env.openEdition) {
+        deps._Tokens.mintNextToken();
+        _tokensForSale := switch (deps._Tokens.getTokensFromOwner("0000")) {
+          case (?t) t;
+          case (_) Buffer.Buffer<Types.TokenIndex>(0);
+        };
+      };
+
       if (_tokensForSale.size() >= Nat64.toNat(qty)) {
         var ret : List.List<Types.TokenIndex> = List.nil();
         while (List.size(ret) < Nat64.toNat(qty)) {
