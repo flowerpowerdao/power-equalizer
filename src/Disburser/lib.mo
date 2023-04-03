@@ -15,7 +15,7 @@ import Types "types";
 import Utils "../utils";
 
 module {
-  public class Factory(this : Principal, state : Types.StableState) {
+  public class Factory(this : Principal) {
 
     /*********
     * STATE *

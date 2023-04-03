@@ -257,7 +257,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   // Disburser
   let _Disburser = Disburser.Factory(
     cid,
-    _disburserState,
   );
 
   // queries
