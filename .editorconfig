@@ -1,5 +1,5 @@
 root = true
 
-[*.{ts,js,mo}]
+[*.{ts,js,mo,did}]
 indent_style = space
 indent_size = 2

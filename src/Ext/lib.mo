@@ -12,9 +12,10 @@ import ExtCore "../toniq-labs/ext/Core";
 import MarketplaceTypes "../Marketplace/types";
 import Env "../Env";
 import Types "types";
+import RootTypes "../types";
 
 module {
-  public class Factory(this : Principal, deps : Types.Dependencies, consts : Types.Constants) {
+  public class Factory(config : RootTypes.Config, deps : Types.Dependencies) {
 
     /*************
     * CONSTANTS *
@@ -27,7 +28,7 @@ module {
     ********************/
 
     public func getMinter() : Principal {
-      consts.minter;
+      config.minter;
     };
 
     public func extensions() : [Types.Extension] {
@@ -82,7 +83,7 @@ module {
     };
 
     public func metadata(token : Types.TokenIdentifier) : Result.Result<Types.Metadata, Types.CommonError> {
-      if (ExtCore.TokenIdentifier.isPrincipal(token, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(token, config.canister) == false) {
         return #err(#InvalidToken(token));
       };
       let tokenind = ExtCore.TokenIdentifier.getIndex(token);
@@ -100,7 +101,7 @@ module {
       if (request.amount != 1) {
         return #err(#Other("Must use amount of 1"));
       };
-      if (ExtCore.TokenIdentifier.isPrincipal(request.token, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(request.token, config.canister) == false) {
         return #err(#InvalidToken(request.token));
       };
       let token = ExtCore.TokenIdentifier.getIndex(request.token);

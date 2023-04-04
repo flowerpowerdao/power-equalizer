@@ -6,12 +6,13 @@ import Random "mo:base/Random";
 import Buffer "mo:base/Buffer";
 
 import Types "types";
+import RootTypes "../types";
 import Utils "../utils";
 import Env "../Env";
 
 module {
 
-  public class Factory(consts : Types.Constants) {
+  public class Factory(config : RootTypes.Config) {
 
     /*********
     * STATE *
@@ -37,7 +38,7 @@ module {
     //*** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
     public func streamAsset(caller : Principal, id : Nat, isThumb : Bool, payload : Blob) : () {
-      assert (caller == consts.minter);
+      assert (caller == config.minter);
       var asset : Types.Asset = _assets.get(id);
       if (isThumb) {
         switch (asset.thumbnail) {
@@ -69,7 +70,7 @@ module {
     };
 
     public func updateThumb(caller : Principal, name : Text, file : Types.File) : ?Nat {
-      assert (caller == consts.minter);
+      assert (caller == config.minter);
       var i : Nat = 0;
       for (a in _assets.vals()) {
         if (a.name == name) {
@@ -89,7 +90,7 @@ module {
     };
 
     public func addAsset(caller : Principal, asset : Types.Asset) : Nat {
-      assert (caller == consts.minter);
+      assert (caller == config.minter);
       if (Env.singleAssetCollection) {
         if (Env.delayedReveal) {
           assert (_assets.size() < 2);

@@ -23,10 +23,11 @@ import Fuzz "mo:fuzz";
 import AID "../toniq-labs/util/AccountIdentifier";
 import Env "../Env";
 import Types "types";
+import RootTypes "../types";
 import Utils "../utils";
 
 module {
-  public class Factory(this : Principal, deps : Types.Dependencies, consts : Types.Constants) {
+  public class Factory(config : RootTypes.Config, deps : Types.Dependencies) {
 
     /*********
     * STATE *
@@ -122,7 +123,7 @@ module {
 
     // updates
     public func initMint(caller : Principal) : Result.Result<(), Text> {
-      assert (caller == consts.minter);
+      assert (caller == config.minter);
 
       if (deps._Tokens.getNextTokenId() != 0) {
         return #err("already minted");
@@ -146,14 +147,14 @@ module {
     };
 
     public func shuffleTokensForSale(caller : Principal) : async () {
-      assert (caller == consts.minter and Nat32.toNat(Env.collectionSize) == _tokensForSale.size());
+      assert (caller == config.minter and Nat32.toNat(Env.collectionSize) == _tokensForSale.size());
       // shuffle indices
       let seed : Blob = await Random.blob();
       _tokensForSale := deps._Shuffle.shuffleTokens(_tokensForSale, seed);
     };
 
     public func airdropTokens(caller : Principal, startingIndex : Nat) : () {
-      assert (caller == consts.minter and _totalToSell == 0);
+      assert (caller == config.minter and _totalToSell == 0);
 
       if (not Env.airdropEnabled) {
         return;
@@ -175,7 +176,7 @@ module {
     };
 
     public func enableSale(caller : Principal) : Nat {
-      assert (caller == consts.minter and _totalToSell == 0);
+      assert (caller == config.minter and _totalToSell == 0);
       _totalToSell := _tokensForSale.size();
       _tokensForSale.size();
     };
@@ -218,7 +219,7 @@ module {
         return #err("Price mismatch!");
       };
       let subaccount = getNextSubAccount();
-      let paymentAddress : Types.AccountIdentifier = AID.fromPrincipal(this, ?subaccount);
+      let paymentAddress : Types.AccountIdentifier = AID.fromPrincipal(config.canister, ?subaccount);
 
       // we only reserve the tokens here, they deducted from the available tokens
       // after payment. otherwise someone could stall the sale by reserving all
@@ -291,7 +292,7 @@ module {
           };
           _saleTransactions.add({
             tokens = tokens;
-            seller = this;
+            seller = config.canister;
             price = settlement.price;
             buyer = settlement.buyer;
             time = Time.now();
@@ -307,7 +308,7 @@ module {
               ("price_currency", #Text("ICP")),
               ("price", #U64(settlement.price)),
               // there can only be one token in tokens due to the reserve function
-              ("token_id", #Text(Utils.indexToIdentifier(settlement.tokens[0], this))),
+              ("token_id", #Text(Utils.indexToIdentifier(settlement.tokens[0], config.canister))),
             ];
             caller;
           };
@@ -373,7 +374,7 @@ module {
             try {
               // check if subaccount holds icp
               let response : Types.Tokens = await Ledger.account_balance({
-                account = Blob.fromArray(AviateAccountIdentifier.addHash(AviateAccountIdentifier.fromPrincipal(this, ?subaccount)));
+                account = Blob.fromArray(AviateAccountIdentifier.addHash(AviateAccountIdentifier.fromPrincipal(config.canister, ?subaccount)));
               });
               if (response.e8s > 10000) {
                 var bh = await Ledger.transfer({

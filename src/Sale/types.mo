@@ -34,10 +34,6 @@ module {
     _Disburser : Disburser.Factory;
   };
 
-  public type Constants = {
-    minter : Principal;
-  };
-
   public type WhitelistSlot = Env.WhitelistSlot;
   public type AccountIdentifier = ExtCore.AccountIdentifier;
   public type TokenIdentifier = ExtCore.TokenIdentifier;

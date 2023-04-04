@@ -15,11 +15,12 @@ import Env "../Env";
 import ExtCore "../toniq-labs/ext/Core";
 import MarketplaceTypes "../Marketplace/types";
 import Types "types";
+import RootTypes "../types";
 import Utils "../utils";
 
 module {
 
-  public class HttpHandler(this : Principal, deps : Types.Dependencies, consts : Types.Constants) {
+  public class HttpHandler(config : RootTypes.Config, deps : Types.Dependencies) {
 
     /********************
     * PUBLIC INTERFACE *
@@ -160,7 +161,7 @@ module {
           # "Sold via Marketplace:                     " # debug_show (deps._Marketplace.transactionsSize()) # "\n"
           # "Sold via Marketplace in ICP:              " # _displayICP(soldValue) # "\n"
           # "Average Price ICP Via Marketplace:        " # _displayICP(avg) # "\n"
-          # "Admin:                                    " # debug_show (consts.minter) # "\n",
+          # "Admin:                                    " # debug_show (config.minter) # "\n",
         );
         streaming_strategy = null;
       };
@@ -207,7 +208,7 @@ module {
 
     private func _processFile(tokenid : ExtCore.TokenIdentifier, file : AssetTypes.File) : Types.HttpResponse {
       // start custom
-      let self : Principal = this;
+      let self : Principal = config.canister;
       let canisterId : Text = Principal.toText(self);
       let canister = actor (canisterId) : actor {
         http_request_streaming_callback : shared () -> async ();

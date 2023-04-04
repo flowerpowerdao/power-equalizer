@@ -8,11 +8,12 @@ import Debug "mo:base/Debug";
 import AID "../toniq-labs/util/AccountIdentifier";
 import ExtCore "../toniq-labs/ext/Core";
 import Types "types";
+import RootTypes "../types";
 import Utils "../utils";
 import Env "../Env";
 
 module {
-  public class Factory(this : Principal, consts : Types.Constants) {
+  public class Factory(config : RootTypes.Config) {
 
     /*********
     * STATE *
@@ -57,7 +58,7 @@ module {
     //*** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
     public func balance(request : Types.BalanceRequest) : Types.BalanceResponse {
-      if (ExtCore.TokenIdentifier.isPrincipal(request.token, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(request.token, config.canister) == false) {
         return #err(#InvalidToken(request.token));
       };
       let token = ExtCore.TokenIdentifier.getIndex(request.token);
@@ -77,7 +78,7 @@ module {
     };
 
     public func bearer(token : Types.TokenIdentifier) : Result.Result<Types.AccountIdentifier, Types.CommonError> {
-      if (ExtCore.TokenIdentifier.isPrincipal(token, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(token, config.canister) == false) {
         return #err(#InvalidToken(token));
       };
       let tokenind = ExtCore.TokenIdentifier.getIndex(token);
@@ -189,7 +190,7 @@ module {
     };
 
     public func getTokenData(token : Text) : ?Blob {
-      if (ExtCore.TokenIdentifier.isPrincipal(token, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(token, config.canister) == false) {
         return null;
       };
       let tokenind = ExtCore.TokenIdentifier.getIndex(token);

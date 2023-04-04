@@ -45,8 +45,4 @@ module {
     _Marketplace : Marketplace.Factory;
     _Cap : Cap.Cap;
   };
-
-  public type Constants = {
-    minter : Principal;
-  };
 };

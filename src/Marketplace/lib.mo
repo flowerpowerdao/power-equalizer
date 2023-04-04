@@ -24,10 +24,11 @@ import AID "../toniq-labs/util/AccountIdentifier";
 import Env "../Env";
 import ExtCore "../toniq-labs/ext/Core";
 import Types "types";
+import RootTypes "../types";
 import Utils "../utils";
 
 module {
-  public class Factory(this : Principal, deps : Types.Dependencies, consts : Types.Constants) {
+  public class Factory(config : RootTypes.Config, deps : Types.Dependencies) {
 
     /*********
     * STATE *
@@ -109,7 +110,7 @@ module {
     ********************/
 
     public func lock(caller : Principal, tokenid : Types.TokenIdentifier, price : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount, frontendIdentifier : ?Text) : async Result.Result<Types.AccountIdentifier, Types.CommonError> {
-      if (ExtCore.TokenIdentifier.isPrincipal(tokenid, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(tokenid, config.canister) == false) {
         return #err(#InvalidToken(tokenid));
       };
 
@@ -131,7 +132,7 @@ module {
       };
 
       let subaccount = deps._Sale.getNextSubAccount();
-      let paymentAddress : Types.AccountIdentifier = AID.fromPrincipal(this, ?subaccount);
+      let paymentAddress : Types.AccountIdentifier = AID.fromPrincipal(config.canister, ?subaccount);
       _tokenListing.put(
         token,
         {
@@ -176,7 +177,7 @@ module {
     };
 
     public func settle(caller : Principal, tokenid : Types.TokenIdentifier) : async Result.Result<(), Types.CommonError> {
-      if (ExtCore.TokenIdentifier.isPrincipal(tokenid, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(tokenid, config.canister) == false) {
         return #err(#InvalidToken(tokenid));
       };
       let token : Types.TokenIndex = ExtCore.TokenIdentifier.getIndex(tokenid);
@@ -189,7 +190,7 @@ module {
       };
 
       let response = await Ledger.account_balance({
-        account = Blob.fromArray(addHash(fromPrincipal(this, ?settlement.subaccount)));
+        account = Blob.fromArray(addHash(fromPrincipal(config.canister, ?settlement.subaccount)));
       });
 
       // because of the await above, we check again if there is a settlement available for the token
@@ -300,7 +301,7 @@ module {
           return #err(#Other("You can not list yet"));
         };
       };
-      if (ExtCore.TokenIdentifier.isPrincipal(request.token, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(request.token, config.canister) == false) {
         return #err(#InvalidToken(request.token));
       };
       let token = ExtCore.TokenIdentifier.getIndex(request.token);
@@ -360,7 +361,7 @@ module {
     };
 
     public func details(token : Types.TokenIdentifier) : Result.Result<(Types.AccountIdentifier, ?Types.Listing), Types.CommonError> {
-      if (ExtCore.TokenIdentifier.isPrincipal(token, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(token, config.canister) == false) {
         return #err(#InvalidToken(token));
       };
       let tokenind = ExtCore.TokenIdentifier.getIndex(token);
@@ -385,7 +386,7 @@ module {
         if (_isLocked(token)) {
           switch (_tokenSettlement.get(token)) {
             case (?settlement) {
-              result.add((token, AID.fromPrincipal(this, ?settlement.subaccount), settlement.price));
+              result.add((token, AID.fromPrincipal(config.canister, ?settlement.subaccount), settlement.price));
             };
             case (_) {};
           };
@@ -434,7 +435,7 @@ module {
         switch (unlockedSettlements().keys().next()) {
           case (?tokenindex) {
             try {
-              ignore (await settle(caller, ExtCore.TokenIdentifier.fromPrincipal(this, tokenindex)));
+              ignore (await settle(caller, ExtCore.TokenIdentifier.fromPrincipal(config.canister, tokenindex)));
             } catch (e) {};
           };
           case null break settleLoop;
@@ -451,13 +452,13 @@ module {
     };
 
     public func putFrontend(caller : Principal, identifier : Text, frontend : Types.Frontend) {
-      assert (caller == consts.minter);
+      assert (caller == config.minter);
       assert (validFrontendFee(frontend));
       _frontends.put(identifier, frontend);
     };
 
     public func deleteFrontend(caller : Principal, identifier : Text) {
-      assert (caller == consts.minter);
+      assert (caller == config.minter);
       _frontends.delete(identifier);
     };
 
