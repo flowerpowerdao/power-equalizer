@@ -4,5 +4,9 @@
     collectionName = $collectionName;
     collectionSize = $collectionSize;
     salePrice = $salePrice;
+    publicSaleStart = $publicSaleStart;
+    whitelistTime = $whitelistTime;
+    marketDelay = $marketDelay;
+    escrowDelay = $escrowDelay;
   }
 )
