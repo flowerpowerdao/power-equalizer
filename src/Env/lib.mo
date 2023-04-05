@@ -30,7 +30,7 @@ module {
 
   // public let publicSaleStart : Time.Time = 1680696181381000000; // Start of first purchase (WL or other)
   // public let whitelistTime : Time.Time = 1680696181381000000; // Period for WL only discount. Set to publicSaleStart for no exclusive period
-  public let marketDelay : Time.Time = 0; // How long to delay market opening (2 days after whitelist sale started or when sold out)
+  // public let marketDelay : Time.Time = 0; // How long to delay market opening (2 days after whitelist sale started or when sold out)
 
   // open edition
   // true - no definite collection size and can be minted in an ongoing effort until 'saleEnd' (need to set collectionSize = 0)

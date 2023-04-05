@@ -8,6 +8,7 @@ module {
     salePrice : Nat64; // e8s
     publicSaleStart : Time.Time; // Start of first purchase (WL or other)
     whitelistTime : Time.Time; // Period for WL only discount. Set to publicSaleStart for no exclusive period
+    marketDelay : Time.Time; // How long to delay market opening (2 days after whitelist sale started or when sold out)
   };
 
   public type Config = InitArgs and {
