@@ -3,6 +3,7 @@ import Time "mo:base/Time";
 
 module {
   public type InitArgs = {
+    collectionName: Text;
     collectionSize: Nat;
   };
 

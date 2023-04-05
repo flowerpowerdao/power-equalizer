@@ -1,6 +1,7 @@
 (
   principal "rrkah-fqaaa-aaaaa-aaaaq-cai",
   record {
+    collectionName = $collectionName;
     collectionSize = $collectionSize;
   }
 )

@@ -148,7 +148,7 @@ module {
         status_code = 200;
         headers = [("content-type", "text/plain")];
         body = Text.encodeUtf8(
-          Env.collectionName # "\n" # "---\n"
+          config.collectionName # "\n" # "---\n"
           # "Cycle Balance:                            ~" # debug_show (Cycles.balance() / 1000000000000) # "T\n"
           # "Minted NFTs:                              " # debug_show (deps._Tokens.getNextTokenId()) # "\n"
           # "Assets:                                   " # debug_show (deps._Assets.size()) # "\n" # "---\n"

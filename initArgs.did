@@ -1,6 +1,7 @@
 (
   principal "rrkah-fqaaa-aaaaa-aaaaq-cai",
   record {
+    collectionName = "Pineapple Punks";
     collectionSize = 10_000;
   }
 )
