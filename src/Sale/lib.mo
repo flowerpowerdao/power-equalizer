@@ -189,7 +189,7 @@ module {
         return #err("The sale has not started yet");
       };
       if (isWhitelisted(address) == false) {
-        if (Time.now() < Env.whitelistTime) {
+        if (Time.now() < config.whitelistTime) {
           return #err("The public sale has not started yet");
         };
       };
@@ -436,7 +436,7 @@ module {
     };
 
     public func salesSettings(address : Types.AccountIdentifier) : Types.SaleSettings {
-      var startTime = Env.whitelistTime;
+      var startTime = config.whitelistTime;
       var endTime: Int = Env.saleEnd;
       // for whitelisted user return nearest and cheapest slot start time
       label l for (item in _whitelist.vals()) {
@@ -455,7 +455,7 @@ module {
         totalToSell = _totalToSell;
         startTime = startTime;
         endTime = endTime;
-        whitelistTime = Env.whitelistTime;
+        whitelistTime = config.whitelistTime;
         whitelist = isWhitelisted(address);
         bulkPricing = getAddressBulkPrice(address);
         openEdition = Env.openEdition;
@@ -519,7 +519,7 @@ module {
     func getCurrentDutchAuctionPrice() : Nat64 {
       let start = if (Env.dutchAuctionFor == #publicSale) {
         // if the dutch auction is for public sale only, we take the start time when the whitelist time has expired
-        Env.whitelistTime;
+        config.whitelistTime;
       } else {
         config.publicSaleStart;
       };
@@ -575,7 +575,7 @@ module {
     // this method is timesensitive now and only returns true, iff the address is whitelist
     // in the current slot
     func isWhitelisted(address : Types.AccountIdentifier) : Bool {
-      if (Env.whitelistDiscountLimited == true and Time.now() >= Env.whitelistTime) {
+      if (Env.whitelistDiscountLimited == true and Time.now() >= config.whitelistTime) {
         return false;
       };
       for (element in _whitelist.vals()) {
@@ -587,7 +587,7 @@ module {
     };
 
     func getSlot(address : Types.AccountIdentifier) : ?Types.WhitelistSlot {
-      if (Env.whitelistDiscountLimited == true and Time.now() >= Env.whitelistTime) {
+      if (Env.whitelistDiscountLimited == true and Time.now() >= config.whitelistTime) {
         return null;
       };
       for (element in _whitelist.vals()) {

@@ -7,6 +7,7 @@ module {
     collectionSize : Nat;
     salePrice : Nat64; // e8s
     publicSaleStart : Time.Time; // Start of first purchase (WL or other)
+    whitelistTime : Time.Time; // Period for WL only discount. Set to publicSaleStart for no exclusive period
   };
 
   public type Config = InitArgs and {

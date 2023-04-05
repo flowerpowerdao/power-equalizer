@@ -29,7 +29,7 @@ module {
   public let defaultMarketplaceFee = ($defaultMarketplaceAddr, $defaultMarketplaceFee : Nat64); // Entrepot Fee
 
   // public let publicSaleStart : Time.Time = $publicSaleStart; // Start of first purchase (WL or other)
-  public let whitelistTime : Time.Time = $whitelistTime; // Period for WL only discount. Set to publicSaleStart for no exclusive period
+  // public let whitelistTime : Time.Time = $whitelistTime; // Period for WL only discount. Set to publicSaleStart for no exclusive period
   public let marketDelay : Time.Time = $marketDelay; // How long to delay market opening (2 days after whitelist sale started or when sold out)
 
   // open edition
