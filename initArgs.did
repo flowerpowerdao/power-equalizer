@@ -3,5 +3,6 @@
   record {
     collectionName = "Pineapple Punks";
     collectionSize = 10_000;
+    salePrice = 700_000_000; // 7 ICP
   }
 )

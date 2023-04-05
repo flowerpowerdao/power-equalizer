@@ -14,7 +14,7 @@ module {
   public let escrowDelay : Time.Time = 120000000000; // 120 seconds
   // public let collectionSize : Nat32 = 100000;
 
-  public let salePrice : Nat64 = 700000000;
+  // public let salePrice : Nat64 = 700000000;
 
   public let salesDistribution : [(ExtCore.AccountIdentifier, Nat64)] = [
     (beneficiary0, 45000),

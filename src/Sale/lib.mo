@@ -449,7 +449,7 @@ module {
 
       return {
         price = getAddressPrice(address);
-        salePrice = Env.salePrice;
+        salePrice = config.salePrice;
         remaining = availableTokens();
         sold = _sold;
         totalToSell = _totalToSell;
@@ -513,7 +513,7 @@ module {
         };
       };
 
-      return [(1, Env.salePrice)];
+      return [(1, config.salePrice)];
     };
 
     func getCurrentDutchAuctionPrice() : Nat64 {

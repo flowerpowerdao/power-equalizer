@@ -3,8 +3,9 @@ import Time "mo:base/Time";
 
 module {
   public type InitArgs = {
-    collectionName: Text;
-    collectionSize: Nat;
+    collectionName : Text;
+    collectionSize : Nat;
+    salePrice : Nat64; // e8s
   };
 
   public type Config = InitArgs and {

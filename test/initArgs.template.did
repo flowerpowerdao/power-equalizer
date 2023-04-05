@@ -3,5 +3,6 @@
   record {
     collectionName = $collectionName;
     collectionSize = $collectionSize;
+    salePrice = $salePrice;
   }
 )
