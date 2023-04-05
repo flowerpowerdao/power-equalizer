@@ -11,7 +11,7 @@ module {
 
   // public let collectionName = "Pineapple Punks";
   public let placeholderContentLength = "1053832";
-  public let escrowDelay : Time.Time = 120000000000; // 120 seconds
+  // public let escrowDelay : Time.Time = 120000000000; // 120 seconds
   // public let collectionSize : Nat32 = 7777;
 
   // public let salePrice : Nat64 = 700000000;

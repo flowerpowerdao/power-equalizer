@@ -232,7 +232,7 @@ module {
           price = total;
           subaccount = subaccount;
           buyer = address;
-          expires = Time.now() + Env.escrowDelay;
+          expires = Time.now() + config.escrowDelay;
           slot = getSlot(address);
         },
       );
