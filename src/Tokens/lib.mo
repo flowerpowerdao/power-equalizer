@@ -4,6 +4,7 @@ import TrieMap "mo:base/TrieMap";
 import Result "mo:base/Result";
 import Buffer "mo:base/Buffer";
 import Debug "mo:base/Debug";
+import Nat32 "mo:base/Nat32";
 
 import AID "../toniq-labs/util/AccountIdentifier";
 import ExtCore "../toniq-labs/ext/Core";
@@ -96,11 +97,11 @@ module {
     * INTERNAL METHODS *
     *******************/
 
-    public func mintCollection(collectionSize : Nat32) {
+    public func mintCollection() {
       if (Env.openEdition and Env.saleEnd == 0) {
         Debug.trap("Open edition must have a sale end date");
       };
-      if (Env.openEdition and Env.collectionSize != 0) {
+      if (Env.openEdition and config.collectionSize != 0) {
         Debug.trap("Open edition must have a collection size of 0");
       };
       if (Env.openEdition and not Env.singleAssetCollection) {
@@ -112,11 +113,11 @@ module {
       if (not Env.openEdition and Env.saleEnd != 0) {
         Debug.trap("Sale end date must be 0 for non-open editions");
       };
-      if (not Env.openEdition and Env.collectionSize == 0) {
+      if (not Env.openEdition and config.collectionSize == 0) {
         Debug.trap("Collection size must be greater than 0 for non-open editions");
       };
 
-      while (getNextTokenId() < collectionSize) {
+      while (getNextTokenId() < Nat32.fromNat(config.collectionSize)) {
         mintNextToken();
       };
     };

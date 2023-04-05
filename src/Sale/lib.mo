@@ -130,7 +130,7 @@ module {
       };
 
       // Mint
-      mintCollection(Env.collectionSize);
+      mintCollection();
 
       // turn whitelist into buffer for better performance
       for (whitelistTier in Env.whitelistTiers.vals()) {
@@ -147,7 +147,7 @@ module {
     };
 
     public func shuffleTokensForSale(caller : Principal) : async () {
-      assert (caller == config.minter and Nat32.toNat(Env.collectionSize) == _tokensForSale.size());
+      assert (caller == config.minter and config.collectionSize == _tokensForSale.size());
       // shuffle indices
       let seed : Blob = await Random.blob();
       _tokensForSale := deps._Shuffle.shuffleTokens(_tokensForSale, seed);
@@ -627,8 +627,8 @@ module {
       _whitelist.add((price, address, slot));
     };
 
-    func mintCollection(collectionSize : Nat32) {
-      deps._Tokens.mintCollection(collectionSize);
+    func mintCollection() {
+      deps._Tokens.mintCollection();
     };
 
     func expiredSalesSettlements() : TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale> {
