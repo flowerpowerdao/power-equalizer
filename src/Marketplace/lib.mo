@@ -296,7 +296,7 @@ module {
 
     public func list(caller : Principal, request : Types.ListRequest) : async Result.Result<(), Types.CommonError> {
       // marketplace is open either when marketDelay has passed or collection sold out
-      if (Time.now() < Env.publicSaleStart + Env.marketDelay) {
+      if (Time.now() < config.publicSaleStart + Env.marketDelay) {
         if (deps._Sale.getSold() < deps._Sale.getTotalToSell()) {
           return #err(#Other("You can not list yet"));
         };

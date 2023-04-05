@@ -185,7 +185,7 @@ module {
       if (Env.openEdition and Time.now() > Env.saleEnd) {
         return #err("The sale has ended");
       };
-      if (Time.now() < Env.publicSaleStart) {
+      if (Time.now() < config.publicSaleStart) {
         return #err("The sale has not started yet");
       };
       if (isWhitelisted(address) == false) {
@@ -521,7 +521,7 @@ module {
         // if the dutch auction is for public sale only, we take the start time when the whitelist time has expired
         Env.whitelistTime;
       } else {
-        Env.publicSaleStart;
+        config.publicSaleStart;
       };
       let timeSinceStart : Int = Time.now() - start; // how many nano seconds passed since the auction began
       // in the event that this function is called before the auction has started, return the starting price

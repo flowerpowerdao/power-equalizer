@@ -165,7 +165,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     });
 
     if (Env.delayedReveal and not _Shuffle.isShuffled()) {
-      let revealTime = Env.publicSaleStart + Env.revealDelay;
+      let revealTime = config.publicSaleStart + Env.revealDelay;
       let delay = Int.abs(Int.max(0, revealTime - Time.now()));
 
       // add random delay up to 60 minutes
