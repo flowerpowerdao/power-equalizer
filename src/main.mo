@@ -30,7 +30,6 @@ import Tokens "Tokens";
 import Disburser "Disburser";
 import DisburserTypes "Disburser/types";
 import Utils "./utils";
-import Env "./Env";
 import Types "./types";
 
 shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs: Types.InitArgs) = myCanister {

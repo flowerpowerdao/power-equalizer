@@ -21,7 +21,6 @@ import Root "mo:cap/Root";
 import Fuzz "mo:fuzz";
 
 import AID "../toniq-labs/util/AccountIdentifier";
-import Env "../Env";
 import Types "types";
 import RootTypes "../types";
 import Utils "../utils";

@@ -10,7 +10,6 @@ import Root "mo:cap/Root";
 import AID "../toniq-labs/util/AccountIdentifier";
 import ExtCore "../toniq-labs/ext/Core";
 import MarketplaceTypes "../Marketplace/types";
-import Env "../Env";
 import Types "types";
 import RootTypes "../types";
 

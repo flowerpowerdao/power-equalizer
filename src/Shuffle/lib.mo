@@ -6,7 +6,6 @@ import Buffer "mo:base/Buffer";
 import Types "types";
 import RootTypes "../types";
 import Utils "../utils";
-import Env "../Env";
 
 module {
   public class Factory(config : RootTypes.Config, deps : Types.Dependencies) {

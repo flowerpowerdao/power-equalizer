@@ -8,7 +8,6 @@ import Buffer "mo:base/Buffer";
 import Types "types";
 import RootTypes "../types";
 import Utils "../utils";
-import Env "../Env";
 
 module {
 

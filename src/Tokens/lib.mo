@@ -11,7 +11,6 @@ import ExtCore "../toniq-labs/ext/Core";
 import Types "types";
 import RootTypes "../types";
 import Utils "../utils";
-import Env "../Env";
 
 module {
   public class Factory(config : RootTypes.Config) {

@@ -11,7 +11,6 @@ import Text "mo:base/Text";
 import Buffer "mo:base/Buffer";
 
 import AssetTypes "../CanisterAssets/types";
-import Env "../Env";
 import ExtCore "../toniq-labs/ext/Core";
 import MarketplaceTypes "../Marketplace/types";
 import Types "types";
