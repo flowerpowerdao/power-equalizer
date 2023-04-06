@@ -10,6 +10,7 @@ module {
     whitelistTime : Time.Time; // Period for WL only discount. Set to publicSaleStart for no exclusive period
     marketDelay : Time.Time; // How long to delay market opening (2 days after whitelist sale started or when sold out)
     escrowDelay : Time.Time;
+    placeholderContentLength : Text; // ??
   };
 
   public type Config = InitArgs and {

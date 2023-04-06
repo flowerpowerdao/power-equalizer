@@ -226,7 +226,7 @@ module {
             ("Access-Control-Expose-Headers", "Content-Length, Content-Range"),
             ("Access-Control-Allow-Methods", "GET, POST, HEAD, OPTIONS"),
             ("Access-Control-Allow-Origin", "*"),
-            ("Content-Length", Env.placeholderContentLength),
+            ("Content-Length", config.placeholderContentLength),
             ("Accept-Ranges", "bytes"),
           ];
           // end custom

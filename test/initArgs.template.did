@@ -8,5 +8,6 @@
     whitelistTime = $whitelistTime;
     marketDelay = $marketDelay;
     escrowDelay = $escrowDelay;
+    placeholderContentLength = "1053832";
   }
 )

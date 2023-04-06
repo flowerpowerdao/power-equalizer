@@ -10,7 +10,7 @@ module {
   let beneficiary1 : ExtCore.AccountIdentifier = "24fc8fbcf345bc6a2ba14bbd323fc041c8ad400cc48b1e69cb53dd612afd0d81";
 
   // public let collectionName = "Pineapple Punks";
-  public let placeholderContentLength = "1053832";
+  // public let placeholderContentLength = "1053832";
   // public let escrowDelay : Time.Time = 120000000000; // 120 seconds
   // public let collectionSize : Nat32 = 7777;
 
