@@ -26,7 +26,7 @@ module {
   //   (beneficiary1, $royalty1), // Royalty Fee
   // ];
 
-  public let defaultMarketplaceFee = ($defaultMarketplaceAddr, $defaultMarketplaceFee : Nat64); // Entrepot Fee
+  // public let defaultMarketplaceFee = ($defaultMarketplaceAddr, $defaultMarketplaceFee : Nat64); // Entrepot Fee
 
   // public let publicSaleStart : Time.Time = $publicSaleStart; // Start of first purchase (WL or other)
   // public let whitelistTime : Time.Time = $whitelistTime; // Period for WL only discount. Set to publicSaleStart for no exclusive period

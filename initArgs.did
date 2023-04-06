@@ -11,5 +11,6 @@
     placeholderContentLength = "1053832";
     salesDistribution = vec {};
     royalties = vec {};
+    defaultMarketplaceFee = ("", 500);
   }
 )

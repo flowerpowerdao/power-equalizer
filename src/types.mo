@@ -15,6 +15,7 @@ module {
     placeholderContentLength : Text; // ??
     salesDistribution : [(AccountIdentifier, Nat64)];
     royalties : [(AccountIdentifier, Nat64)];
+    defaultMarketplaceFee : (AccountIdentifier, Nat64)
   };
 
   type InitArgsNew = {

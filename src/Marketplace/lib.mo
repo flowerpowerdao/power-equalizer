@@ -476,8 +476,8 @@ module {
 
     func getFrontend(identifier : ?Text) : Types.Frontend {
       let defaultFrontend : Types.Frontend = {
-        fee = Env.defaultMarketplaceFee.1;
-        accountIdentifier = Env.defaultMarketplaceFee.0;
+        fee = config.defaultMarketplaceFee.1;
+        accountIdentifier = config.defaultMarketplaceFee.0;
       };
 
       // disbursement of marketplace fee

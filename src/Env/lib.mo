@@ -26,7 +26,7 @@ module {
   //   (beneficiary1, 750), // Royalty Fee
   // ];
 
-  public let defaultMarketplaceFee = ("ccfe146bb249b6c59e8c5ae71a1b59ddf85d9f9034611427b696f8b25d7b826a", 1000 : Nat64); // Entrepot Fee
+  // public let defaultMarketplaceFee = ("ccfe146bb249b6c59e8c5ae71a1b59ddf85d9f9034611427b696f8b25d7b826a", 1000 : Nat64); // Entrepot Fee
 
   // public let publicSaleStart : Time.Time = 1680696181381000000; // Start of first purchase (WL or other)
   // public let whitelistTime : Time.Time = 1680696181381000000; // Period for WL only discount. Set to publicSaleStart for no exclusive period
