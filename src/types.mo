@@ -15,7 +15,13 @@ module {
     placeholderContentLength : Text; // ??
     salesDistribution : [(AccountIdentifier, Nat64)];
     royalties : [(AccountIdentifier, Nat64)];
-    defaultMarketplaceFee : (AccountIdentifier, Nat64)
+    defaultMarketplaceFee : (AccountIdentifier, Nat64);
+    // open edition
+    // true - no definite collection size and can be minted in an ongoing effort until 'saleEnd' (need to set collectionSize = 0)
+    // false - fixed collection size
+    openEdition : Bool;
+    // when the sale ends (set to '0' if openEdition = false)
+    saleEnd : Time.Time;
   };
 
   type InitArgsNew = {

@@ -12,5 +12,7 @@
     salesDistribution = vec {};
     royalties = vec {};
     defaultMarketplaceFee = ("", 500);
+    openEdition = false;
+    saleEnd = 0;
   }
 )

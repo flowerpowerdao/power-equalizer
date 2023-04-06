@@ -18,5 +18,7 @@
       ($beneficiary1, $royalty1);
     };
     defaultMarketplaceFee = ($defaultMarketplaceAddr, $defaultMarketplaceFee);
+    openEdition = $openEdition;
+    saleEnd = $saleEnd;
   }
 )

@@ -182,7 +182,7 @@ module {
     };
 
     public func reserve(amount : Nat64, quantity : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount) : Result.Result<(Types.AccountIdentifier, Nat64), Text> {
-      if (Env.openEdition and Time.now() > Env.saleEnd) {
+      if (config.openEdition and Time.now() > config.saleEnd) {
         return #err("The sale has ended");
       };
       if (Time.now() < config.publicSaleStart) {
@@ -437,7 +437,7 @@ module {
 
     public func salesSettings(address : Types.AccountIdentifier) : Types.SaleSettings {
       var startTime = config.whitelistTime;
-      var endTime: Int = Env.saleEnd;
+      var endTime: Int = config.saleEnd;
       // for whitelisted user return nearest and cheapest slot start time
       label l for (item in _whitelist.vals()) {
         if (item.1 == address and Time.now() <= item.2.end) {
@@ -458,7 +458,7 @@ module {
         whitelistTime = config.whitelistTime;
         whitelist = isWhitelisted(address);
         bulkPricing = getAddressBulkPrice(address);
-        openEdition = Env.openEdition;
+        openEdition = config.openEdition;
       } : Types.SaleSettings;
     };
 
@@ -468,7 +468,7 @@ module {
 
     // getters & setters
     public func availableTokens() : Nat {
-      if (Env.openEdition) {
+      if (config.openEdition) {
         return 1;
       };
       _tokensForSale.size();
@@ -540,7 +540,7 @@ module {
     };
 
     func nextTokens(qty : Nat64) : [Types.TokenIndex] {
-      if (Env.openEdition) {
+      if (config.openEdition) {
         deps._Tokens.mintNextToken();
         _tokensForSale := switch (deps._Tokens.getTokensFromOwner("0000")) {
           case (?t) t;
