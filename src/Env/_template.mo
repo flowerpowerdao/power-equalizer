@@ -81,9 +81,9 @@ module {
   // public let dutchAuctionReservePrice : Nat64 = $dutchAuctionReservePrice; // reserve price is 5 icp
   // public let dutchAuctionInterval : Time.Time = $dutchAuctionInterval; // 1 minute
 
-  // Airdrop (only addresses, no token index anymore)
-  public let airdropEnabled = $airdropEnabled;
-  public let airdrop : [ExtCore.AccountIdentifier] = $airdrop;
+  // // Airdrop (only addresses, no token index anymore)
+  // public let airdropEnabled = $airdropEnabled;
+  // public let airdrop : [ExtCore.AccountIdentifier] = $airdrop;
 
   // whitelist tiers
   public type WhitelistTier = {

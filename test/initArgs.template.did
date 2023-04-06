@@ -30,5 +30,8 @@
     dutchAuctionIntervalPriceDrop : Nat64 = $dutchAuctionIntervalPriceDrop; // drop 5 icp every interval
     dutchAuctionReservePrice : Nat64 = $dutchAuctionReservePrice; // reserve price is 5 icp
     dutchAuctionInterval : Time.Time = $dutchAuctionInterval; // 1 minute
+    // airdrop
+    airdropEnabled = $airdropEnabled;
+    airdrop = $airdrop;
   }
 )

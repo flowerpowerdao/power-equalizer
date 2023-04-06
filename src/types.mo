@@ -41,6 +41,9 @@ module {
     dutchAuctionIntervalPriceDrop : Nat64; // drop 5 icp every interval
     dutchAuctionReservePrice : Nat64; // reserve price is 5 icp
     dutchAuctionInterval : Time.Time; // 1 minute
+    // airdrop
+    airdropEnabled : Bool;
+    airdrop : [AccountIdentifier];
   };
 
   type InitArgsNew = {

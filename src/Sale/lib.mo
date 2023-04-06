@@ -156,13 +156,13 @@ module {
     public func airdropTokens(caller : Principal, startingIndex : Nat) : () {
       assert (caller == config.minter and _totalToSell == 0);
 
-      if (not Env.airdropEnabled) {
+      if (not config.airdropEnabled) {
         return;
       };
 
       // airdrop tokens
       var temp = 0;
-      label airdrop for (a in Env.airdrop.vals()) {
+      label airdrop for (a in config.airdrop.vals()) {
         if (temp < startingIndex) {
           temp += 1;
           continue airdrop;

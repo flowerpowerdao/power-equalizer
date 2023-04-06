@@ -26,5 +26,8 @@
     dutchAuctionIntervalPriceDrop = 500000000; // drop 5 icp every interval
     dutchAuctionReservePrice = 500000000; // reserve price is 5 icp
     dutchAuctionInterval = 60000000000; // 1 minute
+    // airdrop
+    airdropEnabled = false;
+    airdrop = vec {};
   }
 )
