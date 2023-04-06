@@ -140,14 +140,14 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
 
   public shared ({ caller }) func restoreChunk(chunk : StableChunk): async () {
     assert (caller == init_minter);
-    if (not Env.restoreEnabled) {
+    if (not config.restoreEnabled) {
       Debug.trap("Restore disabled. Please reinstall canister with 'restoreEnabled = true'");
     };
     _loadStableChunk(chunk);
   };
 
   func _trapIfRestoreEnabled() {
-    if (Env.restoreEnabled) {
+    if (config.restoreEnabled) {
       Debug.trap("Restore in progress. If restore is complete, upgrade canister with `restoreEnabled = false`");
     };
   };
@@ -157,7 +157,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     Timer.cancelTimer(_timerId);
     Timer.cancelTimer(_revealTimerId);
 
-    _timerId := Timer.recurringTimer(Env.timersInterval, func(): async () {
+    _timerId := Timer.recurringTimer(config.timersInterval, func(): async () {
       ignore cronSettlements();
       ignore cronDisbursements();
       ignore cronSalesSettlements();
@@ -442,7 +442,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   };
 
   public shared ({ caller }) func grow(n : Nat) : async Nat {
-    assert (Env.test);
+    assert (config.test);
     ignore _Sale.grow(n);
     _Marketplace.grow(n);
   };
