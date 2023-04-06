@@ -39,21 +39,21 @@ module {
   // // when the sale ends (set to '0' if openEdition = false)
   // public let saleEnd : Time.Time = $saleEnd;
 
-  public type WhitelistSlot = {
-    start : Time.Time;
-    end : Time.Time;
-  };
+  // public type WhitelistSlot = {
+  //   start : Time.Time;
+  //   end : Time.Time;
+  // };
 
   // this allows you to create slots for whitelists. one slots can contain multiple whitelist.
   // the start of the first slot has to be the publicSaleStart, the end of the last slot the whitelistTime
-  let whitelistSlot1 = {
-    start = $whitelistSlot1_start;
-    end = $whitelistSlot1_end;
-  };
-  let whitelistSlot2 = {
-    start = $whitelistSlot2_start;
-    end = $whitelistSlot2_end;
-  };
+  // let whitelistSlot1 = {
+  //   start = $whitelistSlot1_start;
+  //   end = $whitelistSlot1_end;
+  // };
+  // let whitelistSlot2 = {
+  //   start = $whitelistSlot2_start;
+  //   end = $whitelistSlot2_end;
+  // };
 
   // // true - assets will be revealed after 'revealDelay'
   // // false - assets will be revealed immediately and assets shuffling will be disabled
@@ -85,27 +85,27 @@ module {
   // public let airdropEnabled = $airdropEnabled;
   // public let airdrop : [ExtCore.AccountIdentifier] = $airdrop;
 
-  // whitelist tiers
-  public type WhitelistTier = {
-    name : Text;
-    price : Nat64;
-    whitelist : [ExtCore.AccountIdentifier];
-    slot : WhitelistSlot;
-  };
+  // // whitelist tiers
+  // public type WhitelistTier = {
+  //   name : Text;
+  //   price : Nat64;
+  //   whitelist : [ExtCore.AccountIdentifier];
+  //   slot : WhitelistSlot;
+  // };
 
-  // order from lower price to higher price
-  public let whitelistTiers : [WhitelistTier] = [
-    {
-      name = $whitelistTier0Name;
-      price = $whitelistTier0Price;
-      whitelist = $whitelistTier0Whitelist;
-      slot = whitelistSlot1;
-    },
-    {
-      name = $whitelistTier1Name;
-      price = $whitelistTier1Price;
-      whitelist = $whitelistTier1Whitelist;
-      slot = whitelistSlot2;
-    },
-  ];
+  // // order from lower price to higher price
+  // public let whitelistTiers : [WhitelistTier] = [
+  //   {
+  //     name = $whitelistTier0Name;
+  //     price = $whitelistTier0Price;
+  //     whitelist = $whitelistTier0Whitelist;
+  //     slot = whitelistSlot1;
+  //   },
+  //   {
+  //     name = $whitelistTier1Name;
+  //     price = $whitelistTier1Price;
+  //     whitelist = $whitelistTier1Whitelist;
+  //     slot = whitelistSlot2;
+  //   },
+  // ];
 };

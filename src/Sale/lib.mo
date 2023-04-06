@@ -133,7 +133,7 @@ module {
       mintCollection();
 
       // turn whitelist into buffer for better performance
-      for (whitelistTier in Env.whitelistTiers.vals()) {
+      for (whitelistTier in config.whitelistTiers.vals()) {
         appendWhitelist(whitelistTier.price, whitelistTier.whitelist, whitelistTier.slot);
       };
 

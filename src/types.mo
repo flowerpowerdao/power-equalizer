@@ -4,6 +4,18 @@ import Time "mo:base/Time";
 module {
   type AccountIdentifier = Text;
 
+  public type WhitelistSlot = {
+    start : Time.Time;
+    end : Time.Time;
+  };
+
+  public type WhitelistTier = {
+    name : Text;
+    price : Nat64;
+    whitelist : [AccountIdentifier];
+    slot : WhitelistSlot;
+  };
+
   public type InitArgs = {
     collectionName : Text;
     collectionSize : Nat;
@@ -47,6 +59,9 @@ module {
     // whitelist
     whitelistOneTimeOnly : Bool; // Whitelist addresses are removed after purchase
     whitelistDiscountLimited : Bool; // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
+    // whitelist tiers
+    // order from lower price to higher price
+    whitelistTiers : [WhitelistTier];
   };
 
   type InitArgsNew = {
