@@ -47,7 +47,7 @@ module {
           // start custom
           // we assume the placeholder is stored in index 0
           // and thus uploaded first
-          if (Env.delayedReveal and not deps._Shuffle.isShuffled()) {
+          if (config.delayedReveal and not deps._Shuffle.isShuffled()) {
             return _processFile(Nat.toText(0), deps._Assets.get(0).payload);
           };
           // end custom

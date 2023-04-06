@@ -14,5 +14,7 @@
     defaultMarketplaceFee = ("", 500);
     openEdition = false;
     saleEnd = 0;
+    delayedReveal = true;
+    revealDelay = 86400000000000; // 86400000000000 == 24 hours
   }
 )

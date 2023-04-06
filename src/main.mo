@@ -164,7 +164,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
       ignore cronFailedSales();
     });
 
-    if (Env.delayedReveal and not _Shuffle.isShuffled()) {
+    if (config.delayedReveal and not _Shuffle.isShuffled()) {
       let revealTime = config.publicSaleStart + Env.revealDelay;
       let delay = Int.abs(Int.max(0, revealTime - Time.now()));
 

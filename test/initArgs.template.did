@@ -20,5 +20,7 @@
     defaultMarketplaceFee = ($defaultMarketplaceAddr, $defaultMarketplaceFee);
     openEdition = $openEdition;
     saleEnd = $saleEnd;
+    delayedReveal = $delayedReveal;
+    revealDelay = $revealDelay;
   }
 )
