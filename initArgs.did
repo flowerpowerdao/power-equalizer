@@ -16,5 +16,8 @@
     saleEnd = 0;
     delayedReveal = true;
     revealDelay = 86400000000000; // 86400000000000 == 24 hours
+    // true - the entire collection will consists of only one asset, meaning all NFTs look the same
+    // false - there are at least two different assets in the collection
+    singleAssetCollection = false;
   }
 )

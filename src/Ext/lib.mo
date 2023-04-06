@@ -56,7 +56,7 @@ module {
       var resp : Buffer.Buffer<(Types.TokenIndex, Text)> = Buffer.Buffer(0);
       let startIndex = if (config.delayedReveal) { 1 } else { 0 };
       for (e in deps._Tokens.getTokenMetadata().entries()) {
-        let assetid = deps._Assets.get(if (Env.singleAssetCollection) startIndex else Nat32.toNat(e.0) + startIndex).name;
+        let assetid = deps._Assets.get(if (config.singleAssetCollection) startIndex else Nat32.toNat(e.0) + startIndex).name;
         resp.add((e.0, assetid));
       };
       Buffer.toArray(resp);

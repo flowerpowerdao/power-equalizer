@@ -104,7 +104,7 @@ module {
       if (config.openEdition and config.collectionSize != 0) {
         Debug.trap("Open edition must have a collection size of 0");
       };
-      if (config.openEdition and not Env.singleAssetCollection) {
+      if (config.openEdition and not config.singleAssetCollection) {
         Debug.trap("Open edition must be a single asset collection");
       };
       if (config.openEdition and config.delayedReveal) {
@@ -125,7 +125,7 @@ module {
     public func mintNextToken() {
       /* for delayedReveal we start with asset 1, as index 0 contains the placeholder and is not being shuffled */
       let startIndex : Nat32 = if (config.delayedReveal) { 1 } else { 0 };
-      putTokenMetadata(getNextTokenId(), #nonfungible({ metadata = ?Utils.nat32ToBlob(if (Env.singleAssetCollection) startIndex else getNextTokenId() + startIndex) }));
+      putTokenMetadata(getNextTokenId(), #nonfungible({ metadata = ?Utils.nat32ToBlob(if (config.singleAssetCollection) startIndex else getNextTokenId() + startIndex) }));
       transferTokenToUser(getNextTokenId(), "0000");
       incrementSupply();
       incrementNextTokenId();

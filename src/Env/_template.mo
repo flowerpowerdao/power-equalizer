@@ -6,8 +6,8 @@ module {
   public let restoreEnabled = $restoreEnabled; // must be 'false' (see backup/README.md for details)
   public let timersInterval = #seconds($timersInterval);
 
-  let beneficiary0 : ExtCore.AccountIdentifier = $beneficiary0;
-  let beneficiary1 : ExtCore.AccountIdentifier = $beneficiary1;
+  // let beneficiary0 : ExtCore.AccountIdentifier = $beneficiary0;
+  // let beneficiary1 : ExtCore.AccountIdentifier = $beneficiary1;
 
   // public let collectionName = "Pineapple Punks";
   // public let placeholderContentLength = "1053832";
@@ -63,7 +63,7 @@ module {
 
   // true - the entire collection will consists of only one asset, meaning all NFTs look the same
   // false - there are at least two different assets in the collection
-  public let singleAssetCollection = $singleAssetCollection;
+  // public let singleAssetCollection = $singleAssetCollection;
 
   public let whitelistOneTimeOnly : Bool = $whitelistOneTimeOnly; // Whitelist addresses are removed after purchase
   public let whitelistDiscountLimited : Bool = $whitelistDiscountLimited; // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored

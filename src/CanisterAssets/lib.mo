@@ -91,7 +91,7 @@ module {
 
     public func addAsset(caller : Principal, asset : Types.Asset) : Nat {
       assert (caller == config.minter);
-      if (Env.singleAssetCollection) {
+      if (config.singleAssetCollection) {
         if (config.delayedReveal) {
           assert (_assets.size() < 2);
         } else {

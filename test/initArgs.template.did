@@ -22,5 +22,6 @@
     saleEnd = $saleEnd;
     delayedReveal = $delayedReveal;
     revealDelay = $revealDelay;
+    singleAssetCollection = $singleAssetCollection;
   }
 )

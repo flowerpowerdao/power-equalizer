@@ -27,6 +27,9 @@ module {
     delayedReveal : Bool;
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
     revealDelay : Time.Time; // 86400000000000 == 24 hours
+    // true - the entire collection will consists of only one asset, meaning all NFTs look the same
+    // false - there are at least two different assets in the collection
+    singleAssetCollection : Bool;
   };
 
   type InitArgsNew = {
