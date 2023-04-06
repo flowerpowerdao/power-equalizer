@@ -68,18 +68,18 @@ module {
   public let whitelistOneTimeOnly : Bool = true; // Whitelist addresses are removed after purchase
   public let whitelistDiscountLimited : Bool = true; // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
 
-  // dutch auction
-  public type DutchAuctionFor = {
-    #everyone; // dutch auction for everyone
-    #whitelist; // dutch auction for whitelist(tier price is ignored), then salePrice for public sale
-    #publicSale; // tier price for whitelist, then dutch auction for public sale
-  };
-  public let dutchAuctionEnabled = false;
-  public let dutchAuctionFor : DutchAuctionFor = #everyone;
-  public let dutchAuctionStartPrice : Nat64 = 21500000000; // start with 350 icp for dutch auction
-  public let dutchAuctionIntervalPriceDrop : Nat64 = 500000000; // drop 5 icp every interval
-  public let dutchAuctionReservePrice : Nat64 = 500000000; // reserve price is 5 icp
-  public let dutchAuctionInterval : Time.Time = 60000000000; // 1 minute
+  // // dutch auction
+  // public type DutchAuctionFor = {
+  //   #everyone; // dutch auction for everyone
+  //   #whitelist; // dutch auction for whitelist(tier price is ignored), then salePrice for public sale
+  //   #publicSale; // tier price for whitelist, then dutch auction for public sale
+  // };
+  // public let dutchAuctionEnabled = false;
+  // public let dutchAuctionFor : DutchAuctionFor = #everyone;
+  // public let dutchAuctionStartPrice : Nat64 = 21500000000; // start with 350 icp for dutch auction
+  // public let dutchAuctionIntervalPriceDrop : Nat64 = 500000000; // drop 5 icp every interval
+  // public let dutchAuctionReservePrice : Nat64 = 500000000; // reserve price is 5 icp
+  // public let dutchAuctionInterval : Time.Time = 60000000000; // 1 minute
 
   // Airdrop (only addresses, no token index anymore)
   public let airdropEnabled = false;

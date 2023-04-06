@@ -28,7 +28,7 @@ else if (existsSync(tsFile)) {
       val = String(val);
     }
     else if (String(val).startsWith('#')) {
-      val = val;
+      val = `variant { ${String(val).slice(1)} }`;
     }
     else {
       val = JSON.stringify(val);

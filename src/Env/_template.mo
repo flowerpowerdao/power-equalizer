@@ -68,18 +68,18 @@ module {
   public let whitelistOneTimeOnly : Bool = $whitelistOneTimeOnly; // Whitelist addresses are removed after purchase
   public let whitelistDiscountLimited : Bool = $whitelistDiscountLimited; // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
 
-  // dutch auction
-  public type DutchAuctionFor = {
-    #everyone; // dutch auction for everyone
-    #whitelist; // dutch auction for whitelist(tier price is ignored), then salePrice for public sale
-    #publicSale; // tier price for whitelist, then dutch auction for public sale
-  };
-  public let dutchAuctionEnabled = $dutchAuctionEnabled;
-  public let dutchAuctionFor : DutchAuctionFor = $dutchAuctionFor;
-  public let dutchAuctionStartPrice : Nat64 = $dutchAuctionStartPrice; // start with 350 icp for dutch auction
-  public let dutchAuctionIntervalPriceDrop : Nat64 = $dutchAuctionIntervalPriceDrop; // drop 5 icp every interval
-  public let dutchAuctionReservePrice : Nat64 = $dutchAuctionReservePrice; // reserve price is 5 icp
-  public let dutchAuctionInterval : Time.Time = $dutchAuctionInterval; // 1 minute
+  // // dutch auction
+  // public type DutchAuctionFor = {
+  //   #everyone; // dutch auction for everyone
+  //   #whitelist; // dutch auction for whitelist(tier price is ignored), then salePrice for public sale
+  //   #publicSale; // tier price for whitelist, then dutch auction for public sale
+  // };
+  // public let dutchAuctionEnabled = $dutchAuctionEnabled;
+  // public let dutchAuctionFor : DutchAuctionFor = $dutchAuctionFor;
+  // public let dutchAuctionStartPrice : Nat64 = $dutchAuctionStartPrice; // start with 350 icp for dutch auction
+  // public let dutchAuctionIntervalPriceDrop : Nat64 = $dutchAuctionIntervalPriceDrop; // drop 5 icp every interval
+  // public let dutchAuctionReservePrice : Nat64 = $dutchAuctionReservePrice; // reserve price is 5 icp
+  // public let dutchAuctionInterval : Time.Time = $dutchAuctionInterval; // 1 minute
 
   // Airdrop (only addresses, no token index anymore)
   public let airdropEnabled = $airdropEnabled;

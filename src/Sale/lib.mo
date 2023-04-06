@@ -489,13 +489,13 @@ module {
 
     // Set different price types here
     func getAddressBulkPrice(address : Types.AccountIdentifier) : [(Nat64, Nat64)] {
-      if (Env.dutchAuctionEnabled) {
+      if (config.dutchAuctionEnabled) {
         // dutch auction for everyone
-        let everyone = Env.dutchAuctionFor == #everyone;
+        let everyone = config.dutchAuctionFor == #everyone;
         // dutch auction for whitelist (tier price is ignored), then salePrice for public sale
-        let whitelist = Env.dutchAuctionFor == #whitelist and isWhitelisted(address);
+        let whitelist = config.dutchAuctionFor == #whitelist and isWhitelisted(address);
         // tier price for whitelist, then dutch auction for public sale
-        let publicSale = Env.dutchAuctionFor == #publicSale and not isWhitelisted(address);
+        let publicSale = config.dutchAuctionFor == #publicSale and not isWhitelisted(address);
 
         if (everyone or whitelist or publicSale) {
           return [(1, getCurrentDutchAuctionPrice())];
@@ -517,7 +517,7 @@ module {
     };
 
     func getCurrentDutchAuctionPrice() : Nat64 {
-      let start = if (Env.dutchAuctionFor == #publicSale) {
+      let start = if (config.dutchAuctionFor == #publicSale) {
         // if the dutch auction is for public sale only, we take the start time when the whitelist time has expired
         config.whitelistTime;
       } else {
@@ -526,16 +526,16 @@ module {
       let timeSinceStart : Int = Time.now() - start; // how many nano seconds passed since the auction began
       // in the event that this function is called before the auction has started, return the starting price
       if (timeSinceStart < 0) {
-        return Env.dutchAuctionStartPrice;
+        return config.dutchAuctionStartPrice;
       };
-      let priceInterval = timeSinceStart / Env.dutchAuctionInterval; // how many intervals passed since the auction began
+      let priceInterval = timeSinceStart / config.dutchAuctionInterval; // how many intervals passed since the auction began
       // what is the discount from the start price in this interval
-      let discount = Nat64.fromIntWrap(priceInterval) * Env.dutchAuctionIntervalPriceDrop;
+      let discount = Nat64.fromIntWrap(priceInterval) * config.dutchAuctionIntervalPriceDrop;
       // to prevent trapping, we check if the start price is bigger than the discount
-      if (Env.dutchAuctionStartPrice > discount) {
-        return Env.dutchAuctionStartPrice - discount;
+      if (config.dutchAuctionStartPrice > discount) {
+        return config.dutchAuctionStartPrice - discount;
       } else {
-        return Env.dutchAuctionReservePrice;
+        return config.dutchAuctionReservePrice;
       };
     };
 
