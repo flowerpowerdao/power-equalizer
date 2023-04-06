@@ -12,9 +12,16 @@
     salesDistribution = vec {};
     royalties = vec {};
     defaultMarketplaceFee = record { ""; 500 };
+    // open edition
+    // true - no definite collection size and can be minted in an ongoing effort until 'saleEnd' (need to set collectionSize = 0)
+    // false - fixed collection size
     openEdition = false;
+    // when the sale ends (set to '0' if openEdition = false)
     saleEnd = 0;
+    // true - assets will be revealed after 'revealDelay'
+    // false - assets will be revealed immediately and assets shuffling will be disabled
     delayedReveal = true;
+    // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
     revealDelay = 86400000000000; // 86400000000000 == 24 hours
     // true - the entire collection will consists of only one asset, meaning all NFTs look the same
     // false - there are at least two different assets in the collection
@@ -29,5 +36,8 @@
     // airdrop
     airdropEnabled = false;
     airdrop = vec {};
+    // whitelist
+    whitelistOneTimeOnly = true; // Whitelist addresses are removed after purchase
+    whitelistDiscountLimited = true; // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
   }
 )

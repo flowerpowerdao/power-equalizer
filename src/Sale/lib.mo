@@ -238,7 +238,7 @@ module {
       );
 
       // remove address from whitelist
-      if (Env.whitelistOneTimeOnly == true) {
+      if (config.whitelistOneTimeOnly == true) {
         if (isWhitelisted(address)) {
           removeFromWhitelist(address);
         };
@@ -336,7 +336,7 @@ module {
           _salesSettlements.delete(paymentaddress);
 
           // add back to whitelist
-          if (Env.whitelistOneTimeOnly and isSome(settlement.slot)) {
+          if (config.whitelistOneTimeOnly and isSome(settlement.slot)) {
             ignore do ? {
               addToWhitelist(settlement.price, settlement.buyer, settlement.slot!);
             };
@@ -575,7 +575,7 @@ module {
     // this method is timesensitive now and only returns true, iff the address is whitelist
     // in the current slot
     func isWhitelisted(address : Types.AccountIdentifier) : Bool {
-      if (Env.whitelistDiscountLimited == true and Time.now() >= config.whitelistTime) {
+      if (config.whitelistDiscountLimited == true and Time.now() >= config.whitelistTime) {
         return false;
       };
       for (element in _whitelist.vals()) {
@@ -587,7 +587,7 @@ module {
     };
 
     func getSlot(address : Types.AccountIdentifier) : ?Types.WhitelistSlot {
-      if (Env.whitelistDiscountLimited == true and Time.now() >= config.whitelistTime) {
+      if (config.whitelistDiscountLimited == true and Time.now() >= config.whitelistTime) {
         return null;
       };
       for (element in _whitelist.vals()) {

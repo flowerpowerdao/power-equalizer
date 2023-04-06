@@ -44,6 +44,9 @@ module {
     // airdrop
     airdropEnabled : Bool;
     airdrop : [AccountIdentifier];
+    // whitelist
+    whitelistOneTimeOnly : Bool; // Whitelist addresses are removed after purchase
+    whitelistDiscountLimited : Bool; // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
   };
 
   type InitArgsNew = {

@@ -65,8 +65,8 @@ module {
   // false - there are at least two different assets in the collection
   // public let singleAssetCollection = $singleAssetCollection;
 
-  public let whitelistOneTimeOnly : Bool = $whitelistOneTimeOnly; // Whitelist addresses are removed after purchase
-  public let whitelistDiscountLimited : Bool = $whitelistDiscountLimited; // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
+  // public let whitelistOneTimeOnly : Bool = $whitelistOneTimeOnly; // Whitelist addresses are removed after purchase
+  // public let whitelistDiscountLimited : Bool = $whitelistDiscountLimited; // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
 
   // // dutch auction
   // public type DutchAuctionFor = {
