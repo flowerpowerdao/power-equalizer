@@ -11,7 +11,7 @@
     placeholderContentLength = "1053832";
     salesDistribution = vec {};
     royalties = vec {};
-    defaultMarketplaceFee = ("", 500);
+    defaultMarketplaceFee = record { ""; 500 };
     openEdition = false;
     saleEnd = 0;
     delayedReveal = true;
