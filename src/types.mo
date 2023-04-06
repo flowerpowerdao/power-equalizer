@@ -2,6 +2,8 @@ import Principal "mo:base/Principal";
 import Time "mo:base/Time";
 
 module {
+  type AccountIdentifier = Text;
+
   public type InitArgs = {
     collectionName : Text;
     collectionSize : Nat;
@@ -11,14 +13,9 @@ module {
     marketDelay : Time.Time; // How long to delay market opening (2 days after whitelist sale started or when sold out)
     escrowDelay : Time.Time;
     placeholderContentLength : Text; // ??
+    salesDistribution : [(AccountIdentifier, Nat64)];
   };
 
-  public type Config = InitArgs and {
-    canister: Principal;
-    minter: Principal;
-  };
-
-  type AccountIdentifier = Text;
   type InitArgsNew = {
     collectionName : Text;
     salePrice : Nat; // e8s
@@ -63,5 +60,10 @@ module {
     timersInterval : ?Nat; // seconds (defailt 10) nanoseconds?
     testMode : ?Bool; // enables 'grow' methods, only for tests
     restoreEnabled : ?Bool; // must be null (see backup/README.md for details)
+  };
+
+  public type Config = InitArgs and {
+    canister: Principal;
+    minter: Principal;
   };
 };

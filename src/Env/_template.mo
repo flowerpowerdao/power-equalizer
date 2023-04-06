@@ -16,10 +16,10 @@ module {
 
   // public let salePrice : Nat64 = $salePrice;
 
-  public let salesDistribution : [(ExtCore.AccountIdentifier, Nat64)] = [
-    (beneficiary0, $salesDistribution0),
-    (beneficiary1, $salesDistribution1),
-  ];
+  // public let salesDistribution : [(ExtCore.AccountIdentifier, Nat64)] = [
+  //   (beneficiary0, $salesDistribution0),
+  //   (beneficiary1, $salesDistribution1),
+  // ];
 
   public let royalties : [(ExtCore.AccountIdentifier, Nat64)] = [
     (beneficiary0, $royalty0), // Royalty Fee

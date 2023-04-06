@@ -9,5 +9,9 @@
     marketDelay = $marketDelay;
     escrowDelay = $escrowDelay;
     placeholderContentLength = "1053832";
+    salesDistribution = vec {
+      ($beneficiary0, $salesDistribution0);
+      ($beneficiary1, $salesDistribution1);
+    };
   }
 )

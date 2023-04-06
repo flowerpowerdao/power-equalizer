@@ -9,5 +9,6 @@
     marketDelay = 86400000000000, // How long to delay market opening (2 days after whitelist sale started or when sold out)
     escrowDelay = 120000000000; // 120 seconds
     placeholderContentLength = "1053832";
+    salesDistribution = vec {};
   }
 )

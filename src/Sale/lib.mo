@@ -315,10 +315,10 @@ module {
           ignore deps._Cap.insert(event);
           // Payout
           // remove total transaction fee from balance to be splitted
-          let bal : Nat64 = response.e8s - (10000 * Nat64.fromNat(Env.salesDistribution.size()));
+          let bal : Nat64 = response.e8s - (10000 * Nat64.fromNat(config.salesDistribution.size()));
 
           // disbursement sales
-          for (f in Env.salesDistribution.vals()) {
+          for (f in config.salesDistribution.vals()) {
             var _fee : Nat64 = bal * f.1 / 100000;
             deps._Disburser.addDisbursement({
               to = f.0;
