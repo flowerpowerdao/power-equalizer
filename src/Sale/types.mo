@@ -6,7 +6,7 @@ import ExtCore "../toniq-labs/ext/Core";
 import Shuffle "../Shuffle";
 import Tokens "../Tokens";
 import Disburser "../Disburser";
-import Env "../Env"
+import Types "../types";
 
 module {
   public type StableChunk = ?{
@@ -34,7 +34,7 @@ module {
     _Disburser : Disburser.Factory;
   };
 
-  public type WhitelistSlot = Env.WhitelistSlot;
+  public type WhitelistSlot = Types.WhitelistSlot;
   public type AccountIdentifier = ExtCore.AccountIdentifier;
   public type TokenIdentifier = ExtCore.TokenIdentifier;
   public type SubAccount = ExtCore.SubAccount;
