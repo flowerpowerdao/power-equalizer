@@ -218,11 +218,11 @@ module {
       };
 
       // deduct 3 extra transaction fees for marketplace(seller + buyer) fee and disbursment to seller
-      let bal : Nat64 = response.e8s - (10000 * Nat64.fromNat(Env.royalties.size() + 3));
+      let bal : Nat64 = response.e8s - (10000 * Nat64.fromNat(config.royalties.size() + 3));
       var rem = bal;
 
       // disbursement of royalties
-      for (f in Env.royalties.vals()) {
+      for (f in config.royalties.vals()) {
         let _fee : Nat64 = bal * f.1 / 100000;
         deps._Disburser.addDisbursement({
           to = f.0;

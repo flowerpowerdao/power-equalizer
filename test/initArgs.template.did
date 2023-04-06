@@ -13,5 +13,9 @@
       ($beneficiary0, $salesDistribution0);
       ($beneficiary1, $salesDistribution1);
     };
+    royalties = vec {
+      ($beneficiary0, $royalty0);
+      ($beneficiary1, $royalty1);
+    };
   }
 )

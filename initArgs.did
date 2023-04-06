@@ -10,5 +10,6 @@
     escrowDelay = 120000000000; // 120 seconds
     placeholderContentLength = "1053832";
     salesDistribution = vec {};
+    royalties = vec {};
   }
 )

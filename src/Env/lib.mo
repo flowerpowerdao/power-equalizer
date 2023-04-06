@@ -21,10 +21,10 @@ module {
   //   (beneficiary1, 10125),
   // ];
 
-  public let royalties : [(ExtCore.AccountIdentifier, Nat64)] = [
-    (beneficiary0, 3375), // Royalty Fee
-    (beneficiary1, 750), // Royalty Fee
-  ];
+  // public let royalties : [(ExtCore.AccountIdentifier, Nat64)] = [
+  //   (beneficiary0, 3375), // Royalty Fee
+  //   (beneficiary1, 750), // Royalty Fee
+  // ];
 
   public let defaultMarketplaceFee = ("ccfe146bb249b6c59e8c5ae71a1b59ddf85d9f9034611427b696f8b25d7b826a", 1000 : Nat64); // Entrepot Fee
 
