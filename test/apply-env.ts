@@ -27,6 +27,9 @@ else if (existsSync(tsFile)) {
     if (typeof val == 'bigint') {
       val = String(val);
     }
+    else if (val instanceof Array) {
+      val = `vec { ${val.map(v => JSON.stringify(v)).join('; ')} }`;
+    }
     else if (String(val).startsWith('#')) {
       val = `variant { ${String(val).slice(1)} }`;
     }
