@@ -24,7 +24,7 @@
     revealDelay = $revealDelay;
     singleAssetCollection = $singleAssetCollection;
     // dutch auction
-    dutchAuction: opt record {
+    dutchAuction = opt record {
       target = $dutchAuctionFor;
       startPrice : $dutchAuctionStartPrice; // start price for dutch auction
       intervalPriceDrop : $dutchAuctionIntervalPriceDrop; // drop price every interval
