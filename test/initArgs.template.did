@@ -26,10 +26,10 @@
     // dutch auction
     dutchAuction = opt record {
       target = $dutchAuctionFor;
-      startPrice : $dutchAuctionStartPrice; // start price for dutch auction
-      intervalPriceDrop : $dutchAuctionIntervalPriceDrop; // drop price every interval
-      reservePrice : $dutchAuctionReservePrice; // reserve price
-      interval : $dutchAuctionInterval; // nanoseconds
+      startPrice = $dutchAuctionStartPrice; // start price for dutch auction
+      intervalPriceDrop = $dutchAuctionIntervalPriceDrop; // drop price every interval
+      reservePrice = $dutchAuctionReservePrice; // reserve price
+      interval = $dutchAuctionInterval; // nanoseconds
     };
     // airdrop
     airdropEnabled = $airdropEnabled;
