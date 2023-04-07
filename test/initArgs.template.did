@@ -24,12 +24,13 @@
     revealDelay = $revealDelay;
     singleAssetCollection = $singleAssetCollection;
     // dutch auction
-    dutchAuctionEnabled = $dutchAuctionEnabled;
-    dutchAuctionFor = $dutchAuctionFor;
-    dutchAuctionStartPrice = $dutchAuctionStartPrice; // start with 350 icp for dutch auction
-    dutchAuctionIntervalPriceDrop = $dutchAuctionIntervalPriceDrop; // drop 5 icp every interval
-    dutchAuctionReservePrice = $dutchAuctionReservePrice; // reserve price is 5 icp
-    dutchAuctionInterval = $dutchAuctionInterval; // 1 minute
+    dutchAuction: opt record {
+      target = $dutchAuctionFor;
+      startPrice : $dutchAuctionStartPrice; // start price for dutch auction
+      intervalPriceDrop : $dutchAuctionIntervalPriceDrop; // drop price every interval
+      reservePrice : $dutchAuctionReservePrice; // reserve price
+      interval : $dutchAuctionInterval; // nanoseconds
+    };
     // airdrop
     airdropEnabled = $airdropEnabled;
     airdrop = $airdrop;

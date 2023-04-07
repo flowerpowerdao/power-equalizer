@@ -488,17 +488,21 @@ module {
 
     // Set different price types here
     func getAddressBulkPrice(address : Types.AccountIdentifier) : [(Nat64, Nat64)] {
-      if (config.dutchAuctionEnabled) {
-        // dutch auction for everyone
-        let everyone = config.dutchAuctionFor == #everyone;
-        // dutch auction for whitelist (tier price is ignored), then salePrice for public sale
-        let whitelist = config.dutchAuctionFor == #whitelist and isWhitelisted(address);
-        // tier price for whitelist, then dutch auction for public sale
-        let publicSale = config.dutchAuctionFor == #publicSale and not isWhitelisted(address);
+      // dutch auction
+      switch (config.dutchAuction) {
+        case (?dutchAuction) {
+          // dutch auction for everyone
+          let everyone = dutchAuction.target == #everyone;
+          // dutch auction for whitelist (tier price is ignored), then salePrice for public sale
+          let whitelist = dutchAuction.target == #whitelist and isWhitelisted(address);
+          // tier price for whitelist, then dutch auction for public sale
+          let publicSale = dutchAuction.target == #publicSale and not isWhitelisted(address);
 
-        if (everyone or whitelist or publicSale) {
-          return [(1, getCurrentDutchAuctionPrice())];
+          if (everyone or whitelist or publicSale) {
+            return [(1, getCurrentDutchAuctionPrice(dutchAuction))];
+          };
         };
+        case (null) {};
       };
 
       // we have to make sure to only return prices that are available in the current whitelist slot
@@ -515,8 +519,8 @@ module {
       return [(1, config.salePrice)];
     };
 
-    func getCurrentDutchAuctionPrice() : Nat64 {
-      let start = if (config.dutchAuctionFor == #publicSale) {
+    func getCurrentDutchAuctionPrice(dutchAuction: RootTypes.DutchAuction) : Nat64 {
+      let start = if (dutchAuction.target == #publicSale) {
         // if the dutch auction is for public sale only, we take the start time when the whitelist time has expired
         config.whitelistTime;
       } else {
@@ -525,16 +529,16 @@ module {
       let timeSinceStart : Int = Time.now() - start; // how many nano seconds passed since the auction began
       // in the event that this function is called before the auction has started, return the starting price
       if (timeSinceStart < 0) {
-        return config.dutchAuctionStartPrice;
+        return dutchAuction.startPrice;
       };
-      let priceInterval = timeSinceStart / config.dutchAuctionInterval; // how many intervals passed since the auction began
+      let priceInterval = timeSinceStart / dutchAuction.interval; // how many intervals passed since the auction began
       // what is the discount from the start price in this interval
-      let discount = Nat64.fromIntWrap(priceInterval) * config.dutchAuctionIntervalPriceDrop;
+      let discount = Nat64.fromIntWrap(priceInterval) * dutchAuction.intervalPriceDrop;
       // to prevent trapping, we check if the start price is bigger than the discount
-      if (config.dutchAuctionStartPrice > discount) {
-        return config.dutchAuctionStartPrice - discount;
+      if (dutchAuction.startPrice > discount) {
+        return dutchAuction.startPrice - discount;
       } else {
-        return config.dutchAuctionReservePrice;
+        return dutchAuction.reservePrice;
       };
     };
 
