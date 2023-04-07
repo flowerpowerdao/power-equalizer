@@ -16,6 +16,18 @@ module {
     slot : WhitelistSlot;
   };
 
+  public type DutchAuction = {
+    target : {
+      #everyone; // dutch auction for everyone
+      #whitelist; // dutch auction for whitelist(tier price is ignored), then salePrice for public sale
+      #publicSale; // tier price for whitelist, then dutch auction for public sale
+    };
+    startPrice : Nat64; // start price for dutch auction
+    intervalPriceDrop : Nat64; // drop price every interval
+    reservePrice : Nat64; // reserve price
+    interval : Time.Time; // nanoseconds
+  };
+
   public type InitArgs = {
     collectionName : Text;
     collectionSize : Nat;
@@ -43,16 +55,7 @@ module {
     // false - there are at least two different assets in the collection
     singleAssetCollection : Bool;
     // dutch auction
-    dutchAuctionEnabled : Bool;
-    dutchAuctionFor : {
-      #everyone; // dutch auction for everyone
-      #whitelist; // dutch auction for whitelist(tier price is ignored), then salePrice for public sale
-      #publicSale; // tier price for whitelist, then dutch auction for public sale
-    };
-    dutchAuctionStartPrice : Nat64; // start with 350 icp for dutch auction
-    dutchAuctionIntervalPriceDrop : Nat64; // drop 5 icp every interval
-    dutchAuctionReservePrice : Nat64; // reserve price is 5 icp
-    dutchAuctionInterval : Time.Time; // 1 minute
+    dutchAuction: ?DutchAuction;
     // airdrop
     airdropEnabled : Bool;
     airdrop : [AccountIdentifier];
