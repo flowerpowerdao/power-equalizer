@@ -7,9 +7,7 @@ import TokenTypes "../Tokens/types";
 
 module {
   public type AccountIdentifier = ExtCore.AccountIdentifier;
-
   public type SubAccount = ExtCore.SubAccount;
-
   public type TokenIndex = ExtCore.TokenIndex;
 
   public type Disbursement = {
@@ -19,13 +17,9 @@ module {
     tokenIndex : TokenIndex;
   };
 
-  public func newStableState() : StableState {
-    return {
-      _disbursementsState = [];
+  public type StableChunk = ?{
+    #v1: {
+      disbursements : [Disbursement];
     };
-  };
-
-  public type StableState = {
-    _disbursementsState : [Disbursement];
   };
 };

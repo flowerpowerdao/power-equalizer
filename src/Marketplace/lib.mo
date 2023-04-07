@@ -4,6 +4,7 @@ import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
 import List "mo:base/List";
+import Nat "mo:base/Nat";
 import Nat64 "mo:base/Nat64";
 import Nat8 "mo:base/Nat8";
 import TrieMap "mo:base/TrieMap";
@@ -17,32 +18,90 @@ import Buffer "mo:base/Buffer";
 import { fromPrincipal; addHash; fromText } "mo:accountid/AccountIdentifier";
 import Encoding "mo:encoding/Binary";
 import Root "mo:cap/Root";
+import Fuzz "mo:fuzz";
 
 import AID "../toniq-labs/util/AccountIdentifier";
-import Env "../Env";
 import ExtCore "../toniq-labs/ext/Core";
 import Types "types";
+import RootTypes "../types";
 import Utils "../utils";
 
 module {
-  public class Factory(this : Principal, state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
+  public class Factory(config : RootTypes.Config, deps : Types.Dependencies) {
 
     /*********
     * STATE *
     *********/
 
-    private var _transactions : Buffer.Buffer<Types.Transaction> = Buffer.fromArray(state._transactionsState);
-    private var _tokenSettlement : TrieMap.TrieMap<Types.TokenIndex, Types.Settlement> = TrieMap.fromEntries(state._tokenSettlementState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-    private var _tokenListing : TrieMap.TrieMap<Types.TokenIndex, Types.Listing> = TrieMap.fromEntries(state._tokenListingState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-    private var _frontends : TrieMap.TrieMap<Text, Types.Frontend> = TrieMap.fromEntries(state._frontendsState.vals(), Text.equal, Text.hash);
+    var _transactions : Buffer.Buffer<Types.Transaction> = Buffer.Buffer(0);
+    var _tokenSettlement : TrieMap.TrieMap<Types.TokenIndex, Types.Settlement> = TrieMap.TrieMap(ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    var _tokenListing : TrieMap.TrieMap<Types.TokenIndex, Types.Listing> = TrieMap.TrieMap(ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    var _frontends : TrieMap.TrieMap<Text, Types.Frontend> = TrieMap.TrieMap(Text.equal, Text.hash);
 
-    public func toStable() : Types.StableState {
-      return {
-        _transactionsState = Buffer.toArray(_transactions);
-        _tokenSettlementState = Iter.toArray(_tokenSettlement.entries());
-        _tokenListingState = Iter.toArray(_tokenListing.entries());
-        _frontendsState = Iter.toArray(_frontends.entries());
+    public func getChunkCount(chunkSize : Nat) : Nat {
+      var count = _transactions.size() / chunkSize;
+      if (_transactions.size() % chunkSize != 0) {
+        count += 1;
       };
+      Nat.max(1, count);
+    };
+
+    public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
+      let start = chunkSize * chunkIndex;
+      let transactionChunk = if (_transactions.size() == 0) {
+        []
+      }
+      else {
+        Buffer.toArray(Buffer.subBuffer(_transactions, start, Nat.min(chunkSize, _transactions.size() - start)));
+      };
+
+      if (chunkIndex == 0) {
+        return ?#v1({
+          transactionCount = _transactions.size();
+          transactionChunk;
+          tokenSettlement = Iter.toArray(_tokenSettlement.entries());
+          tokenListing = Iter.toArray(_tokenListing.entries());
+          frontends = Iter.toArray(_frontends.entries());
+        });
+      }
+      else if (chunkIndex <= getChunkCount(chunkSize)) {
+        return ?#v1_chunk({ transactionChunk });
+      }
+      else {
+        null;
+      };
+    };
+
+    public func loadStableChunk(chunk : Types.StableChunk) {
+      switch (chunk) {
+        case (?#v1(data)) {
+          _transactions := Buffer.Buffer<Types.Transaction>(data.transactionCount);
+          _transactions.append(Buffer.fromArray(data.transactionChunk));
+          _tokenSettlement := TrieMap.fromEntries(data.tokenSettlement.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+          _tokenListing := TrieMap.fromEntries(data.tokenListing.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+          _frontends := TrieMap.fromEntries(data.frontends.vals(), Text.equal, Text.hash);
+        };
+        case (?#v1_chunk(data)) {
+          _transactions.append(Buffer.fromArray(data.transactionChunk));
+        };
+        case (null) {};
+      };
+    };
+
+    public func grow(n : Nat) : Nat {
+      let fuzz = Fuzz.Fuzz();
+
+      for (i in Iter.range(1, n)) {
+        _transactions.add({
+          token = fuzz.text.randomAlphanumeric(32);
+          seller = fuzz.principal.randomPrincipal(10);
+          price = fuzz.nat64.random();
+          buyer = fuzz.text.randomAlphanumeric(32);
+          time = fuzz.int.randomRange(1670000000000000000, 2670000000000000000);
+        });
+      };
+
+      _transactions.size();
     };
 
     /********************
@@ -50,7 +109,7 @@ module {
     ********************/
 
     public func lock(caller : Principal, tokenid : Types.TokenIdentifier, price : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount, frontendIdentifier : ?Text) : async Result.Result<Types.AccountIdentifier, Types.CommonError> {
-      if (ExtCore.TokenIdentifier.isPrincipal(tokenid, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(tokenid, config.canister) == false) {
         return #err(#InvalidToken(tokenid));
       };
 
@@ -72,13 +131,13 @@ module {
       };
 
       let subaccount = deps._Sale.getNextSubAccount();
-      let paymentAddress : Types.AccountIdentifier = AID.fromPrincipal(this, ?subaccount);
+      let paymentAddress : Types.AccountIdentifier = AID.fromPrincipal(config.canister, ?subaccount);
       _tokenListing.put(
         token,
         {
           seller = listing.seller;
           price = listing.price;
-          locked = ?(Time.now() + Env.escrowDelay);
+          locked = ?(Time.now() + config.escrowDelay);
           sellerFrontend = listing.sellerFrontend;
           buyerFrontend = frontendIdentifier;
         },
@@ -117,7 +176,7 @@ module {
     };
 
     public func settle(caller : Principal, tokenid : Types.TokenIdentifier) : async Result.Result<(), Types.CommonError> {
-      if (ExtCore.TokenIdentifier.isPrincipal(tokenid, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(tokenid, config.canister) == false) {
         return #err(#InvalidToken(tokenid));
       };
       let token : Types.TokenIndex = ExtCore.TokenIdentifier.getIndex(tokenid);
@@ -130,7 +189,7 @@ module {
       };
 
       let response = await Ledger.account_balance({
-        account = Blob.fromArray(addHash(fromPrincipal(this, ?settlement.subaccount)));
+        account = Blob.fromArray(addHash(fromPrincipal(config.canister, ?settlement.subaccount)));
       });
 
       // because of the await above, we check again if there is a settlement available for the token
@@ -158,11 +217,11 @@ module {
       };
 
       // deduct 3 extra transaction fees for marketplace(seller + buyer) fee and disbursment to seller
-      let bal : Nat64 = response.e8s - (10000 * Nat64.fromNat(Env.royalties.size() + 3));
+      let bal : Nat64 = response.e8s - (10000 * Nat64.fromNat(config.royalties.size() + 3));
       var rem = bal;
 
       // disbursement of royalties
-      for (f in Env.royalties.vals()) {
+      for (f in config.royalties.vals()) {
         let _fee : Nat64 = bal * f.1 / 100000;
         deps._Disburser.addDisbursement({
           to = f.0;
@@ -236,12 +295,12 @@ module {
 
     public func list(caller : Principal, request : Types.ListRequest) : async Result.Result<(), Types.CommonError> {
       // marketplace is open either when marketDelay has passed or collection sold out
-      if (Time.now() < Env.publicSaleStart + Env.marketDelay) {
+      if (Time.now() < config.publicSaleStart + config.marketDelay) {
         if (deps._Sale.getSold() < deps._Sale.getTotalToSell()) {
           return #err(#Other("You can not list yet"));
         };
       };
-      if (ExtCore.TokenIdentifier.isPrincipal(request.token, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(request.token, config.canister) == false) {
         return #err(#InvalidToken(request.token));
       };
       let token = ExtCore.TokenIdentifier.getIndex(request.token);
@@ -301,7 +360,7 @@ module {
     };
 
     public func details(token : Types.TokenIdentifier) : Result.Result<(Types.AccountIdentifier, ?Types.Listing), Types.CommonError> {
-      if (ExtCore.TokenIdentifier.isPrincipal(token, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(token, config.canister) == false) {
         return #err(#InvalidToken(token));
       };
       let tokenind = ExtCore.TokenIdentifier.getIndex(token);
@@ -326,7 +385,7 @@ module {
         if (_isLocked(token)) {
           switch (_tokenSettlement.get(token)) {
             case (?settlement) {
-              result.add((token, AID.fromPrincipal(this, ?settlement.subaccount), settlement.price));
+              result.add((token, AID.fromPrincipal(config.canister, ?settlement.subaccount), settlement.price));
             };
             case (_) {};
           };
@@ -375,7 +434,7 @@ module {
         switch (unlockedSettlements().keys().next()) {
           case (?tokenindex) {
             try {
-              ignore (await settle(caller, ExtCore.TokenIdentifier.fromPrincipal(this, tokenindex)));
+              ignore (await settle(caller, ExtCore.TokenIdentifier.fromPrincipal(config.canister, tokenindex)));
             } catch (e) {};
           };
           case null break settleLoop;
@@ -392,13 +451,13 @@ module {
     };
 
     public func putFrontend(caller : Principal, identifier : Text, frontend : Types.Frontend) {
-      assert (caller == consts.minter);
+      assert (caller == config.minter);
       assert (validFrontendFee(frontend));
       _frontends.put(identifier, frontend);
     };
 
     public func deleteFrontend(caller : Principal, identifier : Text) {
-      assert (caller == consts.minter);
+      assert (caller == config.minter);
       _frontends.delete(identifier);
     };
 
@@ -416,8 +475,8 @@ module {
 
     func getFrontend(identifier : ?Text) : Types.Frontend {
       let defaultFrontend : Types.Frontend = {
-        fee = Env.defaultMarketplaceFee.1;
-        accountIdentifier = Env.defaultMarketplaceFee.0;
+        fee = config.defaultMarketplaceFee.1;
+        accountIdentifier = config.defaultMarketplaceFee.0;
       };
 
       // disbursement of marketplace fee

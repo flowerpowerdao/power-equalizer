@@ -2,6 +2,8 @@ import { User } from './user';
 import { beneficiaries, airdrop, whitelistTier0, whitelistTier1 } from './well-known-users';
 
 export default {
+  test: true,
+  restoreEnabled: false,
   timersInterval: 10, // seconds
   beneficiary0: beneficiaries[0].accountId,
   beneficiary1: beneficiaries[1].accountId,
@@ -10,6 +12,7 @@ export default {
   royalty0: 3375n,
   royalty1: 750n,
   escrowDelay: 120_000_000_000n, // 120 seconds
+  collectionName: "Test Collection",
   collectionSize: 7777n,
   defaultMarketplaceAddr: new User('marketplace').accountId,
   defaultMarketplaceFee: 1000n,

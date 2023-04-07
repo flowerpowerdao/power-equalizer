@@ -1,0 +1,63 @@
+(
+  principal "r7inp-6aaaa-aaaaa-aaabq-cai", // test canister
+  record {
+    collectionName = $collectionName;
+    collectionSize = $collectionSize;
+    salePrice = $salePrice;
+    publicSaleStart = $publicSaleStart;
+    whitelistTime = $whitelistTime;
+    marketDelay = $marketDelay;
+    escrowDelay = $escrowDelay;
+    placeholderContentLength = "1053832";
+    salesDistribution = vec {
+      record { $beneficiary0; $salesDistribution0 };
+      record { $beneficiary1; $salesDistribution1 };
+    };
+    royalties = vec {
+      record { $beneficiary0; $royalty0 };
+      record { $beneficiary1; $royalty1 };
+    };
+    defaultMarketplaceFee = record { $defaultMarketplaceAddr; $defaultMarketplaceFee };
+    openEdition = $openEdition;
+    saleEnd = $saleEnd;
+    delayedReveal = $delayedReveal;
+    revealDelay = $revealDelay;
+    singleAssetCollection = $singleAssetCollection;
+    // dutch auction
+    dutchAuctionEnabled = $dutchAuctionEnabled;
+    dutchAuctionFor = $dutchAuctionFor;
+    dutchAuctionStartPrice = $dutchAuctionStartPrice; // start with 350 icp for dutch auction
+    dutchAuctionIntervalPriceDrop = $dutchAuctionIntervalPriceDrop; // drop 5 icp every interval
+    dutchAuctionReservePrice = $dutchAuctionReservePrice; // reserve price is 5 icp
+    dutchAuctionInterval = $dutchAuctionInterval; // 1 minute
+    // airdrop
+    airdropEnabled = $airdropEnabled;
+    airdrop = $airdrop;
+    // whitelist
+    whitelistOneTimeOnly = $whitelistOneTimeOnly; // Whitelist addresses are removed after purchase
+    whitelistDiscountLimited = $whitelistDiscountLimited; // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
+    whitelistTiers = vec {
+      record {
+        name = $whitelistTier0Name;
+        price = $whitelistTier0Price;
+        whitelist = $whitelistTier0Whitelist;
+        slot = record {
+          start = $whitelistSlot1_start;
+          end = $whitelistSlot1_end;
+        };
+      };
+      record {
+        name = $whitelistTier1Name;
+        price = $whitelistTier1Price;
+        whitelist = $whitelistTier1Whitelist;
+        slot = record {
+          start = $whitelistSlot2_start;
+          end = $whitelistSlot2_end;
+        };
+      };
+    };
+    test = $test; // must be 'false'
+    restoreEnabled = $restoreEnabled; // must be 'false' (see backup/README.md for details)
+    timersInterval = variant { seconds = $timersInterval };
+  }
+)

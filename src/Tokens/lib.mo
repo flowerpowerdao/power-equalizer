@@ -4,30 +4,31 @@ import TrieMap "mo:base/TrieMap";
 import Result "mo:base/Result";
 import Buffer "mo:base/Buffer";
 import Debug "mo:base/Debug";
+import Nat32 "mo:base/Nat32";
 
 import AID "../toniq-labs/util/AccountIdentifier";
 import ExtCore "../toniq-labs/ext/Core";
 import Types "types";
+import RootTypes "../types";
 import Utils "../utils";
-import Env "../Env";
 
 module {
-  public class Factory(this : Principal, state : Types.StableState, consts : Types.Constants) {
+  public class Factory(config : RootTypes.Config) {
 
     /*********
     * STATE *
     *********/
 
-    private var _tokenMetadata : TrieMap.TrieMap<Types.TokenIndex, Types.Metadata> = TrieMap.fromEntries(state._tokenMetadataState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-    private var _owners : TrieMap.TrieMap<Types.AccountIdentifier, Buffer.Buffer<Types.TokenIndex>> = Utils.bufferTrieMapFromIter(state._ownersState.vals(), AID.equal, AID.hash);
-    private var _registry : TrieMap.TrieMap<Types.TokenIndex, Types.AccountIdentifier> = TrieMap.fromEntries(state._registryState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-    private var _nextTokenId : Types.TokenIndex = state._nextTokenIdState;
-    private var _supply : Types.Balance = state._supplyState;
+    var _tokenMetadata = TrieMap.TrieMap<Types.TokenIndex, Types.Metadata>(ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    var _owners = TrieMap.TrieMap<Types.AccountIdentifier, Buffer.Buffer<Types.TokenIndex>>(AID.equal, AID.hash);
+    var _registry = TrieMap.TrieMap<Types.TokenIndex, Types.AccountIdentifier>(ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    var _nextTokenId = 0 : Types.TokenIndex;
+    var _supply = 0 : Types.Balance;
 
-    public func toStable() : Types.StableState {
-      return {
-        _tokenMetadataState = Iter.toArray(_tokenMetadata.entries());
-        _ownersState = Iter.toArray(
+    public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
+      ?#v1({
+        tokenMetadata = Iter.toArray(_tokenMetadata.entries());
+        owners = Iter.toArray(
           Iter.map<(Types.AccountIdentifier, Buffer.Buffer<Types.TokenIndex>), (Types.AccountIdentifier, [Types.TokenIndex])>(
             _owners.entries(),
             func(owner) {
@@ -35,16 +36,29 @@ module {
             },
           ),
         );
-        _registryState = Iter.toArray(_registry.entries());
-        _nextTokenIdState = _nextTokenId;
-        _supplyState = _supply;
+        registry = Iter.toArray(_registry.entries());
+        nextTokenId = _nextTokenId;
+        supply = _supply;
+      });
+    };
+
+    public func loadStableChunk(chunk : Types.StableChunk) {
+      switch (chunk) {
+        case (?#v1(data)) {
+          _tokenMetadata := TrieMap.fromEntries(data.tokenMetadata.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+          _owners := Utils.bufferTrieMapFromIter(data.owners.vals(), AID.equal, AID.hash);
+          _registry := TrieMap.fromEntries(data.registry.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+          _nextTokenId := data.nextTokenId;
+          _supply := data.supply;
+        };
+        case (null) {};
       };
     };
 
     //*** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
     public func balance(request : Types.BalanceRequest) : Types.BalanceResponse {
-      if (ExtCore.TokenIdentifier.isPrincipal(request.token, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(request.token, config.canister) == false) {
         return #err(#InvalidToken(request.token));
       };
       let token = ExtCore.TokenIdentifier.getIndex(request.token);
@@ -64,7 +78,7 @@ module {
     };
 
     public func bearer(token : Types.TokenIdentifier) : Result.Result<Types.AccountIdentifier, Types.CommonError> {
-      if (ExtCore.TokenIdentifier.isPrincipal(token, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(token, config.canister) == false) {
         return #err(#InvalidToken(token));
       };
       let tokenind = ExtCore.TokenIdentifier.getIndex(token);
@@ -82,35 +96,35 @@ module {
     * INTERNAL METHODS *
     *******************/
 
-    public func mintCollection(collectionSize : Nat32) {
-      if (Env.openEdition and Env.saleEnd == 0) {
+    public func mintCollection() {
+      if (config.openEdition and config.saleEnd == 0) {
         Debug.trap("Open edition must have a sale end date");
       };
-      if (Env.openEdition and Env.collectionSize != 0) {
+      if (config.openEdition and config.collectionSize != 0) {
         Debug.trap("Open edition must have a collection size of 0");
       };
-      if (Env.openEdition and not Env.singleAssetCollection) {
+      if (config.openEdition and not config.singleAssetCollection) {
         Debug.trap("Open edition must be a single asset collection");
       };
-      if (Env.openEdition and Env.delayedReveal) {
+      if (config.openEdition and config.delayedReveal) {
         Debug.trap("Open edition must have delayedReveal = false");
       };
-      if (not Env.openEdition and Env.saleEnd != 0) {
+      if (not config.openEdition and config.saleEnd != 0) {
         Debug.trap("Sale end date must be 0 for non-open editions");
       };
-      if (not Env.openEdition and Env.collectionSize == 0) {
+      if (not config.openEdition and config.collectionSize == 0) {
         Debug.trap("Collection size must be greater than 0 for non-open editions");
       };
 
-      while (getNextTokenId() < collectionSize) {
+      while (getNextTokenId() < Nat32.fromNat(config.collectionSize)) {
         mintNextToken();
       };
     };
 
     public func mintNextToken() {
       /* for delayedReveal we start with asset 1, as index 0 contains the placeholder and is not being shuffled */
-      let startIndex : Nat32 = if (Env.delayedReveal) { 1 } else { 0 };
-      putTokenMetadata(getNextTokenId(), #nonfungible({ metadata = ?Utils.nat32ToBlob(if (Env.singleAssetCollection) startIndex else getNextTokenId() + startIndex) }));
+      let startIndex : Nat32 = if (config.delayedReveal) { 1 } else { 0 };
+      putTokenMetadata(getNextTokenId(), #nonfungible({ metadata = ?Utils.nat32ToBlob(if (config.singleAssetCollection) startIndex else getNextTokenId() + startIndex) }));
       transferTokenToUser(getNextTokenId(), "0000");
       incrementSupply();
       incrementNextTokenId();
@@ -176,7 +190,7 @@ module {
     };
 
     public func getTokenData(token : Text) : ?Blob {
-      if (ExtCore.TokenIdentifier.isPrincipal(token, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(token, config.canister) == false) {
         return null;
       };
       let tokenind = ExtCore.TokenIdentifier.getIndex(token);

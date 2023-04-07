@@ -272,10 +272,11 @@ So when executing `mintNFT`, the `to` address is taken from `registry.json` and 
 
 Each test suite is deployed with its own env settings.
 
-First, start a local replica
+First, start a local replica and deploy
 
 ```
 npm run replica
+npm run deploy
 ```
 
 To deploy and run all tests

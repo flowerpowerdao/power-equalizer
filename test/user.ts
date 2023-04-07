@@ -1,4 +1,4 @@
-import { Actor, ActorSubclass } from '@dfinity/agent';
+import { Actor } from '@dfinity/agent';
 import { AccountIdentifier } from '@dfinity/nns';
 import { Principal } from '@dfinity/principal';
 import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
@@ -18,7 +18,6 @@ import canisterIds from '../.dfx/local/canister_ids.json';
 
 
 export class User {
-  // mainActor: ActorSubclass<_SERVICE_MAIN>;
   mainActor: _SERVICE_MAIN;
   icpActor: _SERVICE_ICP;
   identity: Secp256k1KeyIdentity;
@@ -27,14 +26,17 @@ export class User {
   accountId: string;
 
   constructor(seed?: string) {
-    this.identity = generateIdentity(seed);
-    this.principal = this.identity.getPrincipal();
-    this.account = AccountIdentifier.fromPrincipal({principal: this.principal}).toNumbers();
-    this.accountId = AccountIdentifier.fromPrincipal({principal: this.principal}).toHex();
+    this.identity = seed === '' ? undefined : generateIdentity(seed);
+
+    if (this.identity) {
+      this.principal = this.identity.getPrincipal();
+      this.account = AccountIdentifier.fromPrincipal({principal: this.principal}).toNumbers();
+      this.accountId = AccountIdentifier.fromPrincipal({principal: this.principal}).toHex();
+    }
 
     this.mainActor = Actor.createActor(idlFactoryMain, {
       agent: createAgent(this.identity),
-      canisterId: canisterIds.staging.local,
+      canisterId: canisterIds.test.local,
     });
 
     this.icpActor = Actor.createActor(idlFactoryIcp, {

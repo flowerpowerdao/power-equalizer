@@ -12,20 +12,30 @@ import AviateAccountIdentifier "mo:accountid/AccountIdentifier";
 
 import ExtCore "../toniq-labs/ext/Core";
 import Types "types";
+import RootTypes "../types";
 import Utils "../utils";
 
 module {
-  public class Factory(this : Principal, state : Types.StableState) {
+  public class Factory(config : RootTypes.Config) {
 
     /*********
     * STATE *
     *********/
 
-    private var _disbursements : List.List<Types.Disbursement> = List.fromArray(state._disbursementsState);
+    var _disbursements = List.nil<Types.Disbursement>();
 
-    public func toStable() : Types.StableState {
-      return {
-        _disbursementsState = List.toArray(_disbursements);
+    public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
+      ?#v1({
+        disbursements = List.toArray(_disbursements);
+      });
+    };
+
+    public func loadStableChunk(chunk : Types.StableChunk) {
+      switch (chunk) {
+        case (?#v1(data)) {
+          _disbursements := List.fromArray(data.disbursements);
+        };
+        case (null) {};
       };
     };
 
@@ -63,7 +73,7 @@ module {
                 amount = { e8s = disbursement.amount };
                 fee = { e8s = 10000 };
                 created_at_time = null;
-                memo = Encoding.BigEndian.toNat64(Blob.toArray(Principal.toBlob(Principal.fromText(ExtCore.TokenIdentifier.fromPrincipal(this, disbursement.tokenIndex)))));
+                memo = Encoding.BigEndian.toNat64(Blob.toArray(Principal.toBlob(Principal.fromText(ExtCore.TokenIdentifier.fromPrincipal(config.canister, disbursement.tokenIndex)))));
               });
 
               switch (res) {

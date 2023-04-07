@@ -4,21 +4,30 @@ import Random "mo:base/Random";
 import Buffer "mo:base/Buffer";
 
 import Types "types";
+import RootTypes "../types";
 import Utils "../utils";
-import Env "../Env";
 
 module {
-  public class Factory(state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
+  public class Factory(config : RootTypes.Config, deps : Types.Dependencies) {
 
     /*********
     * STATE *
     *********/
 
-    private var _isShuffled : Bool = state._isShuffledState;
+    var _isShuffled = false;
 
-    public func toStable() : Types.StableState {
-      return {
-        _isShuffledState = _isShuffled;
+    public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
+      ?#v1({
+        isShuffled = _isShuffled;
+      });
+    };
+
+    public func loadStableChunk(chunk : Types.StableChunk) {
+      switch (chunk) {
+        case (?#v1(data)) {
+          _isShuffled := data.isShuffled;
+        };
+        case (null) {};
       };
     };
 
@@ -29,7 +38,7 @@ module {
     //*** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
     public func shuffleAssets() : async () {
-      assert (Env.delayedReveal and not _isShuffled);
+      assert (config.delayedReveal and not _isShuffled);
       // get a random seed from the IC
       let seed : Blob = await Random.blob();
       // use that seed to create random number generator
@@ -45,7 +54,7 @@ module {
         currentIndex -= 1;
         // for delayed reveal we never want to touch the 0 index
         // as it contains the placeholder
-        if (Env.delayedReveal and randomIndex == 0) {
+        if (config.delayedReveal and randomIndex == 0) {
           randomIndex += 1;
         };
         assert ((randomIndex != 0) and (currentIndex != 0));

@@ -1,10 +1,9 @@
 import Tokens "../Tokens";
 
 module {
-
-  public func newStableState() : StableState {
-    return {
-      _assetsState : [Asset] = [];
+  public type StableChunk = ?{
+    #v1: {
+      assets : [Asset];
     };
   };
 
@@ -19,13 +18,4 @@ module {
     metadata : ?File;
     payload : File;
   };
-
-  public type StableState = {
-    _assetsState : [Asset];
-  };
-
-  public type Constants = {
-    minter : Principal;
-  }
-
 };

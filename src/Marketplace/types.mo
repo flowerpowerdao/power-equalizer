@@ -9,13 +9,16 @@ import Sale "../Sale";
 import Disburser "../Disburser";
 
 module {
-
-  public func newStableState() : StableState {
-    return {
-      _transactionsState : [Transaction] = [];
-      _tokenSettlementState : [(TokenTypes.TokenIndex, Settlement)] = [];
-      _tokenListingState : [(TokenTypes.TokenIndex, Listing)] = [];
-      _frontendsState : [(Text, Frontend)] = [];
+  public type StableChunk = ?{
+    #v1: {
+      transactionCount : Nat;
+      transactionChunk : [Transaction];
+      tokenSettlement : [(TokenIndex, Settlement)];
+      tokenListing : [(TokenIndex, Listing)];
+      frontends : [(Text, Frontend)];
+    };
+    #v1_chunk: {
+      transactionChunk : [Transaction];
     };
   };
 
@@ -25,17 +28,11 @@ module {
   };
 
   public type AccountIdentifier = ExtCore.AccountIdentifier;
-
   public type Time = Time.Time;
-
   public type TokenIdentifier = TokenTypes.TokenIdentifier;
-
   public type Metadata = TokenTypes.Metadata;
-
   public type SubAccount = ExtCore.SubAccount;
-
   public type CommonError = ExtCore.CommonError;
-
   public type TokenIndex = ExtCore.TokenIndex;
 
   public type Transaction = {
@@ -70,22 +67,10 @@ module {
     frontendIdentifier : ?Text;
   };
 
-  public type StableState = {
-    _transactionsState : [Transaction];
-    _tokenSettlementState : [(TokenIndex, Settlement)];
-    _tokenListingState : [(TokenIndex, Listing)];
-    _frontendsState : [(Text, Frontend)];
-  };
-
   public type Dependencies = {
     _Cap : Cap.Cap;
     _Tokens : Tokens.Factory;
     _Sale : Sale.Factory;
     _Disburser : Disburser.Factory;
   };
-
-  public type Constants = {
-    minter : Principal;
-  };
-
 };

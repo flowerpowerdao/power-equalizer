@@ -6,34 +6,25 @@ import ExtCore "../toniq-labs/ext/Core";
 import Shuffle "../Shuffle";
 import Tokens "../Tokens";
 import Disburser "../Disburser";
-import Env "../Env"
+import Types "../types";
 
 module {
-
-  public func newStableState() : StableState {
-    return {
-      _saleTransactionsState : [SaleTransaction] = [];
-      _salesSettlementsState : [(AccountIdentifier, Sale)] = [];
-      _failedSalesState : [(AccountIdentifier, SubAccount)] = [];
-      _tokensForSaleState : [TokenIndex] = [];
-      _whitelistStable : [(Nat64, AccountIdentifier, WhitelistSlot)] = [];
-      _soldIcpState : Nat64 = 0;
-      _soldState : Nat = 0;
-      _totalToSellState : Nat = 0;
-      _nextSubAccountState : Nat = 0;
+  public type StableChunk = ?{
+    #v1: {
+      saleTransactionCount : Nat;
+      saleTransactionChunk : [SaleTransaction];
+      salesSettlements : [(AccountIdentifier, Sale)];
+      failedSales : [(AccountIdentifier, SubAccount)];
+      tokensForSale : [TokenIndex];
+      whitelist : [(Nat64, AccountIdentifier, WhitelistSlot)];
+      soldIcp : Nat64;
+      sold : Nat;
+      totalToSell : Nat;
+      nextSubAccount : Nat;
     };
-  };
-
-  public type StableState = {
-    _saleTransactionsState : [SaleTransaction];
-    _salesSettlementsState : [(AccountIdentifier, Sale)];
-    _failedSalesState : [(AccountIdentifier, SubAccount)];
-    _tokensForSaleState : [TokenIndex];
-    _whitelistStable : [(Nat64, AccountIdentifier, WhitelistSlot)];
-    _soldIcpState : Nat64;
-    _soldState : Nat;
-    _totalToSellState : Nat;
-    _nextSubAccountState : Nat;
+    #v1_chunk: {
+      saleTransactionChunk : [SaleTransaction];
+    };
   };
 
   public type Dependencies = {
@@ -43,22 +34,12 @@ module {
     _Disburser : Disburser.Factory;
   };
 
-  public type Constants = {
-    minter : Principal;
-  };
-
-  public type WhitelistSlot = Env.WhitelistSlot;
-
+  public type WhitelistSlot = Types.WhitelistSlot;
   public type AccountIdentifier = ExtCore.AccountIdentifier;
-
   public type TokenIdentifier = ExtCore.TokenIdentifier;
-
   public type SubAccount = ExtCore.SubAccount;
-
   public type CommonError = ExtCore.CommonError;
-
   public type TokenIndex = ExtCore.TokenIndex;
-
   public type Time = Time.Time;
 
   public type Tokens = {

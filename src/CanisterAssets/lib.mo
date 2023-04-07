@@ -6,29 +6,38 @@ import Random "mo:base/Random";
 import Buffer "mo:base/Buffer";
 
 import Types "types";
+import RootTypes "../types";
 import Utils "../utils";
-import Env "../Env";
 
 module {
 
-  public class Factory(state : Types.StableState, consts : Types.Constants) {
+  public class Factory(config : RootTypes.Config) {
 
     /*********
     * STATE *
     *********/
 
-    private var _assets : Buffer.Buffer<Types.Asset> = Buffer.fromArray(state._assetsState);
+    var _assets = Buffer.Buffer<Types.Asset>(0);
 
-    public func toStable() : Types.StableState {
-      return {
-        _assetsState = Buffer.toArray(_assets);
+    public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
+      ?#v1({
+        assets = Buffer.toArray(_assets);
+      });
+    };
+
+    public func loadStableChunk(chunk : Types.StableChunk) {
+      switch (chunk) {
+        case (?#v1(data)) {
+          _assets := Buffer.fromArray(data.assets);
+        };
+        case (null) {};
       };
     };
 
     //*** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
     public func streamAsset(caller : Principal, id : Nat, isThumb : Bool, payload : Blob) : () {
-      assert (caller == consts.minter);
+      assert (caller == config.minter);
       var asset : Types.Asset = _assets.get(id);
       if (isThumb) {
         switch (asset.thumbnail) {
@@ -60,7 +69,7 @@ module {
     };
 
     public func updateThumb(caller : Principal, name : Text, file : Types.File) : ?Nat {
-      assert (caller == consts.minter);
+      assert (caller == config.minter);
       var i : Nat = 0;
       for (a in _assets.vals()) {
         if (a.name == name) {
@@ -80,9 +89,9 @@ module {
     };
 
     public func addAsset(caller : Principal, asset : Types.Asset) : Nat {
-      assert (caller == consts.minter);
-      if (Env.singleAssetCollection) {
-        if (Env.delayedReveal) {
+      assert (caller == config.minter);
+      if (config.singleAssetCollection) {
+        if (config.delayedReveal) {
           assert (_assets.size() < 2);
         } else {
           assert (_assets.size() == 0);
