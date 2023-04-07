@@ -2,6 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { execSync } from 'child_process';
 import { User } from '../user';
 
+import canisterIds from '../../.dfx/local/canister_ids.json';
+
+let canisterId = canisterIds.test.local;
 
 describe('backup', async () => {
   let growSize = 2001n;
@@ -30,6 +33,6 @@ describe('backup', async () => {
   });
 
   it('backup to a.json', async () => {
-    execSync(`npm run backup -- --file a.json --chunk-size ${chunkSize}`, { stdio: 'inherit' });
+    execSync(`npm run backup -- --canister-id ${canisterId} --file a.json --chunk-size ${chunkSize}`, { stdio: 'inherit' });
   });
 });

@@ -11,9 +11,13 @@ let argv = minimist(process.argv.slice(2));
 let network = argv.network || 'local';
 let file = argv.file;
 let pemData = argv.pem || '';
+let canisterId = argv['canister-id'];
 
 if (!file) {
   throw new Error('Missing --file argument')
+}
+if (!canisterId) {
+  throw new Error('Missing --canister-id argument');
 }
 
 let filePath = path.resolve(__dirname, 'data', file);
@@ -22,7 +26,7 @@ if (!fs.existsSync(filePath)) {
 }
 
 let identity = pemData && decode(pemData);
-let mainActor = getActor(network, identity);
+let mainActor = getActor(network, canisterId, identity);
 
 export let restore = async ({network, file}) => {
   console.log(`Network: ${network}`);

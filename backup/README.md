@@ -11,6 +11,8 @@ The backup file will be saved in `data` folder.
 
 `--network <network>` - `ic` or `local`. *Default* `local`
 
+`--canister-id <principal>` - canister id. *Required*
+
 `--file <file>` - output file name. *Default* current date and time
 
 `--chunk-size <size>` - chunk size(number of items). *Default* `10000`
@@ -20,7 +22,7 @@ Chunk size > 15k => restore fails
 
 ### Example with arguments
 ```
-npm run backup -- --network ic --file 2023-01-01.json --chunk-size 5000
+npm run backup -- --network ic --canister-id rrkah-fqaaa-aaaaa-aaaaq-cai --file 2023-01-01.json --chunk-size 5000
 ```
 
 # Restore
@@ -36,6 +38,8 @@ dfx deploy <canister> --network <network> --mode reinstall
 
 `--network <network>` - `ic` or `local`. *Default* `local`
 
+`--canister-id <principal>` - canister id. *Required*
+
 `--file <file>` - file name with backup data to restore. *Required*
 
 `--pem <pem_data>` - PEM-file data. *Required*
@@ -46,7 +50,7 @@ npm run restore -- --network <network> --file <backup-file> --pem "$(dfx identit
 
 Example:
 ```
-npm run restore -- --network ic --file 2023-01-01.json --pem "$(dfx identity export default)"
+npm run restore -- --network ic --canister-id rrkah-fqaaa-aaaaa-aaaaq-cai --file 2023-01-01.json --pem "$(dfx identity export default)"
 ```
 
 4. In `Env/lib.mo` set `restoreEnabled = false`
