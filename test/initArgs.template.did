@@ -1,5 +1,5 @@
 (
-  principal "rrkah-fqaaa-aaaaa-aaaaq-cai",
+  principal "r7inp-6aaaa-aaaaa-aaabq-cai", // test canister
   record {
     collectionName = $collectionName;
     collectionSize = $collectionSize;
