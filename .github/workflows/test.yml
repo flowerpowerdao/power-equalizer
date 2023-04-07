@@ -24,4 +24,5 @@ jobs:
             dfx identity use anonymous
             npm install
             npm run replica
+            npm run deploy
             npm run test
