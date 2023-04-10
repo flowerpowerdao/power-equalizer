@@ -6,7 +6,6 @@
     salePrice = $salePrice;
     publicSaleStart = $publicSaleStart;
     whitelistTime = $whitelistTime;
-    escrowDelay = $escrowDelay;
     placeholderContentLength = "1053832";
     salesDistribution = vec {
       record { $beneficiary0; $salesDistribution0 };
@@ -60,9 +59,10 @@
         };
       };
     };
+    marketDelay = opt $marketDelay;
+    escrowDelay = opt $escrowDelay;
     test = opt $test; // must be 'false'
     restoreEnabled = opt $restoreEnabled; // must be 'false' (see backup/README.md for details)
     timersInterval = opt variant { seconds = $timersInterval };
-    marketDelay = opt $marketDelay;
   }
 )

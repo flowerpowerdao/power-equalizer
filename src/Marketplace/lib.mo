@@ -137,7 +137,7 @@ module {
         {
           seller = listing.seller;
           price = listing.price;
-          locked = ?(Time.now() + config.escrowDelay);
+          locked = ?(Time.now() + Option.get(config.escrowDelay, 120000000000));
           sellerFrontend = listing.sellerFrontend;
           buyerFrontend = frontendIdentifier;
         },

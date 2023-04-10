@@ -227,7 +227,7 @@ module {
           price = total;
           subaccount = subaccount;
           buyer = address;
-          expires = Time.now() + config.escrowDelay;
+          expires = Time.now() + Option.get(config.escrowDelay, 120000000000);
           slot = getSlot(address);
         },
       );
