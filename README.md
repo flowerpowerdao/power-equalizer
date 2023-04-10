@@ -233,7 +233,7 @@ Because the `makefile` and `deploy.zsh` are pretty opinated, we are not includin
 
 ## caveats 🕳
 
-- The canister code is written in a way that the seed animation _ALWAYS_ has to be the first asset uploaded to the canister if you are doing a `delayedReveal`
+- The canister code is written in a way that the seed animation _ALWAYS_ has to be the first asset uploaded to the canister if you are doing a `revealDelay > 0`
 - The seed animation video needs to be encoded in a way that it can be played on iOS devices, use `HandBrake` for that or `ffmpeg`
 
 ## vessel 🚢

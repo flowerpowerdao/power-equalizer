@@ -38,7 +38,7 @@ module {
     //*** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
     public func shuffleAssets() : async () {
-      assert (config.delayedReveal and not _isShuffled);
+      assert (config.revealDelay > 0 and not _isShuffled);
       // get a random seed from the IC
       let seed : Blob = await Random.blob();
       // use that seed to create random number generator
@@ -54,7 +54,7 @@ module {
         currentIndex -= 1;
         // for delayed reveal we never want to touch the 0 index
         // as it contains the placeholder
-        if (config.delayedReveal and randomIndex == 0) {
+        if (config.revealDelay > 0 and randomIndex == 0) {
           randomIndex += 1;
         };
         assert ((randomIndex != 0) and (currentIndex != 0));

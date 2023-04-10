@@ -20,7 +20,8 @@
     defaultMarketplaceFee = record { $defaultMarketplaceAddr; $defaultMarketplaceFee };
     openEdition = $openEdition;
     saleEnd = $saleEnd;
-    delayedReveal = $delayedReveal;
+    // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
+    // 0 - assets will be revealed immediately and assets shuffling will be disabled
     revealDelay = $revealDelay;
     singleAssetCollection = $singleAssetCollection;
     // dutch auction
