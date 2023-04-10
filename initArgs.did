@@ -27,7 +27,6 @@
     // false - there are at least two different assets in the collection
     singleAssetCollection = false;
     // airdrop
-    airdropEnabled = false;
     airdrop = vec {};
     // whitelist
     whitelistOneTimeOnly = true; // Whitelist addresses are removed after purchase

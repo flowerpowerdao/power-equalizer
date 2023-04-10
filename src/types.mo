@@ -57,7 +57,6 @@ module {
     // dutch auction
     dutchAuction: ?DutchAuction;
     // airdrop
-    airdropEnabled : Bool;
     airdrop : [AccountIdentifier];
     // whitelist
     whitelistOneTimeOnly : Bool; // Whitelist addresses are removed after purchase

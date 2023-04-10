@@ -49,7 +49,6 @@ export default {
   dutchAuctionIntervalPriceDrop: 500000000n, // drop 5 icp every interval
   dutchAuctionReservePrice: 500000000n, // reserve price is 5 icp
   dutchAuctionInterval: 60000000000n, // 1 minute
-  airdropEnabled: false,
   airdrop: airdrop.map(user => user.accountId),
   // order from lower price to higher price
   whitelistTier0Name: 'ethflower',

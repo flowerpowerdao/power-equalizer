@@ -32,7 +32,6 @@
     //   interval = $dutchAuctionInterval; // nanoseconds
     // };
     // airdrop
-    airdropEnabled = $airdropEnabled;
     airdrop = $airdrop;
     // whitelist
     whitelistOneTimeOnly = $whitelistOneTimeOnly; // Whitelist addresses are removed after purchase
