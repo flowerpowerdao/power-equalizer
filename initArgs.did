@@ -6,7 +6,6 @@
     salePrice = 700_000_000; // 7 ICP
     publicSaleStart = 1680696181381000000; // Start of first purchase (WL or other)
     whitelistTime = 1680696181381000000; // Period for WL only discount. Set to publicSaleStart for no exclusive period
-    marketDelay = 86400000000000; // How long to delay market opening (2 days after whitelist sale started or when sold out)
     escrowDelay = 120000000000; // 120 seconds
     placeholderContentLength = "1053832"; // ??
     salesDistribution = vec {};

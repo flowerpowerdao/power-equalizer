@@ -34,7 +34,6 @@ module {
     salePrice : Nat64; // e8s
     publicSaleStart : Time.Time; // Start of first purchase (WL or other)
     whitelistTime : Time.Time; // Period for WL only discount. Set to publicSaleStart for no exclusive period
-    marketDelay : Time.Time; // How long to delay market opening (2 days after whitelist sale started or when sold out)
     escrowDelay : Time.Time;
     placeholderContentLength : Text; // ??
     salesDistribution : [(AccountIdentifier, Nat64)];
@@ -67,6 +66,7 @@ module {
       #seconds : Nat;
       #nanoseconds : Nat;
     };
+    marketDelay : ?Time.Time; // How long to delay market opening (2 days after whitelist sale started or when sold out) (default 172800000000000 - 2 days)
   };
 
   type InitArgsNew = {
@@ -108,7 +108,7 @@ module {
     //   reservePrice : Nat64; // reserve price
     //   interval : Time.Time; // nanoseconds
     // };
-    marketDelay : ?Time.Time; // How long to delay market opening (after whitelist sale started or when sold out) (default 172800000000000 - 2 days)
+    // marketDelay : ?Time.Time; // How long to delay market opening (after whitelist sale started or when sold out) (default 172800000000000 - 2 days)
     escrowDelay : ?Time.Time; // default 120000000000 - 120 seconds
     // timersInterval : ?Nat; // seconds (defailt 10) nanoseconds?
     // testMode : ?Bool; // enables 'grow' methods, only for tests
