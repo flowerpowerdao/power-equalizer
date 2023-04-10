@@ -441,7 +441,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   };
 
   public shared ({ caller }) func grow(n : Nat) : async Nat {
-    assert (config.test);
+    assert (config.test == ?true);
     ignore _Sale.grow(n);
     _Marketplace.grow(n);
   };

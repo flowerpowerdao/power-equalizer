@@ -64,7 +64,7 @@ module {
     // whitelist tiers
     // order from lower price to higher price
     whitelistTiers : [WhitelistTier];
-    test : Bool; // must be 'false'
+    test : ?Bool; // must be 'false'
     restoreEnabled : Bool; // must be 'false' (see backup/README.md for details)
     timersInterval : {
       #seconds : Nat;

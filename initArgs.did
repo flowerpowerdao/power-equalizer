@@ -32,7 +32,6 @@
     whitelistOneTimeOnly = true; // Whitelist addresses are removed after purchase
     whitelistDiscountLimited = true; // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
     whitelistTiers = vec {};
-    test = false; // must be 'false'
     restoreEnabled = false; // must be 'false' (see backup/README.md for details)
     timersInterval = variant { seconds = 60 };
   }
