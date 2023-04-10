@@ -6,8 +6,6 @@
     salePrice = $salePrice;
     publicSaleStart = $publicSaleStart;
     whitelistTime = $whitelistTime;
-    marketDelay = $marketDelay;
-    escrowDelay = $escrowDelay;
     placeholderContentLength = "1053832";
     salesDistribution = vec {
       record { $beneficiary0; $salesDistribution0 };
@@ -17,22 +15,26 @@
       record { $beneficiary0; $royalty0 };
       record { $beneficiary1; $royalty1 };
     };
-    defaultMarketplaceFee = record { $defaultMarketplaceAddr; $defaultMarketplaceFee };
+    marketplaces = vec {
+      record { $marketplace0_name; $marketplace0_addr; $marketplace0_fee };
+      record { $marketplace1_name; $marketplace1_addr; $marketplace1_fee };
+      record { $marketplace2_name; $marketplace2_addr; $marketplace2_fee };
+    };
     openEdition = $openEdition;
     saleEnd = $saleEnd;
-    delayedReveal = $delayedReveal;
+    // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
+    // 0 - assets will be revealed immediately and assets shuffling will be disabled
     revealDelay = $revealDelay;
     singleAssetCollection = $singleAssetCollection;
     // dutch auction
-    dutchAuction = opt record {
-      target = $dutchAuctionFor;
-      startPrice = $dutchAuctionStartPrice; // start price for dutch auction
-      intervalPriceDrop = $dutchAuctionIntervalPriceDrop; // drop price every interval
-      reservePrice = $dutchAuctionReservePrice; // reserve price
-      interval = $dutchAuctionInterval; // nanoseconds
-    };
+    // dutchAuction = opt record {
+    //   target = $dutchAuctionFor;
+    //   startPrice = $dutchAuctionStartPrice; // start price for dutch auction
+    //   intervalPriceDrop = $dutchAuctionIntervalPriceDrop; // drop price every interval
+    //   reservePrice = $dutchAuctionReservePrice; // reserve price
+    //   interval = $dutchAuctionInterval; // nanoseconds
+    // };
     // airdrop
-    airdropEnabled = $airdropEnabled;
     airdrop = $airdrop;
     // whitelist
     whitelistOneTimeOnly = $whitelistOneTimeOnly; // Whitelist addresses are removed after purchase
@@ -57,8 +59,10 @@
         };
       };
     };
-    test = $test; // must be 'false'
-    restoreEnabled = $restoreEnabled; // must be 'false' (see backup/README.md for details)
-    timersInterval = variant { seconds = $timersInterval };
+    marketDelay = opt $marketDelay;
+    escrowDelay = opt $escrowDelay;
+    test = opt $test; // must be 'false'
+    restoreEnabled = opt $restoreEnabled; // must be 'false' (see backup/README.md for details)
+    timersInterval = opt variant { seconds = $timersInterval };
   }
 )

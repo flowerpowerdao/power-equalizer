@@ -155,10 +155,6 @@ module {
     public func airdropTokens(caller : Principal, startingIndex : Nat) : () {
       assert (caller == config.minter and _totalToSell == 0);
 
-      if (not config.airdropEnabled) {
-        return;
-      };
-
       // airdrop tokens
       var temp = 0;
       label airdrop for (a in config.airdrop.vals()) {
@@ -231,7 +227,7 @@ module {
           price = total;
           subaccount = subaccount;
           buyer = address;
-          expires = Time.now() + config.escrowDelay;
+          expires = Time.now() + Option.get(config.escrowDelay, 120000000000);
           slot = getSlot(address);
         },
       );

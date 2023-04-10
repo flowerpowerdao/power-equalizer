@@ -91,7 +91,7 @@ describe('buy on marketplace', async () => {
   it('check seller ICP balance', async () => {
     let balanceAfterBuyOnSale = initialBalance - env.salePrice - ICP_FEE;
     let transferFees = ICP_FEE * 5n; // 1 seller transfer, 2 marketplace transfers(seller + buyer), 2 royalty transfers
-    let expectedBalance = balanceAfterBuyOnSale + applyFees(price - transferFees, [env.royalty0, env.royalty1, env.defaultMarketplaceFee * 2n]);
+    let expectedBalance = balanceAfterBuyOnSale + applyFees(price - transferFees, [env.royalty0, env.royalty1, env.marketplace0_fee * 2n]);
     expect(await seller.icpActor.account_balance({ account: seller.account })).toEqual({ e8s: expectedBalance });
   });
 });

@@ -2,6 +2,7 @@ import Cycles "mo:base/ExperimentalCycles";
 import Principal "mo:base/Principal";
 import Array "mo:base/Array";
 import Result "mo:base/Result";
+import Option "mo:base/Option";
 import Int "mo:base/Int";
 import Time "mo:base/Time";
 import Timer "mo:base/Timer";
@@ -33,11 +34,20 @@ import Utils "./utils";
 import Types "./types";
 
 shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs: Types.InitArgs) = myCanister {
-
   let config = {
     initArgs with
     canister = cid;
     minter = init_minter;
+  };
+
+  // validate config
+  if (config.marketplaces.size() < 1) {
+    Debug.trap("add at least one marketplace");
+  };
+  for (marketplace in config.marketplaces.vals()) {
+    if (marketplace.2 < 0 or marketplace.2 > 500) {
+      Debug.trap("marketplace fee must be between 0 and 500");
+    };
   };
 
   /*********
@@ -139,14 +149,14 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
 
   public shared ({ caller }) func restoreChunk(chunk : StableChunk): async () {
     assert (caller == init_minter);
-    if (not config.restoreEnabled) {
+    if (config.restoreEnabled != ?true) {
       Debug.trap("Restore disabled. Please reinstall canister with 'restoreEnabled = true'");
     };
     _loadStableChunk(chunk);
   };
 
   func _trapIfRestoreEnabled() {
-    if (config.restoreEnabled) {
+    if (config.restoreEnabled == ?true) {
       Debug.trap("Restore in progress. If restore is complete, upgrade canister with `restoreEnabled = false`");
     };
   };
@@ -156,14 +166,14 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     Timer.cancelTimer(_timerId);
     Timer.cancelTimer(_revealTimerId);
 
-    _timerId := Timer.recurringTimer(config.timersInterval, func(): async () {
+    _timerId := Timer.recurringTimer(Option.get(config.timersInterval, #seconds(60)), func(): async () {
       ignore cronSettlements();
       ignore cronDisbursements();
       ignore cronSalesSettlements();
       ignore cronFailedSales();
     });
 
-    if (config.delayedReveal and not _Shuffle.isShuffled()) {
+    if (config.revealDelay > 0 and not _Shuffle.isShuffled()) {
       let revealTime = config.publicSaleStart + config.revealDelay;
       let delay = Int.abs(Int.max(0, revealTime - Time.now()));
 
@@ -422,26 +432,12 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     await _Marketplace.cronSettlements(caller);
   };
 
-  public shared ({ caller }) func putFrontend(identifier : Text, frontend : MarketplaceTypes.Frontend) : async () {
-    _trapIfRestoreEnabled();
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    _Marketplace.putFrontend(caller, identifier, frontend);
-  };
-
-  public shared ({ caller }) func deleteFrontend(identifier : Text) : async () {
-    _trapIfRestoreEnabled();
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    _Marketplace.deleteFrontend(caller, identifier);
-  };
-
   public shared func frontends() : async [(Text, MarketplaceTypes.Frontend)] {
     _Marketplace.frontends();
   };
 
   public shared ({ caller }) func grow(n : Nat) : async Nat {
-    assert (config.test);
+    assert (config.test == ?true);
     ignore _Sale.grow(n);
     _Marketplace.grow(n);
   };

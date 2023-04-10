@@ -24,8 +24,8 @@ describe('sale and royalty fees', async () => {
     expect(await seller.icpActor.account_balance(toAccount(env.beneficiary1))).toEqual({ e8s: 0n });
   });
 
-  it('check defaultMarketplace balance', async () => {
-    expect(await seller.icpActor.account_balance(toAccount(env.defaultMarketplaceAddr))).toEqual({ e8s: 0n });
+  it('check default marketplace balance', async () => {
+    expect(await seller.icpActor.account_balance(toAccount(env.marketplace0_addr))).toEqual({ e8s: 0n });
   });
 
   it('buy from sale', async () => {
@@ -45,8 +45,8 @@ describe('sale and royalty fees', async () => {
     expect(await seller.icpActor.account_balance(toAccount(env.beneficiary1))).toEqual({ e8s: feeOf(env.salePrice - buyTransferFees, env.salesDistribution1) });
   });
 
-  it('check defaultMarketplace sale fee disbursement', async () => {
-    expect(await seller.icpActor.account_balance(toAccount(env.defaultMarketplaceAddr))).toEqual({ e8s: 0n });
+  it('check default marketplace sale fee disbursement', async () => {
+    expect(await seller.icpActor.account_balance(toAccount(env.marketplace0_addr))).toEqual({ e8s: 0n });
   });
 
   it('check seller ICP balance', async () => {
@@ -121,7 +121,7 @@ describe('sale and royalty fees', async () => {
 
   it('check seller ICP balance', async () => {
     let balanceAfterBuyOnSale = initialBalance - env.salePrice - ICP_FEE;
-    let expectedBalance = balanceAfterBuyOnSale + applyFees(price - transferFees, [env.royalty0, env.royalty1, env.defaultMarketplaceFee * 2n]);
+    let expectedBalance = balanceAfterBuyOnSale + applyFees(price - transferFees, [env.royalty0, env.royalty1, env.marketplace0_fee * 2n]);
     expect(await seller.icpActor.account_balance({ account: seller.account })).toEqual({ e8s: expectedBalance });
   });
 
@@ -137,7 +137,7 @@ describe('sale and royalty fees', async () => {
     expect(await seller.icpActor.account_balance(toAccount(env.beneficiary1))).toEqual({ e8s: saleFee + royaltyFee });
   });
 
-  it('check defaultMarketplace royalty fee disbursement', async () => {
-    expect(await seller.icpActor.account_balance(toAccount(env.defaultMarketplaceAddr))).toEqual({ e8s: feeOf(price - transferFees, env.defaultMarketplaceFee * 2n) });
+  it('check default marketplace royalty fee disbursement', async () => {
+    expect(await seller.icpActor.account_balance(toAccount(env.marketplace0_addr))).toEqual({ e8s: feeOf(price - transferFees, env.marketplace0_fee * 2n) });
   });
 });

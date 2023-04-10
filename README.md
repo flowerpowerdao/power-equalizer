@@ -4,7 +4,7 @@
 
 ## pre launch
 
-- [ ] adapt `Env/lib.mo` to your needs
+- [ ] adapt `initArgs.did` to your needs
 - [ ] add canister to [DAB](https://docs.google.com/forms/d/e/1FAIpQLSc-0BL9FMRtI0HhWj4g7CCYjf3TMr4_K_qqmagjzkUH_CKczw/viewform)
 - [ ] send collection details to entrepot via form
 - [ ] top canister up with cycles
@@ -233,7 +233,7 @@ Because the `makefile` and `deploy.zsh` are pretty opinated, we are not includin
 
 ## caveats 🕳
 
-- The canister code is written in a way that the seed animation _ALWAYS_ has to be the first asset uploaded to the canister if you are doing a `delayedReveal`
+- The canister code is written in a way that the seed animation _ALWAYS_ has to be the first asset uploaded to the canister if you are doing a `revealDelay > 0`
 - The seed animation video needs to be encoded in a way that it can be played on iOS devices, use `HandBrake` for that or `ffmpeg`
 
 ## vessel 🚢
