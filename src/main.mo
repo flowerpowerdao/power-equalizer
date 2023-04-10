@@ -2,6 +2,7 @@ import Cycles "mo:base/ExperimentalCycles";
 import Principal "mo:base/Principal";
 import Array "mo:base/Array";
 import Result "mo:base/Result";
+import Option "mo:base/Option";
 import Int "mo:base/Int";
 import Time "mo:base/Time";
 import Timer "mo:base/Timer";
@@ -165,7 +166,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     Timer.cancelTimer(_timerId);
     Timer.cancelTimer(_revealTimerId);
 
-    _timerId := Timer.recurringTimer(config.timersInterval, func(): async () {
+    _timerId := Timer.recurringTimer(Option.get(config.timersInterval, #seconds(60)), func(): async () {
       ignore cronSettlements();
       ignore cronDisbursements();
       ignore cronSalesSettlements();
