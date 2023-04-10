@@ -28,7 +28,7 @@ npm run backup -- --network ic --canister-id rrkah-fqaaa-aaaaa-aaaaq-cai --file 
 # Restore
 (!) If any error occurred during the restore, please follow all the steps again.
 
-1. In `Env/lib.mo` set `restoreEnabled = true`
+1. Add `restoreEnabled = opt true;` to `initArgs.did`
 2. Reinstall canister with clear all data
 ```
 dfx deploy <canister> --network <network> --mode reinstall
@@ -53,7 +53,7 @@ Example:
 npm run restore -- --network ic --canister-id rrkah-fqaaa-aaaaa-aaaaq-cai --file 2023-01-01.json --pem "$(dfx identity export default)"
 ```
 
-4. In `Env/lib.mo` set `restoreEnabled = false`
+4. Remove `restoreEnabled = opt true;` from `initArgs.did`
 4. Upgrade canister
 ```
 dfx deploy <canister> --network <network>

@@ -139,14 +139,14 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
 
   public shared ({ caller }) func restoreChunk(chunk : StableChunk): async () {
     assert (caller == init_minter);
-    if (not config.restoreEnabled) {
+    if (config.restoreEnabled != ?true) {
       Debug.trap("Restore disabled. Please reinstall canister with 'restoreEnabled = true'");
     };
     _loadStableChunk(chunk);
   };
 
   func _trapIfRestoreEnabled() {
-    if (config.restoreEnabled) {
+    if (config.restoreEnabled == ?true) {
       Debug.trap("Restore in progress. If restore is complete, upgrade canister with `restoreEnabled = false`");
     };
   };
