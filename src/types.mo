@@ -39,7 +39,7 @@ module {
     placeholderContentLength : Text; // ??
     salesDistribution : [(AccountIdentifier, Nat64)];
     royalties : [(AccountIdentifier, Nat64)];
-    defaultMarketplaceFee : (AccountIdentifier, Nat64);
+    marketplaces : [(Text, AccountIdentifier, Nat64)]; // first marketplace is default
     // open edition
     // true - no definite collection size and can be minted in an ongoing effort until 'saleEnd' (need to set collectionSize = 0)
     // false - fixed collection size
@@ -52,9 +52,7 @@ module {
     // true - the entire collection will consists of only one asset, meaning all NFTs look the same
     // false - there are at least two different assets in the collection
     singleAssetCollection : Bool;
-    // dutch auction
     dutchAuction: ?DutchAuction;
-    // airdrop
     airdrop : [AccountIdentifier];
     // whitelist
     whitelistOneTimeOnly : Bool; // Whitelist addresses are removed after purchase

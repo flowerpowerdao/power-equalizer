@@ -8,10 +8,13 @@
     whitelistTime = 1680696181381000000; // Period for WL only discount. Set to publicSaleStart for no exclusive period
     marketDelay = 86400000000000; // How long to delay market opening (2 days after whitelist sale started or when sold out)
     escrowDelay = 120000000000; // 120 seconds
-    placeholderContentLength = "1053832";
+    placeholderContentLength = "1053832"; // ??
     salesDistribution = vec {};
     royalties = vec {};
-    defaultMarketplaceFee = record { ""; 500 };
+    marketplaces = vec {
+      // first marketplace is default
+      record { "entrepot"; "ccfe146bb249b6c59e8c5ae71a1b59ddf85d9f9034611427b696f8b25d7b826a"; 500 }; // total payout 1% (0.5% to seller marketplace, 0.5% to buyer marketplace)
+    };
     // open edition
     // true - no definite collection size and can be minted in an ongoing effort until 'saleEnd' (need to set collectionSize = 0)
     // false - fixed collection size

@@ -14,8 +14,19 @@ export default {
   escrowDelay: 120_000_000_000n, // 120 seconds
   collectionName: "Test Collection",
   collectionSize: 7777n,
-  defaultMarketplaceAddr: new User('marketplace').accountId,
-  defaultMarketplaceFee: 1000n,
+
+  marketplace0_name: "entrepot",
+  marketplace0_addr: new User('marketplace').accountId,
+  marketplace0_fee: 500n,
+
+  marketplace1_name: "yumi",
+  marketplace1_addr: new User('marketplace').accountId,
+  marketplace1_fee: 456n,
+
+  marketplace2_name: "jelly",
+  marketplace2_addr: new User('marketplace').accountId,
+  marketplace2_fee: 300n,
+
   salePrice: 700000000n,
   publicSaleStart: BigInt(Date.now()) * 1_000_000n, // Start of first purchase (WL or other)
   whitelistTime: BigInt(Date.now()) * 1_000_000n, // Period for WL only discount. Set to publicSaleStart for no exclusive period

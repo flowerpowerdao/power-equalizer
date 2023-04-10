@@ -33,11 +33,20 @@ import Utils "./utils";
 import Types "./types";
 
 shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs: Types.InitArgs) = myCanister {
-
   let config = {
     initArgs with
     canister = cid;
     minter = init_minter;
+  };
+
+  // validate config
+  if (config.marketplaces.size() < 1) {
+    Debug.trap("add at least one marketplace");
+  };
+  for (marketplace in config.marketplaces.vals()) {
+    if (marketplace.2 < 0 or marketplace.2 > 500) {
+      Debug.trap("marketplace fee must be between 0 and 500");
+    };
   };
 
   /*********
@@ -420,20 +429,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     canistergeekMonitor.collectMetrics();
     // caller will be stored to the Cap event, is that ok?
     await _Marketplace.cronSettlements(caller);
-  };
-
-  public shared ({ caller }) func putFrontend(identifier : Text, frontend : MarketplaceTypes.Frontend) : async () {
-    _trapIfRestoreEnabled();
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    _Marketplace.putFrontend(caller, identifier, frontend);
-  };
-
-  public shared ({ caller }) func deleteFrontend(identifier : Text) : async () {
-    _trapIfRestoreEnabled();
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    _Marketplace.deleteFrontend(caller, identifier);
   };
 
   public shared func frontends() : async [(Text, MarketplaceTypes.Frontend)] {

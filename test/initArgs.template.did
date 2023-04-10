@@ -17,7 +17,11 @@
       record { $beneficiary0; $royalty0 };
       record { $beneficiary1; $royalty1 };
     };
-    defaultMarketplaceFee = record { $defaultMarketplaceAddr; $defaultMarketplaceFee };
+    marketplaces = vec {
+      record { $marketplace0_name; $marketplace0_addr; $marketplace0_fee };
+      record { $marketplace1_name; $marketplace1_addr; $marketplace1_fee };
+      record { $marketplace2_name; $marketplace2_addr; $marketplace2_fee };
+    };
     openEdition = $openEdition;
     saleEnd = $saleEnd;
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')

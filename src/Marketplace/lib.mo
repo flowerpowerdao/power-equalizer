@@ -450,17 +450,6 @@ module {
       AID.fromPrincipal(Principal.fromText(p), ?Utils.natToSubAccount(sa));
     };
 
-    public func putFrontend(caller : Principal, identifier : Text, frontend : Types.Frontend) {
-      assert (caller == config.minter);
-      assert (validFrontendFee(frontend));
-      _frontends.put(identifier, frontend);
-    };
-
-    public func deleteFrontend(caller : Principal, identifier : Text) {
-      assert (caller == config.minter);
-      _frontends.delete(identifier);
-    };
-
     public func frontends() : [(Text, Types.Frontend)] {
       Iter.toArray(_frontends.entries());
     };
@@ -469,28 +458,16 @@ module {
     * INTERNAL METHODS *
     ********************/
 
-    func validFrontendFee(frontend : Types.Frontend) : Bool {
-      frontend.fee <= 500 and frontend.fee >= 0
-    };
+    func getFrontend(identifierOpt : ?Text) : Types.Frontend {
+      let identifier = Option.get(identifierOpt, config.marketplaces[0].0);
 
-    func getFrontend(identifier : ?Text) : Types.Frontend {
-      let defaultFrontend : Types.Frontend = {
-        fee = config.defaultMarketplaceFee.1;
-        accountIdentifier = config.defaultMarketplaceFee.0;
+      for (marketplace in config.marketplaces.vals()) {
+        if (marketplace.0 == identifier) {
+          return { accountIdentifier = marketplace.1; fee = marketplace.2; };
+        };
       };
 
-      // disbursement of marketplace fee
-      let frontend : Types.Frontend = switch (
-        do ? {
-          switch (_frontends.get(identifier!)) {
-            case (?frontend) frontend;
-            case _ defaultFrontend;
-          };
-        },
-      ) {
-        case (?frontend) { frontend };
-        case _ defaultFrontend;
-      };
+      return { accountIdentifier = config.marketplaces[0].1; fee = config.marketplaces[0].2; }
     };
 
     // getters & setters
