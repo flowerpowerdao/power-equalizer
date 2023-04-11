@@ -29,7 +29,21 @@ describe('sale and royalty fees', async () => {
   });
 
   it('buy from sale', async () => {
-    await buyFromSale(seller)
+    let settings = await seller.mainActor.salesSettings(seller.accountId);
+    let res = await seller.mainActor.reserve(settings.price, 1n, seller.accountId, new Uint8Array);
+
+    expect(res).toHaveProperty('ok');
+
+    if ('ok' in res) {
+      let paymentAddress = res.ok[0];
+      let paymentAmount = res.ok[1];
+      expect(paymentAddress.length).toBe(64);
+      expect(paymentAmount).toBe(settings.price);
+
+      await seller.sendICP(paymentAddress, paymentAmount);
+      let retrieveRes = await seller.mainActor.retrieve(paymentAddress);
+      expect(retrieveRes).toHaveProperty('ok');
+    }
   });
 
   it('cron cronDisbursements', async () => {
