@@ -77,10 +77,10 @@ module {
       #openEdition: Time.Time; // no definite collection size and can be minted in an ongoing effort until a specified time
     };
     publicSaleStart : Time.Time; // public sale start time
-    placeholderContentLength : Text; // ??
-    salesDistribution : [(AccountIdentifier, Nat64)];
-    royalties : [(AccountIdentifier, Nat64)];
-    marketplaces : [(Text, AccountIdentifier, Nat64)];
+    // placeholderContentLength : Text; // ??
+    // salesDistribution : [(AccountIdentifier, Nat64)];
+    // royalties : [(AccountIdentifier, Nat64)];
+    // marketplaces : [(Text, AccountIdentifier, Nat64)];
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
     // 0 - assets will be revealed immediately and assets shuffling will be disabled
     // revealDelay : Time.Time; // 86400000000000 == 24 hours
