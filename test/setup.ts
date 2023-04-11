@@ -9,6 +9,8 @@ beforeAll(async (suite) => {
   let envName = path.dirname(suite.name).split('/').at(-1);
 
   if (envName !== prevEnvName) {
+    prevEnvName = envName;
+
     await applyEnv(envName);
 
     execSync(`npm run deploy-test`, {
@@ -26,6 +28,4 @@ beforeAll(async (suite) => {
       execSync(`npm run mint:test`);
     }
   }
-
-  prevEnvName = envName;
 });
