@@ -13,7 +13,8 @@ export async function applyEnv(envName: string) {
     console.log(`Applying .env.${envName}.ts`);
     let didData = templateDidData;
 
-    let env = await import(tsFile);
+    // let env = await import(tsFile);
+    let env = require(tsFile);
 
     for (let [key, val] of Object.entries(env.default)) {
       if (typeof val == 'bigint') {
@@ -36,4 +37,8 @@ export async function applyEnv(envName: string) {
   else {
     console.log(`ERR: Env '${envName}' not found`);
   }
+}
+
+if (process.argv[2]) {
+  applyEnv(process.argv[2]);
 }
