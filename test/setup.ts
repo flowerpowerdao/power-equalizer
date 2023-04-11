@@ -9,7 +9,10 @@ beforeAll((suite) => {
   let envName = path.dirname(suite.name).split('/').at(-1);
   if (envName !== prevEnvName) {
     applyEnv(envName);
-    execSync(`npm run deploy-test`);
+
+    execSync(`npm run deploy-test`, {
+      cwd: path.resolve(__dirname, '..')
+    });
 
     if (envName === 'multi-asset') {
       execSync(`npm run mint:test-2`);
