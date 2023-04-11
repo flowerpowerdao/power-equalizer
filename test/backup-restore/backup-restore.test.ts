@@ -10,6 +10,8 @@ import canisterIds from '../../.dfx/local/canister_ids.json';
 let canisterId = canisterIds.test.local;
 
 describe('backup', async () => {
+  await applyEnv('restore');
+
   let growSize = 2001n;
   let growCount = 2;
   let chunkSize = 1500n;
@@ -47,8 +49,6 @@ it('deploy', async () => {
     cwd: path.resolve(__dirname, '..'),
     stdio: ['ignore', 'ignore', 'pipe'],
   });
-
-  execSync(`npm run mint:test`);
 });
 
 describe('restore', async () => {
