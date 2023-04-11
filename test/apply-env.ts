@@ -37,3 +37,7 @@ export async function applyEnv(envName: string) {
     console.log(`ERR: Env '${envName}' not found`);
   }
 }
+
+if (process.argv[2]) {
+  applyEnv(process.argv[2]);
+}

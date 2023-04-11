@@ -14,7 +14,7 @@
     "ledger": {
       "type": "custom",
       "wasm": "declarations/ledger/ledger.wasm",
-      "candid": "declarations/ledger/ledger.private.did",
+      "candid": "declarations/ledger/ledger.public.did",
       "remote": {
         "candid": "declarations/ledger/ledger.public.did",
         "id": {
