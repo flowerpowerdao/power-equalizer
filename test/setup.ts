@@ -5,10 +5,11 @@ import {applyEnv} from './apply-env';
 
 let prevEnvName = '';
 
-beforeAll((suite) => {
+beforeAll(async (suite) => {
   let envName = path.dirname(suite.name).split('/').at(-1);
+
   if (envName !== prevEnvName) {
-    applyEnv(envName);
+    await applyEnv(envName);
 
     execSync(`npm run deploy-test`, {
       cwd: path.resolve(__dirname, '..')
@@ -25,5 +26,6 @@ beforeAll((suite) => {
       execSync(`npm run mint:test`);
     }
   }
+
   prevEnvName = envName;
 });
