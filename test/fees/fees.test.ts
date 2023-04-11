@@ -8,7 +8,7 @@ import env from './.env.fees';
 
 describe('sale and royalty fees', async () => {
   let price = 1_000_000n;
-  let initialBalance = 1_000_000_000n;
+  let initialBalance = 1000_000_000_000n;
 
   let seller = new User;
   await seller.mintICP(initialBalance);
