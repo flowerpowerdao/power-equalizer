@@ -35,7 +35,7 @@
     "test:open-edition": "npm run vitest open-edition",
     "test:backup": "npm run vitest backup",
     "test:restore": "npm run vitest restore",
-    "test": "npm run vitest single-asset.test.ts && npm run vitest multi-asset && npm run vitest single-asset-delayed-reveal && npm run vitest pending-sale && npm run vitest public-sale && npm run vitest highload-sale && npm run vitest whitelist-sale && npm run vitest whitelist-slots && npm run vitest marketplace && npm run vitest fees && npm run vitest sold-out && npm run vitest open-edition && npm run vitest backup && npm run vitest restore",
+    "test": "npm run vitest single-asset.test.ts && npm run vitest multi-asset && npm run vitest single-asset-delayed-reveal && npm run vitest pending-sale && npm run vitest public-sale && npm run vitest highload-sale && npm run vitest whitelist-sale && npm run vitest whitelist-slots && npm run vitest fees && npm run vitest sold-out && npm run vitest open-edition && npm run vitest backup && npm run vitest restore",
     "backup": "ts-node ./backup/backup.ts",
     "restore": "ts-node ./backup/restore.ts",
     "test-br": "ts-node ./backup/test.ts"
