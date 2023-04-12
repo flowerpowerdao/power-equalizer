@@ -19,7 +19,7 @@
     "mint-2": "dfx canister call staging addAsset '(record {name = \"privat0\";payload = record {ctype = \"text/html\"; data = vec {blob \"hello world0!\"} } })' && dfx canister call staging addAsset '(record {name = \"privat1\";payload = record {ctype = \"text/html\"; data = vec {blob \"hello world1!\"} } })' && dfx canister call staging initMint && dfx canister call staging shuffleTokensForSale && dfx canister call staging enableSale",
     "mint:test": "dfx canister call test addAsset '(record {name = \"privat\";payload = record {ctype = \"text/html\"; data = vec {blob \"hello world!\"} } })' && dfx canister call test initMint && dfx canister call test shuffleTokensForSale && dfx canister call test enableSale",
     "mint:test-2": "dfx canister call test addAsset '(record {name = \"privat0\";payload = record {ctype = \"text/html\"; data = vec {blob \"hello world0!\"} } })' && dfx canister call test addAsset '(record {name = \"privat1\";payload = record {ctype = \"text/html\"; data = vec {blob \"hello world1!\"} } })' && dfx canister call test initMint && dfx canister call test shuffleTokensForSale && dfx canister call test enableSale",
-    "vitest": "vitest run --threads false --isolate false --reporter verbose",
+    "vitest": "vitest run --threads false --isolate false",
     "vitest:watch": "vitest watch",
     "env": "ts-node ./test/apply-env.ts",
     "test:pending-sale": "npm run env pending-sale && npm run deploy-test && npm run mint:test && vitest run pending-sale",
