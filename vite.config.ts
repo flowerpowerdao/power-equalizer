@@ -8,7 +8,7 @@ export default defineConfig({
     exclude: [
       '**/node_modules/**',
       '**/.{git,dfx,vessel}/**',
-      'test/marketplace',
+      // 'test/marketplace',
       'test/backup/backup.test.ts',
       'test/restore/restore.test.ts',
       // 'test/backup-restore',
