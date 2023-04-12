@@ -25,4 +25,4 @@ jobs:
             npm install
             npm run replica
             npm run deploy
-            npm run test
+            npm run vitest
