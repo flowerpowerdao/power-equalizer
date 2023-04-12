@@ -6,15 +6,17 @@ import { applyFees, buyFromSale, checkTokenCount, feeOf, toAccount, tokenIdentif
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
 import env from './.env.fees';
 
-describe('sale and royalty fees', async () => {
+describe('sale and royalty fees', () => {
   let price = 1_000_000n;
   let initialBalance = 1_000_000_000n;
 
   let seller = new User;
-  await seller.mintICP(initialBalance);
-
   let buyer = new User;
-  await buyer.mintICP(initialBalance);
+
+  it('mint ICP', async () => {
+    await seller.mintICP(initialBalance);
+    await buyer.mintICP(initialBalance);
+  });
 
   it('check beneficiary0 balance', async () => {
     expect(await seller.icpActor.account_balance(toAccount(env.beneficiary0))).toEqual({ e8s: 0n });
