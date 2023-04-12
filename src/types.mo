@@ -70,11 +70,11 @@ module {
   };
 
   type InitArgsNew = {
-    collectionName : Text;
+    name : Text;
     salePrice : Nat; // e8s
     saleType : {
-      #limitedEdition: Nat; // fixed collection size
-      #openEdition: Time.Time; // no definite collection size and can be minted in an ongoing effort until a specified time
+      #supplyCap: Nat; // fixed collection size
+      #endTime: Time.Time; // no definite collection size and can be minted in an ongoing effort until a specified time
     };
     publicSaleStart : Time.Time; // public sale start time
     // placeholderContentLength : Text; // ??
@@ -88,7 +88,7 @@ module {
     // false - there are at least two different assets in the collection
     singleAssetCollection : ?Bool;
     airdrop : ?[AccountIdentifier];
-    whitelistTiers: ?[{
+    whitelists: ?[{
       name : Text;
       price : Nat64;
       addresses : [AccountIdentifier];
