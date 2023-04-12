@@ -29,7 +29,7 @@ module {
   };
 
   public type InitArgs = {
-    collectionName : Text;
+    name : Text;
     collectionSize : Nat;
     salePrice : Nat64; // e8s
     publicSaleStart : Time.Time; // Start of first purchase (WL or other)

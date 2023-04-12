@@ -12,7 +12,7 @@ export default {
   royalty0: 3375n,
   royalty1: 750n,
   escrowDelay: 120_000_000_000n, // 120 seconds
-  collectionName: "Test Collection",
+  name: "Test Collection",
   collectionSize: 7777n,
 
   marketplace0_name: "entrepot",

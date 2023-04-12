@@ -1,7 +1,7 @@
 (
   principal "r7inp-6aaaa-aaaaa-aaabq-cai", // test canister
   record {
-    collectionName = $collectionName;
+    name = $name;
     collectionSize = $collectionSize;
     salePrice = $salePrice;
     publicSaleStart = $publicSaleStart;

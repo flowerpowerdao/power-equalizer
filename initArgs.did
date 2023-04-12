@@ -1,7 +1,7 @@
 (
   principal "rrkah-fqaaa-aaaaa-aaaaq-cai", // staging canister
   record {
-    collectionName = "Pineapple Punks";
+    name = "Pineapple Punks";
     collectionSize = 10_000;
     // saltType = variant { limitedEdition 10_000 };
     // saltType = variant { openEdition 1670696181381000000 };
