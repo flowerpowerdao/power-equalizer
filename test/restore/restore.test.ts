@@ -7,7 +7,7 @@ import canisterIds from '../../.dfx/local/canister_ids.json';
 
 let canisterId = canisterIds.test.local;
 
-describe('restore', async () => {
+describe('restore', () => {
   let chunkSize = 1500n;
 
   it('try to restore by non-minter user', async () => {

@@ -6,7 +6,7 @@ import canisterIds from '../../.dfx/local/canister_ids.json';
 
 let canisterId = canisterIds.test.local;
 
-describe('backup', async () => {
+describe('backup', () => {
   let growSize = 2001n;
   let growCount = 2;
   let chunkSize = 1500n;

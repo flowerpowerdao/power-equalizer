@@ -9,13 +9,15 @@ import canisterIds from '../../.dfx/local/canister_ids.json';
 
 let canisterId = canisterIds.test.local;
 
-describe('backup', async () => {
-  await applyEnv('restore');
-
+describe('backup', () => {
   let growSize = 2001n;
   let growCount = 2;
   let chunkSize = 1500n;
   let user = new User('');
+
+  it('apply env', async () => {
+    await applyEnv('restore');
+  });
 
   it('try to restore with restoreEnabled = false', async () => {
     await expect(user.mainActor.restoreChunk({v1: {
@@ -51,7 +53,7 @@ it('deploy', async () => {
   });
 });
 
-describe('restore', async () => {
+describe('restore', () => {
   let chunkSize = 1500n;
 
   it('try to restore by non-minter user', async () => {
