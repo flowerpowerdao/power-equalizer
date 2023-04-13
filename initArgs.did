@@ -22,8 +22,8 @@
     // when the sale ends (set to '0' if openEdition = false)
     saleEnd = 0;
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
-    // 0 - assets will be revealed immediately and assets shuffling will be disabled
-    revealDelay = 86400000000000; // 86400000000000 == 24 hours
+    // variant { none } - assets will be revealed immediately and assets shuffling will be disabled
+    revealDelay = variant { hours = 24 };
     // true - the entire collection will consists of only one asset, meaning all NFTs look the same
     // false - there are at least two different assets in the collection
     singleAssetCollection = false;

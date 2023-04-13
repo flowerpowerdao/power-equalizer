@@ -24,7 +24,7 @@
     saleEnd = $saleEnd;
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
     // 0 - assets will be revealed immediately and assets shuffling will be disabled
-    revealDelay = $revealDelay;
+    revealDelay = variant { nanoseconds = $revealDelay };
     singleAssetCollection = $singleAssetCollection;
     // dutch auction
     // dutchAuction = opt record {
@@ -59,10 +59,10 @@
         };
       };
     };
-    marketDelay = opt $marketDelay;
-    escrowDelay = opt $escrowDelay;
+    marketDelay = opt variant { nanoseconds = $marketDelay };
+    escrowDelay = opt variant { nanoseconds = $escrowDelay };
+    timersInterval = opt variant { seconds = $timersInterval };
     test = opt $test; // must be 'false'
     restoreEnabled = opt $restoreEnabled; // must be 'false' (see backup/README.md for details)
-    timersInterval = opt variant { seconds = $timersInterval };
   }
 )

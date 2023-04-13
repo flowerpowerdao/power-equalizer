@@ -4,6 +4,15 @@ import Time "mo:base/Time";
 module {
   type AccountIdentifier = Text;
 
+  public type Duration = {
+    #nanoseconds : Nat;
+    #seconds : Nat;
+    #minutes : Nat;
+    #hours : Nat;
+    #days : Nat;
+    #none;
+  };
+
   public type WhitelistSlot = {
     start : Time.Time;
     end : Time.Time;
@@ -46,7 +55,7 @@ module {
     saleEnd : Time.Time;
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
     // 0 - assets will be revealed immediately and assets shuffling will be disabled
-    revealDelay : Time.Time; // 86400000000000 == 24 hours
+    revealDelay : Duration; // 86400000000000 == 24 hours
     // true - the entire collection will consists of only one asset, meaning all NFTs look the same
     // false - there are at least two different assets in the collection
     singleAssetCollection : Bool;
@@ -58,15 +67,11 @@ module {
     // whitelist tiers
     // order from lower price to higher price
     whitelistTiers : [WhitelistTier];
-    escrowDelay : ?Time.Time; // default 120000000000 - 120 seconds
-    marketDelay : ?Time.Time; // How long to delay market opening (2 days after whitelist sale started or when sold out) (default 172800000000000 - 2 days)
+    escrowDelay : ?Duration; // default 2 minutes
+    marketDelay : ?Duration; // How long to delay market opening (2 days after whitelist sale started or when sold out) (default 2 days)
     test : ?Bool; // must be null
     restoreEnabled : ?Bool; // must be null (see backup/README.md for details)
-    // default 60 seconds
-    timersInterval : ?{
-      #seconds : Nat;
-      #nanoseconds : Nat;
-    };
+    timersInterval : ?Duration; // default 60 seconds
   };
 
   type InitArgsNew = {

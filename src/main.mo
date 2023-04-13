@@ -166,15 +166,17 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     Timer.cancelTimer(_timerId);
     Timer.cancelTimer(_revealTimerId);
 
-    _timerId := Timer.recurringTimer(Option.get(config.timersInterval, #seconds(60)), func(): async () {
+    let timersInterval = Utils.toNanos(Option.get(config.timersInterval, #seconds(60)));
+
+    _timerId := Timer.recurringTimer(#nanoseconds(timersInterval), func(): async () {
       ignore cronSettlements();
       ignore cronDisbursements();
       ignore cronSalesSettlements();
       ignore cronFailedSales();
     });
 
-    if (config.revealDelay > 0 and not _Shuffle.isShuffled()) {
-      let revealTime = config.publicSaleStart + config.revealDelay;
+    if (Utils.toNanos(config.revealDelay) > 0 and not _Shuffle.isShuffled()) {
+      let revealTime = config.publicSaleStart + Utils.toNanos(config.revealDelay);
       let delay = Int.abs(Int.max(0, revealTime - Time.now()));
 
       // add random delay up to 60 minutes

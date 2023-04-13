@@ -137,7 +137,7 @@ module {
         {
           seller = listing.seller;
           price = listing.price;
-          locked = ?(Time.now() + Option.get(config.escrowDelay, 120000000000));
+          locked = ?(Time.now() + Utils.toNanos(Option.get(config.escrowDelay, #minutes(2))));
           sellerFrontend = listing.sellerFrontend;
           buyerFrontend = frontendIdentifier;
         },
@@ -295,7 +295,7 @@ module {
 
     public func list(caller : Principal, request : Types.ListRequest) : async Result.Result<(), Types.CommonError> {
       // marketplace is open either when marketDelay has passed or collection sold out
-      let marketDelay = Option.get(config.marketDelay, 172800000000000);
+      let marketDelay = Utils.toNanos(Option.get(config.marketDelay, #days(2)));
       if (Time.now() < config.publicSaleStart + marketDelay) {
         if (deps._Sale.getSold() < deps._Sale.getTotalToSell()) {
           return #err(#Other("You can not list yet"));
