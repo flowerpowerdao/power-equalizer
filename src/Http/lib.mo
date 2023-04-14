@@ -216,6 +216,7 @@ module {
 
       if (file.data.size() > 1) {
         let (payload, token) = _streamContent(tokenid, 0, file.data);
+        let contentLength = Array.foldLeft<Blob, Nat>(file.data, 0, func(total, blob) = total + blob.size());
         return {
           // start custom
           status_code = 200;
@@ -225,7 +226,7 @@ module {
             ("Access-Control-Expose-Headers", "Content-Length, Content-Range"),
             ("Access-Control-Allow-Methods", "GET, POST, HEAD, OPTIONS"),
             ("Access-Control-Allow-Origin", "*"),
-            ("Content-Length", config.placeholderContentLength),
+            ("Content-Length", Nat.toText(contentLength)),
             ("Accept-Ranges", "bytes"),
           ];
           // end custom

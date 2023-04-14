@@ -6,7 +6,6 @@
     salePrice = $salePrice;
     publicSaleStart = $publicSaleStart;
     whitelistTime = $whitelistTime;
-    placeholderContentLength = "1053832";
     salesDistribution = vec {
       record { $beneficiary0; $salesDistribution0 };
       record { $beneficiary1; $salesDistribution1 };
