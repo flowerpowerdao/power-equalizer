@@ -23,6 +23,6 @@ jobs:
         run: |
             dfx identity use anonymous
             npm install
-            npm run replica
+            npm run replica-dfx-14
             npm run deploy
             npm run vitest

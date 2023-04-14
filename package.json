@@ -4,7 +4,8 @@
   },
   "scripts": {
     "start": "npm run replica && npm run deploy && npm run mint",
-    "replica": "dfx stop && rm -rf .dfx && dfx start --clean --background --artificial-delay 0 && dfx canister create staging && dfx canister create ledger && dfx canister create test --specified-id r7inp-6aaaa-aaaaa-aaabq-cai",
+    "replica": "dfx stop && rm -rf .dfx && dfx start --clean --background && dfx canister create staging && dfx canister create ledger && dfx canister create test",
+    "replica-dfx-14": "dfx stop && rm -rf .dfx && dfx start --clean --background --artificial-delay 0 && dfx canister create staging && dfx canister create ledger && dfx canister create test --specified-id r7inp-6aaaa-aaaaa-aaabq-cai",
     "deploy": "npm run deploy:ledger && npm run deploy:staging",
     "deploy-test": "npm run reinstall:ledger -- -qq && npm run reinstall:test -- -qq",
     "deploy:staging": "dfx canister create staging && DFX_MOC_PATH=\"$(vessel bin)/moc\" dfx deploy staging --argument \"$(cat initArgs.did)\"",
