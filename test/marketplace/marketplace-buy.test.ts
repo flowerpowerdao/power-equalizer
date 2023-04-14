@@ -6,15 +6,17 @@ import { applyFees, buyFromSale, checkTokenCount, tokenIdentifier } from '../uti
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
 import env from './.env.marketplace';
 
-describe('buy on marketplace', async () => {
+describe('buy on marketplace', () => {
+  let seller = new User;
+  let buyer = new User;
+
   let price = 1_000_000n;
   let initialBalance = 1_000_000_000n;
 
-  let seller = new User;
-  await seller.mintICP(initialBalance);
-
-  let buyer = new User;
-  await buyer.mintICP(initialBalance);
+  it('mint ICP', async () => {
+    await seller.mintICP(initialBalance);
+    await buyer.mintICP(initialBalance);
+  });
 
   it('buy from sale', async () => {
     await buyFromSale(seller)

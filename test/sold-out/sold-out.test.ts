@@ -4,9 +4,12 @@ import { buyFromSale, tokenIdentifier } from '../utils';
 import { whitelistTier0, whitelistTier1, lucky } from '../well-known-users';
 import env from './.env.sold-out';
 
-describe('sold out', async () => {
+describe('sold out', () => {
   let user = new User;
-  await user.mintICP(1_000_000_000_000n);
+
+  it('mint ICP', async () => {
+    await user.mintICP(1_000_000_000_000n);
+  });
 
   it('try to list token before sold out', async () => {
     await buyFromSale(user);
