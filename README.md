@@ -285,10 +285,10 @@ To deploy and run all tests
 npm run test
 ```
 
-To deploy and run specific env tests
+To deploy and run specific tests
 
 ```
-npm run test:pending-sale
+npm run test pending-sale
 ```
 
 To run tests without deployment (useful when writing tests)

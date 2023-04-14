@@ -25,4 +25,4 @@ jobs:
             npm install
             npm run replica-dfx-14
             npm run deploy
-            npm run vitest
+            npm run test
