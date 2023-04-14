@@ -2,6 +2,8 @@ import Time "mo:base/Time";
 import ExtCore "../toniq-labs/ext/Core";
 
 module {
+  public let test = $test; // must be 'false'
+  public let restoreEnabled = $restoreEnabled; // must be 'false' (see backup/README.md for details)
   public let timersInterval = #seconds($timersInterval);
 
   let beneficiary0 : ExtCore.AccountIdentifier = $beneficiary0;
@@ -12,7 +14,7 @@ module {
   public let escrowDelay : Time.Time = $escrowDelay; // 120 seconds
   public let collectionSize : Nat32 = $collectionSize;
 
-  public let salePrice : Nat64 = 700000000;
+  public let salePrice : Nat64 = $salePrice;
 
   public let salesDistribution : [(ExtCore.AccountIdentifier, Nat64)] = [
     (beneficiary0, $salesDistribution0),

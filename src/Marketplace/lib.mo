@@ -4,6 +4,7 @@ import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Iter "mo:base/Iter";
 import List "mo:base/List";
+import Nat "mo:base/Nat";
 import Nat64 "mo:base/Nat64";
 import Nat8 "mo:base/Nat8";
 import TrieMap "mo:base/TrieMap";
@@ -17,6 +18,7 @@ import Buffer "mo:base/Buffer";
 import { fromPrincipal; addHash; fromText } "mo:accountid/AccountIdentifier";
 import Encoding "mo:encoding/Binary";
 import Root "mo:cap/Root";
+import Fuzz "mo:fuzz";
 
 import AID "../toniq-labs/util/AccountIdentifier";
 import Env "../Env";
@@ -25,24 +27,89 @@ import Types "types";
 import Utils "../utils";
 
 module {
-  public class Factory(this : Principal, state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
+  public class Factory(this : Principal, deps : Types.Dependencies, consts : Types.Constants) {
 
     /*********
     * STATE *
     *********/
 
-    private var _transactions : Buffer.Buffer<Types.Transaction> = Buffer.fromArray(state._transactionsState);
-    private var _tokenSettlement : TrieMap.TrieMap<Types.TokenIndex, Types.Settlement> = TrieMap.fromEntries(state._tokenSettlementState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-    private var _tokenListing : TrieMap.TrieMap<Types.TokenIndex, Types.Listing> = TrieMap.fromEntries(state._tokenListingState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-    private var _frontends : TrieMap.TrieMap<Text, Types.Frontend> = TrieMap.fromEntries(state._frontendsState.vals(), Text.equal, Text.hash);
+    var _transactions : Buffer.Buffer<Types.Transaction> = Buffer.Buffer(0);
+    var _tokenSettlement : TrieMap.TrieMap<Types.TokenIndex, Types.Settlement> = TrieMap.TrieMap(ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    var _tokenListing : TrieMap.TrieMap<Types.TokenIndex, Types.Listing> = TrieMap.TrieMap(ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+    var _frontends : TrieMap.TrieMap<Text, Types.Frontend> = TrieMap.TrieMap(Text.equal, Text.hash);
 
-    public func toStable() : Types.StableState {
-      return {
-        _transactionsState = Buffer.toArray(_transactions);
-        _tokenSettlementState = Iter.toArray(_tokenSettlement.entries());
-        _tokenListingState = Iter.toArray(_tokenListing.entries());
-        _frontendsState = Iter.toArray(_frontends.entries());
+    public func getChunkCount(chunkSize : Nat) : Nat {
+      var count = _transactions.size() / chunkSize;
+      if (_transactions.size() % chunkSize != 0) {
+        count += 1;
       };
+      Nat.max(1, count);
+    };
+
+    public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
+      let start = chunkSize * chunkIndex;
+      let transactionChunk = if (_transactions.size() == 0) {
+        []
+      }
+      else {
+        Buffer.toArray(Buffer.subBuffer(_transactions, start, Nat.min(chunkSize, _transactions.size() - start)));
+      };
+
+      if (chunkIndex == 0) {
+        return ?#v1({
+          transactionCount = _transactions.size();
+          transactionChunk;
+          tokenSettlement = Iter.toArray(_tokenSettlement.entries());
+          tokenListing = Iter.toArray(_tokenListing.entries());
+          frontends = Iter.toArray(_frontends.entries());
+        });
+      }
+      else if (chunkIndex <= getChunkCount(chunkSize)) {
+        return ?#v1_chunk({ transactionChunk });
+      }
+      else {
+        null;
+      };
+    };
+
+    public func loadStableChunk(chunk : Types.StableChunk) {
+      switch (chunk) {
+        // TODO: remove after upgrade vvv
+        case (?#legacy(state)) {
+          _transactions := Buffer.fromArray(state._transactionsState);
+          _tokenSettlement := TrieMap.fromEntries(state._tokenSettlementState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+          _tokenListing := TrieMap.fromEntries(state._tokenListingState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+          _frontends := TrieMap.fromEntries(state._frontendsState.vals(), Text.equal, Text.hash);
+        };
+        // TODO: remove after upgrade ^^^
+        case (?#v1(data)) {
+          _transactions := Buffer.Buffer<Types.Transaction>(data.transactionCount);
+          _transactions.append(Buffer.fromArray(data.transactionChunk));
+          _tokenSettlement := TrieMap.fromEntries(data.tokenSettlement.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+          _tokenListing := TrieMap.fromEntries(data.tokenListing.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
+          _frontends := TrieMap.fromEntries(data.frontends.vals(), Text.equal, Text.hash);
+        };
+        case (?#v1_chunk(data)) {
+          _transactions.append(Buffer.fromArray(data.transactionChunk));
+        };
+        case (null) {};
+      };
+    };
+
+    public func grow(n : Nat) : Nat {
+      let fuzz = Fuzz.Fuzz();
+
+      for (i in Iter.range(1, n)) {
+        _transactions.add({
+          token = fuzz.text.randomAlphanumeric(32);
+          seller = fuzz.principal.randomPrincipal(10);
+          price = fuzz.nat64.random();
+          buyer = fuzz.text.randomAlphanumeric(32);
+          time = fuzz.int.randomRange(1670000000000000000, 2670000000000000000);
+        });
+      };
+
+      _transactions.size();
     };
 
     /********************

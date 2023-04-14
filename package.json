@@ -4,7 +4,7 @@
   },
   "scripts": {
     "start": "npm run replica && npm run deploy && npm run mint",
-    "replica": "dfx stop && rm -rf .dfx && dfx start --clean --background && dfx canister create ledger && dfx canister create staging",
+    "replica": "dfx stop && rm -rf .dfx && dfx start --clean --background && dfx canister create staging && dfx canister create ledger",
     "deploy": " npm run deploy:ledger && npm run deploy:staging",
     "deploy-qq": "npm run deploy:ledger-reinstall -- -qq && npm run deploy:staging-reinstall -- -qq",
     "deploy:staging": "dfx canister create staging && DFX_MOC_PATH=\"$(vessel bin)/moc\" dfx deploy staging --argument '(principal \"'$(dfx canister id staging)'\")'",
@@ -32,16 +32,24 @@
     "test:multi-asset": "npm run env multi-asset && npm run deploy-qq && npm run mint-2 && vitest run multi-asset",
     "test:single-asset-delayed-reveal": "npm run env single-asset-delayed-reveal && npm run deploy-qq && npm run mint-2 && dfx canister call staging shuffleTokensForSale && vitest run single-asset-delayed-reveal",
     "test:open-edition": "npm run env open-edition && npm run deploy-qq && npm run mint && vitest run open-edition",
-    "test": "npm run test:single-asset && npm run test:multi-asset && npm run test:single-asset-delayed-reveal && npm run test:pending-sale && npm run test:public-sale && npm run test:highload-sale && npm run test:whitelist-sale && npm run test:whitelist-slots && npm run test:marketplace && npm run test:fees && npm run test:sold-out && npm run test:open-edition"
+    "test:backup": "npm run env backup && npm run deploy-qq && npm run mint && vitest run backup",
+    "test:restore": "npm run env restore && npm run deploy-qq && vitest run restore",
+    "test": "npm run test:single-asset && npm run test:multi-asset && npm run test:single-asset-delayed-reveal && npm run test:pending-sale && npm run test:public-sale && npm run test:highload-sale && npm run test:whitelist-sale && npm run test:whitelist-slots && npm run test:marketplace && npm run test:fees && npm run test:sold-out && npm run test:open-edition && npm run test:backup && npm run test:restore",
+    "backup": "ts-node ./backup/backup.ts",
+    "restore": "ts-node ./backup/restore.ts",
+    "test-br": "ts-node ./backup/test.ts"
   },
   "devDependencies": {
     "@dfinity/agent": "^0.15.0",
     "@dfinity/identity": "^0.15.0",
-    "@dfinity/identity-secp256k1": "^0.15.1",
+    "@dfinity/identity-secp256k1": "^0.15.4",
     "@dfinity/nns": "^0.10.0",
     "@dfinity/principal": "^0.15.0",
+    "@types/node": "^18.15.0",
+    "minimist": "^1.2.8",
+    "pem-file": "^1.0.1",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.4",
-    "vitest": "^0.25.6"
+    "vitest": "^0.29.2"
   }
 }

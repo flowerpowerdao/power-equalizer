@@ -8,17 +8,37 @@ import Utils "../utils";
 import Env "../Env";
 
 module {
-  public class Factory(state : Types.StableState, deps : Types.Dependencies, consts : Types.Constants) {
+  public class Factory(deps : Types.Dependencies, consts : Types.Constants) {
 
     /*********
     * STATE *
     *********/
 
-    private var _isShuffled : Bool = state._isShuffledState;
+    var _isShuffled = false;
 
     public func toStable() : Types.StableState {
       return {
         _isShuffledState = _isShuffled;
+      };
+    };
+
+    public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
+      ?#v1({
+        isShuffled = _isShuffled;
+      });
+    };
+
+    public func loadStableChunk(chunk : Types.StableChunk) {
+      switch (chunk) {
+        // TODO: remove after upgrade vvv
+        case (?#legacy(state)) {
+          _isShuffled := state._isShuffledState;
+        };
+        // TODO: remove after upgrade ^^^
+        case (?#v1(data)) {
+          _isShuffled := data.isShuffled;
+        };
+        case (null) {};
       };
     };
 

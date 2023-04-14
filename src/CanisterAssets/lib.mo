@@ -11,17 +11,31 @@ import Env "../Env";
 
 module {
 
-  public class Factory(state : Types.StableState, consts : Types.Constants) {
+  public class Factory(consts : Types.Constants) {
 
     /*********
     * STATE *
     *********/
 
-    private var _assets : Buffer.Buffer<Types.Asset> = Buffer.fromArray(state._assetsState);
+    var _assets = Buffer.Buffer<Types.Asset>(0);
 
-    public func toStable() : Types.StableState {
-      return {
-        _assetsState = Buffer.toArray(_assets);
+    public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
+      ?#v1({
+        assets = Buffer.toArray(_assets);
+      });
+    };
+
+    public func loadStableChunk(chunk : Types.StableChunk) {
+      switch (chunk) {
+        // TODO: remove after upgrade vvv
+        case (?#legacy(state)) {
+          _assets := Buffer.fromArray(state._assetsState);
+        };
+        // TODO: remove after upgrade ^^^
+        case (?#v1(data)) {
+          _assets := Buffer.fromArray(data.assets);
+        };
+        case (null) {};
       };
     };
 

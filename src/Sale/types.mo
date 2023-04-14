@@ -9,7 +9,7 @@ import Disburser "../Disburser";
 import Env "../Env"
 
 module {
-
+  // TODO: remove after upgrade
   public func newStableState() : StableState {
     return {
       _saleTransactionsState : [SaleTransaction] = [];
@@ -24,6 +24,26 @@ module {
     };
   };
 
+  public type StableChunk = ?{
+    #legacy: StableState; // TODO: remove after upgrade
+    #v1: {
+      saleTransactionCount : Nat;
+      saleTransactionChunk : [SaleTransaction];
+      salesSettlements : [(AccountIdentifier, Sale)];
+      failedSales : [(AccountIdentifier, SubAccount)];
+      tokensForSale : [TokenIndex];
+      whitelist : [(Nat64, AccountIdentifier, WhitelistSlot)];
+      soldIcp : Nat64;
+      sold : Nat;
+      totalToSell : Nat;
+      nextSubAccount : Nat;
+    };
+    #v1_chunk: {
+      saleTransactionChunk : [SaleTransaction];
+    };
+  };
+
+  // TODO: remove after upgrade
   public type StableState = {
     _saleTransactionsState : [SaleTransaction];
     _salesSettlementsState : [(AccountIdentifier, Sale)];
@@ -48,17 +68,11 @@ module {
   };
 
   public type WhitelistSlot = Env.WhitelistSlot;
-
   public type AccountIdentifier = ExtCore.AccountIdentifier;
-
   public type TokenIdentifier = ExtCore.TokenIdentifier;
-
   public type SubAccount = ExtCore.SubAccount;
-
   public type CommonError = ExtCore.CommonError;
-
   public type TokenIndex = ExtCore.TokenIndex;
-
   public type Time = Time.Time;
 
   public type Tokens = {
