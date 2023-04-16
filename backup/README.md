@@ -41,12 +41,12 @@ dfx deploy <canister> --network <network> --mode reinstall
 `--pem <pem_data>` - PEM-file data. *Required*
 
 ```
-npm run restore -- --network <network> --file <backup-file> --pem "$(dfx identity export <identity_name>)"
+npm run restore -- --network <network> --file <backup-file> --pem '$(dfx identity export <identity_name>)'
 ```
 
 Example:
 ```
-npm run restore -- --network ic --file 2023-01-01.json --pem "$(dfx identity export default)"
+npm run restore -- --network ic --file 2023-01-01.json --pem '$(dfx identity export default)'
 ```
 
 4. In `Env/lib.mo` set `restoreEnabled = false`
