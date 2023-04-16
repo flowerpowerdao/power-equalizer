@@ -9,9 +9,9 @@ describe('pending sale', () => {
     let res = await user.mainActor.salesSettings(user.accountId);
     expect(res.salePrice).toBe(env.salePrice);
     expect(res.price).toBe(env.salePrice);
-    expect(res.remaining).toBe(env.collectionSize);
+    expect(res.remaining).toBe(7777n);
     expect(res.sold).toBe(0n);
-    expect(res.totalToSell).toBe(env.collectionSize);
+    expect(res.totalToSell).toBe(7777n);
     expect(res.startTime).toBe(env.publicSaleStart);
     expect(res.whitelist).toBe(false);
     expect(res.whitelistTime).toBe(env.whitelistTime);
@@ -40,7 +40,7 @@ describe('pending sale', () => {
   test('check supply', async () => {
     let user = new User;
     let res = await user.mainActor.supply();
-    expect(res['ok']).toBe(env.collectionSize);
+    expect(res['ok']).toBe(7777n);
   });
 
   test('check getTokens', async () => {

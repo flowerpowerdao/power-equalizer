@@ -32,7 +32,8 @@ describe('sold out', () => {
   });
 
   it('buy entire collection on sale', async () => {
-    for (let i = 0; i < env.collectionSize - 1n; i++) {
+    let settings = await user.mainActor.salesSettings(user.accountId);
+    for (let i = 0; i < settings.totalToSell - 1n; i++) {
       await buyFromSale(user);
     }
   });

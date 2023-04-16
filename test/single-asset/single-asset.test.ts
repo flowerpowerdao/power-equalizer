@@ -16,7 +16,8 @@ describe('single asset collection', () => {
   });
 
   test('check metadata of each token', async () => {
-    for (let i = 0; i < env.collectionSize; i++) {
+    let settings = await user.mainActor.salesSettings(user.accountId);
+    for (let i = 0; i < settings.totalToSell; i++) {
       expect(await user.mainActor.metadata(tokenIdentifier(i))).toEqual({
         ok: {
           nonfungible: {
