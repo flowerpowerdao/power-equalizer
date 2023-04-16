@@ -2,7 +2,7 @@ import defaultEnv from '../.env.default';
 
 export default {
   ...defaultEnv,
-  collectionSize: 2n,
+  sale: 'variant { supply = 2 }',
   revealDelay: 0n,
   singleAssetCollection: false,
 };
