@@ -27,6 +27,10 @@ import Utils "../utils";
 
 module {
   public class Factory(config : RootTypes.Config, deps : Types.Dependencies) {
+    let openEdition = switch (config.sale) {
+      case (#supply(_)) false;
+      case (#duration(_)) true;
+    };
 
     /*********
     * STATE *
@@ -146,7 +150,13 @@ module {
     };
 
     public func shuffleTokensForSale(caller : Principal) : async () {
-      assert (caller == config.minter and config.collectionSize == _tokensForSale.size());
+      assert (caller == config.minter);
+      switch (config.sale) {
+        case (#supply(supplyCap)) {
+          assert (supplyCap == _tokensForSale.size());
+        };
+        case (_) {};
+      };
       // shuffle indices
       let seed : Blob = await Random.blob();
       _tokensForSale := deps._Shuffle.shuffleTokens(_tokensForSale, seed);
@@ -177,9 +187,15 @@ module {
     };
 
     public func reserve(amount : Nat64, quantity : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount) : Result.Result<(Types.AccountIdentifier, Nat64), Text> {
-      if (config.openEdition and Time.now() > config.saleEnd) {
-        return #err("The sale has ended");
+      switch (config.sale) {
+        case (#duration(duration)) {
+          if (Time.now() > config.publicSaleStart + Utils.toNanos(duration)) {
+            return #err("The sale has ended");
+          };
+        };
+        case (_) {};
       };
+
       if (Time.now() < config.publicSaleStart) {
         return #err("The sale has not started yet");
       };
@@ -432,7 +448,15 @@ module {
 
     public func salesSettings(address : Types.AccountIdentifier) : Types.SaleSettings {
       var startTime = config.whitelistTime;
-      var endTime: Int = config.saleEnd;
+      var endTime: Time.Time = 0;
+
+      switch (config.sale) {
+        case (#duration(duration)) {
+          endTime := config.publicSaleStart + Utils.toNanos(duration);
+        };
+        case (_) {};
+      };
+
       // for whitelisted user return nearest and cheapest slot start time
       label l for (item in _whitelist.vals()) {
         if (item.1 == address and Time.now() <= item.2.end) {
@@ -453,7 +477,7 @@ module {
         whitelistTime = config.whitelistTime;
         whitelist = isWhitelisted(address);
         bulkPricing = getAddressBulkPrice(address);
-        openEdition = config.openEdition;
+        openEdition = openEdition;
       } : Types.SaleSettings;
     };
 
@@ -463,7 +487,7 @@ module {
 
     // getters & setters
     public func availableTokens() : Nat {
-      if (config.openEdition) {
+      if (openEdition) {
         return 1;
       };
       _tokensForSale.size();
@@ -539,7 +563,7 @@ module {
     };
 
     func nextTokens(qty : Nat64) : [Types.TokenIndex] {
-      if (config.openEdition) {
+      if (openEdition) {
         deps._Tokens.mintNextToken();
         _tokensForSale := switch (deps._Tokens.getTokensFromOwner("0000")) {
           case (?t) t;

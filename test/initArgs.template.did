@@ -2,7 +2,7 @@
   principal "r7inp-6aaaa-aaaaa-aaabq-cai", // test canister
   record {
     name = $name;
-    collectionSize = $collectionSize;
+    sale = $sale;
     salePrice = $salePrice;
     publicSaleStart = $publicSaleStart;
     whitelistTime = $whitelistTime;
@@ -19,8 +19,6 @@
       record { $marketplace1_name; $marketplace1_addr; $marketplace1_fee };
       record { $marketplace2_name; $marketplace2_addr; $marketplace2_fee };
     };
-    openEdition = $openEdition;
-    saleEnd = $saleEnd;
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
     // 0 - assets will be revealed immediately and assets shuffling will be disabled
     revealDelay = variant { nanoseconds = $revealDelay };

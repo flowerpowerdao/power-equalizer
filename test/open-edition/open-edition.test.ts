@@ -23,7 +23,7 @@ describe('open edition', () => {
 
   test('wait for the sale to end', async () => {
     await new Promise((resolve) => {
-      setTimeout(resolve, 1000 * 50);
+      setTimeout(resolve, 1000 * 20);
     });
   });
 

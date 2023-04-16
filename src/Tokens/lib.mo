@@ -97,27 +97,20 @@ module {
     *******************/
 
     public func mintCollection() {
-      if (config.openEdition and config.saleEnd == 0) {
-        Debug.trap("Open edition must have a sale end date");
-      };
-      if (config.openEdition and config.collectionSize != 0) {
-        Debug.trap("Open edition must have a collection size of 0");
-      };
-      if (config.openEdition and not config.singleAssetCollection) {
-        Debug.trap("Open edition must be a single asset collection");
-      };
-      if (config.openEdition and Utils.toNanos(config.revealDelay) > 0) {
-        Debug.trap("Open edition must have revealDelay = 0");
-      };
-      if (not config.openEdition and config.saleEnd != 0) {
-        Debug.trap("Sale end date must be 0 for non-open editions");
-      };
-      if (not config.openEdition and config.collectionSize == 0) {
-        Debug.trap("Collection size must be greater than 0 for non-open editions");
-      };
-
-      while (getNextTokenId() < Nat32.fromNat(config.collectionSize)) {
-        mintNextToken();
+      let openEdition = switch (config.sale) {
+        case (#supply(supplyCap)) {
+          while (getNextTokenId() < Nat32.fromNat(supplyCap)) {
+            mintNextToken();
+          };
+        };
+        case (#duration(_)) {
+          if (not config.singleAssetCollection) {
+            Debug.trap("Open edition must be a single asset collection");
+          };
+          if (Utils.toNanos(config.revealDelay) > 0) {
+            Debug.trap("Open edition must have revealDelay = 0");
+          };
+        };
       };
     };
 

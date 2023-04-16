@@ -2,9 +2,10 @@
   principal "rrkah-fqaaa-aaaaa-aaaaq-cai", // staging canister
   record {
     name = "Pineapple Punks";
-    collectionSize = 10_000;
-    // saltType = variant { limitedEdition 10_000 };
-    // saltType = variant { openEdition 1670696181381000000 };
+    sale = variant { supply = 10_000 };
+    // sale = variant {
+    //   duration = variant { days = 30 };
+    // };
     salePrice = 700_000_000; // 7 ICP
     publicSaleStart = 1680696181381000000; // Start of first purchase (WL or other)
     whitelistTime = 1680696181381000000; // Period for WL only discount. Set to publicSaleStart for no exclusive period
@@ -14,12 +15,6 @@
       // first marketplace is default
       record { "entrepot"; "ccfe146bb249b6c59e8c5ae71a1b59ddf85d9f9034611427b696f8b25d7b826a"; 500 }; // total payout 1% (0.5% to seller marketplace, 0.5% to buyer marketplace)
     };
-    // open edition
-    // true - no definite collection size and can be minted in an ongoing effort until 'saleEnd' (need to set collectionSize = 0)
-    // false - fixed collection size
-    openEdition = false;
-    // when the sale ends (set to '0' if openEdition = false)
-    saleEnd = 0;
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
     // variant { none } - assets will be revealed immediately and assets shuffling will be disabled
     revealDelay = variant { hours = 24 };

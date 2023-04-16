@@ -39,19 +39,16 @@ module {
 
   public type InitArgs = {
     name : Text;
-    collectionSize : Nat;
+    sale : {
+      #supply: Nat; // fixed collection size
+      #duration: Duration; // no definite collection size and can be minted within a given time (starting after 'publicSaleStart')
+    };
     salePrice : Nat64; // e8s
     publicSaleStart : Time.Time; // Start of first purchase (WL or other)
     whitelistTime : Time.Time; // Period for WL only discount. Set to publicSaleStart for no exclusive period
     salesDistribution : [(AccountIdentifier, Nat64)];
     royalties : [(AccountIdentifier, Nat64)];
     marketplaces : [(Text, AccountIdentifier, Nat64)]; // first marketplace is default
-    // open edition
-    // true - no definite collection size and can be minted in an ongoing effort until 'saleEnd' (need to set collectionSize = 0)
-    // false - fixed collection size
-    openEdition : Bool;
-    // when the sale ends (set to '0' if openEdition = false)
-    saleEnd : Time.Time;
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
     // 0 - assets will be revealed immediately and assets shuffling will be disabled
     revealDelay : Duration; // 86400000000000 == 24 hours
@@ -73,12 +70,17 @@ module {
     timersInterval : ?Duration; // default 60 seconds
   };
 
+  public type Config = InitArgs and {
+    canister: Principal;
+    minter: Principal;
+  };
+
   type InitArgsNew = {
     name : Text;
     salePrice : Nat; // e8s
     saleType : {
       #supplyCap: Nat; // fixed collection size
-      #endTime: Time.Time; // no definite collection size and can be minted in an ongoing effort until a specified time
+      #duration: Time.Time; // no definite collection size and can be minted in an ongoing effort until a specified time
     };
     publicSaleStart : Time.Time; // public sale start time
     // salesDistribution : [(AccountIdentifier, Nat64)];
@@ -116,10 +118,5 @@ module {
     // timersInterval : ?Nat; // seconds (defailt 10) nanoseconds?
     // testMode : ?Bool; // enables 'grow' methods, only for tests
     // restoreEnabled : ?Bool; // must be null (see backup/README.md for details)
-  };
-
-  public type Config = InitArgs and {
-    canister: Principal;
-    minter: Principal;
   };
 };

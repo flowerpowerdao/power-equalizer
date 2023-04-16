@@ -13,6 +13,7 @@ export async function applyEnv(envName: string) {
     console.log(`Applying .env.${envName}.ts`);
     let didData = templateDidData;
 
+    // @ts-ignore
     let env = await import(tsFile);
 
     for (let [key, val] of Object.entries(env.default)) {
@@ -25,10 +26,13 @@ export async function applyEnv(envName: string) {
       else if (String(val).startsWith('#')) {
         val = `variant { ${String(val).slice(1)} }`;
       }
+      else if (String(val).startsWith('variant {')) {
+        val = val;
+      }
       else {
         val = JSON.stringify(val);
       }
-      didData = didData.replaceAll('$' + key, val as string);
+      didData = didData.replaceAll(new RegExp(`\\$${key}\\b`, 'g'), val as string);
     }
 
     writeFileSync(initArgsFile, didData);
