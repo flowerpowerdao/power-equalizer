@@ -10,7 +10,7 @@ export async function applyEnv(envName: string) {
 
   // check if *.ts env file exists
   if (existsSync(tsFile)) {
-    console.log(`Applying .env.${envName}.ts`);
+    // console.log(`Applying .env.${envName}.ts`);
     let didData = templateDidData;
 
     // @ts-ignore
@@ -39,6 +39,7 @@ export async function applyEnv(envName: string) {
   }
   else {
     console.log(`ERR: Env '${envName}' not found`);
+    process.exit(1);
   }
 }
 

@@ -1,6 +1,6 @@
 import defaultEnv from '../.env.default';
 
 export default {
-  ...defaultEnv,
+  ...defaultEnv(),
   restoreEnabled: true,
 };
