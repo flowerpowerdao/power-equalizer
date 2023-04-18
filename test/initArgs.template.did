@@ -22,7 +22,7 @@
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
     // 0 - assets will be revealed immediately and assets shuffling will be disabled
     revealDelay = variant { nanoseconds = $revealDelay };
-    singleAssetCollection = $singleAssetCollection;
+    singleAssetCollection = opt $singleAssetCollection;
     // dutch auction
     // dutchAuction = opt record {
     //   target = $dutchAuctionFor;

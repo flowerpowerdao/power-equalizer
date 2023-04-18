@@ -90,7 +90,7 @@ module {
 
     public func addAsset(caller : Principal, asset : Types.Asset) : Nat {
       assert (caller == config.minter);
-      if (config.singleAssetCollection) {
+      if (config.singleAssetCollection == ?true) {
         if (Utils.toNanos(config.revealDelay) > 0) {
           assert (_assets.size() < 2);
         } else {

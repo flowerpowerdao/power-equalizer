@@ -104,7 +104,7 @@ module {
           };
         };
         case (#duration(_)) {
-          if (not config.singleAssetCollection) {
+          if (config.singleAssetCollection != ?true) {
             Debug.trap("Open edition must be a single asset collection");
           };
           if (Utils.toNanos(config.revealDelay) > 0) {
@@ -117,7 +117,7 @@ module {
     public func mintNextToken() {
       /* for delayed reveal we start with asset 1, as index 0 contains the placeholder and is not being shuffled */
       let startIndex : Nat32 = if (Utils.toNanos(config.revealDelay) > 0) { 1 } else { 0 };
-      putTokenMetadata(getNextTokenId(), #nonfungible({ metadata = ?Utils.nat32ToBlob(if (config.singleAssetCollection) startIndex else getNextTokenId() + startIndex) }));
+      putTokenMetadata(getNextTokenId(), #nonfungible({ metadata = ?Utils.nat32ToBlob(if (config.singleAssetCollection == ?true) startIndex else getNextTokenId() + startIndex) }));
       transferTokenToUser(getNextTokenId(), "0000");
       incrementSupply();
       incrementNextTokenId();
