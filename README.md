@@ -4,7 +4,7 @@
 
 ## pre launch
 
-- [ ] adapt `initArgs.did` to your needs
+- [ ] adapt `initArgs.did` to your needs (see [CONFIG.md](CONFIG.md))
 - [ ] add canister to [DAB](https://docs.google.com/forms/d/e/1FAIpQLSc-0BL9FMRtI0HhWj4g7CCYjf3TMr4_K_qqmagjzkUH_CKczw/viewform)
 - [ ] send collection details to entrepot via form
 - [ ] top canister up with cycles
