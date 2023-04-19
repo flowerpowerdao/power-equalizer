@@ -12,9 +12,9 @@ describe('pending sale', () => {
     expect(res.remaining).toBe(7777n);
     expect(res.sold).toBe(0n);
     expect(res.totalToSell).toBe(7777n);
-    expect(res.startTime).toBe(env.publicSaleStart);
+    expect(res.startTime).toBe(env.whitelistSlot1_start);
+    expect(res.whitelistTime).toBe(env.publicSaleStart);
     expect(res.whitelist).toBe(false);
-    expect(res.whitelistTime).toBe(env.whitelistTime);
     expect(res.bulkPricing).toEqual([[1n, env.salePrice]]);
   });
 

@@ -216,12 +216,18 @@ module {
         case (_) {};
       };
 
+      let inPendingWhitelist = Option.isSome(getEligibleWhitelist(address, true));
+      let inOngoingWhitelist = Option.isSome(getEligibleWhitelist(address, false));
+
       if (Time.now() < config.publicSaleStart) {
-        return #err("The sale has not started yet");
+        if (inPendingWhitelist and not inOngoingWhitelist) {
+          return #err("The sale has not started yet");
+        }
+        else if (not isWhitelisted(address)) {
+          return #err("The public sale has not started yet");
+        };
       };
-      if (Time.now() < config.whitelistTime and not isWhitelisted(address)) {
-        return #err("The public sale has not started yet");
-      };
+
       if (availableTokens() == 0) {
         return #err("No more NFTs available right now!");
       };
@@ -477,7 +483,7 @@ module {
     };
 
     public func salesSettings(address : Types.AccountIdentifier) : Types.SaleSettings {
-      var startTime = config.whitelistTime;
+      var startTime = config.publicSaleStart;
       var endTime: Time.Time = 0;
 
       switch (config.sale) {
@@ -504,7 +510,7 @@ module {
         totalToSell = _totalToSell;
         startTime = startTime;
         endTime = endTime;
-        whitelistTime = config.whitelistTime;
+        whitelistTime = config.publicSaleStart;
         whitelist = isWhitelisted(address);
         bulkPricing = getAddressBulkPrice(address);
         openEdition = openEdition;
@@ -571,11 +577,10 @@ module {
     };
 
     func getCurrentDutchAuctionPrice(dutchAuction: RootTypes.DutchAuction) : Nat64 {
-      let start = if (dutchAuction.target == #publicSale) {
-        // if the dutch auction is for public sale only, we take the start time when the whitelist time has expired
-        config.whitelistTime;
-      } else {
+      let start = if (dutchAuction.target == #publicSale or config.whitelists.size() == 0) {
         config.publicSaleStart;
+      } else {
+        config.whitelists[0].startTime;
       };
       let timeSinceStart : Int = Time.now() - start; // how many nano seconds passed since the auction began
       // in the event that this function is called before the auction has started, return the starting price

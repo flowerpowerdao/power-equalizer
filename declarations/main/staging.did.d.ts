@@ -259,7 +259,6 @@ export interface InitArgs {
   'test' : [] | [boolean],
   'restoreEnabled' : [] | [boolean],
   'revealDelay' : Duration,
-  'whitelistTime' : Time,
   'airdrop' : Array<AccountIdentifier>,
   'royalties' : Array<[AccountIdentifier, bigint]>,
   'salePrice' : bigint,

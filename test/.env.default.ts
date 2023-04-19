@@ -29,8 +29,7 @@ export default () => {
     marketplace2_fee: 300n,
 
     salePrice: 700000000n,
-    publicSaleStart: BigInt(Date.now()) * 1_000_000n, // Start of first purchase (WL or other)
-    whitelistTime: BigInt(Date.now()) * 1_000_000n, // Period for WL only discount. Set to publicSaleStart for no exclusive period
+    publicSaleStart: BigInt(Date.now()) * 1_000_000n,
     marketDelay: 172_800_000_000_000n, // How long to delay market opening (2 days after whitelist sale started or when sold out)
     whitelistSlot1_start: BigInt(Date.now()) * 1_000_000n,
     whitelistSlot1_end: BigInt(Date.now()) * 1_000_000n,

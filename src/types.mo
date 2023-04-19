@@ -46,8 +46,7 @@ module {
       #duration: Duration; // no definite collection size and can be minted within a given time (starting after 'publicSaleStart')
     };
     salePrice : Nat64; // e8s
-    publicSaleStart : Time.Time; // Start of first purchase (WL or other)
-    whitelistTime : Time.Time; // Period for WL only discount. Set to publicSaleStart for no exclusive period
+    publicSaleStart : Time.Time;
     salesDistribution : [(AccountIdentifier, Nat64)];
     royalties : [(AccountIdentifier, Nat64)];
     marketplaces : [(Text, AccountIdentifier, Nat64)]; // first marketplace is default

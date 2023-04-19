@@ -7,8 +7,7 @@
     //   duration = variant { days = 30 };
     // };
     salePrice = 700_000_000; // 7 ICP
-    publicSaleStart = 1680696181381000000; // Start of first purchase (WL or other)
-    whitelistTime = 1680696181381000000; // Period for WL only discount. Set to publicSaleStart for no exclusive period
+    publicSaleStart = 1680696181381000000;
     salesDistribution = vec {};
     royalties = vec {};
     marketplaces = vec {

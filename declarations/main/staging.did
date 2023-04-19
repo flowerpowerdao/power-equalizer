@@ -395,7 +395,6 @@ type InitArgs =
    singleAssetCollection: opt bool;
    test: opt bool;
    timersInterval: opt Duration;
-   whitelistTime: Time;
    whitelists: vec Whitelist;
  };
 type HttpStreamingStrategy = variant {
