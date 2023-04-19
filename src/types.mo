@@ -18,11 +18,13 @@ module {
     end : Time.Time;
   };
 
-  public type WhitelistTier = {
+  public type Whitelist = {
     name : Text;
     price : Nat64;
-    whitelist : [AccountIdentifier];
-    slot : WhitelistSlot;
+    addresses : [AccountIdentifier];
+    oneTimeOnly : Bool; // Whitelist addresses are removed after purchase
+    startTime : Time.Time;
+    endTime : ?Time.Time;
   };
 
   public type DutchAuction = {
@@ -51,18 +53,13 @@ module {
     marketplaces : [(Text, AccountIdentifier, Nat64)]; // first marketplace is default
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
     // 0 - assets will be revealed immediately and assets shuffling will be disabled
-    revealDelay : Duration; // 86400000000000 == 24 hours
+    revealDelay : Duration;
     // true - the entire collection will consists of only one asset, meaning all NFTs look the same
     // false - there are at least two different assets in the collection
     singleAssetCollection : ?Bool;
     dutchAuction: ?DutchAuction;
     airdrop : [AccountIdentifier];
-    // whitelist
-    whitelistOneTimeOnly : Bool; // Whitelist addresses are removed after purchase
-    whitelistDiscountLimited : Bool; // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
-    // whitelist tiers
-    // order from lower price to higher price
-    whitelistTiers : [WhitelistTier];
+    whitelists : [Whitelist]; // order from lower price to higher price
     escrowDelay : ?Duration; // default 2 minutes
     marketDelay : ?Duration; // How long to delay market opening (2 days after whitelist sale started or when sold out) (default 2 days)
     test : ?Bool; // must be null
@@ -76,8 +73,8 @@ module {
   };
 
   type InitArgsNew = {
-    name : Text;
-    salePrice : Nat; // e8s
+    // name : Text;
+    // salePrice : Nat; // e8s
     // saleType : {
     //   #supplyCap: Nat; // fixed collection size
     //   #duration: Time.Time; // no definite collection size and can be minted in an ongoing effort until a specified time
@@ -92,15 +89,15 @@ module {
     // true - the entire collection will consists of only one asset, meaning all NFTs look the same
     // false - there are at least two different assets in the collection
     // singleAssetCollection : ?Bool;
-    airdrop : ?[AccountIdentifier];
-    whitelists: ?[{
-      name : Text;
-      price : Nat64;
-      addresses : [AccountIdentifier];
-      oneTimeOnly : Bool; // Whitelist addresses are removed after purchase
-      startTime : Time.Time;
-      endTime : Time.Time; // set to 0 if no end time
-    }];
+    // airdrop : ?[AccountIdentifier];
+    // whitelists: ?[{
+    //   name : Text;
+    //   price : Nat64;
+    //   addresses : [AccountIdentifier];
+    //   oneTimeOnly : Bool; // Whitelist addresses are removed after purchase
+    //   startTime : Time.Time;
+    //   endTime : Time.Time; // set to 0 if no end time
+    // }];
     // dutch auction
     // dutchAuction: ?{
     //   target : {

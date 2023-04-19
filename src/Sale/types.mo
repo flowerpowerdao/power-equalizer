@@ -10,6 +10,7 @@ import Types "../types";
 
 module {
   public type StableChunk = ?{
+    // v1
     #v1: {
       saleTransactionCount : Nat;
       saleTransactionChunk : [SaleTransaction];
@@ -25,6 +26,22 @@ module {
     #v1_chunk: {
       saleTransactionChunk : [SaleTransaction];
     };
+    // v2
+    #v2: {
+      saleTransactionCount : Nat;
+      saleTransactionChunk : [SaleTransaction];
+      salesSettlements : [(AccountIdentifier, Sale)];
+      failedSales : [(AccountIdentifier, SubAccount)];
+      tokensForSale : [TokenIndex];
+      whitelistSpots : [(WhitelistSpotId, WhitelistSpotUsed)];
+      soldIcp : Nat64;
+      sold : Nat;
+      totalToSell : Nat;
+      nextSubAccount : Nat;
+    };
+    #v2_chunk: {
+      saleTransactionChunk : [SaleTransaction];
+    };
   };
 
   public type Dependencies = {
@@ -34,7 +51,10 @@ module {
     _Disburser : Disburser.Factory;
   };
 
+  public type Whitelist = Types.Whitelist;
   public type WhitelistSlot = Types.WhitelistSlot;
+  public type WhitelistSpotId = Text; // <whitelist_name>:<account_id>
+  public type WhitelistSpotUsed = Bool;
   public type AccountIdentifier = ExtCore.AccountIdentifier;
   public type TokenIdentifier = ExtCore.TokenIdentifier;
   public type SubAccount = ExtCore.SubAccount;
@@ -46,13 +66,22 @@ module {
     e8s : Nat64;
   };
 
-  public type Sale = {
+  public type SaleV1 = {
     tokens : [TokenIndex];
     price : Nat64;
     subaccount : SubAccount;
     buyer : AccountIdentifier;
     expires : Time;
     slot : ?WhitelistSlot;
+  };
+
+  public type Sale = {
+    tokens : [TokenIndex];
+    price : Nat64;
+    subaccount : SubAccount;
+    buyer : AccountIdentifier;
+    expires : Time;
+    whitelistName: ?Text;
   };
 
   public type SaleTransaction = {

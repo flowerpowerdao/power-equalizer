@@ -23,7 +23,7 @@
     "vitest": "vitest run --threads false --isolate false",
     "vitest:watch": "vitest watch",
     "env": "ts-node ./test/apply-env.ts",
-    "test": "vitest run --threads false --isolate false --reporter verbose",
+    "test": "dfx build staging && vitest run --threads false --isolate false --reporter verbose",
     "backup": "ts-node ./backup/backup.ts",
     "restore": "ts-node ./backup/restore.ts",
     "test-br": "ts-node ./backup/test.ts"

@@ -31,29 +31,23 @@
     //   reservePrice = $dutchAuctionReservePrice; // reserve price
     //   interval = $dutchAuctionInterval; // nanoseconds
     // };
-    // airdrop
     airdrop = $airdrop;
-    // whitelist
-    whitelistOneTimeOnly = $whitelistOneTimeOnly; // Whitelist addresses are removed after purchase
-    whitelistDiscountLimited = $whitelistDiscountLimited; // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
-    whitelistTiers = vec {
+    whitelists = vec {
       record {
         name = $whitelistTier0Name;
         price = $whitelistTier0Price;
-        whitelist = $whitelistTier0Whitelist;
-        slot = record {
-          start = $whitelistSlot1_start;
-          end = $whitelistSlot1_end;
-        };
+        addresses = $whitelistTier0Whitelist;
+        oneTimeOnly = true;
+        startTime = $whitelistSlot1_start;
+        endTime = opt $whitelistSlot1_end;
       };
       record {
         name = $whitelistTier1Name;
         price = $whitelistTier1Price;
-        whitelist = $whitelistTier1Whitelist;
-        slot = record {
-          start = $whitelistSlot2_start;
-          end = $whitelistSlot2_end;
-        };
+        addresses = $whitelistTier1Whitelist;
+        oneTimeOnly = true;
+        startTime = $whitelistSlot2_start;
+        endTime = opt $whitelistSlot2_end;
       };
     };
     marketDelay = opt variant { nanoseconds = $marketDelay };

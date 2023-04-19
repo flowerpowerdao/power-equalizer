@@ -138,9 +138,9 @@ module {
         0;
       };
 
-      var whitelistTiersText = "";
-      for (whitelistTier in config.whitelistTiers.vals()) {
-        whitelistTiersText #= whitelistTier.name # " " # _displayICP(Nat64.toNat(whitelistTier.price)) # "start: " # debug_show (whitelistTier.slot.start) # ", end: " # debug_show (whitelistTier.slot.end) # "; ";
+      var whitelistsText = "";
+      for (whitelist in config.whitelists.vals()) {
+        whitelistsText #= whitelist.name # " " # _displayICP(Nat64.toNat(whitelist.price)) # "start: " # debug_show (whitelist.startTime) # ", end: " # debug_show (whitelist.endTime) # "; ";
       };
 
       return {
@@ -151,7 +151,7 @@ module {
           # "Cycle Balance:                            ~" # debug_show (Cycles.balance() / 1000000000000) # "T\n"
           # "Minted NFTs:                              " # debug_show (deps._Tokens.getNextTokenId()) # "\n"
           # "Assets:                                   " # debug_show (deps._Assets.size()) # "\n" # "---\n"
-          # "Whitelist Tiers:                          " # whitelistTiersText # "\n"
+          # "Whitelists:                               " # whitelistsText # "\n"
           # "Total to sell:                            " # debug_show (deps._Sale.getTotalToSell()) # "\n"
           # "Remaining:                                " # debug_show (deps._Sale.availableTokens()) # "\n"
           # "Sold:                                     " # debug_show (deps._Sale.getSold()) # "\n"

@@ -21,8 +21,6 @@
     // airdrop
     airdrop = vec {};
     // whitelist
-    whitelistOneTimeOnly = true; // Whitelist addresses are removed after purchase
-    whitelistDiscountLimited = true; // If the whitelist discount is limited to the whitelist period only. If no whitelist period this is ignored
-    whitelistTiers = vec {};
+    whitelists = vec {};
   }
 )
