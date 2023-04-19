@@ -4,7 +4,7 @@ import { ICP_FEE } from '../consts';
 import { User } from '../user';
 import { applyFees, buyFromSale, checkTokenCount, feeOf, toAccount, tokenIdentifier } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
-import env from './.env.fees';
+import env from './env';
 
 describe('sale and royalty fees', () => {
   let price = 1_000_000n;

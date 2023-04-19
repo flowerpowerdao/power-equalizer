@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { User } from '../user';
 import { tokenIdentifier } from '../utils';
-import env from './.env.single-asset-delayed-reveal';
+import env from './env';
 
 describe('single asset with delayed reveal', () => {
   let user = new User;

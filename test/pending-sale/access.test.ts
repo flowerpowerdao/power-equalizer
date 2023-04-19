@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { User } from '../user';
-import env from './.env.pending-sale';
+import env from './env';
 
 describe('method calls restricted to admin/minter', () => {
   test('should try to call initMint', async () => {

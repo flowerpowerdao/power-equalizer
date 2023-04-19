@@ -2,7 +2,7 @@ import { describe, test, expect } from 'vitest';
 import { User } from '../user';
 import { buyFromSale, checkTokenCount } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
-import env from './.env.public-sale';
+import env from './env';
 
 describe('public sale', () => {
   test('try to list nft before marketplace opens', async () => {

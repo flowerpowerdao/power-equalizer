@@ -3,7 +3,7 @@ import { ICP_FEE } from '../consts';
 import { User } from '../user';
 import { buyFromSale, checkTokenCount, feeOf, toAccount } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
-import env from './.env.highload-sale';
+import env from './env';
 
 let buyTransferFees = ICP_FEE * 2n; // 2 sale fee transfers
 let saleFee0 = feeOf(env.salePrice - buyTransferFees, env.salesDistribution0);

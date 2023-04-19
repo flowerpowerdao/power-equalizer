@@ -1,4 +1,4 @@
-import defaultEnv from '../.env.default';
+import defaultEnv from '../default-env';
 
 export default {
   ...defaultEnv(),

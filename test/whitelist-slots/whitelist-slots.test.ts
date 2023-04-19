@@ -2,7 +2,7 @@ import { describe, test, expect } from 'vitest';
 import { User } from '../user';
 import { buyFromSale } from '../utils';
 import { whitelistTier0, whitelistTier1, lucky } from '../well-known-users';
-import env from './.env.whitelist-slots';
+import env from './env';
 
 // slot 1
 describe('whitelist slot 1', () => {

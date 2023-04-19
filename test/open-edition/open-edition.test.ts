@@ -3,7 +3,7 @@ import { ICP_FEE } from '../consts';
 import { User } from '../user';
 import { buyFromSale, checkTokenCount, feeOf, toAccount } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
-import env from './.env.open-edition';
+import env from './env';
 
 let count = 10;
 describe('open edition', () => {

@@ -6,11 +6,10 @@ let templateDid = resolve(`${__dirname}/initArgs.template.did`);
 let templateDidData = readFileSync(templateDid).toString();
 
 export async function applyEnv(envName: string) {
-  let tsFile = resolve(`${__dirname}/${envName}/.env.${envName}.ts`);
+  let tsFile = resolve(`${__dirname}/${envName}/env.ts`);
 
   // check if *.ts env file exists
   if (existsSync(tsFile)) {
-    // console.log(`Applying .env.${envName}.ts`);
     let didData = templateDidData;
 
     // @ts-ignore

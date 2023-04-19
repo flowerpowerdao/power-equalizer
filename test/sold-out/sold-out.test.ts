@@ -2,7 +2,7 @@ import { describe, test, it, expect } from 'vitest';
 import { User } from '../user';
 import { buyFromSale, tokenIdentifier } from '../utils';
 import { whitelistTier0, whitelistTier1, lucky } from '../well-known-users';
-import env from './.env.sold-out';
+import env from './env';
 
 describe('sold out', () => {
   let user = new User;

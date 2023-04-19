@@ -2,7 +2,7 @@ import { describe, test, expect } from 'vitest';
 import { User } from '../user';
 import { buyFromSale } from '../utils';
 import { whitelistTier0, whitelistTier1, lucky } from '../well-known-users';
-import env from './.env.whitelist-sale';
+import env from './env';
 
 describe('whitelist sale (public sale not open yet)', () => {
   test('check price for non-whitelisted user', async () => {

@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { User } from '../user';
 import { tokenIdentifier } from '../utils';
-import env from './.env.multi-asset';
+import env from './env';
 
 describe('multi asset collection', () => {
   let user = new User;
