@@ -17,9 +17,7 @@
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
     // variant { none } - assets will be revealed immediately and assets shuffling will be disabled
     revealDelay = variant { hours = 24 };
-    // airdrop
     airdrop = vec {};
-    // whitelist
     whitelists = vec {};
   }
 )
