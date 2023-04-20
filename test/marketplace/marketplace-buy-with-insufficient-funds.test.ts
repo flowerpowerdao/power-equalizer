@@ -4,7 +4,7 @@ import { ICP_FEE } from '../consts';
 import { User } from '../user';
 import { applyFees, buyFromSale, checkTokenCount, tokenIdentifier } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
-import env from './.env.marketplace';
+import env from './env';
 
 describe('try to buy on marketplace with insufficient funds', () => {
   let seller = new User;

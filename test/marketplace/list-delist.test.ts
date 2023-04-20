@@ -2,7 +2,7 @@ import { describe, test, expect, it } from 'vitest';
 import { User } from '../user';
 import { buyFromSale, checkTokenCount, tokenIdentifier } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
-import env from './.env.marketplace';
+import env from './env';
 
 describe('list and delist nft', () => {
   let user = new User;

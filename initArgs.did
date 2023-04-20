@@ -3,9 +3,6 @@
   record {
     name = "Pineapple Punks";
     sale = variant { supply = 10_000 };
-    // sale = variant {
-    //   duration = variant { days = 30 };
-    // };
     salePrice = 700_000_000; // 7 ICP
     publicSaleStart = 1680696181381000000;
     salesDistribution = vec {};
