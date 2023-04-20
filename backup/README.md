@@ -15,7 +15,7 @@ The backup file will be saved in `data` folder.
 
 `--file <file>` - output file name. *Default* current date and time
 
-`--chunk-size <size>` - chunk size(number of items). *Default* `10000`
+`--chunk-size <size>` - chunk size(number of items). *Default* `5000`
 
 Chunk size > 30k => backup fails
 Chunk size > 15k => restore fails
