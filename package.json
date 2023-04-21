@@ -26,7 +26,7 @@
     "test": "dfx build staging && vitest run --threads false --isolate false --reporter verbose",
     "backup": "ts-node ./backup/backup.ts",
     "restore": "ts-node ./backup/restore.ts",
-    "test-br": "ts-node ./backup/test.ts"
+    "test-br": "npm run deploy-test && ts-node ./backup/test.ts"
   },
   "devDependencies": {
     "@dfinity/agent": "^0.15.0",
