@@ -1,7 +1,7 @@
 (
   principal "rrkah-fqaaa-aaaaa-aaaaq-cai", // staging canister
   record {
-    name = "Pineapple Punks";
+    name = "Collection Name";
     sale = variant { supply = 10_000 };
     salePrice = 700_000_000; // 7 ICP
     publicSaleStart = 1680696181381000000;

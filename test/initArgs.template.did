@@ -30,6 +30,7 @@
     //   reservePrice = $dutchAuctionReservePrice; // reserve price
     //   interval = $dutchAuctionInterval; // nanoseconds
     // };
+    dutchAuction = null;
     airdrop = $airdrop;
     whitelists = vec {
       record {

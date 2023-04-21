@@ -53,12 +53,12 @@ module {
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
     // 0 - assets will be revealed immediately and assets shuffling will be disabled
     revealDelay : Duration;
+    airdrop : [AccountIdentifier];
+    whitelists : [Whitelist]; // order from lower price to higher price
+    dutchAuction: ?DutchAuction;
     // true - the entire collection will consists of only one asset, meaning all NFTs look the same
     // false - there are at least two different assets in the collection
     singleAssetCollection : ?Bool;
-    dutchAuction: ?DutchAuction;
-    airdrop : [AccountIdentifier];
-    whitelists : [Whitelist]; // order from lower price to higher price
     escrowDelay : ?Duration; // default 2 minutes
     marketDelay : ?Duration; // How long to delay market opening (2 days after whitelist sale started or when sold out) (default 2 days)
     test : ?Bool; // must be null
