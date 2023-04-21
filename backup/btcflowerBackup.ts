@@ -5,6 +5,7 @@ import { StableChunk } from "../declarations/main/staging.did";
 import { marketplace } from "./btcflowerMarketplace";
 import { sale } from "./btcflowerSale";
 import { tokens } from "./btcflowerTokens";
+import { order } from "./btcflowerNFTOrder";
 
 let file =
   new Date()
@@ -51,6 +52,8 @@ export let backup = async ({ file }) => {
       "  "
     )
   );
+
+  fs.writeFileSync(`backup/data/nft.txt`, await order());
 
   console.log(`Backup successfully saved to backup/data/${file}`);
 };

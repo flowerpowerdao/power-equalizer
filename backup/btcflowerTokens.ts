@@ -65,6 +65,5 @@ function intToByteArray(int) {
 
   // byteArray now contains the 4 bytes of the integer
   const array = Array.from(byteArray);
-  console.log(array);
   return array;
 }

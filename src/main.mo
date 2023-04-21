@@ -271,21 +271,21 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   );
 
   public shared ({ caller }) func streamAsset(id : Nat, isThumb : Bool, payload : Blob) : async () {
-    _trapIfRestoreEnabled();
+    // _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
     // checks caller == minter
     _Assets.streamAsset(caller, id, isThumb, payload);
   };
 
   public shared ({ caller }) func updateThumb(name : Text, file : AssetsTypes.File) : async ?Nat {
-    _trapIfRestoreEnabled();
+    // _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
     // checks caller == minter
     _Assets.updateThumb(caller, name, file);
   };
 
   public shared ({ caller }) func addAsset(asset : AssetsTypes.Asset) : async Nat {
-    _trapIfRestoreEnabled();
+    // _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
     // checks caller == minter
     _Assets.addAsset(caller, asset);
