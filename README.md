@@ -4,12 +4,12 @@
 
 ## pre launch
 
-- [ ] adapt `Env/lib.mo` to your needs
-- [ ] add canister to [DAB](https://docs.google.com/forms/d/e/1FAIpQLSc-0BL9FMRtI0HhWj4g7CCYjf3TMr4_K_qqmagjzkUH_CKczw/viewform)
-- [ ] send collection details to entrepot via form
-- [ ] top canister up with cycles
-- [ ] run off chain backup script with mainnet canister id
-- [ ] setup auto topup of canisters
+- [x] adapt `Env/lib.mo` to your needs
+- [x] add canister to [DAB](https://docs.google.com/forms/d/e/1FAIpQLSc-0BL9FMRtI0HhWj4g7CCYjf3TMr4_K_qqmagjzkUH_CKczw/viewform)
+- [x] send collection details to entrepot via form
+- [x] top canister up with cycles
+- [x] run off chain backup script with mainnet canister id
+- [x] setup auto topup of canisters
 
 ## launch
 
