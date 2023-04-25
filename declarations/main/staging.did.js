@@ -62,7 +62,11 @@ export const idlFactory = ({ IDL }) => {
   const StableState = IDL.Record({ '_assetsState' : IDL.Vec(Asset) });
   const StableChunk__1 = IDL.Opt(
     IDL.Variant({
-      'v1' : IDL.Record({ 'assets' : IDL.Vec(Asset) }),
+      'v1' : IDL.Record({
+        'assetsChunk' : IDL.Vec(Asset),
+        'assetsCount' : IDL.Nat,
+      }),
+      'v1_chunk' : IDL.Record({ 'assetsChunk' : IDL.Vec(Asset) }),
       'legacy' : StableState,
     })
   );
@@ -419,6 +423,7 @@ export const idlFactory = ({ IDL }) => {
     'whitelistTime' : Time__1,
     'salePrice' : IDL.Nat64,
     'remaining' : IDL.Nat,
+    'openEdition' : IDL.Bool,
     'price' : IDL.Nat64,
   });
   const Balance__1 = IDL.Nat;
@@ -574,7 +579,6 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Tuple(TokenIndex__1, AccountIdentifier__1, IDL.Nat64))],
         ['query'],
       ),
-    'shuffleAssets' : IDL.Func([], [], []),
     'shuffleTokensForSale' : IDL.Func([], [], []),
     'stats' : IDL.Func(
         [],

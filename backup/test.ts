@@ -12,7 +12,7 @@ let test = async () => {
   let chunkSize = 10_020n;
 
   console.log('Reinstall');
-  execSync('npm run deploy:staging -- -qqqq');
+  execSync('npm run deploy:staging-reinstall -- -qqqq');
 
   for (let i = 0; i < growCount; i++) {
     let count = await mainActor.grow(growSize);

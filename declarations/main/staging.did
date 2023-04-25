@@ -214,10 +214,15 @@ type StableChunk__2 =
     v1: record {disbursements: vec Disbursement;};
   };
 type StableChunk__1 = 
- opt variant {
-       legacy: StableState;
-       v1: record {assets: vec Asset;};
-     };
+ opt
+  variant {
+    legacy: StableState;
+    v1: record {
+          assetsChunk: vec Asset;
+          assetsCount: nat;
+        };
+    v1_chunk: record {assetsChunk: vec Asset;};
+  };
 type StableChunk = variant {
                      v1:
                       record {
@@ -252,6 +257,7 @@ type SaleSettings =
                       nat64;
                     };
    endTime: Time__1;
+   openEdition: bool;
    price: nat64;
    remaining: nat;
    salePrice: nat64;
@@ -655,7 +661,6 @@ type Canister =
            AccountIdentifier__1;
            nat64;
          }) query;
-   shuffleAssets: () -> ();
    shuffleTokensForSale: () -> ();
    stats: () -> (nat64, nat64, nat64, nat64, nat, nat, nat) query;
    streamAsset: (nat, bool, blob) -> ();
