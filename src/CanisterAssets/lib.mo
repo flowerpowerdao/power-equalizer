@@ -33,12 +33,13 @@ module {
 
     public func toStableChunk(chunkSize_ignored : Nat, chunkIndex : Nat) : Types.StableChunk {
       let chunkSize = _bytesPerChunk / _biggestAssetSize;
-      let start = chunkSize * chunkIndex;
-      let assetsChunk = if (_assets.size() == 0) {
+      let start = Nat.min(_assets.size(), chunkSize * chunkIndex);
+      let count = Nat.min(chunkSize, _assets.size() - start);
+      let assetsChunk = if (_assets.size() == 0 or count == 0) {
         []
       }
       else {
-        Buffer.toArray(Buffer.subBuffer(_assets, start, Nat.min(chunkSize, _assets.size() - start)));
+        Buffer.toArray(Buffer.subBuffer(_assets, start, count));
       };
 
       if (chunkIndex == 0) {
@@ -47,7 +48,7 @@ module {
           assetsChunk;
         });
       }
-      else if (chunkIndex <= getChunkCount()) {
+      else if (chunkIndex < getChunkCount()) {
         return ?#v1_chunk({ assetsChunk });
       }
       else {
@@ -66,9 +67,11 @@ module {
         case (?#v1(data)) {
           _assets := Buffer.Buffer<Types.Asset>(data.assetsCount);
           _assets.append(Buffer.fromArray(data.assetsChunk));
+          _updateBiggestAssetSize();
         };
         case (?#v1_chunk(data)) {
           _assets.append(Buffer.fromArray(data.assetsChunk));
+          _updateBiggestAssetSize();
         };
         case (null) {};
       };
@@ -119,6 +122,7 @@ module {
         };
       };
       _assets.put(id, asset);
+      _updateBiggestAssetSize();
     };
 
     public func updateThumb(caller : Principal, name : Text, file : Types.File) : ?Nat {
