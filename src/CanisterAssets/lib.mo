@@ -61,24 +61,24 @@ module {
         // TODO: remove after upgrade vvv
         case (?#legacy(state)) {
           _assets := Buffer.fromArray(state._assetsState);
-          _updateBiggestAssetSize();
+          _updateBiggestAssetSize(state._assetsState);
         };
         // TODO: remove after upgrade ^^^
         case (?#v1(data)) {
           _assets := Buffer.Buffer<Types.Asset>(data.assetsCount);
           _assets.append(Buffer.fromArray(data.assetsChunk));
-          _updateBiggestAssetSize();
+          _updateBiggestAssetSize(data.assetsChunk);
         };
         case (?#v1_chunk(data)) {
           _assets.append(Buffer.fromArray(data.assetsChunk));
-          _updateBiggestAssetSize();
+          _updateBiggestAssetSize(data.assetsChunk);
         };
         case (null) {};
       };
     };
 
-    func _updateBiggestAssetSize() {
-      for (asset in _assets.vals()) {
+    func _updateBiggestAssetSize(assets : [Types.Asset]) {
+      for (asset in assets.vals()) {
         var assetSize = asset.payload.data.size();
         switch (asset.thumbnail) {
           case (?thumbnail) {
@@ -122,7 +122,7 @@ module {
         };
       };
       _assets.put(id, asset);
-      _updateBiggestAssetSize();
+      _updateBiggestAssetSize([asset]);
     };
 
     public func updateThumb(caller : Principal, name : Text, file : Types.File) : ?Nat {
@@ -138,6 +138,7 @@ module {
             metadata = asset.metadata;
           };
           _assets.put(i, asset);
+          _updateBiggestAssetSize([asset]);
           return ?i;
         };
         i += 1;
@@ -155,6 +156,7 @@ module {
         };
       };
       _assets.add(asset);
+      _updateBiggestAssetSize([asset]);
       _assets.size() - 1;
     };
 
