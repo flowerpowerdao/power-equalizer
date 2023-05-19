@@ -1,5 +1,5 @@
 import { Metadata, StableChunk__6 } from "../declarations/main/staging.did";
-import { getActor } from "./btcflowerActor";
+import { getActor } from "./clownActor";
 let mainActor = getActor("ic");
 
 export async function tokens() {

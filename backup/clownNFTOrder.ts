@@ -1,4 +1,4 @@
-import { getActor } from "./btcflowerActor";
+import { getActor } from "./clownActor";
 let mainActor = getActor("ic");
 
 export async function order() {
