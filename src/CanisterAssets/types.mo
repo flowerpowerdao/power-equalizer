@@ -11,7 +11,11 @@ module {
   public type StableChunk = ?{
     #legacy: StableState; // TODO: remove after upgrade
     #v1: {
-      assets : [Asset];
+      assetsCount : Nat;
+      assetsChunk : [Asset];
+    };
+    #v1_chunk: {
+      assetsChunk : [Asset];
     };
   };
 
