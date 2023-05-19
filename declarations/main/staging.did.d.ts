@@ -89,7 +89,6 @@ export interface Canister {
     [],
     Array<[TokenIndex__1, AccountIdentifier__1, bigint]>
   >,
-  'shuffleAssets' : ActorMethod<[], undefined>,
   'shuffleTokensForSale' : ActorMethod<[], undefined>,
   'stats' : ActorMethod<
     [],
@@ -328,6 +327,7 @@ export interface SaleSettings {
   'whitelistTime' : Time__1,
   'salePrice' : bigint,
   'remaining' : bigint,
+  'openEdition' : boolean,
   'price' : bigint,
 }
 export interface SaleTransaction {
@@ -355,7 +355,11 @@ export type StableChunk = {
       'shuffle' : StableChunk__5,
     }
   };
-export type StableChunk__1 = [] | [{ 'v1' : { 'assets' : Array<Asset> } }];
+export type StableChunk__1 = [] | [
+  { 'v1' : { 'assetsChunk' : Array<Asset>, 'assetsCount' : bigint } } |
+    { 'v1_chunk' : { 'assetsChunk' : Array<Asset> } } |
+    { 'legacy' : StableState }
+];
 export type StableChunk__2 = [] | [
   { 'v1' : { 'disbursements' : Array<Disbursement> } }
 ];

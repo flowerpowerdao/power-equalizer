@@ -38,7 +38,8 @@
     "backup": "ts-node ./backup/backup.ts",
     "btc-backup": "ts-node ./backup/btcflowerBackup.ts",
     "restore": "ts-node ./backup/restore.ts",
-    "test-br": "ts-node ./backup/test.ts"
+    "test-br": "ts-node ./backup/test.ts",
+    "test-br-assets": "ts-node ./backup/test-assets.ts"
   },
   "devDependencies": {
     "@dfinity/agent": "^0.15.0",
