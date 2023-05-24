@@ -37,7 +37,8 @@
     "test": "npm run test:single-asset && npm run test:multi-asset && npm run test:single-asset-delayed-reveal && npm run test:pending-sale && npm run test:public-sale && npm run test:highload-sale && npm run test:whitelist-sale && npm run test:whitelist-slots && npm run test:marketplace && npm run test:fees && npm run test:sold-out && npm run test:open-edition && npm run test:backup && npm run test:restore",
     "backup": "ts-node ./backup/backup.ts",
     "restore": "ts-node ./backup/restore.ts",
-    "test-br": "ts-node ./backup/test.ts"
+    "test-br": "ts-node ./backup/test.ts",
+    "test-br-assets": "ts-node ./backup/test-assets.ts"
   },
   "devDependencies": {
     "@dfinity/agent": "^0.15.0",

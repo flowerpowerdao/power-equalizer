@@ -78,5 +78,6 @@ module {
     whitelist : Bool;
     totalToSell : Nat;
     bulkPricing : [(Nat64, Nat64)];
+    openEdition : Bool;
   };
 };
