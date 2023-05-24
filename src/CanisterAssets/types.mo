@@ -3,7 +3,11 @@ import Tokens "../Tokens";
 module {
   public type StableChunk = ?{
     #v1: {
-      assets : [Asset];
+      assetsCount : Nat;
+      assetsChunk : [Asset];
+    };
+    #v1_chunk: {
+      assetsChunk : [Asset];
     };
   };
 

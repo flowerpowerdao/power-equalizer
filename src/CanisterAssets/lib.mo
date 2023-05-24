@@ -1,6 +1,7 @@
 import Array "mo:base/Array";
 import Float "mo:base/Float";
 import Int "mo:base/Int";
+import Nat "mo:base/Nat";
 import Iter "mo:base/Iter";
 import Random "mo:base/Random";
 import Buffer "mo:base/Buffer";
@@ -19,18 +20,67 @@ module {
 
     var _assets = Buffer.Buffer<Types.Asset>(0);
 
-    public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
-      ?#v1({
-        assets = Buffer.toArray(_assets);
-      });
+    let _bytesPerChunk = 500_000; // 500kb
+    var _biggestAssetSize = 10_000; // 10kb
+
+    public func getChunkCount() : Nat {
+      var count = _assets.size() * _biggestAssetSize / _bytesPerChunk;
+      if (_assets.size() * _biggestAssetSize % _bytesPerChunk != 0) {
+        count += 1;
+      };
+      return Nat.max(1, count);
+    };
+
+    public func toStableChunk(chunkSize_ignored : Nat, chunkIndex : Nat) : Types.StableChunk {
+      let chunkSize = _bytesPerChunk / _biggestAssetSize;
+      let start = Nat.min(_assets.size(), chunkSize * chunkIndex);
+      let count = Nat.min(chunkSize, _assets.size() - start);
+      let assetsChunk = if (_assets.size() == 0 or count == 0) {
+        []
+      }
+      else {
+        Buffer.toArray(Buffer.subBuffer(_assets, start, count));
+      };
+
+      if (chunkIndex == 0) {
+        return ?#v1({
+          assetsCount = _assets.size();
+          assetsChunk;
+        });
+      }
+      else if (chunkIndex < getChunkCount()) {
+        return ?#v1_chunk({ assetsChunk });
+      }
+      else {
+        null;
+      };
     };
 
     public func loadStableChunk(chunk : Types.StableChunk) {
       switch (chunk) {
         case (?#v1(data)) {
-          _assets := Buffer.fromArray(data.assets);
+          _assets := Buffer.Buffer<Types.Asset>(data.assetsCount);
+          _assets.append(Buffer.fromArray(data.assetsChunk));
+          _updateBiggestAssetSize(data.assetsChunk);
+        };
+        case (?#v1_chunk(data)) {
+          _assets.append(Buffer.fromArray(data.assetsChunk));
+          _updateBiggestAssetSize(data.assetsChunk);
         };
         case (null) {};
+      };
+    };
+
+    func _updateBiggestAssetSize(assets : [Types.Asset]) {
+      for (asset in assets.vals()) {
+        var assetSize = asset.payload.data.size();
+        switch (asset.thumbnail) {
+          case (?thumbnail) {
+            assetSize += thumbnail.data.size();
+          };
+          case (null) {};
+        };
+        _biggestAssetSize := Nat.max(_biggestAssetSize, assetSize);
       };
     };
 
@@ -66,6 +116,7 @@ module {
         };
       };
       _assets.put(id, asset);
+      _updateBiggestAssetSize([asset]);
     };
 
     public func updateThumb(caller : Principal, name : Text, file : Types.File) : ?Nat {
@@ -81,6 +132,7 @@ module {
             metadata = asset.metadata;
           };
           _assets.put(i, asset);
+          _updateBiggestAssetSize([asset]);
           return ?i;
         };
         i += 1;
@@ -98,6 +150,7 @@ module {
         };
       };
       _assets.add(asset);
+      _updateBiggestAssetSize([asset]);
       _assets.size() - 1;
     };
 
