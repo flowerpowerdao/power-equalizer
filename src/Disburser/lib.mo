@@ -23,12 +23,6 @@ module {
 
     var _disbursements = List.nil<Types.Disbursement>();
 
-    public func toStable() : Types.StableState {
-      return {
-        _disbursementsState = List.toArray(_disbursements);
-      };
-    };
-
     public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
       ?#v1({
         disbursements = List.toArray(_disbursements);
@@ -37,11 +31,6 @@ module {
 
     public func loadStableChunk(chunk : Types.StableChunk) {
       switch (chunk) {
-        // TODO: remove after upgrade vvv
-        case (?#legacy(state)) {
-          _disbursements := List.fromArray(state._disbursementsState);
-        };
-        // TODO: remove after upgrade ^^^
         case (?#v1(data)) {
           _disbursements := List.fromArray(data.disbursements);
         };

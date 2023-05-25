@@ -58,12 +58,6 @@ module {
 
     public func loadStableChunk(chunk : Types.StableChunk) {
       switch (chunk) {
-        // TODO: remove after upgrade vvv
-        case (?#legacy(state)) {
-          _assets := Buffer.fromArray(state._assetsState);
-          _updateBiggestAssetSize(state._assetsState);
-        };
-        // TODO: remove after upgrade ^^^
         case (?#v1(data)) {
           _assets := Buffer.Buffer<Types.Asset>(data.assetsCount);
           _assets.append(Buffer.fromArray(data.assetsChunk));

@@ -43,15 +43,6 @@ module {
 
     public func loadStableChunk(chunk : Types.StableChunk) {
       switch (chunk) {
-        // TODO: remove after upgrade vvv
-        case (?#legacy(state)) {
-          _tokenMetadata := TrieMap.fromEntries(state._tokenMetadataState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-          _owners := Utils.bufferTrieMapFromIter(state._ownersState.vals(), AID.equal, AID.hash);
-          _registry := TrieMap.fromEntries(state._registryState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-          _nextTokenId := state._nextTokenIdState;
-          _supply := state._supplyState;
-        };
-        // TODO: remove after upgrade ^^^
         case (?#v1(data)) {
           _tokenMetadata := TrieMap.fromEntries(data.tokenMetadata.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
           _owners := Utils.bufferTrieMapFromIter(data.owners.vals(), AID.equal, AID.hash);
