@@ -75,14 +75,6 @@ module {
 
     public func loadStableChunk(chunk : Types.StableChunk) {
       switch (chunk) {
-        // TODO: remove after upgrade vvv
-        case (?#legacy(state)) {
-          _transactions := Buffer.fromArray(state._transactionsState);
-          _tokenSettlement := TrieMap.fromEntries(state._tokenSettlementState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-          _tokenListing := TrieMap.fromEntries(state._tokenListingState.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
-          _frontends := TrieMap.fromEntries(state._frontendsState.vals(), Text.equal, Text.hash);
-        };
-        // TODO: remove after upgrade ^^^
         case (?#v1(data)) {
           _transactions := Buffer.Buffer<Types.Transaction>(data.transactionCount);
           _transactions.append(Buffer.fromArray(data.transactionChunk));
@@ -126,6 +118,15 @@ module {
 
       if (_isLocked(token)) {
         return #err(#Other("Listing is locked"));
+      };
+
+      switch (frontendIdentifier) {
+        case (?frontendIdentifier) {
+          if (_frontends.get(frontendIdentifier) == null) {
+            return #err(#Other("Unknown frontend identifier"));
+          };
+        };
+        case (null) {};
       };
 
       let listing = switch (_tokenListing.get(token)) {
@@ -316,6 +317,15 @@ module {
 
       if (_isLocked(token)) {
         return #err(#Other("Listing is locked"));
+      };
+
+      switch (request.frontendIdentifier) {
+        case (?frontendIdentifier) {
+          if (_frontends.get(frontendIdentifier) == null) {
+            return #err(#Other("Unknown frontend identifier"));
+          };
+        };
+        case (null) {};
       };
 
       switch (_tokenSettlement.get(token)) {
