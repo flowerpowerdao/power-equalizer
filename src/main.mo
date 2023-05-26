@@ -41,7 +41,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   type SubAccount = ExtCore.SubAccount;
 
   type StableChunk = {
-    #v1: {
+    #v1 : {
       tokens : TokenTypes.StableChunk;
       sale : SaleTypes.StableChunk;
       marketplace : MarketplaceTypes.StableChunk;
@@ -57,6 +57,24 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   stable var _stableChunks : [var StableChunk] = [var];
 
+  // Tokens
+  private stable var _tokenState : Any = ();
+
+  // Sale
+  private stable var _saleState : Any = ();
+
+  // Marketplace
+  private stable var _marketplaceState : Any = ();
+
+  // Assets
+  private stable var _assetsState : Any = ();
+
+  // Shuffle
+  private stable var _shuffleState : Any = ();
+
+  // Disburser
+  private stable var _disburserState : Any = ();
+
   // Cap
   private stable var rootBucketId : ?Text = null;
 
@@ -71,9 +89,12 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   system func preupgrade() {
     let chunkSize = 100_000;
 
-    _stableChunks := Array.tabulateVar<StableChunk>(_getChunkCount(chunkSize), func(i : Nat) {
-      _toStableChunk(chunkSize, i);
-    });
+    _stableChunks := Array.tabulateVar<StableChunk>(
+      _getChunkCount(chunkSize),
+      func(i : Nat) {
+        _toStableChunk(chunkSize, i);
+      },
+    );
 
     // Canistergeek
     _canistergeekMonitorUD := ?canistergeekMonitor.preupgrade();
@@ -132,7 +153,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     _toStableChunk(chunkSize, chunkIndex);
   };
 
-  public shared ({ caller }) func restoreChunk(chunk : StableChunk): async () {
+  public shared ({ caller }) func restoreChunk(chunk : StableChunk) : async () {
     assert (caller == init_minter);
     if (not Env.restoreEnabled) {
       Debug.trap("Restore disabled. Please reinstall canister with 'restoreEnabled = true'");
@@ -151,12 +172,15 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     Timer.cancelTimer(_timerId);
     Timer.cancelTimer(_revealTimerId);
 
-    _timerId := Timer.recurringTimer(Env.timersInterval, func(): async () {
-      ignore cronSettlements();
-      ignore cronDisbursements();
-      ignore cronSalesSettlements();
-      ignore cronFailedSales();
-    });
+    _timerId := Timer.recurringTimer(
+      Env.timersInterval,
+      func() : async () {
+        ignore cronSettlements();
+        ignore cronDisbursements();
+        ignore cronSalesSettlements();
+        ignore cronFailedSales();
+      },
+    );
 
     if (Env.delayedReveal and not _Shuffle.isShuffled()) {
       let revealTime = Env.publicSaleStart + Env.revealDelay;
@@ -166,9 +190,12 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
       let minute = 1_000_000_000 * 60;
       let randDelay = Int.abs(Time.now() % 60 * minute);
 
-      _revealTimerId := Timer.setTimer(#nanoseconds(delay + randDelay), func(): async () {
-        ignore _Shuffle.shuffleAssets();
-      });
+      _revealTimerId := Timer.setTimer(
+        #nanoseconds(delay + randDelay),
+        func() : async () {
+          ignore _Shuffle.shuffleAssets();
+        },
+      );
     };
   };
 
@@ -210,7 +237,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   // Disburser
   let _Disburser = Disburser.Factory(
-    cid,
+    cid
   );
 
   // queries
@@ -268,7 +295,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   let _Assets = Assets.Factory(
     {
       minter = init_minter;
-    },
+    }
   );
 
   public shared ({ caller }) func streamAsset(id : Nat, isThumb : Bool, payload : Blob) : async () {
