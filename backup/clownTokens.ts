@@ -1,4 +1,7 @@
-import { Metadata, StableChunk__6 } from "../declarations/main/staging.did";
+import {
+  Metadata,
+  StableChunk__6,
+} from "../declarations/main/staging.did";
 import { getActor } from "./clownActor";
 let mainActor = getActor("ic");
 
@@ -9,10 +12,10 @@ export async function tokens() {
     {
       v1: {
         tokenMetadata: getTokenMetadata(),
-        owners: getOwners(registry),
+        owners: getOwners(registry), // owners is not directly exposed, so we have to calculate it
         registry,
-        nextTokenId: 2009,
-        supply: 2009n,
+        nextTokenId: 2000,
+        supply: 2000n, // supply is basically equal to nextTokenId
       },
     },
   ];
@@ -20,12 +23,12 @@ export async function tokens() {
 }
 function getTokenMetadata(): [number, Metadata][] {
   const tokenMetadata: [number, Metadata][] = [];
-  for (let i = 0; i < 2009; i++) {
+  for (let i = 0; i < 2000; i++) {
     let item: [number, Metadata] = [
       i,
       {
         nonfungible: {
-          metadata: [intToByteArray(i + 1)],
+          metadata: [intToByteArray(i + 1)], // because collection had a delayedReveal, we don't point to the 0 index
         },
       },
     ];

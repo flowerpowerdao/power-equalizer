@@ -11,24 +11,26 @@ export async function marketplace() {
   const marketplace: StableChunk__3 = [
     {
       v1: {
-        frontends: [],
-        tokenListing: await getTokenListing(),
-        transactionCount: BigInt(transactions.length),
-        transactionChunk: transactions,
         tokenSettlement: await getSettlements(),
+        frontends: await getFrontends(),
+        tokenListing: await getTokenListing(),
+        transactionChunk: transactions,
+        transactionCount: BigInt(transactions.length),
       },
     },
   ];
   return marketplace;
 }
 
+async function getFrontends() {
+  const frontends = await mainActor.frontends();
+  return frontends;
+}
+
 async function getTokenListing(): Promise<[number, Listing][]> {
   const tokenListing = await mainActor.listings();
   return tokenListing.map((listing) => {
-    let newListing: [number, Listing] = [
-      listing[0],
-      { ...listing[1], sellerFrontend: [], buyerFrontend: [] },
-    ];
+    let newListing: [number, Listing] = [listing[0], listing[1]];
     return newListing;
   });
 }
@@ -40,11 +42,5 @@ async function getTransactions() {
 
 async function getSettlements(): Promise<[number, Settlement][]> {
   const settlements = await mainActor.allSettlements();
-  return settlements.map((settlement) => {
-    let newSettlement: [number, Settlement] = [
-      settlement[0],
-      { ...settlement[1], sellerFrontend: [], buyerFrontend: [] },
-    ];
-    return newSettlement;
-  });
+  return settlements;
 }

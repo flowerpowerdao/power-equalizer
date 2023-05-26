@@ -357,8 +357,7 @@ export type StableChunk = {
   };
 export type StableChunk__1 = [] | [
   { 'v1' : { 'assetsChunk' : Array<Asset>, 'assetsCount' : bigint } } |
-    { 'v1_chunk' : { 'assetsChunk' : Array<Asset> } } |
-    { 'legacy' : StableState }
+    { 'v1_chunk' : { 'assetsChunk' : Array<Asset> } }
 ];
 export type StableChunk__2 = [] | [
   { 'v1' : { 'disbursements' : Array<Disbursement> } }

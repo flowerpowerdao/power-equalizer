@@ -6,6 +6,7 @@ import { marketplace } from "./clownMarketplace";
 import { sale } from "./clownSale";
 import { tokens } from "./clownTokens";
 import { order } from "./clownNFTOrder";
+import { disburser } from "./clownDisburser";
 
 let file =
   new Date()
@@ -22,9 +23,9 @@ export let backup = async ({ file }) => {
     {
       v1: {
         marketplace: await marketplace(),
-        assets: [],
+        assets: [], // cant be backuped as current canister does not expose the assets
         sale: await sale(),
-        disburser: [],
+        disburser: await disburser(),
         tokens: await tokens(),
         shuffle: [{ v1: { isShuffled: true } }],
       },

@@ -144,16 +144,12 @@ type StableChunk__3 =
      };
     v1_chunk: record {transactionChunk: vec Transaction;};
   };
-type StableChunk__2 = 
- opt
-  variant {
-    legacy: StableState__1;
-    v1: record {disbursements: vec Disbursement;};
-  };
+type StableChunk__2 = opt
+                       variant {
+                         v1: record {disbursements: vec Disbursement;};};
 type StableChunk__1 = 
  opt
   variant {
-    legacy: StableState;
     v1: record {
           assetsChunk: vec Asset;
           assetsCount: nat;

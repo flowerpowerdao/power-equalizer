@@ -59,7 +59,6 @@ export const idlFactory = ({ IDL }) => {
         'assetsCount' : IDL.Nat,
       }),
       'v1_chunk' : IDL.Record({ 'assetsChunk' : IDL.Vec(Asset) }),
-      'legacy' : StableState,
     })
   );
   const AccountIdentifier__4 = IDL.Text;

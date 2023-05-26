@@ -232,7 +232,7 @@ export interface SaleSettings {
 export interface SaleTransaction {
   'time' : Time__1,
   'seller' : Principal,
-  'tokens' : Uint32Array | number[],
+  'tokens' : number[],
   'buyer' : AccountIdentifier__4,
   'price' : bigint,
 }
