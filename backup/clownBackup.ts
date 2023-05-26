@@ -23,7 +23,7 @@ export let backup = async ({ file }) => {
     {
       v1: {
         marketplace: await marketplace(),
-        assets: [], // cant be backuped as current canister does not expose the assets
+        assets: [{ v1: { assetsChunk: [], assetsCount: 0n } }], // cant be backuped as current canister does not expose the assets
         sale: await sale(),
         disburser: await disburser(),
         tokens: await tokens(),

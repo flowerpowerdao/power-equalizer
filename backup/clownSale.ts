@@ -9,16 +9,16 @@ export async function sale() {
   const sale: StableChunk__4 = [
     {
       v1: {
-        saleTransactionCount: getSaleTransactionCount(saleTransactions),
-        saleTransactionChunk: saleTransactions,
-        salesSettlements: await getSalesSettlements(),
-        failedSales: await getFailedSailes(),
-        tokensForSale: [], // sale already ended
         whitelist: [], // sale ended
-        soldIcp: getSoldIcp(saleTransactions),
-        sold: getSold(saleTransactions), // how many token were sold
+        salesSettlements: await getSalesSettlements(),
         totalToSell: getSold(saleTransactions), // how many token were for sale
+        failedSales: await getFailedSailes(),
+        sold: getSold(saleTransactions), // how many token were sold
+        saleTransactionChunk: saleTransactions,
+        saleTransactionCount: getSaleTransactionCount(saleTransactions),
         nextSubAccount: 3000n, // 2000 mint transactions + 656 marketplace transactions
+        soldIcp: getSoldIcp(saleTransactions),
+        tokensForSale: [], // sale already ended
       },
     },
   ];

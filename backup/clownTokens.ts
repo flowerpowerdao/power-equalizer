@@ -11,11 +11,11 @@ export async function tokens() {
   const tokens: StableChunk__6 = [
     {
       v1: {
-        tokenMetadata: getTokenMetadata(),
         owners: getOwners(registry), // owners is not directly exposed, so we have to calculate it
+        tokenMetadata: getTokenMetadata(),
+        supply: 2000n, // supply is basically equal to nextTokenId
         registry,
         nextTokenId: 2000,
-        supply: 2000n, // supply is basically equal to nextTokenId
       },
     },
   ];
