@@ -11,6 +11,7 @@
 - [ ] run off chain backup script with mainnet canister id
 - [ ] setup auto topup of canisters
 
+
 ## launch
 
 - run `make deploy-production-ic-full`

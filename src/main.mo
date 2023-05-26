@@ -111,6 +111,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   func _getChunkCount(chunkSize : Nat) : Nat {
     var count = Nat.max(1, _Marketplace.getChunkCount(chunkSize));
     count := Nat.max(count, _Sale.getChunkCount(chunkSize));
+    count := Nat.max(count, _Assets.getChunkCount());
     count;
   };
 

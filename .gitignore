@@ -10,3 +10,4 @@ node_modules
 backup/data/a.json
 backup/data/b.json
 test/initArgs.did
+deploy.zsh

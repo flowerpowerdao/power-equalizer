@@ -101,7 +101,13 @@ export const idlFactory = ({ IDL }) => {
     })
   );
   const StableChunk__1 = IDL.Opt(
-    IDL.Variant({ 'v1' : IDL.Record({ 'assets' : IDL.Vec(Asset) }) })
+    IDL.Variant({
+      'v1' : IDL.Record({
+        'assetsChunk' : IDL.Vec(Asset),
+        'assetsCount' : IDL.Nat,
+      }),
+      'v1_chunk' : IDL.Record({ 'assetsChunk' : IDL.Vec(Asset) }),
+    })
   );
   const AccountIdentifier__5 = IDL.Text;
   const WhitelistSlot = IDL.Record({ 'end' : Time, 'start' : Time });
@@ -440,6 +446,7 @@ export const idlFactory = ({ IDL }) => {
     'whitelistTime' : Time__2,
     'salePrice' : IDL.Nat64,
     'remaining' : IDL.Nat,
+    'openEdition' : IDL.Bool,
     'price' : IDL.Nat64,
   });
   const Balance__1 = IDL.Nat;

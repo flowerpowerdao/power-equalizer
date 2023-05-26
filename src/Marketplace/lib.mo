@@ -47,12 +47,13 @@ module {
     };
 
     public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
-      let start = chunkSize * chunkIndex;
-      let transactionChunk = if (_transactions.size() == 0) {
+      let start = Nat.min(_transactions.size(), chunkSize * chunkIndex);
+      let count = Nat.min(chunkSize, _transactions.size() - start);
+      let transactionChunk = if (_transactions.size() == 0 or count == 0) {
         []
       }
       else {
-        Buffer.toArray(Buffer.subBuffer(_transactions, start, Nat.min(chunkSize, _transactions.size() - start)));
+        Buffer.toArray(Buffer.subBuffer(_transactions, start, count));
       };
 
       if (chunkIndex == 0) {
@@ -64,7 +65,7 @@ module {
           frontends = Iter.toArray(_frontends.entries());
         });
       }
-      else if (chunkIndex <= getChunkCount(chunkSize)) {
+      else if (chunkIndex < getChunkCount(chunkSize)) {
         return ?#v1_chunk({ transactionChunk });
       }
       else {
