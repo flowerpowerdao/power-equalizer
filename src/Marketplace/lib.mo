@@ -120,6 +120,19 @@ module {
         return #err(#Other("Listing is locked"));
       };
 
+      if (not validFrontendIndentifier(frontendIdentifier)) {
+        return #err(#Other("Unknown frontend identifier"));
+      };
+
+      switch (frontendIdentifier) {
+        case (?frontendIdentifier) {
+          if (_frontends.get(frontendIdentifier) == null) {
+            return #err(#Other("Unknown frontend identifier"));
+          };
+        };
+        case (null) {};
+      };
+
       let listing = switch (_tokenListing.get(token)) {
         case (?listing) { listing };
         case (null) {
@@ -310,6 +323,10 @@ module {
         return #err(#Other("Listing is locked"));
       };
 
+      if (not validFrontendIndentifier(request.frontendIdentifier)) {
+        return #err(#Other("Unknown frontend identifier"));
+      };
+
       switch (_tokenSettlement.get(token)) {
         case (?settlement) {
           let resp : Result.Result<(), Types.CommonError> = await settle(caller, request.token);
@@ -469,6 +486,18 @@ module {
     /********************
     * INTERNAL METHODS *
     ********************/
+
+    func validFrontendIndentifier(frontendIdentifier : ?Text) : Bool {
+      switch (frontendIdentifier) {
+        case (?frontendIdentifier) {
+          if (_frontends.get(frontendIdentifier) == null) {
+            return false;
+          };
+        };
+        case (null) {};
+      };
+      true;
+    };
 
     func validFrontendFee(frontend : Types.Frontend) : Bool {
       frontend.fee <= 500 and frontend.fee >= 0
