@@ -14,7 +14,7 @@ module {
     #v1: {
       saleTransactionCount : Nat;
       saleTransactionChunk : [SaleTransaction];
-      salesSettlements : [(AccountIdentifier, Sale)];
+      salesSettlements : [(AccountIdentifier, SaleV1)];
       failedSales : [(AccountIdentifier, SubAccount)];
       tokensForSale : [TokenIndex];
       whitelist : [(Nat64, AccountIdentifier, WhitelistSlot)];

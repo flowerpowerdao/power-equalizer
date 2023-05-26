@@ -93,7 +93,7 @@ module {
         case (?#v1(data)) {
           _saleTransactions := Buffer.Buffer<Types.SaleTransaction>(data.saleTransactionCount);
           _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
-          _salesSettlements := TrieMap.fromEntries(data.salesSettlements.vals(), AID.equal, AID.hash);
+          // _salesSettlements := TrieMap.fromEntries(data.salesSettlements.vals(), AID.equal, AID.hash);
           _failedSales := Buffer.fromArray<(Types.AccountIdentifier, Types.SubAccount)>(data.failedSales);
           _tokensForSale := Buffer.fromArray<Types.TokenIndex>(data.tokensForSale);
           // _whitelistSpots := data.whitelist??; leaving empty for ended sales
