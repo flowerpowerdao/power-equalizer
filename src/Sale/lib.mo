@@ -84,19 +84,6 @@ module {
 
     public func loadStableChunk(chunk : Types.StableChunk) {
       switch (chunk) {
-        // TODO: remove after upgrade vvv
-        case (?#legacy(state)) {
-          _saleTransactions := Buffer.fromArray<Types.SaleTransaction>(state._saleTransactionsState);
-          _salesSettlements := TrieMap.fromEntries(state._salesSettlementsState.vals(), AID.equal, AID.hash);
-          _failedSales := Buffer.fromArray<(Types.AccountIdentifier, Types.SubAccount)>(state._failedSalesState);
-          _tokensForSale := Buffer.fromArray<Types.TokenIndex>(state._tokensForSaleState);
-          _whitelist := Buffer.fromArray<(Nat64, Types.AccountIdentifier, Types.WhitelistSlot)>(state._whitelistStable);
-          _soldIcp := state._soldIcpState;
-          _sold := state._soldState;
-          _totalToSell := state._totalToSellState;
-          _nextSubAccount := state._nextSubAccountState;
-        };
-        // TODO: remove after upgrade ^^^
         case (?#v1(data)) {
           _saleTransactions := Buffer.Buffer<Types.SaleTransaction>(data.saleTransactionCount);
           _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));

@@ -16,12 +16,6 @@ module {
 
     var _isShuffled = false;
 
-    public func toStable() : Types.StableState {
-      return {
-        _isShuffledState = _isShuffled;
-      };
-    };
-
     public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
       ?#v1({
         isShuffled = _isShuffled;
@@ -30,11 +24,6 @@ module {
 
     public func loadStableChunk(chunk : Types.StableChunk) {
       switch (chunk) {
-        // TODO: remove after upgrade vvv
-        case (?#legacy(state)) {
-          _isShuffled := state._isShuffledState;
-        };
-        // TODO: remove after upgrade ^^^
         case (?#v1(data)) {
           _isShuffled := data.isShuffled;
         };

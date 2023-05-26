@@ -357,12 +357,10 @@ export type StableChunk = {
   };
 export type StableChunk__1 = [] | [
   { 'v1' : { 'assetsChunk' : Array<Asset>, 'assetsCount' : bigint } } |
-    { 'v1_chunk' : { 'assetsChunk' : Array<Asset> } } |
-    { 'legacy' : StableState }
+    { 'v1_chunk' : { 'assetsChunk' : Array<Asset> } }
 ];
 export type StableChunk__2 = [] | [
-  { 'v1' : { 'disbursements' : Array<Disbursement> } } |
-    { 'legacy' : StableState__1 }
+  { 'v1' : { 'disbursements' : Array<Disbursement> } }
 ];
 export type StableChunk__3 = [] | [
   {
@@ -374,8 +372,7 @@ export type StableChunk__3 = [] | [
         'transactionCount' : bigint,
       }
     } |
-    { 'v1_chunk' : { 'transactionChunk' : Array<Transaction> } } |
-    { 'legacy' : StableState__2 }
+    { 'v1_chunk' : { 'transactionChunk' : Array<Transaction> } }
 ];
 export type StableChunk__4 = [] | [
   {
@@ -392,13 +389,9 @@ export type StableChunk__4 = [] | [
         'tokensForSale' : Uint32Array | number[],
       }
     } |
-    { 'v1_chunk' : { 'saleTransactionChunk' : Array<SaleTransaction> } } |
-    { 'legacy' : StableState__3 }
+    { 'v1_chunk' : { 'saleTransactionChunk' : Array<SaleTransaction> } }
 ];
-export type StableChunk__5 = [] | [
-  { 'v1' : { 'isShuffled' : boolean } } |
-    { 'legacy' : StableState__4 }
-];
+export type StableChunk__5 = [] | [{ 'v1' : { 'isShuffled' : boolean } }];
 export type StableChunk__6 = [] | [
   {
       'v1' : {
@@ -408,36 +401,8 @@ export type StableChunk__6 = [] | [
         'registry' : Array<[TokenIndex__4, AccountIdentifier__6]>,
         'nextTokenId' : TokenIndex__4,
       }
-    } |
-    { 'legacy' : StableState__5 }
+    }
 ];
-export interface StableState { '_assetsState' : Array<Asset> }
-export interface StableState__1 { '_disbursementsState' : Array<Disbursement> }
-export interface StableState__2 {
-  '_frontendsState' : Array<[string, Frontend]>,
-  '_tokenSettlementState' : Array<[TokenIndex__1, Settlement]>,
-  '_transactionsState' : Array<Transaction>,
-  '_tokenListingState' : Array<[TokenIndex__1, Listing]>,
-}
-export interface StableState__3 {
-  '_salesSettlementsState' : Array<[AccountIdentifier__4, Sale]>,
-  '_soldIcpState' : bigint,
-  '_saleTransactionsState' : Array<SaleTransaction>,
-  '_totalToSellState' : bigint,
-  '_soldState' : bigint,
-  '_tokensForSaleState' : Uint32Array | number[],
-  '_failedSalesState' : Array<[AccountIdentifier__4, SubAccount__1]>,
-  '_nextSubAccountState' : bigint,
-  '_whitelistStable' : Array<[bigint, AccountIdentifier__4, WhitelistSlot]>,
-}
-export interface StableState__4 { '_isShuffledState' : boolean }
-export interface StableState__5 {
-  '_nextTokenIdState' : TokenIndex__4,
-  '_ownersState' : Array<[AccountIdentifier__6, Uint32Array | number[]]>,
-  '_supplyState' : Balance__2,
-  '_registryState' : Array<[TokenIndex__4, AccountIdentifier__6]>,
-  '_tokenMetadataState' : Array<[TokenIndex__4, Metadata]>,
-}
 export interface StatusRequest {
   'memory_size' : boolean,
   'cycles' : boolean,
