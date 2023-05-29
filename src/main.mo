@@ -57,7 +57,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   type SubAccount = ExtCore.SubAccount;
 
   type StableChunk = {
-    #v1: {
+    #v1 : {
       tokens : TokenTypes.StableChunk;
       sale : SaleTypes.StableChunk;
       marketplace : MarketplaceTypes.StableChunk;
@@ -73,6 +73,24 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
 
   stable var _stableChunks : [var StableChunk] = [var];
 
+  // Tokens
+  private stable var _tokenState : Any = ();
+
+  // Sale
+  private stable var _saleState : Any = ();
+
+  // Marketplace
+  private stable var _marketplaceState : Any = ();
+
+  // Assets
+  private stable var _assetsState : Any = ();
+
+  // Shuffle
+  private stable var _shuffleState : Any = ();
+
+  // Disburser
+  private stable var _disburserState : Any = ();
+
   // Cap
   private stable var rootBucketId : ?Text = null;
 
@@ -87,9 +105,12 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   system func preupgrade() {
     let chunkSize = 100_000;
 
-    _stableChunks := Array.tabulateVar<StableChunk>(_getChunkCount(chunkSize), func(i : Nat) {
-      _toStableChunk(chunkSize, i);
-    });
+    _stableChunks := Array.tabulateVar<StableChunk>(
+      _getChunkCount(chunkSize),
+      func(i : Nat) {
+        _toStableChunk(chunkSize, i);
+      },
+    );
 
     // Canistergeek
     _canistergeekMonitorUD := ?canistergeekMonitor.preupgrade();
@@ -148,7 +169,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _toStableChunk(chunkSize, chunkIndex);
   };
 
-  public shared ({ caller }) func restoreChunk(chunk : StableChunk): async () {
+  public shared ({ caller }) func restoreChunk(chunk : StableChunk) : async () {
     assert (caller == init_minter);
     if (config.restoreEnabled != ?true) {
       Debug.trap("Restore disabled. Please reinstall canister with 'restoreEnabled = true'");
@@ -169,7 +190,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
 
     let timersInterval = Utils.toNanos(Option.get(config.timersInterval, #seconds(60)));
 
-    _timerId := Timer.recurringTimer(#nanoseconds(timersInterval), func(): async () {
+    _timerId := Timer.recurringTimer(#nanoseconds(timersInterval), func() : async () {
       ignore cronSettlements();
       ignore cronDisbursements();
       ignore cronSalesSettlements();
@@ -184,9 +205,12 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
       let minute = 1_000_000_000 * 60;
       let randDelay = Int.abs(Time.now() % 60 * minute);
 
-      _revealTimerId := Timer.setTimer(#nanoseconds(delay + randDelay), func(): async () {
-        ignore _Shuffle.shuffleAssets();
-      });
+      _revealTimerId := Timer.setTimer(
+        #nanoseconds(delay + randDelay),
+        func() : async () {
+          ignore _Shuffle.shuffleAssets();
+        },
+      );
     };
   };
 
