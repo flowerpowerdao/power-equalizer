@@ -17,15 +17,15 @@ export default () => {
     sale: 'variant { supply = 7777 }',
 
     marketplace0_name: "entrepot",
-    marketplace0_addr: new User('marketplace').accountId,
+    marketplace0_addr: new User('entrepot').accountId,
     marketplace0_fee: 500n,
 
     marketplace1_name: "yumi",
-    marketplace1_addr: new User('marketplace').accountId,
+    marketplace1_addr: new User('yumi').accountId,
     marketplace1_fee: 456n,
 
     marketplace2_name: "jelly",
-    marketplace2_addr: new User('marketplace').accountId,
+    marketplace2_addr: new User('jelly').accountId,
     marketplace2_fee: 300n,
 
     salePrice: 700000000n,
