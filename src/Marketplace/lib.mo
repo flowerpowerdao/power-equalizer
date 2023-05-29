@@ -124,15 +124,6 @@ module {
         return #err(#Other("Unknown frontend identifier"));
       };
 
-      switch (frontendIdentifier) {
-        case (?frontendIdentifier) {
-          if (_frontends.get(frontendIdentifier) == null) {
-            return #err(#Other("Unknown frontend identifier"));
-          };
-        };
-        case (null) {};
-      };
-
       let listing = switch (_tokenListing.get(token)) {
         case (?listing) { listing };
         case (null) {
@@ -491,10 +482,13 @@ module {
 
     func validFrontendIndentifier(frontendIdentifier : ?Text) : Bool {
       switch (frontendIdentifier) {
-        case (?frontendIdentifier) {
-          if (_frontends.get(frontendIdentifier) == null) {
-            return false;
+        case (?identifier) {
+          for (marketplace in config.marketplaces.vals()) {
+            if (marketplace.0 == identifier) {
+              return true;
+            };
           };
+          return false;
         };
         case (null) {};
       };
