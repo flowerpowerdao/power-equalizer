@@ -7,7 +7,6 @@ registry.json
 tokens.json
 __pycache__
 node_modules
-backup/data/a.json
-backup/data/b.json
+backup/data/*
 test/initArgs.did
 deploy.zsh

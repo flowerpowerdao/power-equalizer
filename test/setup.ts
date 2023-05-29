@@ -23,7 +23,7 @@ beforeAll(async (suite) => {
       execSync(`npm run mint:test-2`);
       execSync(`dfx canister call test shuffleTokensForSale`);
     }
-    else {
+    else if (envName !== 'backup-assets') {
       execSync(`npm run mint:test`);
     }
   }
