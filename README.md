@@ -12,6 +12,21 @@
 - [ ] setup auto topup of canisters
 
 
+## first deployment
+```
+npm run mint
+```
+or
+```
+dfx canister deploy --all --netowork ic
+dfx canister call mint --netowork ic
+```
+
+## upgrade canister
+```
+dfx canister deploy --all --netowork ic
+```
+
 ## launch
 
 - run `make deploy-production-ic-full`

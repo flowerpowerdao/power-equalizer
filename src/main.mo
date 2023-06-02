@@ -316,7 +316,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _Assets.updateThumb(caller, name, file);
   };
 
-  public shared ({ caller }) func addAsset(asset : AssetsTypes.Asset) : async Nat {
+  public shared ({ caller }) func addAsset(asset : AssetsTypes.AssetV2) : async Nat {
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
     // checks caller == minter

@@ -15,6 +15,14 @@ export interface Asset {
   'name' : string,
   'payload' : File,
 }
+export interface AssetV2 {
+  'thumbnail' : [] | [File],
+  'payloadUrl' : [] | [string],
+  'thumbnailUrl' : [] | [string],
+  'metadata' : [] | [File],
+  'name' : string,
+  'payload' : File,
+}
 export type Balance = bigint;
 export interface BalanceRequest { 'token' : TokenIdentifier, 'user' : User }
 export type BalanceResponse = { 'ok' : Balance } |
@@ -23,7 +31,7 @@ export type Balance__1 = bigint;
 export type Balance__2 = bigint;
 export interface Canister {
   'acceptCycles' : ActorMethod<[], undefined>,
-  'addAsset' : ActorMethod<[Asset], bigint>,
+  'addAsset' : ActorMethod<[AssetV2], bigint>,
   'airdropTokens' : ActorMethod<[bigint], undefined>,
   'allSettlements' : ActorMethod<[], Array<[TokenIndex__1, Settlement]>>,
   'availableCycles' : ActorMethod<[], bigint>,
@@ -261,6 +269,7 @@ export interface InitArgs {
   'revealDelay' : Duration,
   'airdrop' : Array<AccountIdentifier>,
   'royalties' : Array<[AccountIdentifier, bigint]>,
+  'placeholderUrl' : [] | [string],
   'salePrice' : bigint,
   'marketDelay' : [] | [Duration],
   'singleAssetCollection' : [] | [boolean],
@@ -371,6 +380,14 @@ export interface SaleTransaction {
   'buyer' : AccountIdentifier__5,
   'price' : bigint,
 }
+export interface SaleV1 {
+  'expires' : Time__2,
+  'slot' : [] | [WhitelistSlot],
+  'subaccount' : SubAccount__1,
+  'tokens' : Uint32Array | number[],
+  'buyer' : AccountIdentifier__5,
+  'price' : bigint,
+}
 export interface Settlement {
   'sellerFrontend' : [] | [string],
   'subaccount' : SubAccount__3,
@@ -391,7 +408,9 @@ export type StableChunk = {
   };
 export type StableChunk__1 = [] | [
   { 'v1' : { 'assetsChunk' : Array<Asset>, 'assetsCount' : bigint } } |
-    { 'v1_chunk' : { 'assetsChunk' : Array<Asset> } }
+    { 'v2' : { 'assetsChunk' : Array<AssetV2>, 'assetsCount' : bigint } } |
+    { 'v1_chunk' : { 'assetsChunk' : Array<Asset> } } |
+    { 'v2_chunk' : { 'assetsChunk' : Array<AssetV2> } }
 ];
 export type StableChunk__2 = [] | [
   { 'v1' : { 'disbursements' : Array<Disbursement> } }
@@ -412,7 +431,7 @@ export type StableChunk__4 = [] | [
   {
       'v1' : {
         'whitelist' : Array<[bigint, AccountIdentifier__5, WhitelistSlot]>,
-        'salesSettlements' : Array<[AccountIdentifier__5, Sale]>,
+        'salesSettlements' : Array<[AccountIdentifier__5, SaleV1]>,
         'totalToSell' : bigint,
         'failedSales' : Array<[AccountIdentifier__5, SubAccount__1]>,
         'sold' : bigint,

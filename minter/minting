@@ -1,0 +1,13 @@
+assets canister:
+	generate assets
+	generate thumbnails (png)
+	generate metadata.json
+	deploy
+
+collection canister:
+	configure initArgs.did
+	deploy
+	upload assets and thumnails (or use on-chain generation)
+	upload metadata (remove mint_number)
+	mint
+	check

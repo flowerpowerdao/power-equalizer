@@ -6,8 +6,10 @@
     "start": "npm run replica && npm run deploy && npm run mint",
     "replica": "dfx stop && rm -rf .dfx && dfx start --clean --background && npm run create-canisters",
     "replica:no-delay": "dfx stop && rm -rf .dfx && DFX_VERSION=0.14.0-beta.1 dfx start --clean --background --artificial-delay 0 && npm run create-canisters",
-    "create-canisters": "dfx canister create staging && dfx canister create ledger && dfx canister create test --specified-id r7inp-6aaaa-aaaaa-aaabq-cai",
-    "deploy": "npm run deploy:ledger && npm run deploy:staging",
+    "create-canisters": "dfx canister create staging && dfx canister create ledger && dfx canister create test --specified-id r7inp-6aaaa-aaaaa-aaabq-cai && dfx canister create assets --specified-id rrkah-fqaaa-aaaaa-aaaaq-cai",
+    "vite": "vite --port 3000",
+    "build": "",
+    "deploy": "npm run deploy:ledger && npm run deploy:staging && dfx deploy assets",
     "deploy-test": "npm run reinstall:ledger -- -qq && npm run reinstall:test -- -qq",
     "deploy:staging": "dfx canister create staging && DFX_MOC_PATH=\"$(vessel bin)/moc\" dfx deploy staging --argument \"$(cat initArgs.did)\"",
     "reinstall:staging": "dfx canister create staging && DFX_MOC_PATH=\"$(vessel bin)/moc\" dfx deploy staging --mode reinstall -y --argument \"$(cat initArgs.did)\"",
@@ -37,10 +39,12 @@
     "@dfinity/nns": "^0.10.0",
     "@dfinity/principal": "^0.15.0",
     "@types/node": "^18.15.0",
+    "chalk": "^5.2.0",
     "minimist": "^1.2.8",
     "pem-file": "^1.0.1",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.4",
+    "vite": "^4.3.9",
     "vitest": "^0.31.1"
   }
 }

@@ -18,7 +18,7 @@ module {
     * STATE *
     *********/
 
-    var _assets = Buffer.Buffer<Types.Asset>(0);
+    var _assets = Buffer.Buffer<Types.AssetV2>(0);
 
     let _bytesPerChunk = 500_000; // 500kb
     var _biggestAssetSize = 10_000; // 10kb
@@ -57,13 +57,32 @@ module {
     };
 
     public func loadStableChunk(chunk : Types.StableChunk) {
+      let toV2 = func(assets : [Types.Asset]) : [Types.AssetV2] {
+        Array.map<Types.Asset, Types.AssetV2>(assets, func(asset) {
+          {
+            asset with
+            payloadUrl = null;
+            thumbnailUrl = null;
+          };
+        });
+      };
+
       switch (chunk) {
         case (?#v1(data)) {
-          _assets := Buffer.Buffer<Types.Asset>(data.assetsCount);
-          _assets.append(Buffer.fromArray(data.assetsChunk));
+          _assets := Buffer.Buffer<Types.AssetV2>(data.assetsCount);
+          _assets.append(Buffer.fromArray(toV2(data.assetsChunk)));
           _updateBiggestAssetSize(data.assetsChunk);
         };
         case (?#v1_chunk(data)) {
+          _assets.append(Buffer.fromArray(toV2(data.assetsChunk)));
+          _updateBiggestAssetSize(data.assetsChunk);
+        };
+        case (?#v2(data)) {
+          _assets := Buffer.Buffer<Types.AssetV2>(data.assetsCount);
+          _assets.append(Buffer.fromArray(data.assetsChunk));
+          _updateBiggestAssetSize(data.assetsChunk);
+        };
+        case (?#v2_chunk(data)) {
           _assets.append(Buffer.fromArray(data.assetsChunk));
           _updateBiggestAssetSize(data.assetsChunk);
         };
@@ -88,7 +107,7 @@ module {
 
     public func streamAsset(caller : Principal, id : Nat, isThumb : Bool, payload : Blob) : () {
       assert (caller == config.minter);
-      var asset : Types.Asset = _assets.get(id);
+      var asset : Types.AssetV2 = _assets.get(id);
       if (isThumb) {
         switch (asset.thumbnail) {
           case (?t) {
@@ -100,6 +119,8 @@ module {
               };
               payload = asset.payload;
               metadata = asset.metadata;
+              payloadUrl = asset.payloadUrl;
+              thumbnailUrl = asset.thumbnailUrl;
             };
           };
           case (_) {};
@@ -113,6 +134,8 @@ module {
             data = Array.append(asset.payload.data, [payload]);
           };
           metadata = asset.metadata;
+          payloadUrl = asset.payloadUrl;
+          thumbnailUrl = asset.thumbnailUrl;
         };
       };
       _assets.put(id, asset);
@@ -124,12 +147,14 @@ module {
       var i : Nat = 0;
       for (a in _assets.vals()) {
         if (a.name == name) {
-          var asset : Types.Asset = _assets.get(i);
+          var asset : Types.AssetV2 = _assets.get(i);
           asset := {
             name = asset.name;
             thumbnail = ?file;
             payload = asset.payload;
             metadata = asset.metadata;
+            payloadUrl = asset.payloadUrl;
+            thumbnailUrl = asset.thumbnailUrl;
           };
           _assets.put(i, asset);
           _updateBiggestAssetSize([asset]);
@@ -140,7 +165,7 @@ module {
       return null;
     };
 
-    public func addAsset(caller : Principal, asset : Types.Asset) : Nat {
+    public func addAsset(caller : Principal, asset : Types.AssetV2) : Nat {
       assert (caller == config.minter);
       if (config.singleAssetCollection == ?true) {
         if (Utils.toNanos(config.revealDelay) > 0) {
@@ -158,15 +183,15 @@ module {
     * INTERNAL METHODS *
     *******************/
 
-    public func get(id : Nat) : Types.Asset {
+    public func get(id : Nat) : Types.AssetV2 {
       return _assets.get(id);
     };
 
-    public func put(id : Nat, element : Types.Asset) {
+    public func put(id : Nat, element : Types.AssetV2) {
       _assets.put(id, element);
     };
 
-    public func add(element : Types.Asset) {
+    public func add(element : Types.AssetV2) {
       _assets.add(element);
     };
 
@@ -174,7 +199,7 @@ module {
       _assets.size();
     };
 
-    public func vals() : Iter.Iter<Types.Asset> {
+    public func vals() : Iter.Iter<Types.AssetV2> {
       _assets.vals();
     };
 

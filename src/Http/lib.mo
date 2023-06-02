@@ -29,7 +29,7 @@ module {
       switch (Utils.natFromText(token.key)) {
         case null return { body = Blob.fromArray([]); token = null };
         case (?assetid) {
-          let asset : AssetTypes.Asset = deps._Assets.get(assetid);
+          let asset : AssetTypes.AssetV2 = deps._Assets.get(assetid);
           let res = _streamContent(token.key, token.index, asset.payload.data);
           return {
             body = res.0;
@@ -47,13 +47,13 @@ module {
           // we assume the placeholder is stored in index 0
           // and thus uploaded first
           if (Utils.toNanos(config.revealDelay) > 0 and not deps._Shuffle.isShuffled()) {
-            return _processFile(Nat.toText(0), deps._Assets.get(0).payload);
+            return _processFile(Nat.toText(0), deps._Assets.get(0).payload, config.placeholderUrl);
           };
           // end custom
           switch (deps._Tokens.getTokenData(tokenid)) {
             case (?metadata) {
               let assetid : Nat = Nat32.toNat(Utils.blobToNat32(metadata));
-              let asset : AssetTypes.Asset = deps._Assets.get(assetid);
+              let asset : AssetTypes.AssetV2 = deps._Assets.get(assetid);
               // start custom
               switch (_processAsset(request, asset)) {
                 case (?response) {
@@ -62,7 +62,7 @@ module {
                 case (null) {};
               };
               // end custom
-              return _processFile(Nat.toText(assetid), asset.payload);
+              return _processFile(Nat.toText(assetid), asset.payload, asset.payloadUrl);
             };
             case (_) {};
           };
@@ -73,7 +73,7 @@ module {
         case (?atext) {
           switch (Utils.natFromText(atext)) {
             case (?assetid) {
-              let asset : AssetTypes.Asset = deps._Assets.get(assetid);
+              let asset : AssetTypes.AssetV2 = deps._Assets.get(assetid);
               // start custom
               switch (_processAsset(request, asset)) {
                 case (?response) {
@@ -82,7 +82,7 @@ module {
                 case (null) {};
               };
               // end custom
-              return _processFile(Nat.toText(assetid), asset.payload);
+              return _processFile(Nat.toText(assetid), asset.payload, asset.payloadUrl);
             };
             case (_) {};
           };
@@ -104,7 +104,7 @@ module {
             switch (deps._Tokens.getTokenDataFromIndex(Nat32.fromNat(tokenIndex))) {
               case (?assetIdBlob) {
                 let assetid : Nat = Nat32.toNat(Utils.blobToNat32(assetIdBlob));
-                let asset : AssetTypes.Asset = deps._Assets.get(assetid);
+                let asset : AssetTypes.AssetV2 = deps._Assets.get(assetid);
                 // start custom
                 switch (_processAsset(request, asset)) {
                   case (?response) {
@@ -113,7 +113,7 @@ module {
                   case (null) {};
                 };
                 // end custom
-                return _processFile(Nat.toText(assetid), asset.payload);
+                return _processFile(Nat.toText(assetid), asset.payload, asset.payloadUrl);
               };
               case (_) {};
             };
@@ -170,7 +170,7 @@ module {
     * INTERNAL METHODS *
     ********************/
 
-    func _processAsset(request : Types.HttpRequest, asset : AssetTypes.Asset) : ?Types.HttpResponse {
+    func _processAsset(request : Types.HttpRequest, asset : AssetTypes.AssetV2) : ?Types.HttpResponse {
       let t = switch (_getParam(request.url, "type")) {
         case (?t) { t };
         case (null) {
@@ -178,6 +178,14 @@ module {
         };
       };
       if (t == "thumbnail") {
+        // redirect thumbnail
+        switch (asset.thumbnailUrl) {
+          case (?thumbnailUrl) {
+            return ?_redirect(thumbnailUrl);
+          };
+          case (_) {};
+        };
+
         switch (asset.thumbnail) {
           case (?thumb) {
             return ?{
@@ -205,7 +213,14 @@ module {
       return null;
     };
 
-    private func _processFile(tokenid : ExtCore.TokenIdentifier, file : AssetTypes.File) : Types.HttpResponse {
+    private func _processFile(tokenid : ExtCore.TokenIdentifier, file : AssetTypes.File, redirectUrlOpt : ?Text) : Types.HttpResponse {
+      switch (redirectUrlOpt) {
+        case (?redirectUrl) {
+          return _redirect(redirectUrl);
+        };
+        case (null) {};
+      };
+
       // start custom
       let self : Principal = config.canister;
       let canisterId : Text = Principal.toText(self);
@@ -263,6 +278,17 @@ module {
           key = id;
         },
       );
+    };
+
+    func _redirect(url : Text) : Types.HttpResponse {
+      {
+        status_code = 302;
+        headers = [
+          ("Location", url),
+        ];
+        body = Blob.fromArray([]);
+        streaming_strategy = null;
+      }
     };
 
     private func _displayICP(amt : Nat) : Text {

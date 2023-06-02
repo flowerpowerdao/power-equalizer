@@ -41,6 +41,7 @@ export const idlFactory = ({ IDL }) => {
     'revealDelay' : Duration,
     'airdrop' : IDL.Vec(AccountIdentifier),
     'royalties' : IDL.Vec(IDL.Tuple(AccountIdentifier, IDL.Nat64)),
+    'placeholderUrl' : IDL.Opt(IDL.Text),
     'salePrice' : IDL.Nat64,
     'marketDelay' : IDL.Opt(Duration),
     'singleAssetCollection' : IDL.Opt(IDL.Bool),
@@ -51,8 +52,10 @@ export const idlFactory = ({ IDL }) => {
     'data' : IDL.Vec(IDL.Vec(IDL.Nat8)),
     'ctype' : IDL.Text,
   });
-  const Asset = IDL.Record({
+  const AssetV2 = IDL.Record({
     'thumbnail' : IDL.Opt(File),
+    'payloadUrl' : IDL.Opt(IDL.Text),
+    'thumbnailUrl' : IDL.Opt(IDL.Text),
     'metadata' : IDL.Opt(File),
     'name' : IDL.Text,
     'payload' : File,
@@ -100,13 +103,24 @@ export const idlFactory = ({ IDL }) => {
       'v1_chunk' : IDL.Record({ 'transactionChunk' : IDL.Vec(Transaction) }),
     })
   );
+  const Asset = IDL.Record({
+    'thumbnail' : IDL.Opt(File),
+    'metadata' : IDL.Opt(File),
+    'name' : IDL.Text,
+    'payload' : File,
+  });
   const StableChunk__1 = IDL.Opt(
     IDL.Variant({
       'v1' : IDL.Record({
         'assetsChunk' : IDL.Vec(Asset),
         'assetsCount' : IDL.Nat,
       }),
+      'v2' : IDL.Record({
+        'assetsChunk' : IDL.Vec(AssetV2),
+        'assetsCount' : IDL.Nat,
+      }),
       'v1_chunk' : IDL.Record({ 'assetsChunk' : IDL.Vec(Asset) }),
+      'v2_chunk' : IDL.Record({ 'assetsChunk' : IDL.Vec(AssetV2) }),
     })
   );
   const AccountIdentifier__5 = IDL.Text;
@@ -114,10 +128,10 @@ export const idlFactory = ({ IDL }) => {
   const Time__2 = IDL.Int;
   const SubAccount__1 = IDL.Vec(IDL.Nat8);
   const TokenIndex__2 = IDL.Nat32;
-  const Sale = IDL.Record({
+  const SaleV1 = IDL.Record({
     'expires' : Time__2,
+    'slot' : IDL.Opt(WhitelistSlot),
     'subaccount' : SubAccount__1,
-    'whitelistName' : IDL.Opt(IDL.Text),
     'tokens' : IDL.Vec(TokenIndex__2),
     'buyer' : AccountIdentifier__5,
     'price' : IDL.Nat64,
@@ -125,6 +139,14 @@ export const idlFactory = ({ IDL }) => {
   const SaleTransaction = IDL.Record({
     'time' : Time__2,
     'seller' : IDL.Principal,
+    'tokens' : IDL.Vec(TokenIndex__2),
+    'buyer' : AccountIdentifier__5,
+    'price' : IDL.Nat64,
+  });
+  const Sale = IDL.Record({
+    'expires' : Time__2,
+    'subaccount' : SubAccount__1,
+    'whitelistName' : IDL.Opt(IDL.Text),
     'tokens' : IDL.Vec(TokenIndex__2),
     'buyer' : AccountIdentifier__5,
     'price' : IDL.Nat64,
@@ -137,7 +159,7 @@ export const idlFactory = ({ IDL }) => {
         'whitelist' : IDL.Vec(
           IDL.Tuple(IDL.Nat64, AccountIdentifier__5, WhitelistSlot)
         ),
-        'salesSettlements' : IDL.Vec(IDL.Tuple(AccountIdentifier__5, Sale)),
+        'salesSettlements' : IDL.Vec(IDL.Tuple(AccountIdentifier__5, SaleV1)),
         'totalToSell' : IDL.Nat,
         'failedSales' : IDL.Vec(IDL.Tuple(AccountIdentifier__5, SubAccount__1)),
         'sold' : IDL.Nat,
@@ -492,7 +514,7 @@ export const idlFactory = ({ IDL }) => {
   });
   const Canister = IDL.Service({
     'acceptCycles' : IDL.Func([], [], []),
-    'addAsset' : IDL.Func([Asset], [IDL.Nat], []),
+    'addAsset' : IDL.Func([AssetV2], [IDL.Nat], []),
     'airdropTokens' : IDL.Func([IDL.Nat], [], []),
     'allSettlements' : IDL.Func(
         [],
@@ -669,6 +691,7 @@ export const init = ({ IDL }) => {
     'revealDelay' : Duration,
     'airdrop' : IDL.Vec(AccountIdentifier),
     'royalties' : IDL.Vec(IDL.Tuple(AccountIdentifier, IDL.Nat64)),
+    'placeholderUrl' : IDL.Opt(IDL.Text),
     'salePrice' : IDL.Nat64,
     'marketDelay' : IDL.Opt(Duration),
     'singleAssetCollection' : IDL.Opt(IDL.Bool),
