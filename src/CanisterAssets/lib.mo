@@ -20,6 +20,19 @@ module {
 
     var _assets = Buffer.Buffer<Types.AssetV2>(0);
 
+    // placeholder returned instead of asset when there is reveal delay and not yet revealed
+    var _placeholder : Types.AssetV2 = {
+      name = "placeholder";
+      payload = {
+        ctype = "";
+        data = [];
+      };
+      thumbnail = null;
+      metadata = null;
+      payloadUrl = null;
+      thumbnailUrl = null;
+    };
+
     let _bytesPerChunk = 500_000; // 500kb
     var _biggestAssetSize = 10_000; // 10kb
 
@@ -43,13 +56,14 @@ module {
       };
 
       if (chunkIndex == 0) {
-        return ?#v1({
+        return ?#v2({
+          placeholder = _placeholder;
           assetsCount = _assets.size();
           assetsChunk;
         });
       }
       else if (chunkIndex < getChunkCount()) {
-        return ?#v1_chunk({ assetsChunk });
+        return ?#v2_chunk({ assetsChunk });
       }
       else {
         null;
@@ -68,6 +82,7 @@ module {
       };
 
       switch (chunk) {
+        // v1 -> v2
         case (?#v1(data)) {
           _assets := Buffer.Buffer<Types.AssetV2>(data.assetsCount);
           _assets.append(Buffer.fromArray(toV2(data.assetsChunk)));
@@ -77,7 +92,9 @@ module {
           _assets.append(Buffer.fromArray(toV2(data.assetsChunk)));
           _updateBiggestAssetSize(data.assetsChunk);
         };
+        // v2
         case (?#v2(data)) {
+          _placeholder := data.placeholder;
           _assets := Buffer.Buffer<Types.AssetV2>(data.assetsCount);
           _assets.append(Buffer.fromArray(data.assetsChunk));
           _updateBiggestAssetSize(data.assetsChunk);
@@ -179,9 +196,18 @@ module {
       _assets.size() - 1;
     };
 
+    public func addPlaceholder(caller : Principal, asset : Types.AssetV2) {
+      assert (caller == config.minter);
+      _placeholder := asset;
+    };
+
     /*******************
     * INTERNAL METHODS *
     *******************/
+
+    public func getPlaceholder() : Types.AssetV2 {
+      _placeholder;
+    };
 
     public func get(id : Nat) : Types.AssetV2 {
       return _assets.get(id);

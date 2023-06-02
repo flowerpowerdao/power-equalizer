@@ -10,6 +10,7 @@ module {
       assetsChunk : [Asset];
     };
     #v2: {
+      placeholder : AssetV2;
       assetsCount : Nat;
       assetsChunk : [AssetV2];
     };

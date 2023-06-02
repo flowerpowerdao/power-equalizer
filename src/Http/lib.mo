@@ -26,6 +26,14 @@ module {
     ********************/
 
     public func http_request_streaming_callback(token : Types.HttpStreamingCallbackToken) : Types.HttpStreamingCallbackResponse {
+      if (token.key == "placeholder") {
+        let placeholder = deps._Assets.getPlaceholder();
+        let res = _streamContent(token.key, token.index, placeholder.payload.data);
+        return {
+          body = res.0;
+          token = res.1;
+        };
+      };
       switch (Utils.natFromText(token.key)) {
         case null return { body = Blob.fromArray([]); token = null };
         case (?assetid) {
@@ -44,10 +52,10 @@ module {
       switch (_getParam(request.url, "tokenid")) {
         case (?tokenid) {
           // start custom
-          // we assume the placeholder is stored in index 0
-          // and thus uploaded first
+          // if not revealed yet, return placeholder
           if (Utils.toNanos(config.revealDelay) > 0 and not deps._Shuffle.isShuffled()) {
-            return _processFile(Nat.toText(0), deps._Assets.get(0).payload, config.placeholderUrl);
+            let placeholder = deps._Assets.getPlaceholder();
+            return _processFile("placeholder", placeholder.payload, placeholder.payloadUrl);
           };
           // end custom
           switch (deps._Tokens.getTokenData(tokenid)) {
