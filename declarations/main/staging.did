@@ -189,10 +189,12 @@ type StableChunk__1 =
           assetsCount: nat;
         };
     v1_chunk: record {assetsChunk: vec Asset;};
-    v2: record {
-          assetsChunk: vec AssetV2;
-          assetsCount: nat;
-        };
+    v2:
+     record {
+       assetsChunk: vec AssetV2;
+       assetsCount: nat;
+       placeholder: AssetV2;
+     };
     v2_chunk: record {assetsChunk: vec AssetV2;};
   };
 type StableChunk = variant {
@@ -392,6 +394,7 @@ type InitArgs =
    airdrop: vec AccountIdentifier;
    dutchAuction: opt DutchAuction;
    escrowDelay: opt Duration;
+   legacyPlaceholder: opt bool;
    marketDelay: opt Duration;
    marketplaces: vec record {
                        text;
@@ -399,7 +402,6 @@ type InitArgs =
                        nat64;
                      };
    name: text;
-   placeholderUrl: opt text;
    publicSaleStart: Time;
    restoreEnabled: opt bool;
    revealDelay: Duration;
@@ -617,6 +619,7 @@ type Canister =
  service {
    acceptCycles: () -> ();
    addAsset: (AssetV2) -> (nat);
+   addPlaceholder: (AssetV2) -> ();
    airdropTokens: (nat) -> ();
    allSettlements: () -> (vec record {
                                 TokenIndex__1;

@@ -1,9 +1,11 @@
 import {ExecSyncOptions, execSync} from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
 import chalk from 'chalk';
 
 import {decode} from '../backup/pem';
-import config from './config';
-import {getActor} from './utils';
+import {getActor, getAssetsCanisterId} from './utils';
+import {parallel} from './parallel';
 
 // create canister
 // deploy canister
@@ -14,69 +16,97 @@ import {getActor} from './utils';
 
 let execOptions = {stdio: ['inherit', 'pipe', 'inherit']} as ExecSyncOptions;
 
+let network = 'local';
+let assetsCanisterId = getAssetsCanisterId(network);
+
+let assetsCanisterUrl = '';
+if (network === 'local' || network === 'test') {
+  assetsCanisterUrl = `http://localhost:3000/`;
+}
+else {
+  assetsCanisterUrl = `https://${assetsCanisterId}.raw.icp0.io/`
+}
+
+let assetsDir = path.resolve(__dirname, '../assets');
 let identityName = execSync('dfx identity whoami').toString();
 let pemData = execSync(`dfx identity export ${identityName}`, execOptions).toString();
 let identity = decode(pemData);
-let actor = getActor(config.network, identity);
+let actor = getActor(network, identity);
 
 console.log(identity.getPrincipal().toText());
 
 let run = () => {
   // createCanisters();
-  deployCanisters();
+  // deployCanisters();
+  uploadAssetsMetadata();
 }
 
 // let createCanisters = () => {
 //   console.log(chalk.green('Creating canisters...'));
-//   execSync(`dfx canister create --all --network ${config.network}`, execOptions).toString();
+//   execSync(`dfx canister create --all --network ${network}`, execOptions).toString();
 // }
 
 let deployCanisters = () => {
   console.log(chalk.green('Deploying assets canister...'));
-  execSync(`dfx deploy assets --network ${config.network}`, execOptions);
+  execSync(`dfx deploy assets --network ${network}`, execOptions);
 
   console.log(chalk.green('Deploying main canister...'));
-  execSync(`dfx deploy ${config.network == 'production' ? 'production' : 'staging'} --argument "$(cat initArgs.did)" --network ${config.network}`, execOptions);
+  execSync(`dfx deploy ${network == 'production' ? 'production' : 'staging'} --argument "$(cat initArgs.did)" --network ${network}`, execOptions);
 }
 
-let uploadCollectionAssets = async () => {
-  console.log(chalk.green('Uploading assets to main canister...'));
+let uploadAssetsMetadata = async () => {
+  let assets = JSON.parse(fs.readFileSync(path.resolve(assetsDir, 'metadata.json')).toString());
+  console.log(chalk.green(`Found ${assets.length} assets`));
 
-  // placeholder
-  console.log(chalk.green('Uploading placeholder...'));
-  await actor.addAsset({
-    name: 'placeholder',
-    payload: {
-      ctype: '',
-      data: [],
-    },
-    thumbnail: null,
-    metadata: null,
-    payloadUrl: [config.assetsCanisterUrl + config.placeholder],
-    thumbnailUrl: null,
+  let dirContent = fs.readdirSync(assetsDir);
+  let files = dirContent.filter((item) => {
+    return fs.lstatSync(path.resolve(assetsDir, item)).isFile();
   });
 
-  // assets
-  console.log(chalk.green('Uploading assets metadata...'));
-  let assets = []; // TODO: get assets from metadata.json
-  // let assets = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'assets/metadata.json')).toString());
+  let filesByName = new Map(files.map((file) => {
+    return [path.parse(file).name, file];
+  }));
 
-  for (let asset of assets) {
-    await actor.addAsset({
-      name: asset.name,
+  // placeholder
+  if (filesByName.has('placeholder')) {
+    console.log(chalk.green('Uploading placeholder...'));
+    await actor.addPlaceholder({
+      name: 'placeholder',
       payload: {
         ctype: '',
         data: [],
       },
-      thumbnail: null,
-      metadata: [{
-        ctype: 'application/json',
-        data: [new TextEncoder().encode(JSON.stringify(asset.metadata))],
-      }],
-      payloadUrl: [config.assetsCanisterUrl + asset.payloadFile],
-      thumbnailUrl: [config.assetsCanisterUrl + asset.thumbnailFile],
+      thumbnail: [],
+      metadata: [],
+      payloadUrl: [assetsCanisterUrl + filesByName.get('placeholder')],
+      thumbnailUrl: [],
     });
   }
+  else {
+    console.log(chalk.yellow('No placeholder.'));
+  }
+
+  // assets
+  console.log(chalk.green('Uploading assets metadata...'));
+
+  await parallel(100, [...assets.entries()], async ([index, metadata]) => {
+    console.log(`Uploading asset ${index}`);
+    let uploadedIndex = await actor.addAsset({
+      name: String(index),
+      payload: {
+        ctype: '',
+        data: [],
+      },
+      thumbnail: [],
+      metadata: [{
+        ctype: 'application/json',
+        data: [new TextEncoder().encode(JSON.stringify(metadata))],
+      }],
+      payloadUrl: [assetsCanisterUrl + filesByName.get(String(index))],
+      thumbnailUrl: [assetsCanisterUrl + filesByName.get(String(index) + '_thumbnail')],
+    });
+    console.log(uploadedIndex, index);
+  });
 }
 
 run();

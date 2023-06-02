@@ -32,6 +32,7 @@ export type Balance__2 = bigint;
 export interface Canister {
   'acceptCycles' : ActorMethod<[], undefined>,
   'addAsset' : ActorMethod<[AssetV2], bigint>,
+  'addPlaceholder' : ActorMethod<[AssetV2], undefined>,
   'airdropTokens' : ActorMethod<[bigint], undefined>,
   'allSettlements' : ActorMethod<[], Array<[TokenIndex__1, Settlement]>>,
   'availableCycles' : ActorMethod<[], bigint>,
@@ -258,6 +259,7 @@ export type HttpStreamingStrategy = {
 export interface InitArgs {
   'timersInterval' : [] | [Duration],
   'dutchAuction' : [] | [DutchAuction],
+  'legacyPlaceholder' : [] | [boolean],
   'whitelists' : Array<Whitelist>,
   'marketplaces' : Array<[string, AccountIdentifier, bigint]>,
   'name' : string,
@@ -269,7 +271,6 @@ export interface InitArgs {
   'revealDelay' : Duration,
   'airdrop' : Array<AccountIdentifier>,
   'royalties' : Array<[AccountIdentifier, bigint]>,
-  'placeholderUrl' : [] | [string],
   'salePrice' : bigint,
   'marketDelay' : [] | [Duration],
   'singleAssetCollection' : [] | [boolean],
@@ -408,7 +409,13 @@ export type StableChunk = {
   };
 export type StableChunk__1 = [] | [
   { 'v1' : { 'assetsChunk' : Array<Asset>, 'assetsCount' : bigint } } |
-    { 'v2' : { 'assetsChunk' : Array<AssetV2>, 'assetsCount' : bigint } } |
+    {
+      'v2' : {
+        'assetsChunk' : Array<AssetV2>,
+        'assetsCount' : bigint,
+        'placeholder' : AssetV2,
+      }
+    } |
     { 'v1_chunk' : { 'assetsChunk' : Array<Asset> } } |
     { 'v2_chunk' : { 'assetsChunk' : Array<AssetV2> } }
 ];

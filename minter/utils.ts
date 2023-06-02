@@ -10,11 +10,11 @@ import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 
 export let getMainCanisterId = (network: string): string => {
   if (network === 'local') {
-    let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, '.dfx/local/canister_ids.json')).toString());
+    let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../.dfx/local/canister_ids.json')).toString());
     return ids.staging.local;
   }
   else if (network === 'test') {
-    let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, '.dfx/local/canister_ids.json')).toString());
+    let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../.dfx/local/canister_ids.json')).toString());
     return ids.test.local;
   }
   else if (network === 'staging') {
@@ -29,11 +29,11 @@ export let getMainCanisterId = (network: string): string => {
 
 export let getAssetsCanisterId = (network: string): string => {
   if (network === 'local') {
-    let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, '.dfx/local/canister_ids.json')).toString());
+    let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../.dfx/local/canister_ids.json')).toString());
     return ids.assets.local;
   }
   else if (network === 'test') {
-    let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, '.dfx/local/canister_ids.json')).toString());
+    let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../.dfx/local/canister_ids.json')).toString());
     return ids.assets.local;
   }
   else if (network === 'staging') {

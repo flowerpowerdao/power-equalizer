@@ -31,6 +31,7 @@ export const idlFactory = ({ IDL }) => {
   const InitArgs = IDL.Record({
     'timersInterval' : IDL.Opt(Duration),
     'dutchAuction' : IDL.Opt(DutchAuction),
+    'legacyPlaceholder' : IDL.Opt(IDL.Bool),
     'whitelists' : IDL.Vec(Whitelist),
     'marketplaces' : IDL.Vec(IDL.Tuple(IDL.Text, AccountIdentifier, IDL.Nat64)),
     'name' : IDL.Text,
@@ -41,7 +42,6 @@ export const idlFactory = ({ IDL }) => {
     'revealDelay' : Duration,
     'airdrop' : IDL.Vec(AccountIdentifier),
     'royalties' : IDL.Vec(IDL.Tuple(AccountIdentifier, IDL.Nat64)),
-    'placeholderUrl' : IDL.Opt(IDL.Text),
     'salePrice' : IDL.Nat64,
     'marketDelay' : IDL.Opt(Duration),
     'singleAssetCollection' : IDL.Opt(IDL.Bool),
@@ -118,6 +118,7 @@ export const idlFactory = ({ IDL }) => {
       'v2' : IDL.Record({
         'assetsChunk' : IDL.Vec(AssetV2),
         'assetsCount' : IDL.Nat,
+        'placeholder' : AssetV2,
       }),
       'v1_chunk' : IDL.Record({ 'assetsChunk' : IDL.Vec(Asset) }),
       'v2_chunk' : IDL.Record({ 'assetsChunk' : IDL.Vec(AssetV2) }),
@@ -515,6 +516,7 @@ export const idlFactory = ({ IDL }) => {
   const Canister = IDL.Service({
     'acceptCycles' : IDL.Func([], [], []),
     'addAsset' : IDL.Func([AssetV2], [IDL.Nat], []),
+    'addPlaceholder' : IDL.Func([AssetV2], [], []),
     'airdropTokens' : IDL.Func([IDL.Nat], [], []),
     'allSettlements' : IDL.Func(
         [],
@@ -681,6 +683,7 @@ export const init = ({ IDL }) => {
   const InitArgs = IDL.Record({
     'timersInterval' : IDL.Opt(Duration),
     'dutchAuction' : IDL.Opt(DutchAuction),
+    'legacyPlaceholder' : IDL.Opt(IDL.Bool),
     'whitelists' : IDL.Vec(Whitelist),
     'marketplaces' : IDL.Vec(IDL.Tuple(IDL.Text, AccountIdentifier, IDL.Nat64)),
     'name' : IDL.Text,
@@ -691,7 +694,6 @@ export const init = ({ IDL }) => {
     'revealDelay' : Duration,
     'airdrop' : IDL.Vec(AccountIdentifier),
     'royalties' : IDL.Vec(IDL.Tuple(AccountIdentifier, IDL.Nat64)),
-    'placeholderUrl' : IDL.Opt(IDL.Text),
     'salePrice' : IDL.Nat64,
     'marketDelay' : IDL.Opt(Duration),
     'singleAssetCollection' : IDL.Opt(IDL.Bool),

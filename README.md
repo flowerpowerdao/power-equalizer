@@ -11,10 +11,27 @@
 - [ ] run off chain backup script with mainnet canister id
 - [ ] setup auto topup of canisters
 
+## Assets
+
+Placeholder is optional.
+
+Extension can be any.
+
+`assets` folder structure:
+```
+assets/
+  metadata.json
+  placeholder.svg
+  1.svg
+  1_thumbnail.svg
+  2.svg
+  2_thumbnail.svg
+  ...
+```
 
 ## first deployment
 ```
-npm run mint
+npm run minter
 ```
 or
 ```
