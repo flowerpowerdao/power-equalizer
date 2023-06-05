@@ -15,6 +15,7 @@ module {
     *********/
 
     var _isShuffled = false;
+    let minIndex = if (config.legacyPlaceholder == ?true) 1 else 0;
 
     public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
       ?#v1({
@@ -45,9 +46,6 @@ module {
       let randGen = Utils.prngStrong(seed);
       // get the number of available assets
       var currentIndex : Nat = deps._Assets.size();
-
-      let legacyPlaceholder = config.legacyPlaceholder == ?true;
-      let minIndex = if (legacyPlaceholder) 1 else 0;
 
       // shuffle the assets array using the random beacon
       while (currentIndex > minIndex) {
