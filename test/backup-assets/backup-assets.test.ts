@@ -36,8 +36,8 @@ describe('backup', () => {
 
   it('check a.json', async () => {
     let data = JSON.parse(readFileSync(__dirname + '/../../backup/data/a.json').toString());
-    expect(data[0]['v2']['assets'][0]['v2']['assetsChunk']).toHaveLength(7);
-    expect(data[0]['v2']['assets'][0]['v2']['assetsCount']).toBe('###bigint:7');
+    expect(data[0]['v1']['assets'][0]['v2']['assetsChunk']).toHaveLength(7);
+    expect(data[0]['v1']['assets'][0]['v2']['assetsCount']).toBe('###bigint:7');
   });
 });
 
