@@ -17,16 +17,7 @@ import {parallel} from './parallel';
 let execOptions = {stdio: ['inherit', 'pipe', 'inherit']} as ExecSyncOptions;
 
 let network = 'local';
-let assetsCanisterId = getAssetsCanisterId(network);
-
-let assetsCanisterUrl = '';
-if (network === 'local' || network === 'test') {
-  assetsCanisterUrl = `http://localhost:3000/`;
-}
-else {
-  assetsCanisterUrl = `https://${assetsCanisterId}.raw.icp0.io/`
-}
-
+let mainCanisterName = network == 'production' ? 'production' : 'staging';
 let assetsDir = path.resolve(__dirname, '../assets');
 let identityName = execSync('dfx identity whoami').toString();
 let pemData = execSync(`dfx identity export ${identityName}`, execOptions).toString();
@@ -37,21 +28,31 @@ console.log(identity.getPrincipal().toText());
 
 let run = () => {
   // createCanisters();
-  // deployCanisters();
+  deployCanisters();
   uploadAssetsMetadata();
+  mint();
 }
 
-// let createCanisters = () => {
-//   console.log(chalk.green('Creating canisters...'));
-//   execSync(`dfx canister create --all --network ${network}`, execOptions).toString();
-// }
+let getAssetUrl = (file) => {
+  let assetsCanisterId = getAssetsCanisterId(network);
+
+  let assetsCanisterUrl = '';
+  if (network === 'local' || network === 'test') {
+    assetsCanisterUrl = `http://localhost:3000/`;
+  }
+  else {
+    assetsCanisterUrl = `https://${assetsCanisterId}.raw.icp0.io/`;
+  }
+
+  return assetsCanisterUrl + file;
+}
 
 let deployCanisters = () => {
   console.log(chalk.green('Deploying assets canister...'));
   execSync(`dfx deploy assets --network ${network}`, execOptions);
 
   console.log(chalk.green('Deploying main canister...'));
-  execSync(`dfx deploy ${network == 'production' ? 'production' : 'staging'} --argument "$(cat initArgs.did)" --network ${network}`, execOptions);
+  execSync(`dfx deploy ${mainCanisterName} --argument "$(cat initArgs.did)" --network ${network}`, execOptions);
 }
 
 let uploadAssetsMetadata = async () => {
@@ -78,7 +79,7 @@ let uploadAssetsMetadata = async () => {
       },
       thumbnail: [],
       metadata: [],
-      payloadUrl: [assetsCanisterUrl + filesByName.get('placeholder')],
+      payloadUrl: [getAssetUrl(filesByName.get('placeholder'))],
       thumbnailUrl: [],
     });
   }
@@ -102,11 +103,32 @@ let uploadAssetsMetadata = async () => {
         ctype: 'application/json',
         data: [new TextEncoder().encode(JSON.stringify(metadata))],
       }],
-      payloadUrl: [assetsCanisterUrl + filesByName.get(String(index))],
-      thumbnailUrl: [assetsCanisterUrl + filesByName.get(String(index) + '_thumbnail')],
+      payloadUrl: [getAssetUrl(filesByName.get(String(index)))],
+      thumbnailUrl: [getAssetUrl(filesByName.get(String(index) + '_thumbnail'))],
     });
     console.log(uploadedIndex, index);
   });
+};
+
+let mint = () => {
+  console.log(chalk.green('Minting...'));
+  console.log('initiating cap ...');
+  execSync(`dfx canister --network ${network} call ${mainCanisterName} initCap`, execOptions);
+
+  console.log('initiating mint ...');
+  execSync(`dfx canister --network ${network} call ${mainCanisterName} initMint`, execOptions);
+
+  console.log('shuffle Tokens For Sale ...');
+  execSync(`dfx canister --network ${network} call ${mainCanisterName} shuffleTokensForSale`, execOptions);
+
+  console.log('airdrop tokens ...');
+  execSync(`dfx canister --network ${network} call ${mainCanisterName} airdropTokens 0`, execOptions);
+
+  console.log('airdrop tokens ...');
+  execSync(`dfx canister --network ${network} call ${mainCanisterName} airdropTokens 1500`, execOptions);
+
+  console.log('enable sale ...');
+  execSync(`dfx canister --network ${network} call ${mainCanisterName} enableSale`, execOptions);
 }
 
 run();

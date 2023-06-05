@@ -2,7 +2,7 @@
   principal "rrkah-fqaaa-aaaaa-aaaaq-cai", // staging canister
   record {
     name = "Collection Name";
-    sale = variant { supply = 10_000 };
+    sale = variant { supply = 5 };
     salePrice = 700_000_000; // 7 ICP
     publicSaleStart = 1680696181381000000;
     salesDistribution = vec {};
@@ -13,7 +13,8 @@
     };
     // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
     // variant { none } - assets will be revealed immediately and assets shuffling will be disabled
-    revealDelay = variant { hours = 24 };
+    // revealDelay = variant { hours = 24 };
+    revealDelay = variant { none };
     airdrop = vec {};
     whitelists = vec {};
   }

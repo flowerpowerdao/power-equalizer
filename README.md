@@ -29,19 +29,22 @@ assets/
   ...
 ```
 
-## first deployment
+## First deployment
+For local deployment run extra commands:
+```
+npm run replica
+npm run deploy:ledger
+npm run vite
+```
+
+Run minter
 ```
 npm run minter
 ```
-or
-```
-dfx canister deploy --all --netowork ic
-dfx canister call mint --netowork ic
-```
 
-## upgrade canister
+## upgrade main canister
 ```
-dfx canister deploy --all --netowork ic
+dfx canister deploy production --netowork ic
 ```
 
 ## launch
@@ -304,6 +307,12 @@ So when executing `mintNFT`, the `to` address is taken from `registry.json` and 
 ## Testing 🧪
 
 Each test suite is deployed with its own env settings.
+
+You need to switch to an anonymous identity to run the tests.
+
+```
+dfx identity use anonymouse
+```
 
 First, start a local replica and deploy
 
