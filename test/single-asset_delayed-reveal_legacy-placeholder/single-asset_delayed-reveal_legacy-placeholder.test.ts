@@ -11,7 +11,7 @@ describe('single asset with delayed reveal', () => {
 
     tokenToAsset.forEach(([index, asset], i) => {
       expect(index).toBe(i);
-      expect(asset).toBe('privat0');
+      expect(asset).toBe('privat1');
     });
   });
 
@@ -21,7 +21,7 @@ describe('single asset with delayed reveal', () => {
       expect(await user.mainActor.metadata(tokenIdentifier(i))).toEqual({
         ok: {
           nonfungible: {
-            metadata: [new Uint8Array([0, 0, 0, 0])],
+            metadata: [new Uint8Array([0, 0, 0, 1])],
           },
         },
       });
