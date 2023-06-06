@@ -2,21 +2,28 @@ import {ExecSyncOptions, execSync} from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import chalk from 'chalk';
+import minimist from 'minimist';
 
 import {decode} from '../backup/pem';
 import {getActor, getAssetsCanisterId} from './utils';
 import {parallel} from './parallel';
 
-// create canister
-// deploy canister
-// upload placeholder (if needed)
-// upload assets
-// upload metadata
-// call initCap, initMint, shuffleTokensForSale, airdropTokens, airdropTokens, enableSale
 
 let execOptions = {stdio: ['inherit', 'pipe', 'inherit']} as ExecSyncOptions;
 
-let network = 'local';
+let argv = minimist(process.argv.slice(2));
+
+let network = argv._[0] || 'local';
+let dfxNetwork = network === 'local' || network === 'test' ? 'local' : 'ic';
+
+let mode = argv.mode || '';
+let modeArg = mode === 'reinstall' ? `--mode=${mode}` : '';
+
+// skip prompt for local reinstall
+if (dfxNetwork === 'local' && mode === 'reinstall') {
+  modeArg += ' --yes';
+}
+
 let mainCanisterName = network == 'production' ? 'production' : 'staging';
 let assetsDir = path.resolve(__dirname, '../assets');
 let identityName = execSync('dfx identity whoami').toString();
@@ -27,7 +34,6 @@ let actor = getActor(network, identity);
 console.log(identity.getPrincipal().toText());
 
 let run = () => {
-  // createCanisters();
   deployCanisters();
   uploadAssetsMetadata();
   mint();
@@ -48,11 +54,15 @@ let getAssetUrl = (file) => {
 }
 
 let deployCanisters = () => {
+  if (mode === 'reinstall') {
+    console.log(chalk.yellow('REINSTALL MODE'));
+  }
+
   console.log(chalk.green('Deploying assets canister...'));
-  execSync(`dfx deploy assets --network ${network}`, execOptions);
+  execSync(`dfx deploy assets --network ${dfxNetwork} ${modeArg}`, execOptions);
 
   console.log(chalk.green('Deploying main canister...'));
-  execSync(`dfx deploy ${mainCanisterName} --argument "$(cat initArgs.did)" --network ${network}`, execOptions);
+  execSync(`dfx deploy ${mainCanisterName} --argument "$(cat initArgs.did)" --network ${dfxNetwork} ${modeArg}`, execOptions);
 }
 
 let uploadAssetsMetadata = async () => {
@@ -112,23 +122,28 @@ let uploadAssetsMetadata = async () => {
 
 let mint = () => {
   console.log(chalk.green('Minting...'));
-  console.log('initiating cap ...');
-  execSync(`dfx canister --network ${network} call ${mainCanisterName} initCap`, execOptions);
+  if (dfxNetwork === 'ic') {
+    console.log('initiating cap ...');
+    execSync(`dfx canister --network ${dfxNetwork} call ${mainCanisterName} initCap`, execOptions);
+  }
+  else {
+    console.log(chalk.yellow('skip cap init for local network'));
+  }
 
   console.log('initiating mint ...');
-  execSync(`dfx canister --network ${network} call ${mainCanisterName} initMint`, execOptions);
+  execSync(`dfx canister --network ${dfxNetwork} call ${mainCanisterName} initMint`, execOptions);
 
   console.log('shuffle Tokens For Sale ...');
-  execSync(`dfx canister --network ${network} call ${mainCanisterName} shuffleTokensForSale`, execOptions);
+  execSync(`dfx canister --network ${dfxNetwork} call ${mainCanisterName} shuffleTokensForSale`, execOptions);
 
   console.log('airdrop tokens ...');
-  execSync(`dfx canister --network ${network} call ${mainCanisterName} airdropTokens 0`, execOptions);
+  execSync(`dfx canister --network ${dfxNetwork} call ${mainCanisterName} airdropTokens 0`, execOptions);
 
   console.log('airdrop tokens ...');
-  execSync(`dfx canister --network ${network} call ${mainCanisterName} airdropTokens 1500`, execOptions);
+  execSync(`dfx canister --network ${dfxNetwork} call ${mainCanisterName} airdropTokens 1500`, execOptions);
 
   console.log('enable sale ...');
-  execSync(`dfx canister --network ${network} call ${mainCanisterName} enableSale`, execOptions);
+  execSync(`dfx canister --network ${dfxNetwork} call ${mainCanisterName} enableSale`, execOptions);
 }
 
 run();

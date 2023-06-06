@@ -2,7 +2,7 @@
   principal "rrkah-fqaaa-aaaaa-aaaaq-cai", // staging canister
   record {
     name = "Collection Name";
-    sale = variant { supply = 5 };
+    sale = variant { supply = 4 };
     salePrice = 700_000_000; // 7 ICP
     publicSaleStart = 1680696181381000000;
     salesDistribution = vec {};
@@ -17,5 +17,7 @@
     revealDelay = variant { none };
     airdrop = vec {};
     whitelists = vec {};
+    singleAssetCollection = opt true;
+    legacyPlaceholder = opt true;
   }
 )

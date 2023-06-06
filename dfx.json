@@ -44,6 +44,7 @@
       ]
     }
   },
+  "dfx": "0.14.1",
   "defaults": {
     "build": {
       "packtool": "vessel sources",

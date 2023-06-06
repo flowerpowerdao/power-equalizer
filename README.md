@@ -29,7 +29,7 @@ assets/
   ...
 ```
 
-## First deployment
+## Deploy
 For local deployment run extra commands:
 ```
 npm run replica
@@ -37,12 +37,35 @@ npm run deploy:ledger
 npm run vite
 ```
 
-Run minter
+Deploy
 ```
-npm run minter
+npm run deploy <network>
 ```
 
-## upgrade main canister
+`<network>` - local | test | staging | production
+
+`local` and `test` deployed locally
+
+`staging` and `production` deployed to IC mainnet
+
+### Examples
+
+Deploy production
+```
+npm run deploy production
+```
+
+Clean deploy locally
+```
+npm run deploy local -- --mode reinstall
+```
+
+Deploy staging with small amount of cycles (for example to test the creation of canisters)
+```
+npm run deploy staging -- --mode reinstall
+```
+
+## Upgrade main canister
 ```
 dfx canister deploy production --netowork ic
 ```
@@ -71,163 +94,7 @@ deploy-production-ic-full:
 	./deploy.zsh ic 7777 production
 ```
 
-This `makefile` calls the `deploy.zsh` script.
-
 ```
-# deploy.zsh
-#!/bin/zsh
-# stream asset to the canister using this
-# https://gist.github.com/jorgenbuilder/6d32ef665b84457a9be2063224b754fb
-file="assets/output.mp4"
-filename=$(echo $file | sed -E "s/.+\///")
-fileextension=$(echo $file | sed -E "s/.+\.//")
-mime="video/$fileextension"
-network=${1:-local}
-number_of_assets=${2:-10}
-mode=${3:-staging}
-threshold="100000"
-asset_canister_url="https://zt63f-rqaaa-aaaae-qadaq-cai.raw.ic0.app/"
-
-dfx stop
-dfx start --background --clean
-
-# reset the canister state
-if [[ "$mode" == "production" ]]
-then
-echo "production deployment ..."
-dfx canister --network $network create $mode
-ID=$(dfx canister --network $network id $mode)
-DFX_MOC_PATH="$(vessel bin)/moc" dfx deploy --network $network --argument "(principal \"$ID\")" $mode
-else
-echo "staging deployment ..."
-dfx canister --network $network create $mode
-ID=$(dfx canister --network $network id $mode)
-yes yes| DFX_MOC_PATH="$(vessel bin)/moc" dfx deploy --network $network --argument "(principal \"$ID\")" --mode=reinstall $mode
-fi
-
-
-# first create the asset calling addAsset
-echo "creating asset..."
-asset_id=$(dfx canister --network $network call $mode addAsset "(record { \
-    name = \"$filename\"; \
-    payload = record {
-        ctype = \"$mime\"; \
-        data = vec {\
-}}})")
-
-asset_id=$(echo $asset_id | tr -d -c 0-9)
-echo $asset_id
-
-# then chunk the file and upload it to the asset
-# id using streamAsset
-i=0
-byteSize=${#$(od -An -v -tuC $file)[@]}
-echo "$network Uploading asset \"$filename\", size: $byteSize"
-while [ $i -le $byteSize ]; do
-    echo "chunk #$(($i/$threshold+1))..."
-    dfx canister --network $network call $mode streamAsset "($asset_id, \
-        false, \
-        vec { $(for byte in ${(j:;:)$(od -An -v -tuC $file)[@]:$i:$threshold}; echo "$byte;") }\
-    )"
-    # dfx canister call staging addAsset "( vec {\
-    #     vec { $(for byte in ${(j:;:)$(od -An -v -tuC $file)[@]:$i:$threshold}; echo "$byte;") };\
-    # })"
-    i=$(($i+$threshold))
-done
-
-if [[ "$network" == "ic" ]]
-then
-open "https://$(dfx canister --network $network id $mode).raw.ic0.app/?asset=0"
-else
-open "http://127.0.0.1:4943/?canisterId=$(dfx canister --network $network id $mode)&asset=0"
-fi
-
-# add the other assets
-upload_assets() {
-    for asset in {$k..$(($k+$batch_size-1))}; do
-        if [ $asset -gt $number_of_assets ];
-            then break;
-        fi;
-        j=$asset-1;
-        dfx canister --network $network call --async $mode addAsset '(record {
-            name = "'$asset'";
-            payload = record {
-                ctype = "image/svg+xml";
-                data = vec {blob "
-                    <svg xmlns=\"http://www.w3.org/2000/svg\">
-                        <script>
-                            fetch(\"'$asset_canister_url$asset'.svg\")
-                            .then(response =&gt; response.text())
-                            .then(text =&gt; {
-                                let parser = new DOMParser();
-                                let doc = parser.parseFromString( text, \"image/svg+xml\" );
-                                document.getElementsByTagName(\"svg\")[0].appendChild( doc.getElementsByTagName(\"svg\")[0] );
-                            })
-                            .catch(err =&gt; console.log(err))
-                        </script>
-                    </svg>"
-                };
-            };
-            thumbnail = opt record {
-                ctype = "image/svg+xml";
-                data = vec {blob "
-                    <svg xmlns=\"http://www.w3.org/2000/svg\">
-                        <script>
-                            fetch(\"'$asset_canister_url$asset'_thumbnail.svg\")
-                            .then(response =&gt; response.text())
-                            .then(text =&gt; {
-                                let parser = new DOMParser();
-                                let doc = parser.parseFromString( text, \"image/svg+xml\" );
-                                document.getElementsByTagName(\"svg\")[0].appendChild( doc.getElementsByTagName(\"svg\")[0] );
-                            })
-                            .catch(err =&gt; console.log(err))
-                        </script>
-                    </svg>"
-                };
-            };
-            metadata = opt record {
-                ctype = "application/json";
-                data = vec {blob "'"$(cat assets/metadata.json | jq ".[$j]" | sed 's/"/\\"/g')"'"
-                };
-            };
-        })' &>/dev/null
-    done
-}
-
-batch_size=1000
-k=1
-while [ $k -le $number_of_assets ]; do
-    upload_assets &
-    k=$(($k+$batch_size))
-done
-jobs
-wait
-echo "done"
-
-# init cap
-echo "initiating cap ..."
-dfx canister --network $network call $mode initCap
-
-# init mint
-echo "initiating mint ..."
-dfx canister --network $network call $mode initMint
-
-# shuffle Tokens For Sale
-echo "shuffle Tokens For Sale ..."
-dfx canister --network $network call $mode shuffleTokensForSale
-
-# airdrop tokens
-echo "airdrop tokens ..."
-dfx canister --network $network call $mode airdropTokens 0
-
-# airdrop tokens
-echo "airdrop tokens ..."
-dfx canister --network $network call $mode airdropTokens 1500
-
-# enable sale
-echo "enable sale ..."
-dfx canister --network $network call $mode enableSale
-
 # check the asset that are linked to the tokens
 for i in {0..9}
 do
@@ -255,17 +122,6 @@ done
 # done
 ```
 
-Because the `makefile` and `deploy.zsh` are pretty opinated, we are not including them in the repo. You can use node or python scripts to deploy the canisters and upload the assets, make sure you mimic the functinoality of the `makefile` and `deploy.zsh` scripts. The following bulletpoints are tips and tricks if you stick to our way of uploading assets.
-
-- use `make` to run the standard local deploy
-- use `make deploy-staging-ic` to deploy the staging canister to the mainnet, by default it deploys the NFT staging canister locally and uses `assets/output.mp4` and `metadata.json` as file paths
-  - `metadata.json` **MUST NOT** contain a mint number! (use `cat mymetadata.json| sed '/mint/ d' > metadata.json` to remove the mint number)
-  - note that you need [ext](#ext) installed
-- The `deploy.zsh` adds another oracle to the NFT canister because the script in the source SVG won't be executed the way it's currently structured. Make sure you use the correct API endpoint there as well!
-  - note: this script is not allowed to contain any `&` or `>` characters!
-  - make sure you change the asset canister url and the currency fetched from the oracle
-- make sure you create and `assets` folder and provide the `seed.mp4` file and the `metadata.json` file and specify their names in the script accordingly
-- the weird looking `sed` when uploading the metadata is escaping `"` characters and the variable `$j` is needed for the correct index (`j=$i-1`)
 
 ## caveats 🕳
 
@@ -318,7 +174,7 @@ First, start a local replica and deploy
 
 ```
 npm run replica
-npm run deploy
+npm run deploy-local
 ```
 
 To deploy and run all tests
