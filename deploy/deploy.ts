@@ -46,13 +46,11 @@ let getAssetUrl = (file) => {
 
   let assetsCanisterUrl = '';
   if (network === 'local' || network === 'test') {
-    assetsCanisterUrl = `http://localhost:3000/`;
+    assetsCanisterUrl = `http://localhost:4943/${file}?canisterId=${assetsCanisterId}`;
   }
   else {
-    assetsCanisterUrl = `https://${assetsCanisterId}.raw.icp0.io/`;
+    return `https://${assetsCanisterId}.raw.icp0.io/${file}`;
   }
-
-  return assetsCanisterUrl + file;
 }
 
 let deployCanisters = () => {
