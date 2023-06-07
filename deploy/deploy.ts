@@ -24,7 +24,9 @@ if (dfxNetwork === 'local' && mode === 'reinstall') {
   modeArg += ' --yes';
 }
 
-let mainCanisterName = network == 'production' ? 'production' : 'staging';
+let withCyclesArg = argv['with-cycles'] ? `--with-cycles=${argv['with-cycles']}` : '';
+
+let nftCanisterName = network == 'production' ? 'production' : 'staging';
 let assetsDir = path.resolve(__dirname, '../assets');
 let identityName = execSync('dfx identity whoami').toString();
 let pemData = execSync(`dfx identity export ${identityName}`, execOptions).toString();
@@ -59,15 +61,14 @@ let deployCanisters = () => {
   }
 
   console.log(chalk.green('Deploying assets canister...'));
-  execSync(`dfx deploy assets --network ${dfxNetwork} ${modeArg}`, execOptions);
+  execSync(`dfx deploy assets --network ${dfxNetwork} ${modeArg} ${withCyclesArg}`, execOptions);
 
-  console.log(chalk.green('Deploying main canister...'));
-  execSync(`dfx deploy ${mainCanisterName} --argument "$(cat initArgs.did)" --network ${dfxNetwork} ${modeArg}`, execOptions);
+  console.log(chalk.green('Deploying nft canister...'));
+  execSync(`dfx deploy ${nftCanisterName} --argument "$(cat initArgs.did)" --network ${dfxNetwork} ${modeArg} ${withCyclesArg}`, execOptions);
 }
 
 let uploadAssetsMetadata = async () => {
   let assets = JSON.parse(fs.readFileSync(path.resolve(assetsDir, 'metadata.json')).toString());
-  console.log(chalk.green(`Found ${assets.length} assets`));
 
   let dirContent = fs.readdirSync(assetsDir);
   let files = dirContent.filter((item) => {
@@ -99,6 +100,7 @@ let uploadAssetsMetadata = async () => {
 
   // assets
   console.log(chalk.green('Uploading assets metadata...'));
+  console.log(chalk.green(`Found ${assets.length} assets metadata...`));
 
   await parallel(100, [...assets.entries()], async ([index, metadata]) => {
     console.log(`Uploading asset ${index}`);
@@ -123,27 +125,27 @@ let uploadAssetsMetadata = async () => {
 let mint = () => {
   console.log(chalk.green('Minting...'));
   if (dfxNetwork === 'ic') {
-    console.log('initiating cap ...');
-    execSync(`dfx canister --network ${dfxNetwork} call ${mainCanisterName} initCap`, execOptions);
+    console.log('initiating CAP ...');
+    execSync(`dfx canister --network ${dfxNetwork} call ${nftCanisterName} initCap`, execOptions);
   }
   else {
-    console.log(chalk.yellow('skip cap init for local network'));
+    console.log(chalk.yellow('skip CAP init for local network'));
   }
 
   console.log('initiating mint ...');
-  execSync(`dfx canister --network ${dfxNetwork} call ${mainCanisterName} initMint`, execOptions);
+  execSync(`dfx canister --network ${dfxNetwork} call ${nftCanisterName} initMint`, execOptions);
 
   console.log('shuffle Tokens For Sale ...');
-  execSync(`dfx canister --network ${dfxNetwork} call ${mainCanisterName} shuffleTokensForSale`, execOptions);
+  execSync(`dfx canister --network ${dfxNetwork} call ${nftCanisterName} shuffleTokensForSale`, execOptions);
 
   console.log('airdrop tokens ...');
-  execSync(`dfx canister --network ${dfxNetwork} call ${mainCanisterName} airdropTokens 0`, execOptions);
+  execSync(`dfx canister --network ${dfxNetwork} call ${nftCanisterName} airdropTokens 0`, execOptions);
 
   console.log('airdrop tokens ...');
-  execSync(`dfx canister --network ${dfxNetwork} call ${mainCanisterName} airdropTokens 1500`, execOptions);
+  execSync(`dfx canister --network ${dfxNetwork} call ${nftCanisterName} airdropTokens 1500`, execOptions);
 
   console.log('enable sale ...');
-  execSync(`dfx canister --network ${dfxNetwork} call ${mainCanisterName} enableSale`, execOptions);
+  execSync(`dfx canister --network ${dfxNetwork} call ${nftCanisterName} enableSale`, execOptions);
 }
 
 run();

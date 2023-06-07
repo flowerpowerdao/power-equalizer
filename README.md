@@ -60,9 +60,9 @@ Clean deploy locally
 npm run deploy local -- --mode reinstall
 ```
 
-Deploy staging with small amount of cycles (for example to test the creation of canisters)
+Deploy staging with a small amount of cycles (for example to test the creation of canisters)
 ```
-npm run deploy staging -- --mode reinstall
+npm run deploy staging -- --with-cycles 200_000_000_000
 ```
 
 ## Upgrade main canister
@@ -76,23 +76,6 @@ dfx canister deploy production --netowork ic
 - check if all assets uploaded correctly by calling the canisters `getTokenToAssetMapping()` method
 
 ## deploy 📚
-
-We are using a makefile to simplify the deployment of canisters for different scenarios.
-
-```
-# makefile
-deploy-locally:
-	./deploy.zsh
-
-deploy-staging-ic:
-	./deploy.zsh ic
-
-deploy-staging-ic-full:
-	./deploy.zsh ic 7777
-
-deploy-production-ic-full:
-	./deploy.zsh ic 7777 production
-```
 
 ```
 # check the asset that are linked to the tokens
@@ -207,33 +190,22 @@ or to run specific test suite
 npm run vitest pending-sale
 ```
 
-## manual testing 🧪
+## Manual testing 🧪
 
-deploy the canister with
+Deploy the canister according to [Deploy](#deploy) section.
 
-```
-dfx deploy
-```
+Make sure that the NFT is redirected to the asset:
 
-use the following command to upload an asset that fits into a single message
+http://localhost:4943/0?canisterId=rrkah-fqaaa-aaaaa-aaaaq-cai
 
-```
-dfx canister call btcflower addAsset '(record {name = "privat";payload = record {ctype = "text/html"; data = vec {blob "hello world!"} } })'
-```
+http://localhost:4943/1?canisterId=rrkah-fqaaa-aaaaa-aaaaq-cai
 
-use the following command to mint a token
+http://localhost:4943/1?canisterId=rrkah-fqaaa-aaaaa-aaaaq-cai&type=thumbnail
 
-```
-dfx canister call btcflower mintNFT '(record {to = "75c52c5ee26d10c7c3da77ec7bc2b4c75e1fdc2b92e01d3da6986ba67cfa1703"; asset = 0 : nat32})'
-```
+http://localhost:4943/?canisterId=rrkah-fqaaa-aaaaa-aaaaq-cai&type=thumbnail&asset=1
 
-run icx-proxy to be able to user query parameters locally
+http://localhost:4943/?canisterId=rrkah-fqaaa-aaaaa-aaaaq-cai&tokenid=rrkah-fqaaa-aaaaa-aaaaq-cai should have same redirect as http://localhost:4943/0?canisterId=rrkah-fqaaa-aaaaa-aaaaq-cai
 
-```
-$(dfx cache show)/icx-proxy --address 127.0.0.1:8453 -vv
-```
-
----
 
 **NOTE**
 
