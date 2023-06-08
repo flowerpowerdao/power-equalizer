@@ -40,7 +40,7 @@ dfx deploy <canister> --network <network> --mode reinstall
 
 `--canister-id <principal>` - canister id. *Required*
 
-`--file <file>` - file name with backup data to restore. *Required*
+`--file <file>` - file name within `./backup/data` to restore. *Required*
 
 `--pem <pem_data>` - PEM-file data. *Required*
 
