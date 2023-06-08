@@ -2,6 +2,7 @@ import Cycles "mo:base/ExperimentalCycles";
 import Principal "mo:base/Principal";
 import Array "mo:base/Array";
 import Result "mo:base/Result";
+import Option "mo:base/Option";
 import Int "mo:base/Int";
 import Time "mo:base/Time";
 import Timer "mo:base/Timer";
@@ -30,9 +31,24 @@ import Tokens "Tokens";
 import Disburser "Disburser";
 import DisburserTypes "Disburser/types";
 import Utils "./utils";
-import Env "./Env";
+import Types "./types";
 
-shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCanister {
+shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs: Types.InitArgs) = myCanister {
+  let config = {
+    initArgs with
+    canister = cid;
+    minter = init_minter;
+  };
+
+  // validate config
+  if (config.marketplaces.size() < 1) {
+    Debug.trap("add at least one marketplace");
+  };
+  for (marketplace in config.marketplaces.vals()) {
+    if (marketplace.2 < 0 or marketplace.2 > 500) {
+      Debug.trap("marketplace fee must be between 0 and 500");
+    };
+  };
 
   /*********
   * TYPES *
@@ -155,14 +171,14 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   public shared ({ caller }) func restoreChunk(chunk : StableChunk) : async () {
     assert (caller == init_minter);
-    if (not Env.restoreEnabled) {
+    if (config.restoreEnabled != ?true) {
       Debug.trap("Restore disabled. Please reinstall canister with 'restoreEnabled = true'");
     };
     _loadStableChunk(chunk);
   };
 
   func _trapIfRestoreEnabled() {
-    if (Env.restoreEnabled) {
+    if (config.restoreEnabled == ?true) {
       Debug.trap("Restore in progress. If restore is complete, upgrade canister with `restoreEnabled = false`");
     };
   };
@@ -172,18 +188,17 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     Timer.cancelTimer(_timerId);
     Timer.cancelTimer(_revealTimerId);
 
-    _timerId := Timer.recurringTimer(
-      Env.timersInterval,
-      func() : async () {
-        ignore cronSettlements();
-        ignore cronDisbursements();
-        ignore cronSalesSettlements();
-        ignore cronFailedSales();
-      },
-    );
+    let timersInterval = Utils.toNanos(Option.get(config.timersInterval, #seconds(60)));
 
-    if (Env.delayedReveal and not _Shuffle.isShuffled()) {
-      let revealTime = Env.publicSaleStart + Env.revealDelay;
+    _timerId := Timer.recurringTimer(#nanoseconds(timersInterval), func() : async () {
+      ignore cronSettlements();
+      ignore cronDisbursements();
+      ignore cronSalesSettlements();
+      ignore cronFailedSales();
+    });
+
+    if (Utils.toNanos(config.revealDelay) > 0 and not _Shuffle.isShuffled()) {
+      let revealTime = config.publicSaleStart + Utils.toNanos(config.revealDelay);
       let delay = Int.abs(Int.max(0, revealTime - Time.now()));
 
       // add random delay up to 60 minutes
@@ -236,9 +251,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   };
 
   // Disburser
-  let _Disburser = Disburser.Factory(
-    cid
-  );
+  let _Disburser = Disburser.Factory(config);
 
   // queries
   public query func getDisbursements() : async [DisburserTypes.Disbursement] {
@@ -275,12 +288,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   };
 
   // Tokens
-  let _Tokens = Tokens.Factory(
-    cid,
-    {
-      minter = init_minter;
-    },
-  );
+  let _Tokens = Tokens.Factory(config);
 
   // queries
   public query func balance(request : TokenTypes.BalanceRequest) : async TokenTypes.BalanceResponse {
@@ -292,11 +300,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
   };
 
   // Assets
-  let _Assets = Assets.Factory(
-    {
-      minter = init_minter;
-    }
-  );
+  let _Assets = Assets.Factory(config);
 
   public shared ({ caller }) func streamAsset(id : Nat, isThumb : Bool, payload : Blob) : async () {
     _trapIfRestoreEnabled();
@@ -321,26 +325,21 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   // Shuffle
   let _Shuffle = Shuffle.Factory(
+    config,
     {
       _Assets;
       _Tokens;
-    },
-    {
-      minter = init_minter;
     },
   );
 
   // Sale
   let _Sale = Sale.Factory(
-    cid,
+    config,
     {
       _Cap;
       _Shuffle;
       _Tokens;
       _Disburser;
-    },
-    {
-      minter = init_minter;
     },
   );
 
@@ -419,15 +418,12 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   // Marketplace
   let _Marketplace = Marketplace.Factory(
-    cid,
+    config,
     {
       _Tokens;
       _Cap;
       _Sale;
       _Disburser;
-    },
-    {
-      minter = init_minter;
     },
   );
 
@@ -463,26 +459,12 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
     await _Marketplace.cronSettlements(caller);
   };
 
-  public shared ({ caller }) func putFrontend(identifier : Text, frontend : MarketplaceTypes.Frontend) : async () {
-    _trapIfRestoreEnabled();
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    _Marketplace.putFrontend(caller, identifier, frontend);
-  };
-
-  public shared ({ caller }) func deleteFrontend(identifier : Text) : async () {
-    _trapIfRestoreEnabled();
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    _Marketplace.deleteFrontend(caller, identifier);
-  };
-
   public shared func frontends() : async [(Text, MarketplaceTypes.Frontend)] {
     _Marketplace.frontends();
   };
 
   public shared ({ caller }) func grow(n : Nat) : async Nat {
-    assert (Env.test);
+    assert (config.test == ?true);
     ignore _Sale.grow(n);
     _Marketplace.grow(n);
   };
@@ -528,15 +510,12 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   // EXT
   let _EXT = EXT.Factory(
-    cid,
+    config,
     {
       _Tokens;
       _Assets;
       _Marketplace;
       _Cap;
-    },
-    {
-      minter = init_minter;
     },
   );
 
@@ -586,16 +565,13 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal) = myCani
 
   // Http
   let _HttpHandler = Http.HttpHandler(
-    cid,
+    config,
     {
       _Assets;
       _Marketplace;
       _Shuffle;
       _Tokens;
       _Sale;
-    },
-    {
-      minter = init_minter;
     },
   );
 

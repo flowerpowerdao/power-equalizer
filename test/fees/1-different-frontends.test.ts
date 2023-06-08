@@ -4,52 +4,24 @@ import { ICP_FEE } from '../consts';
 import { User } from '../user';
 import { applyFees, buyFromMarketplace, buyFromSale, checkTokenCount, feeOf, toAccount, tokenIdentifier } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
-import env from './.env.fees';
+import env from './env';
 
 describe('list and buy on different marketplace frontends', async () => {
   let price = 1_000_000n;
   let initialBalance = 1_000_000_000_000n;
   let transferFees = ICP_FEE * 5n; // 1 seller transfer, 2 marketplace transfers(seller + buyer), 2 royalty transfers
 
-  let yumi = new User;
-  let yumiFee = 456n;
+  let yumi = new User('yumi');
+  let yumiFee = env.marketplace1_fee;
 
-  let jelly = new User;
-  let jellyFee = 300n;
+  let jelly = new User('jelly');
+  let jellyFee = env.marketplace2_fee;
 
   let seller = new User;
   await seller.mintICP(initialBalance);
 
   let buyer = new User;
   await buyer.mintICP(initialBalance);
-
-  it('try to add marketplace with fee < 0', async () => {
-    await expect(new User('').mainActor.putFrontend('yumi', {
-      accountIdentifier: yumi.accountId,
-      fee: -1n,
-    })).rejects.toThrow();
-  });
-
-  it('try to add marketplace with fee > 500', async () => {
-    await expect(new User('').mainActor.putFrontend('yumi', {
-      accountIdentifier: yumi.accountId,
-      fee: 501n,
-    })).rejects.toThrow();
-  });
-
-  it('add Yumi marketplace frontend', async () => {
-    await new User('').mainActor.putFrontend('yumi', {
-      accountIdentifier: yumi.accountId,
-      fee: yumiFee,
-    });
-  });
-
-  it('add Jelly marketplace frontend', async () => {
-    await new User('').mainActor.putFrontend('jelly', {
-      accountIdentifier: jelly.accountId,
-      fee: jellyFee,
-    });
-  });
 
   it('buy from sale', async () => {
     await buyFromSale(seller);

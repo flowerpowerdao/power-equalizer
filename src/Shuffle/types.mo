@@ -14,8 +14,4 @@ module {
     _Tokens : Tokens.Factory;
   };
   public type TokenIndex = ExtCore.TokenIndex;
-
-  public type Constants = {
-    minter : Principal;
-  };
 };

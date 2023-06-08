@@ -22,8 +22,4 @@ module {
     metadata : ?File;
     payload : File;
   };
-
-  public type Constants = {
-    minter : Principal;
-  }
 };

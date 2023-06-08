@@ -73,9 +73,4 @@ module {
     _Sale : Sale.Factory;
     _Disburser : Disburser.Factory;
   };
-
-  public type Constants = {
-    minter : Principal;
-  };
-
 };

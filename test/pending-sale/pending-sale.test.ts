@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { User } from '../user';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
-import env from './.env.pending-sale';
+import env from './env';
 
 describe('pending sale', () => {
   test('check salesSettings', async () => {
@@ -9,12 +9,12 @@ describe('pending sale', () => {
     let res = await user.mainActor.salesSettings(user.accountId);
     expect(res.salePrice).toBe(env.salePrice);
     expect(res.price).toBe(env.salePrice);
-    expect(res.remaining).toBe(env.collectionSize);
+    expect(res.remaining).toBe(7777n);
     expect(res.sold).toBe(0n);
-    expect(res.totalToSell).toBe(env.collectionSize);
-    expect(res.startTime).toBe(env.publicSaleStart);
+    expect(res.totalToSell).toBe(7777n);
+    expect(res.startTime).toBe(env.whitelistSlot1_start);
+    expect(res.whitelistTime).toBe(env.publicSaleStart);
     expect(res.whitelist).toBe(false);
-    expect(res.whitelistTime).toBe(env.whitelistTime);
     expect(res.bulkPricing).toEqual([[1n, env.salePrice]]);
   });
 
@@ -40,7 +40,7 @@ describe('pending sale', () => {
   test('check supply', async () => {
     let user = new User;
     let res = await user.mainActor.supply();
-    expect(res['ok']).toBe(env.collectionSize);
+    expect(res['ok']).toBe(7777n);
   });
 
   test('check getTokens', async () => {

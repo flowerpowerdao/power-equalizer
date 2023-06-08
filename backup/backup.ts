@@ -8,10 +8,15 @@ import { getActor } from './actor';
 let argv = minimist(process.argv.slice(2));
 let network = argv.network || 'local';
 let file = argv.file || new Date().toISOString().replaceAll(':', '-').replace('T', '_').replace('Z', '').slice(0, -4) + '.json';
-let chunkSize = argv['chunk-size'] ? BigInt(argv['chunk-size']) : 10_000n;
+let chunkSize = argv['chunk-size'] ? BigInt(argv['chunk-size']) : 5000n;
 let pretty = network == 'local';
+let canisterId = argv['canister-id'];
 
-let mainActor = getActor(network);
+if (!canisterId) {
+  throw new Error('Missing --canister-id argument');
+}
+
+let mainActor = getActor(network, canisterId);
 
 export let backup = async ({network, file, chunkSize}) => {
   console.log(`Network: ${network}`);

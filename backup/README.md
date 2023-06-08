@@ -11,22 +11,24 @@ The backup file will be saved in `data` folder.
 
 `--network <network>` - `ic` or `local`. *Default* `local`
 
+`--canister-id <principal>` - canister id. *Required*
+
 `--file <file>` - output file name. *Default* current date and time
 
-`--chunk-size <size>` - chunk size(number of items). *Default* `10000`
+`--chunk-size <size>` - chunk size(number of items). *Default* `5000`
 
 Chunk size > 30k => backup fails
 Chunk size > 15k => restore fails
 
 ### Example with arguments
 ```
-npm run backup -- --network ic --file 2023-01-01.json --chunk-size 5000
+npm run backup -- --network ic --canister-id rrkah-fqaaa-aaaaa-aaaaq-cai --file 2023-01-01.json --chunk-size 5000
 ```
 
 # Restore
 (!) If any error occurred during the restore, please follow all the steps again.
 
-1. In `Env/lib.mo` set `restoreEnabled = true`
+1. Add `restoreEnabled = opt true;` to `initArgs.did`
 2. Reinstall canister with clear all data
 ```
 dfx deploy <canister> --network <network> --mode reinstall
@@ -35,6 +37,8 @@ dfx deploy <canister> --network <network> --mode reinstall
 ### Possible arguments:
 
 `--network <network>` - `ic` or `local`. *Default* `local`
+
+`--canister-id <principal>` - canister id. *Required*
 
 `--file <file>` - file name with backup data to restore. *Required*
 
@@ -46,10 +50,10 @@ npm run restore -- --network <network> --file <backup-file> --pem "$(dfx identit
 
 Example:
 ```
-npm run restore -- --network ic --file 2023-01-01.json --pem "$(dfx identity export default)"
+npm run restore -- --network ic --canister-id rrkah-fqaaa-aaaaa-aaaaq-cai --file 2023-01-01.json --pem "$(dfx identity export default)"
 ```
 
-4. In `Env/lib.mo` set `restoreEnabled = false`
+4. Remove `restoreEnabled = opt true;` from `initArgs.did`
 4. Upgrade canister
 ```
 dfx deploy <canister> --network <network>

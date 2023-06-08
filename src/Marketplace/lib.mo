@@ -21,13 +21,13 @@ import Root "mo:cap/Root";
 import Fuzz "mo:fuzz";
 
 import AID "../toniq-labs/util/AccountIdentifier";
-import Env "../Env";
 import ExtCore "../toniq-labs/ext/Core";
 import Types "types";
+import RootTypes "../types";
 import Utils "../utils";
 
 module {
-  public class Factory(this : Principal, deps : Types.Dependencies, consts : Types.Constants) {
+  public class Factory(config : RootTypes.Config, deps : Types.Dependencies) {
 
     /*********
     * STATE *
@@ -110,7 +110,7 @@ module {
     ********************/
 
     public func lock(caller : Principal, tokenid : Types.TokenIdentifier, price : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount, frontendIdentifier : ?Text) : async Result.Result<Types.AccountIdentifier, Types.CommonError> {
-      if (ExtCore.TokenIdentifier.isPrincipal(tokenid, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(tokenid, config.canister) == false) {
         return #err(#InvalidToken(tokenid));
       };
 
@@ -122,15 +122,6 @@ module {
 
       if (not validFrontendIndentifier(frontendIdentifier)) {
         return #err(#Other("Unknown frontend identifier"));
-      };
-
-      switch (frontendIdentifier) {
-        case (?frontendIdentifier) {
-          if (_frontends.get(frontendIdentifier) == null) {
-            return #err(#Other("Unknown frontend identifier"));
-          };
-        };
-        case (null) {};
       };
 
       let listing = switch (_tokenListing.get(token)) {
@@ -145,13 +136,13 @@ module {
       };
 
       let subaccount = deps._Sale.getNextSubAccount();
-      let paymentAddress : Types.AccountIdentifier = AID.fromPrincipal(this, ?subaccount);
+      let paymentAddress : Types.AccountIdentifier = AID.fromPrincipal(config.canister, ?subaccount);
       _tokenListing.put(
         token,
         {
           seller = listing.seller;
           price = listing.price;
-          locked = ?(Time.now() + Env.escrowDelay);
+          locked = ?(Time.now() + Utils.toNanos(Option.get(config.escrowDelay, #minutes(2))));
           sellerFrontend = listing.sellerFrontend;
           buyerFrontend = frontendIdentifier;
         },
@@ -190,7 +181,7 @@ module {
     };
 
     public func settle(caller : Principal, tokenid : Types.TokenIdentifier) : async Result.Result<(), Types.CommonError> {
-      if (ExtCore.TokenIdentifier.isPrincipal(tokenid, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(tokenid, config.canister) == false) {
         return #err(#InvalidToken(tokenid));
       };
       let token : Types.TokenIndex = ExtCore.TokenIdentifier.getIndex(tokenid);
@@ -203,7 +194,7 @@ module {
       };
 
       let response = await Ledger.account_balance({
-        account = Blob.fromArray(addHash(fromPrincipal(this, ?settlement.subaccount)));
+        account = Blob.fromArray(addHash(fromPrincipal(config.canister, ?settlement.subaccount)));
       });
 
       // because of the await above, we check again if there is a settlement available for the token
@@ -231,11 +222,11 @@ module {
       };
 
       // deduct 3 extra transaction fees for marketplace(seller + buyer) fee and disbursment to seller
-      let bal : Nat64 = response.e8s - (10000 * Nat64.fromNat(Env.royalties.size() + 3));
+      let bal : Nat64 = response.e8s - (10000 * Nat64.fromNat(config.royalties.size() + 3));
       var rem = bal;
 
       // disbursement of royalties
-      for (f in Env.royalties.vals()) {
+      for (f in config.royalties.vals()) {
         let _fee : Nat64 = bal * f.1 / 100000;
         deps._Disburser.addDisbursement({
           to = f.0;
@@ -309,12 +300,13 @@ module {
 
     public func list(caller : Principal, request : Types.ListRequest) : async Result.Result<(), Types.CommonError> {
       // marketplace is open either when marketDelay has passed or collection sold out
-      if (Time.now() < Env.publicSaleStart + Env.marketDelay) {
+      let marketDelay = Utils.toNanos(Option.get(config.marketDelay, #days(2)));
+      if (Time.now() < config.publicSaleStart + marketDelay) {
         if (deps._Sale.getSold() < deps._Sale.getTotalToSell()) {
           return #err(#Other("You can not list yet"));
         };
       };
-      if (ExtCore.TokenIdentifier.isPrincipal(request.token, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(request.token, config.canister) == false) {
         return #err(#InvalidToken(request.token));
       };
       let token = ExtCore.TokenIdentifier.getIndex(request.token);
@@ -378,7 +370,7 @@ module {
     };
 
     public func details(token : Types.TokenIdentifier) : Result.Result<(Types.AccountIdentifier, ?Types.Listing), Types.CommonError> {
-      if (ExtCore.TokenIdentifier.isPrincipal(token, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(token, config.canister) == false) {
         return #err(#InvalidToken(token));
       };
       let tokenind = ExtCore.TokenIdentifier.getIndex(token);
@@ -403,7 +395,7 @@ module {
         if (_isLocked(token)) {
           switch (_tokenSettlement.get(token)) {
             case (?settlement) {
-              result.add((token, AID.fromPrincipal(this, ?settlement.subaccount), settlement.price));
+              result.add((token, AID.fromPrincipal(config.canister, ?settlement.subaccount), settlement.price));
             };
             case (_) {};
           };
@@ -452,7 +444,7 @@ module {
         switch (unlockedSettlements().keys().next()) {
           case (?tokenindex) {
             try {
-              ignore (await settle(caller, ExtCore.TokenIdentifier.fromPrincipal(this, tokenindex)));
+              ignore (await settle(caller, ExtCore.TokenIdentifier.fromPrincipal(config.canister, tokenindex)));
             } catch (e) {};
           };
           case null break settleLoop;
@@ -468,17 +460,6 @@ module {
       AID.fromPrincipal(Principal.fromText(p), ?Utils.natToSubAccount(sa));
     };
 
-    public func putFrontend(caller : Principal, identifier : Text, frontend : Types.Frontend) {
-      assert (caller == consts.minter);
-      assert (validFrontendFee(frontend));
-      _frontends.put(identifier, frontend);
-    };
-
-    public func deleteFrontend(caller : Principal, identifier : Text) {
-      assert (caller == consts.minter);
-      _frontends.delete(identifier);
-    };
-
     public func frontends() : [(Text, Types.Frontend)] {
       Iter.toArray(_frontends.entries());
     };
@@ -487,40 +468,31 @@ module {
     * INTERNAL METHODS *
     ********************/
 
+    func getFrontend(identifierOpt : ?Text) : Types.Frontend {
+      let identifier = Option.get(identifierOpt, config.marketplaces[0].0);
+
+      for (marketplace in config.marketplaces.vals()) {
+        if (marketplace.0 == identifier) {
+          return { accountIdentifier = marketplace.1; fee = marketplace.2; };
+        };
+      };
+
+      return { accountIdentifier = config.marketplaces[0].1; fee = config.marketplaces[0].2; }
+    };
+
     func validFrontendIndentifier(frontendIdentifier : ?Text) : Bool {
       switch (frontendIdentifier) {
-        case (?frontendIdentifier) {
-          if (_frontends.get(frontendIdentifier) == null) {
-            return false;
+        case (?identifier) {
+          for (marketplace in config.marketplaces.vals()) {
+            if (marketplace.0 == identifier) {
+              return true;
+            };
           };
+          return false;
         };
         case (null) {};
       };
       true;
-    };
-
-    func validFrontendFee(frontend : Types.Frontend) : Bool {
-      frontend.fee <= 500 and frontend.fee >= 0
-    };
-
-    func getFrontend(identifier : ?Text) : Types.Frontend {
-      let defaultFrontend : Types.Frontend = {
-        fee = Env.defaultMarketplaceFee.1;
-        accountIdentifier = Env.defaultMarketplaceFee.0;
-      };
-
-      // disbursement of marketplace fee
-      let frontend : Types.Frontend = switch (
-        do ? {
-          switch (_frontends.get(identifier!)) {
-            case (?frontend) frontend;
-            case _ defaultFrontend;
-          };
-        },
-      ) {
-        case (?frontend) { frontend };
-        case _ defaultFrontend;
-      };
     };
 
     // getters & setters

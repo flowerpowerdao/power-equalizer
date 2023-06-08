@@ -4,17 +4,19 @@ import { ICP_FEE } from '../consts';
 import { User } from '../user';
 import { applyFees, buyFromSale, checkTokenCount, feeOf, toAccount, tokenIdentifier } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
-import env from './.env.fees';
+import env from './env';
 
-describe('sale and royalty fees', async () => {
+describe('sale and royalty fees', () => {
   let price = 1_000_000n;
   let initialBalance = 1_000_000_000n;
 
   let seller = new User;
-  await seller.mintICP(initialBalance);
-
   let buyer = new User;
-  await buyer.mintICP(initialBalance);
+
+  it('mint ICP', async () => {
+    await seller.mintICP(initialBalance);
+    await buyer.mintICP(initialBalance);
+  });
 
   it('check beneficiary0 balance', async () => {
     expect(await seller.icpActor.account_balance(toAccount(env.beneficiary0))).toEqual({ e8s: 0n });
@@ -24,12 +26,26 @@ describe('sale and royalty fees', async () => {
     expect(await seller.icpActor.account_balance(toAccount(env.beneficiary1))).toEqual({ e8s: 0n });
   });
 
-  it('check defaultMarketplace balance', async () => {
-    expect(await seller.icpActor.account_balance(toAccount(env.defaultMarketplaceAddr))).toEqual({ e8s: 0n });
+  it('check default marketplace balance', async () => {
+    expect(await seller.icpActor.account_balance(toAccount(env.marketplace0_addr))).toEqual({ e8s: 0n });
   });
 
   it('buy from sale', async () => {
-    await buyFromSale(seller)
+    let settings = await seller.mainActor.salesSettings(seller.accountId);
+    let res = await seller.mainActor.reserve(settings.price, 1n, seller.accountId, new Uint8Array);
+
+    expect(res).toHaveProperty('ok');
+
+    if ('ok' in res) {
+      let paymentAddress = res.ok[0];
+      let paymentAmount = res.ok[1];
+      expect(paymentAddress.length).toBe(64);
+      expect(paymentAmount).toBe(settings.price);
+
+      await seller.sendICP(paymentAddress, paymentAmount);
+      let retrieveRes = await seller.mainActor.retrieve(paymentAddress);
+      expect(retrieveRes).toHaveProperty('ok');
+    }
   });
 
   it('cron cronDisbursements', async () => {
@@ -45,8 +61,8 @@ describe('sale and royalty fees', async () => {
     expect(await seller.icpActor.account_balance(toAccount(env.beneficiary1))).toEqual({ e8s: feeOf(env.salePrice - buyTransferFees, env.salesDistribution1) });
   });
 
-  it('check defaultMarketplace sale fee disbursement', async () => {
-    expect(await seller.icpActor.account_balance(toAccount(env.defaultMarketplaceAddr))).toEqual({ e8s: 0n });
+  it('check default marketplace sale fee disbursement', async () => {
+    expect(await seller.icpActor.account_balance(toAccount(env.marketplace0_addr))).toEqual({ e8s: 0n });
   });
 
   it('check seller ICP balance', async () => {
@@ -121,7 +137,7 @@ describe('sale and royalty fees', async () => {
 
   it('check seller ICP balance', async () => {
     let balanceAfterBuyOnSale = initialBalance - env.salePrice - ICP_FEE;
-    let expectedBalance = balanceAfterBuyOnSale + applyFees(price - transferFees, [env.royalty0, env.royalty1, env.defaultMarketplaceFee * 2n]);
+    let expectedBalance = balanceAfterBuyOnSale + applyFees(price - transferFees, [env.royalty0, env.royalty1, env.marketplace0_fee * 2n]);
     expect(await seller.icpActor.account_balance({ account: seller.account })).toEqual({ e8s: expectedBalance });
   });
 
@@ -137,7 +153,7 @@ describe('sale and royalty fees', async () => {
     expect(await seller.icpActor.account_balance(toAccount(env.beneficiary1))).toEqual({ e8s: saleFee + royaltyFee });
   });
 
-  it('check defaultMarketplace royalty fee disbursement', async () => {
-    expect(await seller.icpActor.account_balance(toAccount(env.defaultMarketplaceAddr))).toEqual({ e8s: feeOf(price - transferFees, env.defaultMarketplaceFee * 2n) });
+  it('check default marketplace royalty fee disbursement', async () => {
+    expect(await seller.icpActor.account_balance(toAccount(env.marketplace0_addr))).toEqual({ e8s: feeOf(price - transferFees, env.marketplace0_fee * 2n) });
   });
 });

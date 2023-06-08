@@ -2,14 +2,16 @@ import { describe, test, expect, it } from 'vitest';
 import { User } from '../user';
 import { buyFromSale, checkTokenCount, tokenIdentifier } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
-import env from './.env.marketplace';
+import env from './env';
 
-describe('list, lock and try to delist nft', async () => {
+describe('list, lock and try to delist nft', () => {
   let seller = new User;
-  seller.mintICP(1000_000_000n);
-
   let buyer = new User;
-  buyer.mintICP(1000_000_000n);
+
+  it('mint ICP', async () => {
+    await seller.mintICP(1000_000_000n);
+    await buyer.mintICP(1000_000_000n);
+  });
 
   it('buy from sale', async () => {
     await buyFromSale(seller)

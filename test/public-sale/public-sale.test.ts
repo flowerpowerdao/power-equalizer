@@ -2,7 +2,7 @@ import { describe, test, expect } from 'vitest';
 import { User } from '../user';
 import { buyFromSale, checkTokenCount } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
-import env from './.env.public-sale';
+import env from './env';
 
 describe('public sale', () => {
   test('try to list nft before marketplace opens', async () => {
@@ -18,7 +18,7 @@ describe('public sale', () => {
 
   test('try to buy from sale with insufficient funds', async () => {
     let user = new User;
-    user.mintICP(1000_000_000n);
+    await user.mintICP(1000_000_000n);
 
     let settings = await user.mainActor.salesSettings(user.accountId);
     let res = await user.mainActor.reserve(settings.price, 1n, user.accountId, new Uint8Array);
@@ -44,7 +44,7 @@ describe('public sale', () => {
 
   test('buy sequentially 2 nft from sale', async () => {
     let user = new User;
-    user.mintICP(100_000_000_000n);
+    await user.mintICP(100_000_000_000n);
     let settings = await user.mainActor.salesSettings(user.accountId);
 
     await buyFromSale(user);
@@ -55,7 +55,7 @@ describe('public sale', () => {
 
   test('buy in parallel 4 nft from sale', async () => {
     let user = new User;
-    user.mintICP(100_000_000_000n);
+    await user.mintICP(100_000_000_000n);
     let settings = await user.mainActor.salesSettings(user.accountId);
 
     await Promise.all([

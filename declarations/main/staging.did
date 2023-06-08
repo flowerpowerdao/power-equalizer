@@ -1,11 +1,22 @@
+type WhitelistSpotUsed = bool;
+type WhitelistSpotId = text;
 type WhitelistSlot =
  record {
-   end: Time__2;
-   start: Time__2;
+   end: Time;
+   start: Time;
+ };
+type Whitelist =
+ record {
+   addresses: vec AccountIdentifier;
+   endTime: opt Time;
+   name: text;
+   oneTimeOnly: bool;
+   price: nat64;
+   startTime: Time;
  };
 type User =
  variant {
-   address: AccountIdentifier;
+   address: AccountIdentifier__1;
    "principal": principal;
  };
 type UpdateInformationRequest = record {
@@ -15,12 +26,12 @@ type TransferResponse =
  variant {
    err:
     variant {
-      CannotNotify: AccountIdentifier;
+      CannotNotify: AccountIdentifier__1;
       InsufficientBalance;
       InvalidToken: TokenIdentifier;
       Other: text;
       Rejected;
-      Unauthorized: AccountIdentifier;
+      Unauthorized: AccountIdentifier__1;
     };
    ok: Balance;
  };
@@ -36,10 +47,10 @@ type TransferRequest =
  };
 type Transaction =
  record {
-   buyer: AccountIdentifier__1;
+   buyer: AccountIdentifier__2;
    price: nat64;
    seller: principal;
-   time: Time;
+   time: Time__1;
    token: TokenIdentifier__1;
  };
 type TokenIndex__4 = nat32;
@@ -78,13 +89,13 @@ type StableChunk__6 = opt
                             owners:
                              vec
                               record {
-                                AccountIdentifier__6;
+                                AccountIdentifier__7;
                                 vec TokenIndex__4;
                               };
                             registry:
                              vec record {
                                    TokenIndex__4;
-                                   AccountIdentifier__6;
+                                   AccountIdentifier__7;
                                  };
                             supply: Balance__2;
                             tokenMetadata:
@@ -100,14 +111,14 @@ type StableChunk__4 =
     v1:
      record {
        failedSales: vec record {
-                          AccountIdentifier__4;
+                          AccountIdentifier__5;
                           SubAccount__1;
                         };
        nextSubAccount: nat;
        saleTransactionChunk: vec SaleTransaction;
        saleTransactionCount: nat;
        salesSettlements: vec record {
-                               AccountIdentifier__4;
+                               AccountIdentifier__5;
                                Sale;
                              };
        sold: nat;
@@ -116,11 +127,34 @@ type StableChunk__4 =
        totalToSell: nat;
        whitelist: vec record {
                         nat64;
-                        AccountIdentifier__4;
+                        AccountIdentifier__5;
                         WhitelistSlot;
                       };
      };
     v1_chunk: record {saleTransactionChunk: vec SaleTransaction;};
+    v2:
+     record {
+       failedSales: vec record {
+                          AccountIdentifier__5;
+                          SubAccount__1;
+                        };
+       nextSubAccount: nat;
+       saleTransactionChunk: vec SaleTransaction;
+       saleTransactionCount: nat;
+       salesSettlements: vec record {
+                               AccountIdentifier__5;
+                               Sale;
+                             };
+       sold: nat;
+       soldIcp: nat64;
+       tokensForSale: vec TokenIndex__2;
+       totalToSell: nat;
+       whitelistSpots: vec record {
+                             WhitelistSpotId;
+                             WhitelistSpotUsed;
+                           };
+     };
+    v2_chunk: record {saleTransactionChunk: vec SaleTransaction;};
   };
 type StableChunk__3 =
  opt
@@ -168,7 +202,7 @@ type StableChunk = variant {
                       };};
 type Settlement =
  record {
-   buyer: AccountIdentifier__1;
+   buyer: AccountIdentifier__2;
    buyerFrontend: opt text;
    price: nat64;
    seller: principal;
@@ -177,10 +211,10 @@ type Settlement =
  };
 type SaleTransaction =
  record {
-   buyer: AccountIdentifier__4;
+   buyer: AccountIdentifier__5;
    price: nat64;
    seller: principal;
-   time: Time__1;
+   time: Time__2;
    tokens: vec TokenIndex__2;
  };
 type SaleSettings =
@@ -195,37 +229,37 @@ type SaleSettings =
    remaining: nat;
    salePrice: nat64;
    sold: nat;
-   startTime: Time__1;
+   startTime: Time__2;
    totalToSell: nat;
    whitelist: bool;
-   whitelistTime: Time__1;
+   whitelistTime: Time__2;
  };
 type Sale =
  record {
-   buyer: AccountIdentifier__4;
-   expires: Time__1;
+   buyer: AccountIdentifier__5;
+   expires: Time__2;
    price: nat64;
-   slot: opt WhitelistSlot;
    subaccount: SubAccount__1;
    tokens: vec TokenIndex__2;
+   whitelistName: opt text;
  };
 type Result_9 =
  variant {
    err: CommonError__2;
-   ok: AccountIdentifier__6;
+   ok: AccountIdentifier__7;
  };
 type Result_8 =
  variant {
    err: CommonError__1;
    ok: record {
-         AccountIdentifier__1;
+         AccountIdentifier__2;
          opt Listing;
        };
  };
 type Result_7 =
  variant {
    err: CommonError__1;
-   ok: AccountIdentifier__1;
+   ok: AccountIdentifier__2;
  };
 type Result_6 =
  variant {
@@ -236,7 +270,7 @@ type Result_5 =
  variant {
    err: text;
    ok: record {
-         AccountIdentifier__4;
+         AccountIdentifier__5;
          nat64;
        };
  };
@@ -327,7 +361,7 @@ type LogMessagesData =
 type Listing =
  record {
    buyerFrontend: opt text;
-   locked: opt Time;
+   locked: opt Time__1;
    price: nat64;
    seller: principal;
    sellerFrontend: opt text;
@@ -338,6 +372,39 @@ type ListRequest =
    frontendIdentifier: opt text;
    price: opt nat64;
    token: TokenIdentifier__1;
+ };
+type InitArgs =
+ record {
+   airdrop: vec AccountIdentifier;
+   dutchAuction: opt DutchAuction;
+   escrowDelay: opt Duration;
+   marketDelay: opt Duration;
+   marketplaces: vec record {
+                       text;
+                       AccountIdentifier;
+                       nat64;
+                     };
+   name: text;
+   publicSaleStart: Time;
+   restoreEnabled: opt bool;
+   revealDelay: Duration;
+   royalties: vec record {
+                    AccountIdentifier;
+                    nat64;
+                  };
+   sale: variant {
+           duration: Duration;
+           supply: nat;
+         };
+   salePrice: nat64;
+   salesDistribution: vec record {
+                            AccountIdentifier;
+                            nat64;
+                          };
+   singleAssetCollection: opt bool;
+   test: opt bool;
+   timersInterval: opt Duration;
+   whitelists: vec Whitelist;
  };
 type HttpStreamingStrategy = variant {
                                Callback:
@@ -424,7 +491,7 @@ type GetInformationRequest =
  };
 type Frontend =
  record {
-   accountIdentifier: AccountIdentifier__1;
+   accountIdentifier: AccountIdentifier__2;
    fee: nat64;
  };
 type File =
@@ -433,11 +500,32 @@ type File =
    data: vec blob;
  };
 type Extension = text;
+type DutchAuction =
+ record {
+   interval: Time;
+   intervalPriceDrop: nat64;
+   reservePrice: nat64;
+   startPrice: nat64;
+   target: variant {
+             everyone;
+             publicSale;
+             whitelist;
+           };
+ };
+type Duration =
+ variant {
+   days: nat;
+   hours: nat;
+   minutes: nat;
+   nanoseconds: nat;
+   none;
+   seconds: nat;
+ };
 type Disbursement =
  record {
    amount: nat64;
    fromSubaccount: SubAccount__2;
-   to: AccountIdentifier__5;
+   to: AccountIdentifier__6;
    tokenIndex: TokenIndex__3;
  };
 type DailyMetricsData =
@@ -527,13 +615,12 @@ type Canister =
    cronFailedSales: () -> ();
    cronSalesSettlements: () -> ();
    cronSettlements: () -> ();
-   deleteFrontend: (text) -> ();
    details: (TokenIdentifier__1) -> (Result_8) query;
    enableSale: () -> (nat);
    extensions: () -> (vec Extension) query;
    failedSales: () ->
     (vec record {
-           AccountIdentifier__4;
+           AccountIdentifier__5;
            SubAccount__1;
          }) query;
    frontends: () -> (vec record {
@@ -547,7 +634,7 @@ type Canister =
    getMinter: () -> (principal) query;
    getRegistry: () -> (vec record {
                              TokenIndex;
-                             AccountIdentifier__2;
+                             AccountIdentifier__3;
                            }) query;
    getTokenToAssetMapping: () -> (vec record {
                                         TokenIndex;
@@ -569,7 +656,7 @@ type Canister =
                           Listing;
                           Metadata__2;
                         }) query;
-   lock: (TokenIdentifier__1, nat64, AccountIdentifier__1, SubAccount__3,
+   lock: (TokenIdentifier__1, nat64, AccountIdentifier__2, SubAccount__3,
     opt text) -> (Result_7);
    metadata: (TokenIdentifier__2) -> (Result_6) query;
    pendingCronJobs: () ->
@@ -577,30 +664,29 @@ type Canister =
        disbursements: nat;
        failedSettlements: nat;
      }) query;
-   putFrontend: (text, Frontend) -> ();
-   reserve: (nat64, nat64, AccountIdentifier__4, SubAccount__1) -> (Result_5);
+   reserve: (nat64, nat64, AccountIdentifier__5, SubAccount__1) -> (Result_5);
    restoreChunk: (StableChunk) -> ();
-   retrieve: (AccountIdentifier__4) -> (Result_4);
+   retrieve: (AccountIdentifier__5) -> (Result_4);
    saleTransactions: () -> (vec SaleTransaction) query;
-   salesSettings: (AccountIdentifier__3) -> (SaleSettings) query;
+   salesSettings: (AccountIdentifier__4) -> (SaleSettings) query;
    salesSettlements: () -> (vec record {
-                                  AccountIdentifier__4;
+                                  AccountIdentifier__5;
                                   Sale;
                                 }) query;
    settle: (TokenIdentifier__1) -> (Result_3);
    settlements: () ->
     (vec record {
            TokenIndex__1;
-           AccountIdentifier__1;
+           AccountIdentifier__2;
            nat64;
          }) query;
    shuffleTokensForSale: () -> ();
    stats: () -> (nat64, nat64, nat64, nat64, nat, nat, nat) query;
    streamAsset: (nat, bool, blob) -> ();
    supply: () -> (Result_2) query;
-   toAccountIdentifier: (text, nat) -> (AccountIdentifier__3) query;
-   tokens: (AccountIdentifier__2) -> (Result_1) query;
-   tokens_ext: (AccountIdentifier__2) -> (Result) query;
+   toAccountIdentifier: (text, nat) -> (AccountIdentifier__4) query;
+   tokens: (AccountIdentifier__3) -> (Result_1) query;
+   tokens_ext: (AccountIdentifier__3) -> (Result) query;
    transactions: () -> (vec Transaction) query;
    transfer: (TransferRequest) -> (TransferResponse);
    updateCanistergeekInformation: (UpdateInformationRequest) -> ();
@@ -626,6 +712,7 @@ type Asset =
    payload: File;
    thumbnail: opt File;
  };
+type AccountIdentifier__7 = text;
 type AccountIdentifier__6 = text;
 type AccountIdentifier__5 = text;
 type AccountIdentifier__4 = text;
@@ -633,4 +720,4 @@ type AccountIdentifier__3 = text;
 type AccountIdentifier__2 = text;
 type AccountIdentifier__1 = text;
 type AccountIdentifier = text;
-service : (principal) -> Canister
+service : (principal, InitArgs) -> Canister

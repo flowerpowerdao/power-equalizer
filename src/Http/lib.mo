@@ -11,15 +11,15 @@ import Text "mo:base/Text";
 import Buffer "mo:base/Buffer";
 
 import AssetTypes "../CanisterAssets/types";
-import Env "../Env";
 import ExtCore "../toniq-labs/ext/Core";
 import MarketplaceTypes "../Marketplace/types";
 import Types "types";
+import RootTypes "../types";
 import Utils "../utils";
 
 module {
 
-  public class HttpHandler(this : Principal, deps : Types.Dependencies, consts : Types.Constants) {
+  public class HttpHandler(config : RootTypes.Config, deps : Types.Dependencies) {
 
     /********************
     * PUBLIC INTERFACE *
@@ -46,7 +46,7 @@ module {
           // start custom
           // we assume the placeholder is stored in index 0
           // and thus uploaded first
-          if (Env.delayedReveal and not deps._Shuffle.isShuffled()) {
+          if (Utils.toNanos(config.revealDelay) > 0 and not deps._Shuffle.isShuffled()) {
             return _processFile(Nat.toText(0), deps._Assets.get(0).payload);
           };
           // end custom
@@ -138,20 +138,20 @@ module {
         0;
       };
 
-      var whitelistTiersText = "";
-      for (whitelistTier in Env.whitelistTiers.vals()) {
-        whitelistTiersText #= whitelistTier.name # " " # _displayICP(Nat64.toNat(whitelistTier.price)) # "start: " # debug_show (whitelistTier.slot.start) # ", end: " # debug_show (whitelistTier.slot.end) # "; ";
+      var whitelistsText = "";
+      for (whitelist in config.whitelists.vals()) {
+        whitelistsText #= whitelist.name # " " # _displayICP(Nat64.toNat(whitelist.price)) # "start: " # debug_show (whitelist.startTime) # ", end: " # debug_show (whitelist.endTime) # "; ";
       };
 
       return {
         status_code = 200;
         headers = [("content-type", "text/plain")];
         body = Text.encodeUtf8(
-          Env.collectionName # "\n" # "---\n"
+          config.name # "\n" # "---\n"
           # "Cycle Balance:                            ~" # debug_show (Cycles.balance() / 1000000000000) # "T\n"
           # "Minted NFTs:                              " # debug_show (deps._Tokens.getNextTokenId()) # "\n"
           # "Assets:                                   " # debug_show (deps._Assets.size()) # "\n" # "---\n"
-          # "Whitelist Tiers:                          " # whitelistTiersText # "\n"
+          # "Whitelists:                               " # whitelistsText # "\n"
           # "Total to sell:                            " # debug_show (deps._Sale.getTotalToSell()) # "\n"
           # "Remaining:                                " # debug_show (deps._Sale.availableTokens()) # "\n"
           # "Sold:                                     " # debug_show (deps._Sale.getSold()) # "\n"
@@ -160,7 +160,7 @@ module {
           # "Sold via Marketplace:                     " # debug_show (deps._Marketplace.transactionsSize()) # "\n"
           # "Sold via Marketplace in ICP:              " # _displayICP(soldValue) # "\n"
           # "Average Price ICP Via Marketplace:        " # _displayICP(avg) # "\n"
-          # "Admin:                                    " # debug_show (consts.minter) # "\n",
+          # "Admin:                                    " # debug_show (config.minter) # "\n",
         );
         streaming_strategy = null;
       };
@@ -207,7 +207,7 @@ module {
 
     private func _processFile(tokenid : ExtCore.TokenIdentifier, file : AssetTypes.File) : Types.HttpResponse {
       // start custom
-      let self : Principal = this;
+      let self : Principal = config.canister;
       let canisterId : Text = Principal.toText(self);
       let canister = actor (canisterId) : actor {
         http_request_streaming_callback : shared () -> async ();
@@ -216,6 +216,7 @@ module {
 
       if (file.data.size() > 1) {
         let (payload, token) = _streamContent(tokenid, 0, file.data);
+        let contentLength = Array.foldLeft<Blob, Nat>(file.data, 0, func(total, blob) = total + blob.size());
         return {
           // start custom
           status_code = 200;
@@ -225,7 +226,7 @@ module {
             ("Access-Control-Expose-Headers", "Content-Length, Content-Range"),
             ("Access-Control-Allow-Methods", "GET, POST, HEAD, OPTIONS"),
             ("Access-Control-Allow-Origin", "*"),
-            ("Content-Length", Env.placeholderContentLength),
+            ("Content-Length", Nat.toText(contentLength)),
             ("Accept-Ranges", "bytes"),
           ];
           // end custom

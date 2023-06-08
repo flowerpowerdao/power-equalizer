@@ -12,10 +12,11 @@ import AviateAccountIdentifier "mo:accountid/AccountIdentifier";
 
 import ExtCore "../toniq-labs/ext/Core";
 import Types "types";
+import RootTypes "../types";
 import Utils "../utils";
 
 module {
-  public class Factory(this : Principal) {
+  public class Factory(config : RootTypes.Config) {
 
     /*********
     * STATE *
@@ -72,7 +73,7 @@ module {
                 amount = { e8s = disbursement.amount };
                 fee = { e8s = 10000 };
                 created_at_time = null;
-                memo = Encoding.BigEndian.toNat64(Blob.toArray(Principal.toBlob(Principal.fromText(ExtCore.TokenIdentifier.fromPrincipal(this, disbursement.tokenIndex)))));
+                memo = Encoding.BigEndian.toNat64(Blob.toArray(Principal.toBlob(Principal.fromText(ExtCore.TokenIdentifier.fromPrincipal(config.canister, disbursement.tokenIndex)))));
               });
 
               switch (res) {

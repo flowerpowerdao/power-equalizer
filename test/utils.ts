@@ -71,7 +71,7 @@ export let tokenIdentifier = (index) => {
   let padding = Buffer.from("\x0Atid");
   let array = new Uint8Array([
       ...padding,
-      ...Principal.fromText(canisterIds.staging.local).toUint8Array(),
+      ...Principal.fromText(canisterIds.test.local).toUint8Array(),
       ...to32bits(index),
   ]);
   return Principal.fromUint8Array(array).toText();

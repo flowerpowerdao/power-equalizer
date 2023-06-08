@@ -1,39 +1,47 @@
 import { resolve } from 'path';
 import { existsSync, copyFileSync, readFileSync, writeFileSync } from 'fs';
 
-let envName = process.argv[2];
+let initArgsFile = resolve(`${__dirname}/initArgs.did`);
+let templateDid = resolve(`${__dirname}/initArgs.template.did`);
+let templateDidData = readFileSync(templateDid).toString();
 
-let templateFile = resolve(`${__dirname}/../src/Env/_template.mo`);
-let tsFile = resolve(`${__dirname}/${envName}/.env.${envName}.ts`);
-let moFile = resolve(`${__dirname}/../src/Env/.env.${envName}.mo`);
-let libFile = resolve(`${__dirname}/../src/Env/lib.mo`);
+export async function applyEnv(envName: string) {
+  let tsFile = resolve(`${__dirname}/${envName}/env.ts`);
 
-// check if *.mo env file exists
-if (existsSync(moFile)) {
-  console.log(`Applying .env.${envName}.mo`);
-  copyFileSync(moFile, libFile);
-}
-// check if *.ts env file exists
-else if (existsSync(tsFile)) {
-  console.log(`Applying .env.${envName}.ts`);
-  let data = readFileSync(templateFile).toString();
+  // check if *.ts env file exists
+  if (existsSync(tsFile)) {
+    let didData = templateDidData;
 
-  let env = require(tsFile);
-  for (let [key, val] of Object.entries(env.default)) {
-    if (typeof val == 'bigint') {
-      val = String(val);
+    // @ts-ignore
+    let env = await import(tsFile);
+
+    for (let [key, val] of Object.entries(env.default)) {
+      if (typeof val == 'bigint') {
+        val = String(val);
+      }
+      else if (val instanceof Array) {
+        val = `vec { ${val.map(v => JSON.stringify(v)).join('; ')} }`;
+      }
+      else if (String(val).startsWith('#')) {
+        val = `variant { ${String(val).slice(1)} }`;
+      }
+      else if (String(val).startsWith('variant {')) {
+        val = val;
+      }
+      else {
+        val = JSON.stringify(val);
+      }
+      didData = didData.replaceAll(new RegExp(`\\$${key}\\b`, 'g'), val as string);
     }
-    else if (String(val).startsWith('#')) {
-      val = val;
-    }
-    else {
-      val = JSON.stringify(val);
-    }
-    data = data.replaceAll('$' + key, val as string);
+
+    writeFileSync(initArgsFile, didData);
   }
-
-  writeFileSync(libFile, data);
+  else {
+    console.log(`ERR: Env '${envName}' not found`);
+    process.exit(1);
+  }
 }
-else {
-  console.log(`ERR: Env '${envName}' not found`);
+
+if (process.argv[2]) {
+  applyEnv(process.argv[2]);
 }
