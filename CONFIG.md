@@ -201,3 +201,10 @@ dutchAuction = opt record {
   interval = 60000000000; // 1 minute
 };
 ```
+
+## Restore
+Default `null`
+
+```candid
+restoreEnabled : ?Bool; // must be null (see backup/README.md for details)
+```
