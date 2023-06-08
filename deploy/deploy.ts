@@ -43,10 +43,8 @@ let run = () => {
 
 let getAssetUrl = (file) => {
   let assetsCanisterId = getAssetsCanisterId(network);
-
-  let assetsCanisterUrl = '';
   if (network === 'local' || network === 'test') {
-    assetsCanisterUrl = `http://localhost:4943/${file}?canisterId=${assetsCanisterId}`;
+    return `http://localhost:4943/${file}?canisterId=${assetsCanisterId}`;
   }
   else {
     return `https://${assetsCanisterId}.raw.icp0.io/${file}`;
