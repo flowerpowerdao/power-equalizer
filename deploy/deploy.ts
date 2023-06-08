@@ -38,7 +38,7 @@ console.log(identity.getPrincipal().toText());
 let run = () => {
   deployCanisters();
   uploadAssetsMetadata();
-  mint();
+  launch();
 }
 
 let getAssetUrl = (file) => {
@@ -56,11 +56,11 @@ let deployCanisters = () => {
     console.log(chalk.yellow('REINSTALL MODE'));
   }
 
-  console.log(chalk.green('Deploying assets canister...'));
-  execSync(`dfx deploy assets --network ${dfxNetwork} ${modeArg} ${withCyclesArg}`, execOptions);
-
   console.log(chalk.green('Deploying nft canister...'));
   execSync(`dfx deploy ${nftCanisterName} --argument "$(cat initArgs.did)" --network ${dfxNetwork} ${modeArg} ${withCyclesArg}`, execOptions);
+
+  console.log(chalk.green('Deploying assets canister...'));
+  execSync(`dfx deploy assets --network ${dfxNetwork} ${modeArg} ${withCyclesArg}`, execOptions);
 }
 
 let uploadAssetsMetadata = async () => {
@@ -118,8 +118,8 @@ let uploadAssetsMetadata = async () => {
   });
 };
 
-let mint = () => {
-  console.log(chalk.green('Minting...'));
+let launch = () => {
+  console.log(chalk.green('Launching...'));
   if (dfxNetwork === 'ic') {
     console.log('initiating CAP ...');
     execSync(`dfx canister --network ${dfxNetwork} call ${nftCanisterName} initCap`, execOptions);
