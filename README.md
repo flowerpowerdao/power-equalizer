@@ -11,6 +11,12 @@
 - [ ] run off chain backup script with mainnet canister id
 - [ ] setup auto topup of canisters
 
+## Creating canisters
+If you want to create canisters w/o using cycles wallet:
+```
+dfx ledger create-canister --amount 0.1 --network ic $(dfx identity get-principal)
+```
+
 ## Assets
 
 Placeholder is optional.
@@ -50,24 +56,24 @@ npm run deploy <network>
 
 ### Examples
 
-Deploy production
-```
-npm run deploy production
-```
-
 Clean deploy locally
 ```
 npm run deploy local -- --mode reinstall
 ```
 
-Deploy staging with a small amount of cycles (for example to test the creation of canisters)
+Deploy staging
 ```
-npm run deploy staging -- --with-cycles 200_000_000_000
+npm run deploy staging
+```
+
+Deploy production
+```
+npm run deploy production
 ```
 
 ## Upgrade main canister
 ```
-dfx canister deploy production --netowork ic
+dfx deploy production --netowork ic
 ```
 
 ## launch

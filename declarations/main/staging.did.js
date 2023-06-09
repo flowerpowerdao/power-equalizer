@@ -516,6 +516,7 @@ export const idlFactory = ({ IDL }) => {
   const Canister = IDL.Service({
     'acceptCycles' : IDL.Func([], [], []),
     'addAsset' : IDL.Func([AssetV2], [IDL.Nat], []),
+    'addAssets' : IDL.Func([IDL.Vec(AssetV2)], [IDL.Nat], []),
     'addPlaceholder' : IDL.Func([AssetV2], [], []),
     'airdropTokens' : IDL.Func([IDL.Nat], [], []),
     'allSettlements' : IDL.Func(

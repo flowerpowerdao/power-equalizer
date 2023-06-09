@@ -18,11 +18,11 @@ export let getMainCanisterId = (network: string): string => {
     return ids.test.local;
   }
   else if (network === 'staging') {
-    let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'canister_ids.json')).toString());
+    let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../canister_ids.json')).toString());
     return ids.staging.ic;
   }
   else if (network === 'production') {
-    let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'canister_ids.json')).toString());
+    let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../canister_ids.json')).toString());
     return ids.production.ic;
   }
 };
@@ -37,11 +37,11 @@ export let getAssetsCanisterId = (network: string): string => {
     return ids.assets.local;
   }
   else if (network === 'staging') {
-    let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'canister_ids.json')).toString());
+    let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../canister_ids.json')).toString());
     // return ids.assets.ic; ??
   }
   else if (network === 'production') {
-    let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'canister_ids.json')).toString());
+    let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../canister_ids.json')).toString());
     return ids.assets.ic;
   }
 };

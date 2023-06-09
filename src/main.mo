@@ -333,6 +333,13 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _Assets.addAsset(caller, asset);
   };
 
+  public shared ({ caller }) func addAssets(assets : [AssetsTypes.AssetV2]) : async Nat {
+    _trapIfRestoreEnabled();
+    canistergeekMonitor.collectMetrics();
+    // checks caller == minter
+    _Assets.addAssets(caller, assets);
+  };
+
   // Shuffle
   let _Shuffle = Shuffle.Factory(
     config,

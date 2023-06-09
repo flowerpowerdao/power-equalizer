@@ -3,10 +3,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import chalk from 'chalk';
 import minimist from 'minimist';
+import chunk from 'chunk';
 
 import {decode} from '../backup/pem';
 import {getActor, getAssetsCanisterId} from './utils';
-import {parallel} from './parallel';
 
 
 let execOptions = {stdio: ['inherit', 'pipe', 'inherit']} as ExecSyncOptions;
@@ -33,12 +33,16 @@ let pemData = execSync(`dfx identity export ${identityName}`, execOptions).toStr
 let identity = decode(pemData);
 let actor = getActor(network, identity);
 
-console.log(identity.getPrincipal().toText());
+if (mode === 'reinstall') {
+  console.log(chalk.yellow('REINSTALL MODE'));
+}
+console.log('Controller', identity.getPrincipal().toText());
 
-let run = () => {
-  deployCanisters();
-  uploadAssetsMetadata();
+let run = async () => {
+  deployNftCanister();
+  await uploadAssetsMetadata();
   launch();
+  deployAssetsCanister();
 }
 
 let getAssetUrl = (file) => {
@@ -51,16 +55,14 @@ let getAssetUrl = (file) => {
   }
 }
 
-let deployCanisters = () => {
-  if (mode === 'reinstall') {
-    console.log(chalk.yellow('REINSTALL MODE'));
-  }
-
+let deployNftCanister = () => {
   console.log(chalk.green('Deploying nft canister...'));
-  execSync(`dfx deploy ${nftCanisterName} --argument "$(cat initArgs.did)" --network ${dfxNetwork} ${modeArg} ${withCyclesArg}`, execOptions);
+  execSync(`dfx deploy ${nftCanisterName} --no-wallet --argument "$(cat initArgs.did)" --network ${dfxNetwork} ${modeArg} ${withCyclesArg}`, execOptions);
+}
 
+let deployAssetsCanister = () => {
   console.log(chalk.green('Deploying assets canister...'));
-  execSync(`dfx deploy assets --network ${dfxNetwork} ${modeArg} ${withCyclesArg}`, execOptions);
+  execSync(`dfx deploy assets --no-wallet --network ${dfxNetwork} ${withCyclesArg}`, execOptions);
 }
 
 let uploadAssetsMetadata = async () => {
@@ -98,24 +100,47 @@ let uploadAssetsMetadata = async () => {
   console.log(chalk.green('Uploading assets metadata...'));
   console.log(chalk.green(`Found ${assets.length} assets metadata...`));
 
-  await parallel(100, [...assets.entries()], async ([index, metadata]) => {
-    console.log(`Uploading asset ${index}`);
-    let uploadedIndex = await actor.addAsset({
-      name: String(index),
-      payload: {
-        ctype: '',
-        data: [],
-      },
-      thumbnail: [],
-      metadata: [{
-        ctype: 'application/json',
-        data: [new TextEncoder().encode(JSON.stringify(metadata))],
-      }],
-      payloadUrl: [getAssetUrl(filesByName.get(String(index)))],
-      thumbnailUrl: [getAssetUrl(filesByName.get(String(index) + '_thumbnail'))],
+  let all = new Set([...assets.keys()]);
+  let uploadedCount = 0;
+
+  let chunks = chunk([...assets.entries()], 1000);
+
+  console.log('Chunks:', chunks.length);
+
+  for (let chunk of chunks) {
+    let metadataChunk = chunk.map(([index, metadata]) => {
+      return {
+        name: String(index),
+        payload: {
+          ctype: '',
+          data: [],
+        },
+        thumbnail: [],
+        metadata: [{
+          ctype: 'application/json',
+          data: [new TextEncoder().encode(JSON.stringify(metadata))],
+        }],
+        payloadUrl: [getAssetUrl(filesByName.get(String(index)))],
+        thumbnailUrl: [getAssetUrl(filesByName.get(String(index) + '_thumbnail'))],
+      };
     });
-    console.log(uploadedIndex, index);
-  });
+
+    await actor.addAssets(metadataChunk);
+
+    uploadedCount += chunk.length;
+
+    console.log(`Uploaded metadata: ${uploadedCount}`);
+
+    chunk.forEach(([index, _]) => {
+      all.delete(index);
+    });
+  }
+
+  if (all.size > 0) {
+    throw new Error(`Failed to upload metadata for ${[...all].join(', ')}`);
+  }
+
+  console.log(chalk.green('All assets metadata uploaded'));
 };
 
 let launch = () => {

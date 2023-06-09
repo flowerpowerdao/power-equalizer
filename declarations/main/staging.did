@@ -619,6 +619,7 @@ type Canister =
  service {
    acceptCycles: () -> ();
    addAsset: (AssetV2) -> (nat);
+   addAssets: (vec AssetV2) -> (nat);
    addPlaceholder: (AssetV2) -> ();
    airdropTokens: (nat) -> ();
    allSettlements: () -> (vec record {

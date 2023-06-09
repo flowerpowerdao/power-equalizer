@@ -32,6 +32,7 @@ export type Balance__2 = bigint;
 export interface Canister {
   'acceptCycles' : ActorMethod<[], undefined>,
   'addAsset' : ActorMethod<[AssetV2], bigint>,
+  'addAssets' : ActorMethod<[Array<AssetV2>], bigint>,
   'addPlaceholder' : ActorMethod<[AssetV2], undefined>,
   'airdropTokens' : ActorMethod<[bigint], undefined>,
   'allSettlements' : ActorMethod<[], Array<[TokenIndex__1, Settlement]>>,

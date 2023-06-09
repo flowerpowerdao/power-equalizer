@@ -122,6 +122,7 @@ module {
 
     //*** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
+    // legacy
     public func streamAsset(caller : Principal, id : Nat, isThumb : Bool, payload : Blob) : () {
       assert (caller == config.minter);
       var asset : Types.AssetV2 = _assets.get(id);
@@ -159,6 +160,7 @@ module {
       _updateBiggestAssetSize([asset]);
     };
 
+    // legacy
     public func updateThumb(caller : Principal, name : Text, file : Types.File) : ?Nat {
       assert (caller == config.minter);
       var i : Nat = 0;
@@ -182,6 +184,7 @@ module {
       return null;
     };
 
+    // legacy
     public func addAsset(caller : Principal, asset : Types.AssetV2) : Nat {
       assert (caller == config.minter);
       if (config.singleAssetCollection == ?true) {
@@ -193,6 +196,20 @@ module {
       };
       _assets.add(asset);
       _updateBiggestAssetSize([asset]);
+      _assets.size() - 1;
+    };
+
+    public func addAssets(caller : Principal, assets : [Types.AssetV2]) : Nat {
+      assert (caller == config.minter);
+      if (config.singleAssetCollection == ?true) {
+        if (Utils.toNanos(config.revealDelay) > 0) {
+          assert (_assets.size() < 2);
+        } else {
+          assert (_assets.size() == 0);
+        };
+      };
+      _assets.append(Buffer.fromArray(assets));
+      _updateBiggestAssetSize(assets);
       _assets.size() - 1;
     };
 
