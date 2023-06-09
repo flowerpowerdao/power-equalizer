@@ -38,7 +38,7 @@ export let getAssetsCanisterId = (network: string): string => {
   }
   else if (network === 'staging') {
     let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../canister_ids.json')).toString());
-    // return ids.assets.ic; ??
+    return ids.assets.ic; // ??
   }
   else if (network === 'production') {
     let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../canister_ids.json')).toString());

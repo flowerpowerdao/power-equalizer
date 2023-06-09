@@ -47,6 +47,9 @@ let run = async () => {
 
 let getAssetUrl = (file) => {
   let assetsCanisterId = getAssetsCanisterId(network);
+  if (!assetsCanisterId) {
+    throw new Error('Assets canister id not found');
+  }
   if (network === 'local' || network === 'test') {
     return `http://localhost:4943/${file}?canisterId=${assetsCanisterId}`;
   }
