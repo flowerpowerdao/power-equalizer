@@ -145,12 +145,12 @@ let uploadAssetsMetadata = async () => {
 
 let launch = () => {
   console.log(chalk.green('Launching...'));
-  if (dfxNetwork === 'ic') {
+  if (dfxNetwork === 'ic' && nftCanisterName === 'production') {
     console.log('initiating CAP ...');
     execSync(`dfx canister --network ${dfxNetwork} call ${nftCanisterName} initCap`, execOptions);
   }
   else {
-    console.log(chalk.yellow('skip CAP init for local network'));
+    console.log(chalk.yellow('skip CAP init for local network or staging canister'));
   }
 
   console.log('initiating mint ...');
