@@ -38,6 +38,15 @@ if (mode === 'reinstall') {
 }
 console.log('Controller', identity.getPrincipal().toText());
 
+let dirContent = fs.readdirSync(assetsDir);
+let files = dirContent.filter((item) => {
+  return fs.lstatSync(path.resolve(assetsDir, item)).isFile();
+});
+
+let filesByName = new Map(files.map((file) => {
+  return [path.parse(file).name, file];
+}));
+
 let run = async () => {
   deployNftCanister();
   await uploadAssetsMetadata();
@@ -45,8 +54,12 @@ let run = async () => {
   deployAssetsCanister();
 }
 
-let getAssetUrl = (file) => {
+let getAssetUrl = (filename) => {
   let assetsCanisterId = getAssetsCanisterId(network);
+  let file = filesByName.get(filename);
+  if (!file) {
+    throw new Error(`File '${filename}' not found`);
+  }
   if (!assetsCanisterId) {
     throw new Error('Assets canister id not found');
   }
@@ -71,15 +84,6 @@ let deployAssetsCanister = () => {
 let uploadAssetsMetadata = async () => {
   let assets = JSON.parse(fs.readFileSync(path.resolve(assetsDir, 'metadata.json')).toString());
 
-  let dirContent = fs.readdirSync(assetsDir);
-  let files = dirContent.filter((item) => {
-    return fs.lstatSync(path.resolve(assetsDir, item)).isFile();
-  });
-
-  let filesByName = new Map(files.map((file) => {
-    return [path.parse(file).name, file];
-  }));
-
   // placeholder
   if (filesByName.has('placeholder')) {
     console.log(chalk.green('Uploading placeholder...'));
@@ -91,7 +95,7 @@ let uploadAssetsMetadata = async () => {
       },
       thumbnail: [],
       metadata: [],
-      payloadUrl: [getAssetUrl(filesByName.get('placeholder'))],
+      payloadUrl: [getAssetUrl('placeholder')],
       thumbnailUrl: [],
     });
   }
@@ -123,8 +127,8 @@ let uploadAssetsMetadata = async () => {
           ctype: 'application/json',
           data: [new TextEncoder().encode(JSON.stringify(metadata))],
         }],
-        payloadUrl: [getAssetUrl(filesByName.get(String(index)))],
-        thumbnailUrl: [getAssetUrl(filesByName.get(String(index) + '_thumbnail'))],
+        payloadUrl: [getAssetUrl(String(index))],
+        thumbnailUrl: [getAssetUrl(String(index) + '_thumbnail')],
       };
     });
 
