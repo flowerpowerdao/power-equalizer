@@ -19,7 +19,7 @@ npm run deploy-local
 - [ ] [create canisters](#create-canisters)
 - [ ] [deploy canisters](#deploy)
 - [ ] add canister to [DAB](https://docs.google.com/forms/d/e/1FAIpQLSc-0BL9FMRtI0HhWj4g7CCYjf3TMr4_K_qqmagjzkUH_CKczw/viewform)
-- [ ] send collection details to entrepot via form
+- [ ] send collection details to entrepot via [form](https://collection-guide.paperform.co/)
 - [ ] top canister up with cycles
 - [ ] run off chain backup script with mainnet canister id
 - [ ] setup auto topup of canisters
