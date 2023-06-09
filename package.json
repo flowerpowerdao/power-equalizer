@@ -5,7 +5,7 @@
   "scripts": {
     "start": "npm run replica && npm run deploy && npm run mint",
     "replica": "dfx stop && rm -rf .dfx && dfx start --clean --background && npm run create-canisters",
-    "replica:no-delay": "dfx stop && rm -rf .dfx && DFX_VERSION=0.14.0-beta.1 dfx start --clean --background --artificial-delay 0 && npm run create-canisters",
+    "replica:no-delay": "dfx stop && rm -rf .dfx && DFX_VERSION=0.14.1 dfx start --clean --background --artificial-delay 0 && npm run create-canisters",
     "create-canisters": "dfx canister create staging && dfx canister create ledger && dfx canister create test --specified-id r7inp-6aaaa-aaaaa-aaabq-cai",
     "deploy": "npm run deploy:ledger && npm run deploy:staging",
     "deploy-test": "npm run reinstall:ledger -- -qq && npm run reinstall:test -- -qq",
