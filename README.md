@@ -2,16 +2,31 @@
 
 # power equalizer 🌼
 
-## pre launch
+## Development
+```
+npm start
+```
 
+Redeploy when you changed Motoko code
+```
+npm run deploy-local
+```
+
+## Steps to launch an NFT collection
+
+- [ ] prepare [assets](#assets)
 - [ ] adapt `initArgs.did` to your needs (see [CONFIG.md](CONFIG.md))
+- [ ] [create canisters](#create-canisters)
+- [ ] [deploy canisters](#deploy)
 - [ ] add canister to [DAB](https://docs.google.com/forms/d/e/1FAIpQLSc-0BL9FMRtI0HhWj4g7CCYjf3TMr4_K_qqmagjzkUH_CKczw/viewform)
 - [ ] send collection details to entrepot via form
 - [ ] top canister up with cycles
 - [ ] run off chain backup script with mainnet canister id
 - [ ] setup auto topup of canisters
 
-## Creating canisters
+If you want to upgrade an existing nft canister, see [upgrade nft canister](#upgrade-nft-canister)
+
+## Create canisters
 If you want to create canisters w/o using cycles wallet:
 ```
 dfx ledger create-canister --amount 0.1 --network ic $(dfx identity get-principal)
@@ -71,9 +86,10 @@ Deploy production
 npm run deploy production
 ```
 
-## Upgrade main canister
+## Upgrade nft canister
+Upgrade production canister
 ```
-dfx deploy production --netowork ic
+npm run upgrade:production
 ```
 
 ## launch
