@@ -2,7 +2,7 @@
   principal "rrkah-fqaaa-aaaaa-aaaaq-cai", // staging canister
   record {
     name = "Collection Name";
-    sale = variant { supply = 4 };
+    sale = variant { supply = 3 };
     salePrice = 700_000_000; // 7 ICP
     publicSaleStart = 1686117482129000000;
     salesDistribution = vec {};

@@ -47,11 +47,20 @@ let filesByName = new Map(files.map((file) => {
   return [path.parse(file).name, file];
 }));
 
+// TODO: remove
+// populate with fake data for cherries
+let assets = JSON.parse(fs.readFileSync(path.resolve(assetsDir, 'metadata.json')).toString());
+for (let i = 0; i < assets.length; i++) {
+  filesByName.set(String(i + 1), `${i + 1}.svg`);
+  filesByName.set(String(i + 1) + '_thumbnail', `${i + 1}_thumbnail.png`);
+}
+filesByName.set('placeholder', 'placeholder.mp4');
+
 let run = async () => {
   deployNftCanister();
   await uploadAssetsMetadata();
   launch();
-  deployAssetsCanister();
+  // deployAssetsCanister();
 }
 
 let getAssetUrl = (filename) => {
@@ -76,10 +85,10 @@ let deployNftCanister = () => {
   execSync(`dfx deploy ${nftCanisterName} --no-wallet --argument "$(cat initArgs.did)" --network ${dfxNetwork} ${modeArg} ${withCyclesArg}`, execOptions);
 }
 
-let deployAssetsCanister = () => {
-  console.log(chalk.green('Deploying assets canister...'));
-  execSync(`dfx deploy assets --no-wallet --network ${dfxNetwork} ${withCyclesArg}`, execOptions);
-}
+// let deployAssetsCanister = () => {
+//   console.log(chalk.green('Deploying assets canister...'));
+//   execSync(`dfx deploy assets --no-wallet --network ${dfxNetwork} ${withCyclesArg}`, execOptions);
+// }
 
 let uploadAssetsMetadata = async () => {
   let assets = JSON.parse(fs.readFileSync(path.resolve(assetsDir, 'metadata.json')).toString());
@@ -117,7 +126,7 @@ let uploadAssetsMetadata = async () => {
   for (let chunk of chunks) {
     let metadataChunk = chunk.map(([index, metadata]) => {
       return {
-        name: String(index),
+        name: String(index + 1),
         payload: {
           ctype: '',
           data: [],
@@ -127,8 +136,8 @@ let uploadAssetsMetadata = async () => {
           ctype: 'application/json',
           data: [new TextEncoder().encode(JSON.stringify(metadata))],
         }],
-        payloadUrl: [getAssetUrl(String(index))],
-        thumbnailUrl: [getAssetUrl(String(index) + '_thumbnail')],
+        payloadUrl: [getAssetUrl(String(index + 1))],
+        thumbnailUrl: [getAssetUrl(String(index + 1) + '_thumbnail')],
       };
     });
 

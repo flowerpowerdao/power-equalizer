@@ -1,7 +1,7 @@
 .dfx
 .vessel
 assets/*
-!assets/.gitkeep
+!assets/.ic-assets.json
 *.pem
 .venv
 registry.json

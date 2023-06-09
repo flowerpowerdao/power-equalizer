@@ -14,7 +14,7 @@ npm run deploy-local
 
 ## Steps to launch an NFT collection
 
-- [ ] prepare [assets](#assets)
+- [ ] prepare and deploy [assets](#assets)
 - [ ] adapt `initArgs.did` to your needs (see [CONFIG.md](CONFIG.md))
 - [ ] [create canisters](#create-canisters)
 - [ ] [deploy canisters](#deploy)
@@ -50,7 +50,12 @@ assets/
   ...
 ```
 
-## Deploy
+Deploy assets canister
+```
+dfx deploy assets --no-wallet --network ic
+```
+
+## Deploy NFT canister
 For local deployment run extra commands:
 ```
 npm run replica
@@ -89,7 +94,7 @@ npm run deploy production
 ## Upgrade nft canister
 Upgrade production canister
 ```
-npm run upgrade:production
+npm run upgrade-production
 ```
 
 ## launch
