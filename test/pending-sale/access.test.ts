@@ -25,6 +25,8 @@ describe('method calls restricted to admin/minter', () => {
       metadata: [],
       name: 'test',
       payload: { data: [new Uint8Array], ctype: '' },
+      payloadUrl: [],
+      thumbnailUrl: [],
     })).rejects.toThrow(/assertion failed/);
   });
 });

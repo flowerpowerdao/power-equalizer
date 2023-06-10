@@ -461,7 +461,9 @@ module {
     };
 
     public func frontends() : [(Text, Types.Frontend)] {
-      Iter.toArray(_frontends.entries());
+      Array.map<(Text, Types.AccountIdentifier, Nat64), (Text, Types.Frontend)>(config.marketplaces, func((id, accountIdentifier, fee)) {
+        (id, { accountIdentifier; fee; });
+      });
     };
 
     /********************

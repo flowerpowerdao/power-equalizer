@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite'
+import {defineConfig} from 'vite';
 
 export default defineConfig({
   test: {
@@ -8,10 +8,7 @@ export default defineConfig({
     exclude: [
       '**/node_modules/**',
       '**/.{git,dfx,vessel}/**',
-      // 'test/marketplace',
-      'test/backup/backup.test.ts',
-      'test/restore/restore.test.ts',
-      // 'test/backup-restore',
+      'test/restore/restore.test.ts', // contains only env.ts
     ],
   },
 });

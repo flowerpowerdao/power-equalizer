@@ -192,7 +192,7 @@ module {
         if (temp < startingIndex) {
           temp += 1;
           continue airdrop;
-        } else if (temp >= startingIndex +1500) {
+        } else if (temp >= startingIndex + 1500) {
           break airdrop;
         };
         // nextTokens() updates _tokensForSale, removing consumed tokens

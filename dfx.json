@@ -33,6 +33,12 @@
       "dependencies": [
         "ledger"
       ]
+    },
+    "assets": {
+      "type": "assets",
+      "source": [
+        "assets/"
+      ]
     }
   },
   "defaults": {

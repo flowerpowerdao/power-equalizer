@@ -115,9 +115,7 @@ module {
     };
 
     public func mintNextToken() {
-      /* for delayed reveal we start with asset 1, as index 0 contains the placeholder and is not being shuffled */
-      let startIndex : Nat32 = if (Utils.toNanos(config.revealDelay) > 0) { 1 } else { 0 };
-      putTokenMetadata(getNextTokenId(), #nonfungible({ metadata = ?Utils.nat32ToBlob(if (config.singleAssetCollection == ?true) startIndex else getNextTokenId() + startIndex) }));
+      putTokenMetadata(getNextTokenId(), #nonfungible({ metadata = ?Utils.nat32ToBlob(if (config.singleAssetCollection == ?true) 0 else getNextTokenId()) }));
       transferTokenToUser(getNextTokenId(), "0000");
       incrementSupply();
       incrementNextTokenId();
