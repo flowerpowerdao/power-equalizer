@@ -36,15 +36,11 @@
     },
     "assets": {
       "type": "assets",
-      "frontend": {
-        "entrypoint": "assets/index.html"
-      },
       "source": [
         "assets/"
       ]
     }
   },
-  "dfx": "0.14.1",
   "defaults": {
     "build": {
       "packtool": "vessel sources",
