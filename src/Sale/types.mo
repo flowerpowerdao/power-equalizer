@@ -33,7 +33,7 @@ module {
       salesSettlements : [(AccountIdentifier, Sale)];
       failedSales : [(AccountIdentifier, SubAccount)];
       tokensForSale : [TokenIndex];
-      whitelistSpots : [(WhitelistSpotId, WhitelistSpotUsed)];
+      whitelistSpots : [(WhitelistSpotId, RemainingSpots)];
       soldIcp : Nat64;
       sold : Nat;
       totalToSell : Nat;
@@ -54,7 +54,7 @@ module {
   public type Whitelist = Types.Whitelist;
   public type WhitelistSlot = Types.WhitelistSlot;
   public type WhitelistSpotId = Text; // <whitelist_name>:<account_id>
-  public type WhitelistSpotUsed = Bool;
+  public type RemainingSpots = Nat;
   public type AccountIdentifier = ExtCore.AccountIdentifier;
   public type TokenIdentifier = ExtCore.TokenIdentifier;
   public type SubAccount = ExtCore.SubAccount;
