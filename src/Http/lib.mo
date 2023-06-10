@@ -26,14 +26,6 @@ module {
     ********************/
 
     public func http_request_streaming_callback(token : Types.HttpStreamingCallbackToken) : Types.HttpStreamingCallbackResponse {
-      if (token.key == "placeholder") {
-        let placeholder = deps._Assets.getPlaceholder();
-        let res = _streamContent(token.key, token.index, placeholder.payload.data);
-        return {
-          body = res.0;
-          token = res.1;
-        };
-      };
       switch (Utils.natFromText(token.key)) {
         case null return { body = Blob.fromArray([]); token = null };
         case (?assetid) {
