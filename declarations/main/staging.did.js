@@ -153,7 +153,7 @@ export const idlFactory = ({ IDL }) => {
     'price' : IDL.Nat64,
   });
   const WhitelistSpotId = IDL.Text;
-  const WhitelistSpotUsed = IDL.Bool;
+  const RemainingSpots = IDL.Nat;
   const StableChunk__4 = IDL.Opt(
     IDL.Variant({
       'v1' : IDL.Record({
@@ -179,9 +179,7 @@ export const idlFactory = ({ IDL }) => {
         'saleTransactionCount' : IDL.Nat,
         'nextSubAccount' : IDL.Nat,
         'soldIcp' : IDL.Nat64,
-        'whitelistSpots' : IDL.Vec(
-          IDL.Tuple(WhitelistSpotId, WhitelistSpotUsed)
-        ),
+        'whitelistSpots' : IDL.Vec(IDL.Tuple(WhitelistSpotId, RemainingSpots)),
         'tokensForSale' : IDL.Vec(TokenIndex__2),
       }),
       'v1_chunk' : IDL.Record({
@@ -518,7 +516,7 @@ export const idlFactory = ({ IDL }) => {
     'addAsset' : IDL.Func([AssetV2], [IDL.Nat], []),
     'addAssets' : IDL.Func([IDL.Vec(AssetV2)], [IDL.Nat], []),
     'addPlaceholder' : IDL.Func([AssetV2], [], []),
-    'airdropTokens' : IDL.Func([IDL.Nat], [], []),
+    'airdropTokens' : IDL.Func([], [], []),
     'allSettlements' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(TokenIndex__1, Settlement))],

@@ -1,4 +1,3 @@
-type WhitelistSpotUsed = bool;
 type WhitelistSpotId = text;
 type WhitelistSlot = 
  record {
@@ -151,7 +150,7 @@ type StableChunk__4 =
        totalToSell: nat;
        whitelistSpots: vec record {
                              WhitelistSpotId;
-                             WhitelistSpotUsed;
+                             RemainingSpots;
                            };
      };
     v2_chunk: record {saleTransactionChunk: vec SaleTransaction;};
@@ -319,6 +318,7 @@ type Result =
              opt blob;
            };
  };
+type RemainingSpots = nat;
 type NumericEntity = 
  record {
    avg: nat64;
@@ -621,7 +621,7 @@ type Canister =
    addAsset: (AssetV2) -> (nat);
    addAssets: (vec AssetV2) -> (nat);
    addPlaceholder: (AssetV2) -> ();
-   airdropTokens: (nat) -> ();
+   airdropTokens: () -> ();
    allSettlements: () -> (vec record {
                                 TokenIndex__1;
                                 Settlement;
