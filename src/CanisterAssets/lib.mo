@@ -18,7 +18,20 @@ module {
     * STATE *
     *********/
 
-    var _assets = Buffer.Buffer<Types.Asset>(0);
+    var _assets = Buffer.Buffer<Types.AssetV2>(0);
+
+    // placeholder returned instead of asset when there is reveal delay and not yet revealed
+    var _placeholder : Types.AssetV2 = {
+      name = "placeholder";
+      payload = {
+        ctype = "";
+        data = [];
+      };
+      thumbnail = null;
+      metadata = null;
+      payloadUrl = null;
+      thumbnailUrl = null;
+    };
 
     let _bytesPerChunk = 500_000; // 500kb
     var _biggestAssetSize = 10_000; // 10kb
@@ -43,13 +56,14 @@ module {
       };
 
       if (chunkIndex == 0) {
-        return ?#v1({
+        return ?#v2({
+          placeholder = _placeholder;
           assetsCount = _assets.size();
           assetsChunk;
         });
       }
       else if (chunkIndex < getChunkCount()) {
-        return ?#v1_chunk({ assetsChunk });
+        return ?#v2_chunk({ assetsChunk });
       }
       else {
         null;
@@ -57,13 +71,35 @@ module {
     };
 
     public func loadStableChunk(chunk : Types.StableChunk) {
+      let toV2 = func(assets : [Types.Asset]) : [Types.AssetV2] {
+        Array.map<Types.Asset, Types.AssetV2>(assets, func(asset) {
+          {
+            asset with
+            payloadUrl = null;
+            thumbnailUrl = null;
+          };
+        });
+      };
+
       switch (chunk) {
+        // v1 -> v2
         case (?#v1(data)) {
-          _assets := Buffer.Buffer<Types.Asset>(data.assetsCount);
-          _assets.append(Buffer.fromArray(data.assetsChunk));
+          _assets := Buffer.Buffer<Types.AssetV2>(data.assetsCount);
+          _assets.append(Buffer.fromArray(toV2(data.assetsChunk)));
           _updateBiggestAssetSize(data.assetsChunk);
         };
         case (?#v1_chunk(data)) {
+          _assets.append(Buffer.fromArray(toV2(data.assetsChunk)));
+          _updateBiggestAssetSize(data.assetsChunk);
+        };
+        // v2
+        case (?#v2(data)) {
+          _placeholder := data.placeholder;
+          _assets := Buffer.Buffer<Types.AssetV2>(data.assetsCount);
+          _assets.append(Buffer.fromArray(data.assetsChunk));
+          _updateBiggestAssetSize(data.assetsChunk);
+        };
+        case (?#v2_chunk(data)) {
           _assets.append(Buffer.fromArray(data.assetsChunk));
           _updateBiggestAssetSize(data.assetsChunk);
         };
@@ -86,9 +122,10 @@ module {
 
     //*** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
+    // legacy
     public func streamAsset(caller : Principal, id : Nat, isThumb : Bool, payload : Blob) : () {
       assert (caller == config.minter);
-      var asset : Types.Asset = _assets.get(id);
+      var asset : Types.AssetV2 = _assets.get(id);
       if (isThumb) {
         switch (asset.thumbnail) {
           case (?t) {
@@ -100,6 +137,8 @@ module {
               };
               payload = asset.payload;
               metadata = asset.metadata;
+              payloadUrl = asset.payloadUrl;
+              thumbnailUrl = asset.thumbnailUrl;
             };
           };
           case (_) {};
@@ -113,23 +152,28 @@ module {
             data = Array.append(asset.payload.data, [payload]);
           };
           metadata = asset.metadata;
+          payloadUrl = asset.payloadUrl;
+          thumbnailUrl = asset.thumbnailUrl;
         };
       };
       _assets.put(id, asset);
       _updateBiggestAssetSize([asset]);
     };
 
+    // legacy
     public func updateThumb(caller : Principal, name : Text, file : Types.File) : ?Nat {
       assert (caller == config.minter);
       var i : Nat = 0;
       for (a in _assets.vals()) {
         if (a.name == name) {
-          var asset : Types.Asset = _assets.get(i);
+          var asset : Types.AssetV2 = _assets.get(i);
           asset := {
             name = asset.name;
             thumbnail = ?file;
             payload = asset.payload;
             metadata = asset.metadata;
+            payloadUrl = asset.payloadUrl;
+            thumbnailUrl = asset.thumbnailUrl;
           };
           _assets.put(i, asset);
           _updateBiggestAssetSize([asset]);
@@ -140,7 +184,8 @@ module {
       return null;
     };
 
-    public func addAsset(caller : Principal, asset : Types.Asset) : Nat {
+    // legacy
+    public func addAsset(caller : Principal, asset : Types.AssetV2) : Nat {
       assert (caller == config.minter);
       if (config.singleAssetCollection == ?true) {
         if (Utils.toNanos(config.revealDelay) > 0) {
@@ -154,19 +199,42 @@ module {
       _assets.size() - 1;
     };
 
+    public func addAssets(caller : Principal, assets : [Types.AssetV2]) : Nat {
+      assert (caller == config.minter);
+      if (config.singleAssetCollection == ?true) {
+        if (Utils.toNanos(config.revealDelay) > 0) {
+          assert (_assets.size() < 2);
+        } else {
+          assert (_assets.size() == 0);
+        };
+      };
+      _assets.append(Buffer.fromArray(assets));
+      _updateBiggestAssetSize(assets);
+      _assets.size() - 1;
+    };
+
+    public func addPlaceholder(caller : Principal, asset : Types.AssetV2) {
+      assert (caller == config.minter);
+      _placeholder := asset;
+    };
+
     /*******************
     * INTERNAL METHODS *
     *******************/
 
-    public func get(id : Nat) : Types.Asset {
+    public func getPlaceholder() : Types.AssetV2 {
+      _placeholder;
+    };
+
+    public func get(id : Nat) : Types.AssetV2 {
       return _assets.get(id);
     };
 
-    public func put(id : Nat, element : Types.Asset) {
+    public func put(id : Nat, element : Types.AssetV2) {
       _assets.put(id, element);
     };
 
-    public func add(element : Types.Asset) {
+    public func add(element : Types.AssetV2) {
       _assets.add(element);
     };
 
@@ -174,7 +242,7 @@ module {
       _assets.size();
     };
 
-    public func vals() : Iter.Iter<Types.Asset> {
+    public func vals() : Iter.Iter<Types.AssetV2> {
       _assets.vals();
     };
 

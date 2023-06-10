@@ -203,8 +203,11 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
 
       // add random delay up to 60 minutes
       let minute = 1_000_000_000 * 60;
-      let randDelay = Int.abs(Time.now() % 60 * minute);
-
+      let randDelay = if (delay > 60 * minute) {
+        Int.abs(Time.now() % 60 * minute);
+      } else {
+        0;
+      };
       _revealTimerId := Timer.setTimer(
         #nanoseconds(delay + randDelay),
         func() : async () {
@@ -316,11 +319,25 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _Assets.updateThumb(caller, name, file);
   };
 
-  public shared ({ caller }) func addAsset(asset : AssetsTypes.Asset) : async Nat {
+  public shared ({ caller }) func addPlaceholder(asset : AssetsTypes.AssetV2) : async () {
+    _trapIfRestoreEnabled();
+    canistergeekMonitor.collectMetrics();
+    // checks caller == minter
+    _Assets.addPlaceholder(caller, asset);
+  };
+
+  public shared ({ caller }) func addAsset(asset : AssetsTypes.AssetV2) : async Nat {
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
     // checks caller == minter
     _Assets.addAsset(caller, asset);
+  };
+
+  public shared ({ caller }) func addAssets(assets : [AssetsTypes.AssetV2]) : async Nat {
+    _trapIfRestoreEnabled();
+    canistergeekMonitor.collectMetrics();
+    // checks caller == minter
+    _Assets.addAssets(caller, assets);
   };
 
   // Shuffle

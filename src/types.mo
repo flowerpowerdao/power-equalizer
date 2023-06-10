@@ -64,6 +64,7 @@ module {
     test : ?Bool; // must be null
     restoreEnabled : ?Bool; // must be null (see backup/README.md for details)
     timersInterval : ?Duration; // default 60 seconds
+    legacyPlaceholder : ?Bool; // legacy placeholder is stored in the first asset (we need this because of getTokenToAssetMapping())
   };
 
   public type Config = InitArgs and {

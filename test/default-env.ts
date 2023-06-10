@@ -59,5 +59,7 @@ export default () => {
     whitelistTier1Name: 'modclub',
     whitelistTier1Price: 500000000n,
     whitelistTier1Whitelist: whitelistTier1.map(user => user.accountId),
+
+    legacyPlaceholder: false,
   };
 }
