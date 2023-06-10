@@ -11,3 +11,4 @@ node_modules
 backup/data/*
 test/initArgs.did
 deploy.zsh
+canister_ids.json
