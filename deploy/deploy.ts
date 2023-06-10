@@ -176,10 +176,7 @@ let launch = () => {
   execSync(`dfx canister --network ${dfxNetwork} call ${nftCanisterName} shuffleTokensForSale`, execOptions);
 
   console.log('airdrop tokens ...');
-  execSync(`dfx canister --network ${dfxNetwork} call ${nftCanisterName} airdropTokens 0`, execOptions);
-
-  console.log('airdrop tokens ...');
-  execSync(`dfx canister --network ${dfxNetwork} call ${nftCanisterName} airdropTokens 1500`, execOptions);
+  execSync(`dfx canister --network ${dfxNetwork} call ${nftCanisterName} airdropTokens`, execOptions);
 
   console.log('enable sale ...');
   execSync(`dfx canister --network ${dfxNetwork} call ${nftCanisterName} enableSale`, execOptions);

@@ -33,7 +33,7 @@ import DisburserTypes "Disburser/types";
 import Utils "./utils";
 import Types "./types";
 
-shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs: Types.InitArgs) = myCanister {
+shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs : Types.InitArgs) = myCanister {
   let config = {
     initArgs with
     canister = cid;
@@ -190,12 +190,15 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
 
     let timersInterval = Utils.toNanos(Option.get(config.timersInterval, #seconds(60)));
 
-    _timerId := Timer.recurringTimer(#nanoseconds(timersInterval), func() : async () {
-      ignore cronSettlements();
-      ignore cronDisbursements();
-      ignore cronSalesSettlements();
-      ignore cronFailedSales();
-    });
+    _timerId := Timer.recurringTimer(
+      #nanoseconds(timersInterval),
+      func() : async () {
+        ignore cronSettlements();
+        ignore cronDisbursements();
+        ignore cronSalesSettlements();
+        ignore cronFailedSales();
+      },
+    );
 
     if (Utils.toNanos(config.revealDelay) > 0 and not _Shuffle.isShuffled()) {
       let revealTime = config.publicSaleStart + Utils.toNanos(config.revealDelay);
@@ -377,11 +380,11 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     await _Sale.shuffleTokensForSale(caller);
   };
 
-  public shared ({ caller }) func airdropTokens(startIndex : Nat) : async () {
+  public shared ({ caller }) func airdropTokens() : async () {
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
     // checks caller == minter
-    _Sale.airdropTokens(caller, startIndex);
+    _Sale.airdropTokens(caller);
   };
 
   public shared ({ caller }) func enableSale() : async Nat {
