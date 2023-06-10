@@ -97,42 +97,6 @@ Upgrade production canister
 npm run upgrade-production
 ```
 
-## launch
-
-- run `make deploy-production-ic-full`
-- check if all assets uploaded correctly by calling the canisters `getTokenToAssetMapping()` method
-
-## deploy 📚
-
-```
-# check the asset that are linked to the tokens
-for i in {0..9}
-do
-    tokenid=$(ext tokenid $(dfx canister --network $network id $mode) $i | sed -n  2p)
-		tokenid=$(echo $tokenid | tr -dc '[:alnum:]-')
-		tokenid="${tokenid:3:-2}"
-    if [[ "$network" == "ic" ]]
-    then
-      echo "https://$(dfx canister --network $network id $mode).raw.ic0.app/?tokenid=$tokenid"
-    else
-      echo "http://127.0.0.1:4943/?canisterId=$(dfx canister --network $network id $mode)&tokenid=$tokenid"
-    fi
-done
-
-# after assets are shuffled and revealed
-# check the assets again to see if we now indeed
-# see the correct assets
-# for i in {0..9}
-# do
-#         tokenid=$(ext tokenid $(dfx canister --network ic id staging) $i | sed -n  2p)
-# 		tokenid=$(echo $tokenid | tr -dc '[:alnum:]-')
-# 		tokenid="${tokenid:3:-2}"
-# 		curl "$(dfx canister --network ic id staging).raw.ic0.app/?tokenid=$tokenid"
-# 		echo "\n"
-# done
-```
-
-
 ## caveats 🕳
 
 - The canister code is written in a way that the seed animation _ALWAYS_ has to be the first asset uploaded to the canister if you are doing a `revealDelay > 0`
