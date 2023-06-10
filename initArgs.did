@@ -4,8 +4,7 @@
     name = "Cherries";
     sale = variant { supply = 6666 };
     salePrice = 700_000_000; // 7 ICP
-    publicSaleStart = 1686117482129000000; // TO-DO: change to production
-    // publicSaleStart = 1686632400000000000; // tuesday 1am (production)
+    publicSaleStart = 1686632400000000000; // tuesday 1am (production)
     salesDistribution = vec {
       record { "203b33afcfe22a3727be0a2eb1b90274d2c789754939e4671a7b2480e3d8c774"; 54000 }; // ludo
       record { "20eacca23f6ff96941099da3cbf705f7466c1a7e963b87a4ec87be7d678f4a19"; 19800 }; // moritz

@@ -64,7 +64,7 @@ let run = async () => {
 }
 
 let getAssetUrl = (filename) => {
-  let assetsCanisterId = getAssetsCanisterId(network);
+  let assetsCanisterId = "ypbrq-kqaaa-aaaae-qaeza-cai"
   let file = filesByName.get(filename);
   if (!file) {
     throw new Error(`File '${filename}' not found`);
