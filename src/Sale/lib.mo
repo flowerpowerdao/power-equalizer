@@ -180,7 +180,7 @@ module {
       _tokensForSale := deps._Shuffle.shuffleTokens(_tokensForSale, seed);
     };
 
-    public func airdropTokens(caller : Principal, startingIndex : Nat) : () {
+    public func airdropTokens(caller : Principal) : () {
       assert (caller == config.minter and _totalToSell == 0);
 
       // airdrop tokens
