@@ -15,7 +15,6 @@ module {
     *********/
 
     var _isShuffled = false;
-    let minIndex = if (config.legacyPlaceholder == ?true) 1 else 0;
 
     public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
       ?#v1({
@@ -48,19 +47,11 @@ module {
       var currentIndex : Nat = deps._Assets.size();
 
       // shuffle the assets array using the random beacon
-      while (currentIndex > minIndex) {
+      while (currentIndex > 0) {
         // use a random number to calculate a random index between 0 and currentIndex
         var randomIndex = randGen.next() % currentIndex;
         assert (randomIndex < currentIndex);
         currentIndex -= 1;
-
-        // for delayed reveal we never want to touch the 0 index
-        // as it contains the placeholder
-        if (minIndex > 0 and randomIndex == 0) {
-          randomIndex += 1;
-          assert ((randomIndex != 0) and (currentIndex != 0));
-        };
-
         let temporaryValue = deps._Assets.get(currentIndex);
         deps._Assets.put(currentIndex, deps._Assets.get(randomIndex));
         deps._Assets.put(randomIndex, temporaryValue);
@@ -76,7 +67,7 @@ module {
       // get the number of available tokens
       var currentIndex : Nat = tokens.size();
 
-      while (currentIndex > minIndex) {
+      while (currentIndex > 0) {
         // use a random number to calculate a random index between 0 and currentIndex
         var randomIndex = randGen.next() % currentIndex;
         assert (randomIndex < currentIndex);
