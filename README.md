@@ -61,7 +61,6 @@ For local deployment run extra commands:
 ```
 npm run replica
 npm run deploy:ledger
-npm run vite
 ```
 
 Deploy
