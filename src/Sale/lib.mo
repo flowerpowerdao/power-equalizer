@@ -48,7 +48,7 @@ module {
     var _nextSubAccount = 0 : Nat;
 
     public func getChunkCount(chunkSize : Nat) : Nat {
-      var count: Nat = _saleTransactions.size() / chunkSize;
+      var count : Nat = _saleTransactions.size() / chunkSize;
       if (_saleTransactions.size() % chunkSize != 0) {
         count += 1;
       };
@@ -59,14 +59,13 @@ module {
       let start = Nat.min(_saleTransactions.size(), chunkSize * chunkIndex);
       let count = Nat.min(chunkSize, _saleTransactions.size() - start);
       let saleTransactionChunk = if (_saleTransactions.size() == 0 or count == 0) {
-        []
-      }
-      else {
+        [];
+      } else {
         Buffer.toArray(Buffer.subBuffer(_saleTransactions, start, count));
       };
 
       if (chunkIndex == 0) {
-        ?#v2({
+        ? #v2({
           saleTransactionCount = _saleTransactions.size();
           saleTransactionChunk;
           salesSettlements = Iter.toArray(_salesSettlements.entries());
@@ -78,11 +77,9 @@ module {
           totalToSell = _totalToSell;
           nextSubAccount = _nextSubAccount;
         });
-      }
-      else if (chunkIndex < getChunkCount(chunkSize)) {
-        return ?#v2_chunk({ saleTransactionChunk });
-      }
-      else {
+      } else if (chunkIndex < getChunkCount(chunkSize)) {
+        return ? #v2_chunk({ saleTransactionChunk });
+      } else {
         null;
       };
     };
@@ -90,7 +87,7 @@ module {
     public func loadStableChunk(chunk : Types.StableChunk) {
       switch (chunk) {
         // v1
-        case (?#v1(data)) {
+        case (? #v1(data)) {
           _saleTransactions := Buffer.Buffer<Types.SaleTransaction>(data.saleTransactionCount);
           _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
           // _salesSettlements := TrieMap.fromEntries(data.salesSettlements.vals(), AID.equal, AID.hash);
@@ -102,11 +99,11 @@ module {
           _totalToSell := data.totalToSell;
           _nextSubAccount := data.nextSubAccount;
         };
-        case (?#v1_chunk(data)) {
+        case (? #v1_chunk(data)) {
           _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
         };
         // v2
-        case (?#v2(data)) {
+        case (? #v2(data)) {
           _saleTransactions := Buffer.Buffer<Types.SaleTransaction>(data.saleTransactionCount);
           _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
           _salesSettlements := TrieMap.fromEntries(data.salesSettlements.vals(), AID.equal, AID.hash);
@@ -118,7 +115,7 @@ module {
           _totalToSell := data.totalToSell;
           _nextSubAccount := data.nextSubAccount;
         };
-        case (?#v2_chunk(data)) {
+        case (? #v2_chunk(data)) {
           _saleTransactions.append(Buffer.fromArray(data.saleTransactionChunk));
         };
         case (null) {};
@@ -187,17 +184,9 @@ module {
       assert (caller == config.minter and _totalToSell == 0);
 
       // airdrop tokens
-      var temp = 0;
-      label airdrop for (a in config.airdrop.vals()) {
-        if (temp < startingIndex) {
-          temp += 1;
-          continue airdrop;
-        } else if (temp >= startingIndex + 1500) {
-          break airdrop;
-        };
+      for (a in config.airdrop.vals()) {
         // nextTokens() updates _tokensForSale, removing consumed tokens
         deps._Tokens.transferTokenToUser(nextTokens(1)[0], a);
-        temp += 1;
       };
     };
 
@@ -223,8 +212,7 @@ module {
       if (Time.now() < config.publicSaleStart) {
         if (inPendingWhitelist and not inOngoingWhitelist) {
           return #err("The sale has not started yet");
-        }
-        else if (not isWhitelisted(address)) {
+        } else if (not isWhitelisted(address)) {
           return #err("The public sale has not started yet");
         };
       };
@@ -485,7 +473,7 @@ module {
 
     public func salesSettings(address : Types.AccountIdentifier) : Types.SaleSettings {
       var startTime = config.publicSaleStart;
-      var endTime: Time.Time = 0;
+      var endTime : Time.Time = 0;
 
       switch (config.sale) {
         case (#duration(duration)) {
@@ -577,7 +565,7 @@ module {
       return [(1, config.salePrice)];
     };
 
-    func getCurrentDutchAuctionPrice(dutchAuction: RootTypes.DutchAuction) : Nat64 {
+    func getCurrentDutchAuctionPrice(dutchAuction : RootTypes.DutchAuction) : Nat64 {
       let start = if (dutchAuction.target == #publicSale or config.whitelists.size() == 0) {
         config.publicSaleStart;
       } else {
@@ -624,15 +612,15 @@ module {
       };
     };
 
-    func getWhitelistSpotId(whitelist: Types.Whitelist, address: Types.AccountIdentifier) : Types.WhitelistSpotId {
-      whitelist.name # ":" # address
+    func getWhitelistSpotId(whitelist : Types.Whitelist, address : Types.AccountIdentifier) : Types.WhitelistSpotId {
+      whitelist.name # ":" # address;
     };
 
-    func addWhitelistSpot(whitelist: Types.Whitelist, address: Types.AccountIdentifier) {
+    func addWhitelistSpot(whitelist : Types.Whitelist, address : Types.AccountIdentifier) {
       _whitelistSpots.put(getWhitelistSpotId(whitelist, address), false);
     };
 
-    func removeWhitelistSpot(whitelist: Types.Whitelist, address: Types.AccountIdentifier) {
+    func removeWhitelistSpot(whitelist : Types.Whitelist, address : Types.AccountIdentifier) {
       _whitelistSpots.delete(getWhitelistSpotId(whitelist, address));
     };
 
