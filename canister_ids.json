@@ -1,5 +1,8 @@
 {
   "production": {
     "ic": "y2ga5-lyaaa-aaaae-qae2q-cai"
+  },
+  "staging": {
+    "ic": "ytflb-5qaaa-aaaae-qae3a-cai"
   }
 }
