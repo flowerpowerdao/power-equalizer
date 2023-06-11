@@ -1,10 +1,10 @@
 (
-  principal "ytflb-5qaaa-aaaae-qae3a-cai", // TO-DO: change to production
+  principal "y2ga5-lyaaa-aaaae-qae2q-cai", 
   record {
     name = "Cherries";
     sale = variant { supply = 6666 };
     salePrice = 700_000_000; // 7 ICP
-    publicSaleStart = 1686632400000000000; // tuesday 1am (production)
+    publicSaleStart = 1686632400000000001; // tuesday 1am (production)
     salesDistribution = vec {
       record { "203b33afcfe22a3727be0a2eb1b90274d2c789754939e4671a7b2480e3d8c774"; 54000 }; // ludo
       record { "20eacca23f6ff96941099da3cbf705f7466c1a7e963b87a4ec87be7d678f4a19"; 19800 }; // moritz
@@ -14,7 +14,7 @@
     };
     royalties = vec {
       record { "203b33afcfe22a3727be0a2eb1b90274d2c789754939e4671a7b2480e3d8c774"; 4050 }; // ludo
-      record { "20eacca23f6ff96941099da3cbf705f7466c1a7e963b87a4ec87be7d678f4a19"; 1485 }; // moritz
+      record { "a60ee760948b2ce3e5d150cc65a429747a2e9182856233acdd14587afc08d3ee"; 1485 }; // moritz
       record { "abcb3306869feeab17b4e8b251f2aa26c633c97dc8cd5343583bc6e46413e4e4";  607 }; // andrew
       record { "5ec8e6e59bec11bc9033dbcd173fdefb9aaf4b917a950f87ad2ddf57e957283b";  607 }; // evan
       record { "719d835b163351619acef12d0847257ae9995571313c3414e3f0f90eab2a5675";  751 }; // shamil
