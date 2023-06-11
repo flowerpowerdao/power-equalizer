@@ -34,7 +34,7 @@ export interface Canister {
   'addAsset' : ActorMethod<[AssetV2], bigint>,
   'addAssets' : ActorMethod<[Array<AssetV2>], bigint>,
   'addPlaceholder' : ActorMethod<[AssetV2], undefined>,
-  'airdropTokens' : ActorMethod<[bigint], undefined>,
+  'airdropTokens' : ActorMethod<[], undefined>,
   'allSettlements' : ActorMethod<[], Array<[TokenIndex__1, Settlement]>>,
   'availableCycles' : ActorMethod<[], bigint>,
   'backupChunk' : ActorMethod<[bigint, bigint], StableChunk>,
@@ -332,6 +332,7 @@ export interface NumericEntity {
   'first' : bigint,
   'last' : bigint,
 }
+export type RemainingSpots = bigint;
 export type Result = {
     'ok' : Array<[TokenIndex, [] | [Listing], [] | [Uint8Array | number[]]]>
   } |
@@ -460,7 +461,7 @@ export type StableChunk__4 = [] | [
         'saleTransactionCount' : bigint,
         'nextSubAccount' : bigint,
         'soldIcp' : bigint,
-        'whitelistSpots' : Array<[WhitelistSpotId, WhitelistSpotUsed]>,
+        'whitelistSpots' : Array<[WhitelistSpotId, RemainingSpots]>,
         'tokensForSale' : Uint32Array | number[],
       }
     } |
@@ -546,5 +547,4 @@ export interface Whitelist {
 }
 export interface WhitelistSlot { 'end' : Time, 'start' : Time }
 export type WhitelistSpotId = string;
-export type WhitelistSpotUsed = boolean;
 export interface _SERVICE extends Canister {}
