@@ -41,7 +41,7 @@ module {
     var _salesSettlements = TrieMap.TrieMap<Types.AccountIdentifier, Types.Sale>(AID.equal, AID.hash);
     var _failedSales = Buffer.Buffer<(Types.AccountIdentifier, Types.SubAccount)>(0);
     var _tokensForSale = Buffer.Buffer<Types.TokenIndex>(0);
-    var _whitelistSpots = TrieMap.TrieMap<Types.WhitelistSpotId, Types.WhitelistSpotUsed>(Text.equal, Text.hash);
+    var _whitelistSpots = TrieMap.TrieMap<Types.WhitelistSpotId, Types.RemainingSpots>(Text.equal, Text.hash);
     var _soldIcp = 0 : Nat64;
     var _sold = 0 : Nat;
     var _totalToSell = 0 : Nat;
@@ -617,23 +617,29 @@ module {
     };
 
     func addWhitelistSpot(whitelist : Types.Whitelist, address : Types.AccountIdentifier) {
-      _whitelistSpots.put(getWhitelistSpotId(whitelist, address), false);
+      let remainingSpots = Option.get(_whitelistSpots.get(getWhitelistSpotId(whitelist, address)), 0);
+      _whitelistSpots.put(getWhitelistSpotId(whitelist, address), remainingSpots + 1);
     };
 
     func removeWhitelistSpot(whitelist : Types.Whitelist, address : Types.AccountIdentifier) {
-      _whitelistSpots.delete(getWhitelistSpotId(whitelist, address));
+      let remainingSpots = Option.get(_whitelistSpots.get(getWhitelistSpotId(whitelist, address)), 0);
+      if (remainingSpots > 0) {
+        _whitelistSpots.put(getWhitelistSpotId(whitelist, address), remainingSpots - 1);
+      } else {
+        _whitelistSpots.delete(getWhitelistSpotId(whitelist, address));
+      };
     };
 
     // get a whitelist that has started, hasn't expired, and hasn't been used by an address
     func getEligibleWhitelist(address : Types.AccountIdentifier, allowNotStarted : Bool) : ?Types.Whitelist {
       for (whitelist in config.whitelists.vals()) {
         let spotId = getWhitelistSpotId(whitelist, address);
-        let spotUsed = Option.get(_whitelistSpots.get(spotId), true);
+        let remainingSpots = Option.get(_whitelistSpots.get(spotId), 0);
         let whitelistStarted = Time.now() >= whitelist.startTime;
         let endTime = Option.get(whitelist.endTime, 0);
         let whitelistNotExpired = Time.now() <= endTime or endTime == 0;
 
-        if (not spotUsed and (allowNotStarted or whitelistStarted) and whitelistNotExpired) {
+        if (remainingSpots > 0 and (allowNotStarted or whitelistStarted) and whitelistNotExpired) {
           return ?whitelist;
         };
       };
