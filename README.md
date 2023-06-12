@@ -185,7 +185,7 @@ npm run vitest pending-sale
 
 ## Manual testing 🧪
 
-Deploy the canister according to [Deploy](#deploy) section.
+Deploy [assets](#assets) and [NFT canister](#deploy-nft-canister).
 
 Make sure that the NFT is redirected to the asset:
 
