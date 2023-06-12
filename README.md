@@ -14,6 +14,8 @@ npm run deploy-local
 
 ## Steps to launch an NFT collection
 
+- [ ] fork this repository
+- [ ] comment out last 4 lines in `.gitignore`
 - [ ] prepare and deploy [assets](#assets)
 - [ ] copy `initArgs.local.did` to `initArgs.did` and adapt it to your needs (see [INIT_ARGS.md](INIT_ARGS.md))
 - [ ] [create canisters](#create-canisters)
