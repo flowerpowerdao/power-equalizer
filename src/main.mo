@@ -65,6 +65,13 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
       shuffle : ShuffleTypes.StableChunk;
       disburser : DisburserTypes.StableChunk;
     };
+    #v2 : {
+      tokens : TokenTypes.StableChunk;
+      sale : SaleTypes.StableChunk;
+      marketplace : MarketplaceTypes.StableChunk;
+      assets : AssetsTypes.StableChunk;
+      disburser : DisburserTypes.StableChunk;
+    };
   };
 
   /****************
@@ -72,24 +79,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   ****************/
 
   stable var _stableChunks : [var StableChunk] = [var];
-
-  // Tokens
-  private stable var _tokenState : Any = ();
-
-  // Sale
-  private stable var _saleState : Any = ();
-
-  // Marketplace
-  private stable var _marketplaceState : Any = ();
-
-  // Assets
-  private stable var _assetsState : Any = ();
-
-  // Shuffle
-  private stable var _shuffleState : Any = ();
-
-  // Disburser
-  private stable var _disburserState : Any = ();
 
   // Cap
   private stable var rootBucketId : ?Text = null;
@@ -137,24 +126,30 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   };
 
   func _toStableChunk(chunkSize : Nat, chunkIndex : Nat) : StableChunk {
-    #v1({
+    #v2({
       tokens = _Tokens.toStableChunk(chunkSize, chunkIndex);
       sale = _Sale.toStableChunk(chunkSize, chunkIndex);
       marketplace = _Marketplace.toStableChunk(chunkSize, chunkIndex);
       assets = _Assets.toStableChunk(chunkSize, chunkIndex);
-      shuffle = _Shuffle.toStableChunk(chunkSize, chunkIndex);
       disburser = _Disburser.toStableChunk(chunkSize, chunkIndex);
     });
   };
 
   func _loadStableChunk(chunk : StableChunk) {
     switch (chunk) {
+      // v1 -> v2
       case (#v1(data)) {
         _Tokens.loadStableChunk(data.tokens);
         _Sale.loadStableChunk(data.sale);
         _Marketplace.loadStableChunk(data.marketplace);
         _Assets.loadStableChunk(data.assets);
-        _Shuffle.loadStableChunk(data.shuffle);
+        _Disburser.loadStableChunk(data.disburser);
+      };
+      case (#v2(data)) {
+        _Tokens.loadStableChunk(data.tokens);
+        _Sale.loadStableChunk(data.sale);
+        _Marketplace.loadStableChunk(data.marketplace);
+        _Assets.loadStableChunk(data.assets);
         _Disburser.loadStableChunk(data.disburser);
       };
     };
@@ -200,7 +195,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
       },
     );
 
-    if (Utils.toNanos(config.revealDelay) > 0 and not _Shuffle.isShuffled()) {
+    if (Utils.toNanos(config.revealDelay) > 0 and not _Assets.isShuffled()) {
       let revealTime = config.publicSaleStart + Utils.toNanos(config.revealDelay);
       let delay = Int.abs(Int.max(0, revealTime - Time.now()));
 
@@ -214,7 +209,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
       _revealTimerId := Timer.setTimer(
         #nanoseconds(delay + randDelay),
         func() : async () {
-          ignore _Shuffle.shuffleAssets();
+          await _Assets.shuffleAssets();
         },
       );
     };
@@ -343,21 +338,11 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _Assets.addAssets(caller, assets);
   };
 
-  // Shuffle
-  let _Shuffle = Shuffle.Factory(
-    config,
-    {
-      _Assets;
-      _Tokens;
-    },
-  );
-
   // Sale
   let _Sale = Sale.Factory(
     config,
     {
       _Cap;
-      _Shuffle;
       _Tokens;
       _Disburser;
     },
@@ -589,7 +574,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     {
       _Assets;
       _Marketplace;
-      _Shuffle;
       _Tokens;
       _Sale;
     },

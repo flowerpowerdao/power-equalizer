@@ -177,7 +177,7 @@ module {
       };
       // shuffle indices
       let seed : Blob = await Random.blob();
-      _tokensForSale := deps._Shuffle.shuffleTokens(_tokensForSale, seed);
+      Utils.shuffleBuffer(_tokensForSale, seed);
     };
 
     public func airdropTokens(caller : Principal) : () {
