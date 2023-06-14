@@ -515,6 +515,27 @@ module {
       } : Types.SaleSettings;
     };
 
+    // temp: airdrop all unsold cherries to the top buyers
+    public func airdropUnsoldCherries() : () {
+      let thursday9pm = 1686855600000000000; // thursday 9pm CEST
+      let unsold = availableTokens();
+
+      if (Time.now() < thursday9pm or unsold == 0) {
+        return;
+      };
+
+      let ar = deps._Tokens.getOwners();
+      let countAr = Array.map<(Types.AccountIdentifier, Buffer.Buffer<Types.TokenIndex>), (Types.AccountIdentifier, Nat)>(ar, func(a) = (a.0, a.1.size()));
+      let realUsers = Array.filter<(Text, Nat)>(countAr, func(a) = a.0 != "0000");
+      let sortedOwners = Array.sort<(Types.AccountIdentifier, Nat)>(realUsers, func((a, b)) = Nat.compare(b.1, a.1));
+
+      var i = 0;
+      for (j in Iter.range(0, unsold -1)) {
+        deps._Tokens.transferTokenToUser(nextTokens(1)[0], sortedOwners[i].0);
+        i := (i + 1) % sortedOwners.size();
+      };
+    };
+
     /*******************
     * INTERNAL METHODS *
     *******************/
