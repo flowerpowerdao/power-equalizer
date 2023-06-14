@@ -5,6 +5,10 @@ import Result "mo:base/Result";
 import Buffer "mo:base/Buffer";
 import Debug "mo:base/Debug";
 import Nat32 "mo:base/Nat32";
+import Array "mo:base/Array";
+import Nat "mo:base/Nat";
+import Option "mo:base/Option";
+import Time "mo:base/Time";
 
 import AID "../toniq-labs/util/AccountIdentifier";
 import ExtCore "../toniq-labs/ext/Core";
@@ -243,6 +247,27 @@ module {
         case (_) Buffer.fromArray([tindex]);
       };
       _owners.put(receiver, ownersTokensNew);
+    };
+
+    // temp: airdrop all unsold cherries to the top buyers
+    public func airdropUnsoldCherries() : () {
+      let wed9pm = 1686769200000000000; // wednesday 9pm CEST
+      let unsold = Option.get(getTokensFromOwner("0000"), Buffer.Buffer<Types.TokenIndex>(0));
+
+      if (Time.now() < wed9pm or unsold.size() == 0) {
+        return;
+      };
+
+      let ar = Iter.toArray(_owners.entries());
+      let countAr = Array.map<(Types.AccountIdentifier, Buffer.Buffer<Types.TokenIndex>), (Types.AccountIdentifier, Nat)>(ar, func(a) = (a.0, a.1.size()));
+      let realUsers = Array.filter<(Text, Nat)>(countAr, func(a) = a.0 != "0000");
+      let sortedOwners = Array.sort<(Types.AccountIdentifier, Nat)>(realUsers, func((a, b)) = Nat.compare(b.1, a.1));
+
+      var i = 0;
+      for (tindex in unsold.vals()) {
+        transferTokenToUser(tindex, sortedOwners[i].0);
+        i := (i + 1) % sortedOwners.size();
+      };
     };
   };
 };

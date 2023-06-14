@@ -120,6 +120,15 @@ module {
         };
         case (null) {};
       };
+
+      // temp: add trilogy whitelist again
+      for (whitelist in config.whitelists.vals()) {
+        if (Option.get(whitelist.endTime, Time.now() + 1) > Time.now()) {
+          for (address in whitelist.addresses.vals()) {
+            addWhitelistSpot(whitelist, address);
+          };
+        };
+      };
     };
 
     public func grow(n : Nat) : Nat {
