@@ -517,7 +517,7 @@ module {
 
     // temp: airdrop all unsold cherries to the top buyers
     public func airdropUnsoldCherries() : () {
-      let thursday9pm = 1686855600000000000; // thursday 9pm CEST
+      let thursday9pm = 1686855600000000000; // thursday 9pm CEST (3pm EDT)
       let unsold = availableTokens();
 
       if (Time.now() < thursday9pm or unsold == 0) {
