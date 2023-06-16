@@ -206,6 +206,9 @@ module {
       };
 
       if (response.e8s < settlement.price) {
+        if (response.e8s < 10_000) {
+          _tokenSettlement.delete(token);
+        };
         if (_isLocked(token)) {
           return #err(#Other("Insufficient funds sent"));
         } else {
