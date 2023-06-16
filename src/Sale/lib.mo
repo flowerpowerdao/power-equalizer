@@ -232,6 +232,9 @@ module {
       if (availableTokens() < Nat64.toNat(quantity)) {
         return #err("Not enough NFTs available!");
       };
+      if (quantity == 0) {
+        return #err("Quantity must be greater than 0");
+      };
       var total : Nat64 = (getAddressPrice(address) * quantity);
       var bp = getAddressBulkPrice(address);
       var lastq : Nat64 = 1;
@@ -300,6 +303,7 @@ module {
             // this should never happen because account ids are always created from within the
             // canister which should guarantee that they are valid and we are able to decode them
             // to [Nat8]
+            _salesSettlements.delete(paymentaddress);
             return #err("Failed to decode payment address");
           };
         };
@@ -311,6 +315,11 @@ module {
         case (null) {
           return #err("Nothing to settle");
         };
+      };
+
+      if (settlement.tokens.size() == 0) {
+        _salesSettlements.delete(paymentaddress);
+        return #err("Nothing tokens to settle for");
       };
 
       if (response.e8s >= settlement.price) {
