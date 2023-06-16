@@ -49,40 +49,35 @@ module {
     public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
       let start = Nat.min(_transactions.size(), chunkSize * chunkIndex);
       let count = Nat.min(chunkSize, _transactions.size() - start);
-      let transactionChunk = if (_transactions.size() == 0 or count == 0) {
-        []
-      }
-      else {
+      let transactionChunk = if (_transactions.size() == 0 or count == 0) { [] } else {
         Buffer.toArray(Buffer.subBuffer(_transactions, start, count));
       };
 
       if (chunkIndex == 0) {
-        return ?#v1({
+        return ? #v1({
           transactionCount = _transactions.size();
           transactionChunk;
           tokenSettlement = Iter.toArray(_tokenSettlement.entries());
           tokenListing = Iter.toArray(_tokenListing.entries());
           frontends = Iter.toArray(_frontends.entries());
         });
-      }
-      else if (chunkIndex < getChunkCount(chunkSize)) {
-        return ?#v1_chunk({ transactionChunk });
-      }
-      else {
+      } else if (chunkIndex < getChunkCount(chunkSize)) {
+        return ? #v1_chunk({ transactionChunk });
+      } else {
         null;
       };
     };
 
     public func loadStableChunk(chunk : Types.StableChunk) {
       switch (chunk) {
-        case (?#v1(data)) {
+        case (? #v1(data)) {
           _transactions := Buffer.Buffer<Types.Transaction>(data.transactionCount);
           _transactions.append(Buffer.fromArray(data.transactionChunk));
           _tokenSettlement := TrieMap.fromEntries(data.tokenSettlement.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
           _tokenListing := TrieMap.fromEntries(data.tokenListing.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
           _frontends := TrieMap.fromEntries(data.frontends.vals(), Text.equal, Text.hash);
         };
-        case (?#v1_chunk(data)) {
+        case (? #v1_chunk(data)) {
           _transactions.append(Buffer.fromArray(data.transactionChunk));
         };
         case (null) {};
@@ -463,9 +458,12 @@ module {
     };
 
     public func frontends() : [(Text, Types.Frontend)] {
-      Array.map<(Text, Types.AccountIdentifier, Nat64), (Text, Types.Frontend)>(config.marketplaces, func((id, accountIdentifier, fee)) {
-        (id, { accountIdentifier; fee; });
-      });
+      Array.map<(Text, Types.AccountIdentifier, Nat64), (Text, Types.Frontend)>(
+        config.marketplaces,
+        func((id, accountIdentifier, fee)) {
+          (id, { accountIdentifier; fee });
+        },
+      );
     };
 
     /********************
@@ -477,11 +475,14 @@ module {
 
       for (marketplace in config.marketplaces.vals()) {
         if (marketplace.0 == identifier) {
-          return { accountIdentifier = marketplace.1; fee = marketplace.2; };
+          return { accountIdentifier = marketplace.1; fee = marketplace.2 };
         };
       };
 
-      return { accountIdentifier = config.marketplaces[0].1; fee = config.marketplaces[0].2; }
+      return {
+        accountIdentifier = config.marketplaces[0].1;
+        fee = config.marketplaces[0].2;
+      };
     };
 
     func validFrontendIndentifier(frontendIdentifier : ?Text) : Bool {
