@@ -403,7 +403,9 @@ module {
           case (?paymentAddress) {
             try {
               ignore (await retrieve(caller, paymentAddress));
-            } catch (e) {};
+            } catch (e) {
+              break settleLoop;
+            };
           };
           case null break settleLoop;
         };
@@ -444,6 +446,7 @@ module {
             } catch (e) {
               // if the transaction fails for some reason, we add it back to the Buffer
               _failedSales.add(failedSale);
+              break failedSalesLoop;
             };
           };
           case (null) {

@@ -448,7 +448,9 @@ module {
           case (?tokenindex) {
             try {
               ignore (await settle(caller, ExtCore.TokenIdentifier.fromPrincipal(config.canister, tokenindex)));
-            } catch (e) {};
+            } catch (e) {
+              break settleLoop;
+            };
           };
           case null break settleLoop;
         };
