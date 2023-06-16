@@ -232,6 +232,9 @@ module {
       if (availableTokens() < Nat64.toNat(quantity)) {
         return #err("Not enough NFTs available!");
       };
+      if (quantity == 0) {
+        return #err("Quantity must be greater than 0");
+      };
       var total : Nat64 = (getAddressPrice(address) * quantity);
       var bp = getAddressBulkPrice(address);
       var lastq : Nat64 = 1;
@@ -311,6 +314,10 @@ module {
         case (null) {
           return #err("Nothing to settle");
         };
+      };
+
+      if (settlement.tokens.size() == 0) {
+        return #err("Nothing to settle");
       };
 
       if (response.e8s >= settlement.price) {
