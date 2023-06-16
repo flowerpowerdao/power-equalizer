@@ -303,6 +303,7 @@ module {
             // this should never happen because account ids are always created from within the
             // canister which should guarantee that they are valid and we are able to decode them
             // to [Nat8]
+            _salesSettlements.delete(paymentaddress);
             return #err("Failed to decode payment address");
           };
         };
@@ -317,7 +318,8 @@ module {
       };
 
       if (settlement.tokens.size() == 0) {
-        return #err("Nothing to settle");
+        _salesSettlements.delete(paymentaddress);
+        return #err("Nothing tokens to settle for");
       };
 
       if (response.e8s >= settlement.price) {
