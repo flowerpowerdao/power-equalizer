@@ -126,7 +126,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     };
     _stableChunks := [var];
 
-    // _setTimers();
+    _setTimers();
   };
 
   func _getChunkCount(chunkSize : Nat) : Nat {
@@ -197,8 +197,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
         ignore cronDisbursements();
         ignore cronSalesSettlements();
         ignore cronFailedSales();
-        // temp
-        _Sale.airdropUnsoldCherries();
       },
     );
 
@@ -220,10 +218,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
         },
       );
     };
-  };
-
-  public func airdropUnsoldCherries() : async () {
-    _Sale.airdropUnsoldCherries();
   };
 
   /*************
@@ -375,7 +369,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     canistergeekMonitor.collectMetrics();
     // checks caller == minter
     // prevents double mint
-    // _setTimers();
+    _setTimers();
     _Sale.initMint(caller);
   };
 

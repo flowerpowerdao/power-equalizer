@@ -118,10 +118,6 @@ module {
       };
     };
 
-    public func getOwners() : [(Types.AccountIdentifier, Buffer.Buffer<Types.TokenIndex>)]{
-      return Iter.toArray(_owners.entries())
-    };
-
     public func mintNextToken() {
       putTokenMetadata(getNextTokenId(), #nonfungible({ metadata = ?Utils.nat32ToBlob(if (config.singleAssetCollection == ?true) 0 else getNextTokenId()) }));
       transferTokenToUser(getNextTokenId(), "0000");
