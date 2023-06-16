@@ -5,10 +5,6 @@ import Result "mo:base/Result";
 import Buffer "mo:base/Buffer";
 import Debug "mo:base/Debug";
 import Nat32 "mo:base/Nat32";
-import Array "mo:base/Array";
-import Nat "mo:base/Nat";
-import Option "mo:base/Option";
-import Time "mo:base/Time";
 
 import AID "../toniq-labs/util/AccountIdentifier";
 import ExtCore "../toniq-labs/ext/Core";
@@ -30,7 +26,7 @@ module {
     var _supply = 0 : Types.Balance;
 
     public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
-      ?#v1({
+      ? #v1({
         tokenMetadata = Iter.toArray(_tokenMetadata.entries());
         owners = Iter.toArray(
           Iter.map<(Types.AccountIdentifier, Buffer.Buffer<Types.TokenIndex>), (Types.AccountIdentifier, [Types.TokenIndex])>(
@@ -38,7 +34,7 @@ module {
             func(owner) {
               return (owner.0, Buffer.toArray(owner.1));
             },
-          ),
+          )
         );
         registry = Iter.toArray(_registry.entries());
         nextTokenId = _nextTokenId;
@@ -48,7 +44,7 @@ module {
 
     public func loadStableChunk(chunk : Types.StableChunk) {
       switch (chunk) {
-        case (?#v1(data)) {
+        case (? #v1(data)) {
           _tokenMetadata := TrieMap.fromEntries(data.tokenMetadata.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
           _owners := Utils.bufferTrieMapFromIter(data.owners.vals(), AID.equal, AID.hash);
           _registry := TrieMap.fromEntries(data.registry.vals(), ExtCore.TokenIndex.equal, ExtCore.TokenIndex.hash);
