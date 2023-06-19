@@ -64,11 +64,9 @@ module {
           tokenListing = Iter.toArray(_tokenListing.entries());
           frontends = Iter.toArray(_frontends.entries());
         });
-      }
-      else if (chunkIndex < getChunkCount(chunkSize)) {
+      } else if (chunkIndex < getChunkCount(chunkSize)) {
         return ?#v1_chunk({ transactionChunk });
-      }
-      else {
+      } else {
         null;
       };
     };
@@ -206,6 +204,9 @@ module {
       };
 
       if (response.e8s < settlement.price) {
+        if (response.e8s < 10_000) {
+          _tokenSettlement.delete(token);
+        };
         if (_isLocked(token)) {
           return #err(#Other("Insufficient funds sent"));
         } else {
@@ -445,7 +446,9 @@ module {
           case (?tokenindex) {
             try {
               ignore (await settle(caller, ExtCore.TokenIdentifier.fromPrincipal(config.canister, tokenindex)));
-            } catch (e) {};
+            } catch (e) {
+              break settleLoop;
+            };
           };
           case null break settleLoop;
         };
@@ -479,7 +482,10 @@ module {
         };
       };
 
-      return { accountIdentifier = config.marketplaces[0].1; fee = config.marketplaces[0].2; }
+      return {
+        accountIdentifier = config.marketplaces[0].1;
+        fee = config.marketplaces[0].2;
+      };
     };
 
     func validFrontendIndentifier(frontendIdentifier : ?Text) : Bool {

@@ -75,18 +75,9 @@ module {
                 created_at_time = null;
                 memo = Encoding.BigEndian.toNat64(Blob.toArray(Principal.toBlob(Principal.fromText(ExtCore.TokenIdentifier.fromPrincipal(config.canister, disbursement.tokenIndex)))));
               });
-
-              switch (res) {
-                case (#Ok(blockIndex)) {};
-                case (#Err(#InsufficientFunds({ balance }))) {
-                  // don't add disbursement back to _disbursements because it will lead to an infinite loop
-                };
-                case (#Err(_)) {
-                  _disbursements := List.push(disbursement, _disbursements);
-                };
-              };
             } catch (e) {
               _disbursements := List.push(disbursement, _disbursements);
+              break payloop;
             };
           };
           case (null) {
