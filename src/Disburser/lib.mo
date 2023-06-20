@@ -49,7 +49,7 @@ module {
       List.toArray(_disbursements);
     };
 
-    public func cronDisbursements() : async () {
+    public func cronDisbursements() : async* () {
       label payloop while (true) {
         let (last, newDisbursements) = List.pop(_disbursements);
         switch (last) {
