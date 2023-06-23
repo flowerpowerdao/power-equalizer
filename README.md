@@ -14,10 +14,12 @@ npm run deploy-local
 
 ## Steps to launch an NFT collection
 
+- [ ] fork this repository
+- [ ] comment out last 4 lines in `.gitignore`
 - [ ] prepare and deploy [assets](#assets)
-- [ ] adapt `initArgs.did` to your needs (see [CONFIG.md](CONFIG.md))
+- [ ] copy `initArgs.local.did` to `initArgs.did` and adapt it to your needs (see [INIT_ARGS.md](INIT_ARGS.md))
 - [ ] [create canisters](#create-canisters)
-- [ ] [deploy canisters](#deploy)
+- [ ] [deploy NFT canister](#deploy-nft-canister)
 - [ ] create collection [summary](https://docs.google.com/document/d/1yady6xdsuInRbj8zLpIn7oG933UZUzg-vx_MUnr_jJ0/edit?usp=sharing)
 - [ ] add canister to [DAB](https://docs.google.com/forms/d/e/1FAIpQLSc-0BL9FMRtI0HhWj4g7CCYjf3TMr4_K_qqmagjzkUH_CKczw/viewform)
 - [ ] send collection details to entrepot via [form](https://collection-guide.paperform.co/)
@@ -183,7 +185,7 @@ npm run vitest pending-sale
 
 ## Manual testing 🧪
 
-Deploy the canister according to [Deploy](#deploy) section.
+Deploy [assets](#assets) and [NFT canister](#deploy-nft-canister).
 
 Make sure that the NFT is redirected to the asset:
 
