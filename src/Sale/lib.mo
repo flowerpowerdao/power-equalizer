@@ -280,7 +280,7 @@ module {
       #ok((paymentAddress, total));
     };
 
-    public func retrieve(caller : Principal, paymentaddress : Types.AccountIdentifier) : async Result.Result<(), Text> {
+    public func retrieve(caller : Principal, paymentaddress : Types.AccountIdentifier) : async* Result.Result<(), Text> {
       if (Option.isNull(_salesSettlements.get(paymentaddress))) {
         return #err("Nothing to settle");
       };
@@ -393,7 +393,7 @@ module {
       };
     };
 
-    public func cronSalesSettlements(caller : Principal) : async () {
+    public func cronSalesSettlements(caller : Principal) : async* () {
       // _saleSattlements can potentially be really big, we have to make sure
       // we dont get out of cycles error or error that outgoing calls queue is full.
       // This is done by adding the await statement.
@@ -402,7 +402,7 @@ module {
         switch (expiredSalesSettlements().keys().next()) {
           case (?paymentAddress) {
             try {
-              ignore (await retrieve(caller, paymentAddress));
+              ignore (await* retrieve(caller, paymentAddress));
             } catch (e) {};
           };
           case null break settleLoop;
@@ -410,7 +410,7 @@ module {
       };
     };
 
-    public func cronFailedSales() : async () {
+    public func cronFailedSales() : async* () {
       label failedSalesLoop while (true) {
         let last = _failedSales.removeLast();
         switch (last) {

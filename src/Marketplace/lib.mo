@@ -107,7 +107,7 @@ module {
     * PUBLIC INTERFACE *
     ********************/
 
-    public func lock(caller : Principal, tokenid : Types.TokenIdentifier, price : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount, frontendIdentifier : ?Text) : async Result.Result<Types.AccountIdentifier, Types.CommonError> {
+    public func lock(caller : Principal, tokenid : Types.TokenIdentifier, price : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount, frontendIdentifier : ?Text) : async* Result.Result<Types.AccountIdentifier, Types.CommonError> {
       if (ExtCore.TokenIdentifier.isPrincipal(tokenid, config.canister) == false) {
         return #err(#InvalidToken(tokenid));
       };
@@ -149,7 +149,7 @@ module {
       // check if there is a previous settlement that has never been settled
       switch (_tokenSettlement.get(token)) {
         case (?settlement) {
-          let resp : Result.Result<(), Types.CommonError> = await settle(caller, tokenid);
+          let resp : Result.Result<(), Types.CommonError> = await* settle(caller, tokenid);
           switch (resp) {
             case (#ok) {
               return #err(#Other("Listing has sold"));
@@ -178,7 +178,7 @@ module {
       return #ok(paymentAddress);
     };
 
-    public func settle(caller : Principal, tokenid : Types.TokenIdentifier) : async Result.Result<(), Types.CommonError> {
+    public func settle(caller : Principal, tokenid : Types.TokenIdentifier) : async* Result.Result<(), Types.CommonError> {
       if (ExtCore.TokenIdentifier.isPrincipal(tokenid, config.canister) == false) {
         return #err(#InvalidToken(tokenid));
       };
@@ -296,7 +296,7 @@ module {
       return #ok();
     };
 
-    public func list(caller : Principal, request : Types.ListRequest) : async Result.Result<(), Types.CommonError> {
+    public func list(caller : Principal, request : Types.ListRequest) : async* Result.Result<(), Types.CommonError> {
       // marketplace is open either when marketDelay has passed or collection sold out
       let marketDelay = Utils.toNanos(Option.get(config.marketDelay, #days(2)));
       if (Time.now() < config.publicSaleStart + marketDelay) {
@@ -319,7 +319,7 @@ module {
 
       switch (_tokenSettlement.get(token)) {
         case (?settlement) {
-          let resp : Result.Result<(), Types.CommonError> = await settle(caller, request.token);
+          let resp : Result.Result<(), Types.CommonError> = await* settle(caller, request.token);
           switch (resp) {
             case (#ok) {
               return #err(#Other("Listing is sold"));
@@ -434,7 +434,7 @@ module {
       (res.0, res.1, res.2, floor, _tokenListing.size(), deps._Tokens.registrySize(), _transactions.size());
     };
 
-    public func cronSettlements(caller : Principal) : async () {
+    public func cronSettlements(caller : Principal) : async* () {
       // only failed settlments are settled here
       //  even though the result is ignored, if settle traps the catch block is executed
       // it doesn't matter if this is executed multiple times on the same settlement, `settle` checks if it's already settled
@@ -442,7 +442,7 @@ module {
         switch (unlockedSettlements().keys().next()) {
           case (?tokenindex) {
             try {
-              ignore (await settle(caller, ExtCore.TokenIdentifier.fromPrincipal(config.canister, tokenindex)));
+              ignore (await* settle(caller, ExtCore.TokenIdentifier.fromPrincipal(config.canister, tokenindex)));
             } catch (e) {};
           };
           case null break settleLoop;
