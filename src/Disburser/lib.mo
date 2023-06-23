@@ -25,6 +25,9 @@ module {
     var _disbursements = List.nil<Types.Disbursement>();
 
     public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
+      if (chunkIndex != 0) {
+        return null;
+      };
       ?#v1({
         disbursements = List.toArray(_disbursements);
       });

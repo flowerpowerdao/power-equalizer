@@ -17,6 +17,9 @@ module {
     var _isShuffled = false;
 
     public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
+      if (chunkIndex != 0) {
+        return null;
+      };
       ?#v1({
         isShuffled = _isShuffled;
       });
