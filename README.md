@@ -146,11 +146,10 @@ You need to switch to an anonymous identity to run the tests.
 dfx identity use anonymouse
 ```
 
-First, start a local replica and deploy
+First, start a local replica
 
 ```
 npm run replica
-npm run deploy-local
 ```
 
 To deploy and run all tests
