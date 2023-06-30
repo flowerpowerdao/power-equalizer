@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { User } from '../user';
-import env from './.env.pending-sale';
+import env from './env';
 
 describe('method calls restricted to admin/minter', () => {
   test('should try to call initMint', async () => {
@@ -25,6 +25,8 @@ describe('method calls restricted to admin/minter', () => {
       metadata: [],
       name: 'test',
       payload: { data: [new Uint8Array], ctype: '' },
+      payloadUrl: [],
+      thumbnailUrl: [],
     })).rejects.toThrow(/assertion failed/);
   });
 });

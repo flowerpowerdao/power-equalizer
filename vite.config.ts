@@ -1,8 +1,14 @@
 /// <reference types="vitest" />
-import { defineConfig } from 'vite'
+import {defineConfig} from 'vite';
 
 export default defineConfig({
   test: {
     testTimeout: 1000 * 60 * 2,
+    setupFiles: ['./test/setup.ts'],
+    exclude: [
+      '**/node_modules/**',
+      '**/.{git,dfx,vessel}/**',
+      'test/restore/restore.test.ts', // contains only env.ts
+    ],
   },
 });

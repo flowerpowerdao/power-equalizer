@@ -4,11 +4,11 @@ import Random "mo:base/Random";
 import Buffer "mo:base/Buffer";
 
 import Types "types";
+import RootTypes "../types";
 import Utils "../utils";
-import Env "../Env";
 
 module {
-  public class Factory(deps : Types.Dependencies, consts : Types.Constants) {
+  public class Factory(config : RootTypes.Config, deps : Types.Dependencies) {
 
     /*********
     * STATE *
@@ -17,6 +17,9 @@ module {
     var _isShuffled = false;
 
     public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
+      if (chunkIndex != 0) {
+        return null;
+      };
       ?#v1({
         isShuffled = _isShuffled;
       });
@@ -38,7 +41,7 @@ module {
     //*** ** ** ** ** ** ** ** ** * * PUBLIC INTERFACE * ** ** ** ** ** ** ** ** ** ** /
 
     public func shuffleAssets() : async () {
-      assert (Env.delayedReveal and not _isShuffled);
+      assert (Utils.toNanos(config.revealDelay) > 0 and not _isShuffled);
       // get a random seed from the IC
       let seed : Blob = await Random.blob();
       // use that seed to create random number generator
@@ -47,17 +50,11 @@ module {
       var currentIndex : Nat = deps._Assets.size();
 
       // shuffle the assets array using the random beacon
-      while (currentIndex > 1) {
+      while (currentIndex > 0) {
         // use a random number to calculate a random index between 0 and currentIndex
         var randomIndex = randGen.next() % currentIndex;
         assert (randomIndex < currentIndex);
         currentIndex -= 1;
-        // for delayed reveal we never want to touch the 0 index
-        // as it contains the placeholder
-        if (Env.delayedReveal and randomIndex == 0) {
-          randomIndex += 1;
-        };
-        assert ((randomIndex != 0) and (currentIndex != 0));
         let temporaryValue = deps._Assets.get(currentIndex);
         deps._Assets.put(currentIndex, deps._Assets.get(randomIndex));
         deps._Assets.put(randomIndex, temporaryValue);
@@ -73,7 +70,7 @@ module {
       // get the number of available tokens
       var currentIndex : Nat = tokens.size();
 
-      while (currentIndex > 1) {
+      while (currentIndex > 0) {
         // use a random number to calculate a random index between 0 and currentIndex
         var randomIndex = randGen.next() % currentIndex;
         assert (randomIndex < currentIndex);

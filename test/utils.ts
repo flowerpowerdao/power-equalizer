@@ -35,6 +35,18 @@ export async function buyFromSale(user: User) {
   }
 }
 
+export async function buyFromMarketplace(user: User, tokenId: string, price: bigint, frontendIdentifier: [string] | []) {
+  let lockRes = await user.mainActor.lock(tokenId, price, user.accountId, new Uint8Array, frontendIdentifier);
+  expect(lockRes).toHaveProperty('ok');
+
+  let paytoAddress: string = lockRes['ok'];
+  await user.sendICP(paytoAddress, price);
+
+  let res = await user.mainActor.settle(tokenId);
+  expect(res).toHaveProperty('ok');
+}
+
+
 export async function checkTokenCount(user: User, count: number) {
   let tokensRes = await user.mainActor.tokens(user.accountId);
   expect(tokensRes).toHaveProperty('ok');
@@ -59,7 +71,7 @@ export let tokenIdentifier = (index) => {
   let padding = Buffer.from("\x0Atid");
   let array = new Uint8Array([
       ...padding,
-      ...Principal.fromText(canisterIds.staging.local).toUint8Array(),
+      ...Principal.fromText(canisterIds.test.local).toUint8Array(),
       ...to32bits(index),
   ]);
   return Principal.fromUint8Array(array).toText();

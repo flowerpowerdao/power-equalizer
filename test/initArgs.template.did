@@ -1,0 +1,60 @@
+(
+  principal "r7inp-6aaaa-aaaaa-aaabq-cai", // test canister
+  record {
+    name = $name;
+    sale = $sale;
+    salePrice = $salePrice;
+    publicSaleStart = $publicSaleStart;
+    salesDistribution = vec {
+      record { $beneficiary0; $salesDistribution0 };
+      record { $beneficiary1; $salesDistribution1 };
+    };
+    royalties = vec {
+      record { $beneficiary0; $royalty0 };
+      record { $beneficiary1; $royalty1 };
+    };
+    marketplaces = vec {
+      record { $marketplace0_name; $marketplace0_addr; $marketplace0_fee };
+      record { $marketplace1_name; $marketplace1_addr; $marketplace1_fee };
+      record { $marketplace2_name; $marketplace2_addr; $marketplace2_fee };
+    };
+    // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
+    // 0 - assets will be revealed immediately and assets shuffling will be disabled
+    revealDelay = variant { nanoseconds = $revealDelay };
+    singleAssetCollection = opt $singleAssetCollection;
+    // dutch auction
+    // dutchAuction = opt record {
+    //   target = $dutchAuctionFor;
+    //   startPrice = $dutchAuctionStartPrice; // start price for dutch auction
+    //   intervalPriceDrop = $dutchAuctionIntervalPriceDrop; // drop price every interval
+    //   reservePrice = $dutchAuctionReservePrice; // reserve price
+    //   interval = $dutchAuctionInterval; // nanoseconds
+    // };
+    dutchAuction = null;
+    airdrop = $airdrop;
+    whitelists = vec {
+      record {
+        name = $whitelistTier0Name;
+        price = $whitelistTier0Price;
+        addresses = $whitelistTier0Whitelist;
+        oneTimeOnly = true;
+        startTime = $whitelistSlot1_start;
+        endTime = opt $whitelistSlot1_end;
+      };
+      record {
+        name = $whitelistTier1Name;
+        price = $whitelistTier1Price;
+        addresses = $whitelistTier1Whitelist;
+        oneTimeOnly = true;
+        startTime = $whitelistSlot2_start;
+        endTime = opt $whitelistSlot2_end;
+      };
+    };
+    marketDelay = opt variant { nanoseconds = $marketDelay };
+    escrowDelay = opt variant { nanoseconds = $escrowDelay };
+    timersInterval = opt variant { seconds = $timersInterval };
+    test = opt $test; // must be 'false'
+    restoreEnabled = opt $restoreEnabled; // must be 'false' (see backup/README.md for details)
+    legacyPlaceholder = opt $legacyPlaceholder;
+  }
+)

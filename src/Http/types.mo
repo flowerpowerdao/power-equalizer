@@ -46,8 +46,4 @@ module {
     _Marketplace : Marketplace.Factory;
     _Sale : Sale.Factory;
   };
-
-  public type Constants = {
-    minter : Principal;
-  };
 };

@@ -36,7 +36,7 @@ export class User {
 
     this.mainActor = Actor.createActor(idlFactoryMain, {
       agent: createAgent(this.identity),
-      canisterId: canisterIds.staging.local,
+      canisterId: canisterIds.test.local,
     });
 
     this.icpActor = Actor.createActor(idlFactoryIcp, {

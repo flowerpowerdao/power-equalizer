@@ -4,17 +4,19 @@ import { ICP_FEE } from '../consts';
 import { User } from '../user';
 import { applyFees, buyFromSale, checkTokenCount, tokenIdentifier } from '../utils';
 import { whitelistTier0, whitelistTier1 } from '../well-known-users';
-import env from './.env.marketplace';
+import env from './env';
 
-describe('buy on marketplace', async () => {
+describe('buy on marketplace', () => {
+  let seller = new User;
+  let buyer = new User;
+
   let price = 1_000_000n;
   let initialBalance = 1_000_000_000n;
 
-  let seller = new User;
-  await seller.mintICP(initialBalance);
-
-  let buyer = new User;
-  await buyer.mintICP(initialBalance);
+  it('mint ICP', async () => {
+    await seller.mintICP(initialBalance);
+    await buyer.mintICP(initialBalance);
+  });
 
   it('buy from sale', async () => {
     await buyFromSale(seller)
@@ -91,7 +93,7 @@ describe('buy on marketplace', async () => {
   it('check seller ICP balance', async () => {
     let balanceAfterBuyOnSale = initialBalance - env.salePrice - ICP_FEE;
     let transferFees = ICP_FEE * 5n; // 1 seller transfer, 2 marketplace transfers(seller + buyer), 2 royalty transfers
-    let expectedBalance = balanceAfterBuyOnSale + applyFees(price - transferFees, [env.royalty0, env.royalty1, env.defaultMarketplaceFee * 2n]);
+    let expectedBalance = balanceAfterBuyOnSale + applyFees(price - transferFees, [env.royalty0, env.royalty1, env.marketplace0_fee * 2n]);
     expect(await seller.icpActor.account_balance({ account: seller.account })).toEqual({ e8s: expectedBalance });
   });
 });

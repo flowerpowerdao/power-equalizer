@@ -30,8 +30,4 @@ module {
     price : Nat64;
     locked : ?Time;
   };
-
-  public type Constants = {
-    minter : Principal;
-  }
 };

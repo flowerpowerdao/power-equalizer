@@ -1,12 +1,16 @@
 .dfx
 .vessel
-assets
 *.pem
 .venv
 registry.json
 tokens.json
 __pycache__
 node_modules
-backup/data/a.json
-backup/data/b.json
-deploy.zsh
+backup/data/*
+test/initArgs.did
+
+# remove or comment out the lines below in your forked NFT collection repository
+initArgs.did
+canister_ids.json
+assets/*
+!assets/.ic-assets.json

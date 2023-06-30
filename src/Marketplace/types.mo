@@ -15,7 +15,7 @@ module {
       transactionChunk : [Transaction];
       tokenSettlement : [(TokenIndex, Settlement)];
       tokenListing : [(TokenIndex, Listing)];
-      frontends : [(Text, Frontend)];
+      frontends : [(Text, Frontend)]; // ignored
     };
     #v1_chunk: {
       transactionChunk : [Transaction];
@@ -73,9 +73,4 @@ module {
     _Sale : Sale.Factory;
     _Disburser : Disburser.Factory;
   };
-
-  public type Constants = {
-    minter : Principal;
-  };
-
 };

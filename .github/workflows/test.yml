@@ -18,10 +18,10 @@ jobs:
       - uses: aviate-labs/setup-dfx@v0.2.3
         with:
           vessel-version: 0.6.3
-          dfx-version: 0.13.0
+          dfx-version: 0.14.1
       - name: test
         run: |
             dfx identity use anonymous
             npm install
-            npm run replica
+            npm run replica:no-delay
             npm run test

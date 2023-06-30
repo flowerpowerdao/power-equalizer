@@ -10,11 +10,12 @@ import Root "mo:cap/Root";
 import AID "../toniq-labs/util/AccountIdentifier";
 import ExtCore "../toniq-labs/ext/Core";
 import MarketplaceTypes "../Marketplace/types";
-import Env "../Env";
 import Types "types";
+import Utils "../utils";
+import RootTypes "../types";
 
 module {
-  public class Factory(this : Principal, deps : Types.Dependencies, consts : Types.Constants) {
+  public class Factory(config : RootTypes.Config, deps : Types.Dependencies) {
 
     /*************
     * CONSTANTS *
@@ -27,7 +28,7 @@ module {
     ********************/
 
     public func getMinter() : Principal {
-      consts.minter;
+      config.minter;
     };
 
     public func extensions() : [Types.Extension] {
@@ -53,9 +54,10 @@ module {
 
     public func getTokenToAssetMapping() : [(Types.TokenIndex, Text)] {
       var resp : Buffer.Buffer<(Types.TokenIndex, Text)> = Buffer.Buffer(0);
-      let startIndex = if (Env.delayedReveal) { 1 } else { 0 };
+      // legacy placeholder is stored in asset 0
+      let startIndex = if (config.legacyPlaceholder == ?true and Utils.toNanos(config.revealDelay) > 0) { 1 } else { 0 };
       for (e in deps._Tokens.getTokenMetadata().entries()) {
-        let assetid = deps._Assets.get(if (Env.singleAssetCollection) startIndex else Nat32.toNat(e.0) + startIndex).name;
+        let assetid = deps._Assets.get(if (config.singleAssetCollection == ?true) startIndex else Nat32.toNat(e.0) + startIndex).name;
         resp.add((e.0, assetid));
       };
       Buffer.toArray(resp);
@@ -82,7 +84,7 @@ module {
     };
 
     public func metadata(token : Types.TokenIdentifier) : Result.Result<Types.Metadata, Types.CommonError> {
-      if (ExtCore.TokenIdentifier.isPrincipal(token, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(token, config.canister) == false) {
         return #err(#InvalidToken(token));
       };
       let tokenind = ExtCore.TokenIdentifier.getIndex(token);
@@ -96,11 +98,11 @@ module {
       };
     };
 
-    public func transfer(caller : Principal, request : Types.TransferRequest) : async Types.TransferResponse {
+    public func transfer(caller : Principal, request : Types.TransferRequest) : async* Types.TransferResponse {
       if (request.amount != 1) {
         return #err(#Other("Must use amount of 1"));
       };
-      if (ExtCore.TokenIdentifier.isPrincipal(request.token, this) == false) {
+      if (ExtCore.TokenIdentifier.isPrincipal(request.token, config.canister) == false) {
         return #err(#InvalidToken(request.token));
       };
       let token = ExtCore.TokenIdentifier.getIndex(request.token);

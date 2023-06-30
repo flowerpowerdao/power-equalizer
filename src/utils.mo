@@ -13,9 +13,10 @@ import TrieMap "mo:base/TrieMap";
 import Result "mo:base/Result";
 import Hex "mo:encoding/Hex";
 import Buffer "mo:base/Buffer";
+import BinaryEncoding "mo:encoding/Binary";
 
 import ExtCore "./toniq-labs/ext/Core";
-import BinaryEncoding "mo:encoding/Binary";
+import Types "./types";
 
 module {
   /// Clone from any iterator of key-value pairs
@@ -157,5 +158,16 @@ module {
       Nat8.fromIntWrap(n / 2 ** shift);
     };
     Array.tabulate<Nat8>(32, n_byte);
+  };
+
+  public func toNanos(duration : Types.Duration) : Nat {
+    switch (duration) {
+      case (#none) 0;
+      case (#nanoseconds(ns)) ns;
+      case (#seconds(s)) s * 1_000_000_000;
+      case (#minutes(m)) m * 1_000_000_000 * 60;
+      case (#hours(h)) h * 1000_000_000 * 60 * 60;
+      case (#days(d)) d * 1000_000_000 * 60 * 60 * 24;
+    };
   };
 };

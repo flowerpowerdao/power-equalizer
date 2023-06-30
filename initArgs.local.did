@@ -1,0 +1,22 @@
+(
+  principal "rrkah-fqaaa-aaaaa-aaaaq-cai", // staging canister
+  record {
+    name = "Collection Name";
+    sale = variant { supply = 3 };
+    salePrice = 700_000_000; // 7 ICP
+    publicSaleStart = 1686117482129000000;
+    salesDistribution = vec {};
+    royalties = vec {};
+    marketplaces = vec {
+      // first marketplace is default
+      record { "entrepot"; "ccfe146bb249b6c59e8c5ae71a1b59ddf85d9f9034611427b696f8b25d7b826a"; 500 }; // total payout 1% (0.5% to seller marketplace, 0.5% to buyer marketplace)
+    };
+    // How long to delay assets shuffling and reveal (starting after 'publicSaleStart')
+    // variant { none } - assets will be revealed immediately and assets shuffling will be disabled
+    revealDelay = variant { minutes = 1 };
+    // revealDelay = variant { none };
+    timersInterval = opt variant { seconds = 10 };
+    airdrop = vec {};
+    whitelists = vec {};
+  }
+)

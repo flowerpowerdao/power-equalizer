@@ -9,13 +9,17 @@ export let lucky = Array(10).fill(0).map((_, i) => {
   return new User(`lucky-${i}`);
 });
 
+export let doubleSpot = Array(10).fill(0).map((_, i) => {
+  return new User(`double-spot-${i}`);
+});
+
 export let whitelistTier0 = [...Array(10).fill(0).map((_, i) => {
   return new User(`whitelist-tier-0-${i}`);
-}), ...lucky];
+}), ...lucky, ...doubleSpot, ...doubleSpot];
 
 export let whitelistTier1 = [...Array(10).fill(0).map((_, i) => {
   return new User(`whitelist-tier-1-${i}`);
-}), ...lucky];
+}), ...lucky, ...doubleSpot, ...doubleSpot];
 
 export let airdrop = [...Array(10).fill(0).map((_, i) => {
   return new User(`airdrop-${i}`);

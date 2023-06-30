@@ -22,11 +22,22 @@
         }
       }
     },
+    "test": {
+      "type": "custom",
+      "wasm": ".dfx/local/canisters/staging/staging.wasm",
+      "candid": ".dfx/local/canisters/staging/staging.did"
+    },
     "production": {
       "type": "motoko",
       "main": "src/main.mo",
       "dependencies": [
         "ledger"
+      ]
+    },
+    "assets": {
+      "type": "assets",
+      "source": [
+        "assets/"
       ]
     }
   },
