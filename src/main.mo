@@ -394,10 +394,10 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _Sale.enableSale(caller);
   };
 
-  public func reserve(amount : Nat64, quantity : Nat64, address : SaleTypes.AccountIdentifier, _subaccountNOTUSED : SaleTypes.SubAccount) : async Result.Result<(SaleTypes.AccountIdentifier, Nat64), Text> {
+  public func reserve(amountNOTUSED : Nat64, quantityNOTUSED : Nat64, address : SaleTypes.AccountIdentifier, _subaccountNOTUSED : SaleTypes.SubAccount) : async Result.Result<(SaleTypes.AccountIdentifier, Nat64), Text> {
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
-    _Sale.reserve(amount, quantity, address, _subaccountNOTUSED);
+    _Sale.reserve(address);
   };
 
   public shared ({ caller }) func retrieve(paymentaddress : SaleTypes.AccountIdentifier) : async Result.Result<(), Text> {
@@ -450,11 +450,11 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   // updates
 
   // lock token and get address to pay
-  public shared ({ caller }) func lock(tokenid : MarketplaceTypes.TokenIdentifier, price : Nat64, address : MarketplaceTypes.AccountIdentifier, subaccount : MarketplaceTypes.SubAccount, frontendIdentifier : ?Text) : async Result.Result<MarketplaceTypes.AccountIdentifier, MarketplaceTypes.CommonError> {
+  public shared ({ caller }) func lock(tokenid : MarketplaceTypes.TokenIdentifier, price : Nat64, address : MarketplaceTypes.AccountIdentifier, subaccountNOTUSED : MarketplaceTypes.SubAccount, frontendIdentifier : ?Text) : async Result.Result<MarketplaceTypes.AccountIdentifier, MarketplaceTypes.CommonError> {
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
     // no caller check, anyone can lock
-    await* _Marketplace.lock(caller, tokenid, price, address, subaccount, frontendIdentifier);
+    await* _Marketplace.lock(caller, tokenid, price, address, frontendIdentifier);
   };
 
   // check payment and settle transfer token to user

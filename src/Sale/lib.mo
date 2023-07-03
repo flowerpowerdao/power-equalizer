@@ -196,7 +196,7 @@ module {
       _tokensForSale.size();
     };
 
-    public func reserve(amountNOTUSED : Nat64, quantityNOTUSED : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount) : Result.Result<(Types.AccountIdentifier, Nat64), Text> {
+    public func reserve(address : Types.AccountIdentifier) : Result.Result<(Types.AccountIdentifier, Nat64), Text> {
       switch (config.sale) {
         case (#duration(duration)) {
           if (Time.now() > config.publicSaleStart + Utils.toNanos(duration)) {
