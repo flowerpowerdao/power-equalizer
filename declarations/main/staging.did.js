@@ -103,25 +103,21 @@ export const idlFactory = ({ IDL }) => {
       'v1_chunk' : IDL.Record({ 'transactionChunk' : IDL.Vec(Transaction) }),
     })
   );
-  const Asset = IDL.Record({
-    'thumbnail' : IDL.Opt(File),
-    'metadata' : IDL.Opt(File),
-    'name' : IDL.Text,
-    'payload' : File,
-  });
   const StableChunk__1 = IDL.Opt(
     IDL.Variant({
-      'v1' : IDL.Record({
-        'assetsChunk' : IDL.Vec(Asset),
-        'assetsCount' : IDL.Nat,
-      }),
       'v2' : IDL.Record({
         'assetsChunk' : IDL.Vec(AssetV2),
         'assetsCount' : IDL.Nat,
         'placeholder' : AssetV2,
       }),
-      'v1_chunk' : IDL.Record({ 'assetsChunk' : IDL.Vec(Asset) }),
+      'v3' : IDL.Record({
+        'assetsChunk' : IDL.Vec(AssetV2),
+        'assetsCount' : IDL.Nat,
+        'placeholder' : AssetV2,
+        'isShuffled' : IDL.Bool,
+      }),
       'v2_chunk' : IDL.Record({ 'assetsChunk' : IDL.Vec(AssetV2) }),
+      'v3_chunk' : IDL.Record({ 'assetsChunk' : IDL.Vec(AssetV2) }),
     })
   );
   const AccountIdentifier__5 = IDL.Text;
@@ -240,6 +236,13 @@ export const idlFactory = ({ IDL }) => {
       'disburser' : StableChunk__2,
       'tokens' : StableChunk__6,
       'shuffle' : StableChunk__5,
+    }),
+    'v2' : IDL.Record({
+      'marketplace' : StableChunk__3,
+      'assets' : StableChunk__1,
+      'sale' : StableChunk__4,
+      'disburser' : StableChunk__2,
+      'tokens' : StableChunk__6,
     }),
   });
   const TokenIdentifier = IDL.Text;
