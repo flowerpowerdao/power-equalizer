@@ -24,5 +24,4 @@ jobs:
             dfx identity use anonymous
             npm install
             npm run replica:no-delay
-            npm run deploy-local
             npm run test
