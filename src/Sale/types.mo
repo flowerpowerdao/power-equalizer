@@ -102,7 +102,7 @@ module {
     whitelistTime : Time;
     whitelist : Bool;
     totalToSell : Nat;
-    bulkPricing : [(Nat64, Nat64)];
+    bulkPricing : [(Nat64, Nat64)]; // always [(1, <price>)]
     openEdition : Bool;
   };
 };
