@@ -8,11 +8,5 @@ export async function order() {
     const [tokenId, metadata] = token;
     return Number(metadata);
   });
-  const NFTsString = JSON.stringify(NFTs);
-  const NFTsBashList = NFTsString.replace("[", "(")
-    .replace("]", ")")
-    .replaceAll(",", " ");
-  return NFTsBashList;
+  return JSON.stringify(NFTs);
 }
-
-order();
