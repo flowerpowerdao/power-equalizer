@@ -136,8 +136,7 @@ module {
       _tokenListing.put(
         token,
         {
-          seller = listing.seller;
-          price = listing.price;
+          listing with
           locked = ?(Time.now() + Utils.toNanos(Option.get(config.escrowDelay, #minutes(2))));
           sellerFrontend = listing.sellerFrontend;
           buyerFrontend = frontendIdentifier;
@@ -202,9 +201,6 @@ module {
       };
 
       if (response.e8s < settlement.price) {
-        if (response.e8s < 10_000) {
-          _tokenSettlement.delete(token);
-        };
         if (_isLocked(token)) {
           return #err(#Other("Insufficient funds sent"));
         } else {
