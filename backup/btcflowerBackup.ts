@@ -53,7 +53,7 @@ export let backup = async ({ file }) => {
     )
   );
 
-  fs.writeFileSync(`backup/data/nft.txt`, await order());
+  fs.writeFileSync(`backup/data/order.json`, await order());
 
   console.log(`Backup successfully saved to backup/data/${file}`);
 };
