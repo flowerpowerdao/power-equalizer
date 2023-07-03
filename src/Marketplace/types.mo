@@ -15,7 +15,7 @@ module {
       transactionChunk : [Transaction];
       tokenSettlement : [(TokenIndex, Settlement)];
       tokenListing : [(TokenIndex, Listing)];
-      frontends : [(Text, Frontend)];
+      frontends : [(Text, Frontend)]; // ignored
     };
     #v1_chunk: {
       transactionChunk : [Transaction];

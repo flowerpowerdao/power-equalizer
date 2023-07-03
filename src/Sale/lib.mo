@@ -223,6 +223,9 @@ module {
       if (availableTokens() < Nat64.toNat(quantity)) {
         return #err("Not enough NFTs available!");
       };
+      if (quantity == 0) {
+        return #err("Quantity must be greater than 0");
+      };
       var total : Nat64 = (getAddressPrice(address) * quantity);
       var bp = getAddressBulkPrice(address);
       var lastq : Nat64 = 1;
@@ -277,7 +280,7 @@ module {
       #ok((paymentAddress, total));
     };
 
-    public func retrieve(caller : Principal, paymentaddress : Types.AccountIdentifier) : async Result.Result<(), Text> {
+    public func retrieve(caller : Principal, paymentaddress : Types.AccountIdentifier) : async* Result.Result<(), Text> {
       if (Option.isNull(_salesSettlements.get(paymentaddress))) {
         return #err("Nothing to settle");
       };
@@ -291,6 +294,7 @@ module {
             // this should never happen because account ids are always created from within the
             // canister which should guarantee that they are valid and we are able to decode them
             // to [Nat8]
+            _salesSettlements.delete(paymentaddress);
             return #err("Failed to decode payment address");
           };
         };
@@ -302,6 +306,11 @@ module {
         case (null) {
           return #err("Nothing to settle");
         };
+      };
+
+      if (settlement.tokens.size() == 0) {
+        _salesSettlements.delete(paymentaddress);
+        return #err("Nothing tokens to settle for");
       };
 
       if (response.e8s >= settlement.price) {
@@ -384,7 +393,7 @@ module {
       };
     };
 
-    public func cronSalesSettlements(caller : Principal) : async () {
+    public func cronSalesSettlements(caller : Principal) : async* () {
       // _saleSattlements can potentially be really big, we have to make sure
       // we dont get out of cycles error or error that outgoing calls queue is full.
       // This is done by adding the await statement.
@@ -393,7 +402,7 @@ module {
         switch (expiredSalesSettlements().keys().next()) {
           case (?paymentAddress) {
             try {
-              ignore (await retrieve(caller, paymentAddress));
+              ignore (await* retrieve(caller, paymentAddress));
             } catch (e) {
               break settleLoop;
             };
@@ -403,7 +412,7 @@ module {
       };
     };
 
-    public func cronFailedSales() : async () {
+    public func cronFailedSales() : async* () {
       label failedSalesLoop while (true) {
         let last = _failedSales.removeLast();
         switch (last) {

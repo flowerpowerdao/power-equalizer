@@ -25,6 +25,9 @@ module {
     var _disbursements = List.nil<Types.Disbursement>();
 
     public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
+      if (chunkIndex != 0) {
+        return null;
+      };
       ?#v1({
         disbursements = List.toArray(_disbursements);
       });
@@ -49,7 +52,7 @@ module {
       List.toArray(_disbursements);
     };
 
-    public func cronDisbursements() : async () {
+    public func cronDisbursements() : async* () {
       label payloop while (true) {
         let (last, newDisbursements) = List.pop(_disbursements);
         switch (last) {

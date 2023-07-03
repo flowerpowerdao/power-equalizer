@@ -98,7 +98,7 @@ module {
       };
     };
 
-    public func transfer(caller : Principal, request : Types.TransferRequest) : async Types.TransferResponse {
+    public func transfer(caller : Principal, request : Types.TransferRequest) : async* Types.TransferResponse {
       if (request.amount != 1) {
         return #err(#Other("Must use amount of 1"));
       };
