@@ -23,7 +23,7 @@ module {
     *********/
 
     var _disbursements = List.nil<Types.Disbursement>();
-    var curNonce = 0;
+    var curNonce : Nat64 = 0;
 
     public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
       if (chunkIndex != 0) {
