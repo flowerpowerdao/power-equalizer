@@ -196,7 +196,7 @@ module {
       _tokensForSale.size();
     };
 
-    public func reserve(address : Types.AccountIdentifier) : Result.Result<(Types.AccountIdentifier, Nat64), Text> {
+    public func reserve(amount : Nat64, address : Types.AccountIdentifier) : Result.Result<(Types.AccountIdentifier, Nat64), Text> {
       switch (config.sale) {
         case (#duration(duration)) {
           if (Time.now() > config.publicSaleStart + Utils.toNanos(duration)) {
@@ -220,9 +220,14 @@ module {
       if (availableTokens() == 0) {
         return #err("No more NFTs available right now!");
       };
+
       let price = getAddressPrice(address);
       let subaccount = getNextSubAccount();
       let paymentAddress : Types.AccountIdentifier = AID.fromPrincipal(config.canister, ?subaccount);
+
+      if (amount != price) {
+        return #err("Price mismatch!");
+      };
 
       // we only reserve the tokens here, they deducted from the available tokens
       // after payment. otherwise someone could stall the sale by reserving all

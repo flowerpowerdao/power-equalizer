@@ -394,10 +394,10 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _Sale.enableSale(caller);
   };
 
-  public func reserve(amountNOTUSED : Nat64, quantityNOTUSED : Nat64, address : SaleTypes.AccountIdentifier, _subaccountNOTUSED : SaleTypes.SubAccount) : async Result.Result<(SaleTypes.AccountIdentifier, Nat64), Text> {
+  public func reserve(amount : Nat64, quantityNOTUSED : Nat64, address : SaleTypes.AccountIdentifier, _subaccountNOTUSED : SaleTypes.SubAccount) : async Result.Result<(SaleTypes.AccountIdentifier, Nat64), Text> {
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
-    _Sale.reserve(address);
+    _Sale.reserve(amount, address);
   };
 
   public shared ({ caller }) func retrieve(paymentaddress : SaleTypes.AccountIdentifier) : async Result.Result<(), Text> {
