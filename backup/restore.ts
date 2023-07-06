@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import chalk from "chalk";
 import chunk from "chunk";
 import minimist from "minimist";
 import { Principal } from "@dfinity/principal";
@@ -78,9 +77,26 @@ let uploadAssetsMetadata = async () => {
   let assets = JSON.parse(fs.readFileSync(metadataPath).toString());
   let order = JSON.parse(fs.readFileSync(orderPath).toString());
 
+  // placeholder
+  console.log("Uploading placeholder...");
+  await mainActor.addAssets([{
+    name: "placeholder",
+    payload: {
+      ctype: "",
+      data: [],
+    },
+    thumbnail: [],
+    metadata: [
+    ],
+    payloadUrl: [
+    ],
+    thumbnailUrl: [
+    ],
+  }])
+
   // assets
-  console.log(chalk.green("Uploading assets metadata..."));
-  console.log(chalk.green(`Found ${assets.length} assets metadata...`));
+  console.log("Uploading assets metadata...");
+  console.log(`Found ${assets.length} assets metadata...`);
 
   let all = new Set([...assets.keys()]);
   let uploadedCount = 0;
@@ -130,7 +146,7 @@ let uploadAssetsMetadata = async () => {
     throw new Error(`Failed to upload metadata for ${[...all].join(", ")}`);
   }
 
-  console.log(chalk.green("All assets metadata uploaded"));
+  console.log("All assets metadata uploaded");
 };
 
 restore({ network, file });

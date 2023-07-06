@@ -1,6 +1,8 @@
 (
   principal "rrkah-fqaaa-aaaaa-aaaaq-cai", // staging canister
   record {
+    restoreEnabled = opt true;
+    legacyPlaceholder = opt true;
     name = "Collection Name";
     sale = variant { supply = 3 };
     salePrice = 700_000_000; // 7 ICP
