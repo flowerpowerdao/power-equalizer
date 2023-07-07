@@ -41,10 +41,7 @@ function getAssets() {
   let metadata = JSON.parse(fs.readFileSync(metadataPath).toString());
   let order = JSON.parse(fs.readFileSync(orderPath).toString());
 
-  // assets
-  console.log(`Found ${assets.length} assets metadata...`);
-
-  let assetsChunk = order.map(([arrayIndex, nftIndex]) => {
+  let assetsChunk = order.map((nftIndex) => {
     return {
       name: String(nftIndex),
       payload: {
