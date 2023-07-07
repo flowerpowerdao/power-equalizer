@@ -23,6 +23,7 @@ module {
     *********/
 
     var _disbursements = List.nil<Types.Disbursement>();
+    var curNonce : Nat64 = 0;
 
     public func toStableChunk(chunkSize : Nat, chunkIndex : Nat) : Types.StableChunk {
       if (chunkIndex != 0) {
@@ -60,6 +61,7 @@ module {
             _disbursements := newDisbursements;
 
             try {
+              curNonce := (curNonce + 1) % 1000;
               var res = await Ledger.transfer({
                 to = switch (AviateAccountIdentifier.fromText(disbursement.to)) {
                   case (#ok(accountId)) {
@@ -76,20 +78,11 @@ module {
                 amount = { e8s = disbursement.amount };
                 fee = { e8s = 10000 };
                 created_at_time = null;
-                memo = Encoding.BigEndian.toNat64(Blob.toArray(Principal.toBlob(Principal.fromText(ExtCore.TokenIdentifier.fromPrincipal(config.canister, disbursement.tokenIndex)))));
+                memo = curNonce + Encoding.BigEndian.toNat64(Blob.toArray(Principal.toBlob(Principal.fromText(ExtCore.TokenIdentifier.fromPrincipal(config.canister, disbursement.tokenIndex)))));
               });
-
-              switch (res) {
-                case (#Ok(blockIndex)) {};
-                case (#Err(#InsufficientFunds({ balance }))) {
-                  // don't add disbursement back to _disbursements because it will lead to an infinite loop
-                };
-                case (#Err(_)) {
-                  _disbursements := List.push(disbursement, _disbursements);
-                };
-              };
             } catch (e) {
               _disbursements := List.push(disbursement, _disbursements);
+              break payloop;
             };
           };
           case (null) {
