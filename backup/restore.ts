@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import chunk from "chunk";
 import minimist from "minimist";
 import { Principal } from "@dfinity/principal";
 
@@ -11,33 +10,16 @@ import { decode } from "./pem";
 let argv = minimist(process.argv.slice(2));
 let network = argv.network || "local";
 let file = argv.file;
-let metadata = argv.metadata;
 let pemData = argv.pem || "";
 let canisterId = argv["canister-id"];
 
 if (!file) {
   throw new Error("Missing --file argument");
 }
-if (!metadata) {
-  throw new Error("Missing --metadata argument");
-}
-if (!canisterId) {
-  throw new Error("Missing --canister-id argument");
-}
 
 let filePath = path.resolve(__dirname, "data", file);
 if (!fs.existsSync(filePath)) {
   throw new Error(`File ${filePath} not found`);
-}
-
-let metadataPath = path.resolve(__dirname, "data", metadata);
-if (!fs.existsSync(metadataPath)) {
-  throw new Error(`File ${metadataPath} not found`);
-}
-
-let orderPath = path.resolve(__dirname, "data", "order.json");
-if (!fs.existsSync(orderPath)) {
-  throw new Error(`File ${orderPath} not found`);
 }
 
 let identity = pemData && decode(pemData);
@@ -68,68 +50,7 @@ export let restore = async ({ network, file }) => {
     await mainActor.restoreChunk(chunks[i]);
   }
 
-  await uploadAssetsMetadata();
-
   console.log(`Restore successful`);
-};
-
-let uploadAssetsMetadata = async () => {
-  let assets = JSON.parse(fs.readFileSync(metadataPath).toString());
-  let order = JSON.parse(fs.readFileSync(orderPath).toString());
-
-  // assets
-  console.log("Uploading assets metadata...");
-  console.log(`Found ${assets.length} assets metadata...`);
-
-  let all = new Set([...assets.keys()]);
-  let uploadedCount = 0;
-
-  let chunks = chunk([...order.entries()], 1000);
-
-  console.log("Chunks:", chunks.length);
-
-  for (let chunk of chunks) {
-    let metadataChunk = chunk.map(([arrayIndex, nftIndex]) => {
-      return {
-        name: String(nftIndex),
-        payload: {
-          ctype: "",
-          data: [],
-        },
-        thumbnail: [],
-        metadata: [
-          {
-            ctype: "application/json",
-            data: [
-              new TextEncoder().encode(JSON.stringify(assets[nftIndex - 1])),
-            ],
-          },
-        ],
-        payloadUrl: [
-          `https://n6au6-3aaaa-aaaae-qaaxq-cai.raw.ic0.app/${nftIndex}.svg`,
-        ],
-        thumbnailUrl: [
-          `https://n6au6-3aaaa-aaaae-qaaxq-cai.raw.ic0.app/${nftIndex}_low.svg`,
-        ],
-      };
-    });
-
-    await mainActor.addAssets(metadataChunk);
-
-    uploadedCount += chunk.length;
-
-    console.log(`Uploaded metadata: ${uploadedCount}`);
-
-    chunk.forEach(([index, _]) => {
-      all.delete(index);
-    });
-  }
-
-  if (all.size > 0) {
-    throw new Error(`Failed to upload metadata for ${[...all].join(", ")}`);
-  }
-
-  console.log("All assets metadata uploaded");
 };
 
 restore({ network, file });

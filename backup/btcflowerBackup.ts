@@ -6,6 +6,7 @@ import { marketplace } from "./btcflowerMarketplace";
 import { sale } from "./btcflowerSale";
 import { tokens } from "./btcflowerTokens";
 import { order } from "./btcflowerNFTOrder";
+import { assets } from "./btcflowerAssets";
 
 let file =
   new Date()
@@ -22,7 +23,7 @@ export let backup = async ({ file }) => {
     {
       v1: {
         marketplace: await marketplace(),
-        assets: [],
+        assets: assets(),
         sale: await sale(),
         disburser: [],
         tokens: await tokens(),
