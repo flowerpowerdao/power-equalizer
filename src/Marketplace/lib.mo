@@ -63,11 +63,9 @@ module {
           tokenListing = Iter.toArray(_tokenListing.entries());
           frontends = [];
         });
-      }
-      else if (chunkIndex < getChunkCount(chunkSize)) {
+      } else if (chunkIndex < getChunkCount(chunkSize)) {
         return ?#v1_chunk({ transactionChunk });
-      }
-      else {
+      } else {
         null;
       };
     };
@@ -138,8 +136,7 @@ module {
       _tokenListing.put(
         token,
         {
-          seller = listing.seller;
-          price = listing.price;
+          listing with
           locked = ?(Time.now() + Utils.toNanos(Option.get(config.escrowDelay, #minutes(2))));
           sellerFrontend = listing.sellerFrontend;
           buyerFrontend = frontendIdentifier;
@@ -443,7 +440,9 @@ module {
           case (?tokenindex) {
             try {
               ignore (await* settle(caller, ExtCore.TokenIdentifier.fromPrincipal(config.canister, tokenindex)));
-            } catch (e) {};
+            } catch (e) {
+              break settleLoop;
+            };
           };
           case null break settleLoop;
         };
@@ -477,7 +476,10 @@ module {
         };
       };
 
-      return { accountIdentifier = config.marketplaces[0].1; fee = config.marketplaces[0].2; }
+      return {
+        accountIdentifier = config.marketplaces[0].1;
+        fee = config.marketplaces[0].2;
+      };
     };
 
     func validFrontendIndentifier(frontendIdentifier : ?Text) : Bool {
