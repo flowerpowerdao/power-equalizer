@@ -77,23 +77,6 @@ let uploadAssetsMetadata = async () => {
   let assets = JSON.parse(fs.readFileSync(metadataPath).toString());
   let order = JSON.parse(fs.readFileSync(orderPath).toString());
 
-  // placeholder
-  console.log("Uploading placeholder...");
-  await mainActor.addAssets([{
-    name: "placeholder",
-    payload: {
-      ctype: "",
-      data: [],
-    },
-    thumbnail: [],
-    metadata: [
-    ],
-    payloadUrl: [
-    ],
-    thumbnailUrl: [
-    ],
-  }])
-
   // assets
   console.log("Uploading assets metadata...");
   console.log(`Found ${assets.length} assets metadata...`);
