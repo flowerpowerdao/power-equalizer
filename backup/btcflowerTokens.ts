@@ -25,7 +25,7 @@ function getTokenMetadata(): [number, Metadata][] {
       i,
       {
         nonfungible: {
-          metadata: [intToByteArray(i)],
+          metadata: [intToByteArray(i + 1)],
         },
       },
     ];
