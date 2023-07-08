@@ -8,17 +8,17 @@ export async function sale() {
 
   const sale: StableChunk__4 = [
     {
-      v1: {
-        saleTransactionCount: getSaleTransactionCount(saleTransactions),
-        saleTransactionChunk: saleTransactions,
+      v2: {
         salesSettlements: [],
-        failedSales: [],
-        tokensForSale: [],
-        whitelist: [],
-        soldIcp: getSoldIcp(saleTransactions),
-        sold: getSold(saleTransactions),
         totalToSell: getSold(saleTransactions),
+        failedSales: [],
+        sold: getSold(saleTransactions),
+        saleTransactionChunk: saleTransactions,
+        saleTransactionCount: getSaleTransactionCount(saleTransactions),
         nextSubAccount: 0n,
+        soldIcp: getSoldIcp(saleTransactions),
+        whitelistSpots: [],
+        tokensForSale: [],
       },
     },
   ];

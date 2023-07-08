@@ -25,7 +25,13 @@ export let backup = async ({ file }) => {
         marketplace: await marketplace(),
         assets: assets(),
         sale: await sale(),
-        disburser: [],
+        "disburser": [
+          {
+            "v1": {
+              "disbursements": []
+            }
+          }
+        ],
         tokens: await tokens(),
         shuffle: [{ v1: { isShuffled: true } }],
       },

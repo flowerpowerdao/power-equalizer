@@ -11,11 +11,11 @@ export async function marketplace() {
   const marketplace: StableChunk__3 = [
     {
       v1: {
+        tokenSettlement: await getSettlements(),
         frontends: [],
         tokenListing: await getTokenListing(),
-        transactionCount: BigInt(transactions.length),
         transactionChunk: transactions,
-        tokenSettlement: await getSettlements(),
+        transactionCount: BigInt(transactions.length),
       },
     },
   ];
@@ -27,10 +27,16 @@ async function getTokenListing(): Promise<[number, Listing][]> {
   return tokenListing.map((listing) => {
     let newListing: [number, Listing] = [
       listing[0],
-      { ...listing[1], sellerFrontend: [], buyerFrontend: [] },
+      {
+        sellerFrontend: [],
+        locked: listing[1].locked,
+        seller: listing[1].seller,
+        buyerFrontend: [],
+        price: listing[1].price,
+      },
     ];
     return newListing;
-  });
+  }).sort((a, b) => a[0] - b[0]);
 }
 
 async function getTransactions() {
@@ -43,7 +49,14 @@ async function getSettlements(): Promise<[number, Settlement][]> {
   return settlements.map((settlement) => {
     let newSettlement: [number, Settlement] = [
       settlement[0],
-      { ...settlement[1], sellerFrontend: [], buyerFrontend: [] },
+      {
+        sellerFrontend: [],
+        subaccount: settlement[1].subaccount,
+        seller: settlement[1].seller,
+        buyerFrontend: [],
+        buyer: settlement[1].buyer,
+        price: settlement[1].price,
+      },
     ];
     return newSettlement;
   });

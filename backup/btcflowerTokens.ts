@@ -8,11 +8,11 @@ export async function tokens() {
   const tokens: StableChunk__6 = [
     {
       v1: {
-        tokenMetadata: getTokenMetadata(),
         owners: getOwners(registry),
+        tokenMetadata: getTokenMetadata(),
+        supply: 2009n,
         registry,
         nextTokenId: 2009,
-        supply: 2009n,
       },
     },
   ];
@@ -47,6 +47,20 @@ function getOwners(registry: [number, string][]): [string, number[]][] {
   }, {});
   // turn the object into a list of [AccountIdentifier, [TokenIndex]]
   const ownersList = Object.entries<number[]>(owners);
+  // for every owner, sort their tokens
+  ownersList.forEach((owner) => {
+    owner[1].sort((a, b) => a - b);
+  });
+  // sort
+  ownersList.sort((a, b) => {
+    if (a[0] < b[0]) {
+      return -1;
+    } else if (a[0] > b[0]) {
+      return 1;
+    } else {
+      return 0;
+    }
+  });
   return ownersList;
 }
 

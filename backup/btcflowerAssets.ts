@@ -22,7 +22,7 @@ export function assets() {
     {
       v2: {
         assetsChunk: assetsChunk,
-        assetsCount: assetsChunk.length,
+        assetsCount: BigInt(assetsChunk.length),
         placeholder: {
           thumbnail: [],
           payloadUrl: [],
@@ -43,26 +43,26 @@ function getAssets() {
 
   let assetsChunk = order.map((nftIndex) => {
     return {
-      name: String(nftIndex),
-      payload: {
-        ctype: "",
-        data: [],
-      },
       thumbnail: [],
-      metadata: [
-        {
-          ctype: "application/json",
-          data: [
-            new TextEncoder().encode(JSON.stringify(metadata[nftIndex - 1])),
-          ],
-        },
-      ],
       payloadUrl: [
         `https://n6au6-3aaaa-aaaae-qaaxq-cai.raw.ic0.app/${nftIndex}.svg`,
       ],
       thumbnailUrl: [
         `https://n6au6-3aaaa-aaaae-qaaxq-cai.raw.ic0.app/${nftIndex}_low.svg`,
       ],
+      metadata: [
+        {
+          data: [
+            new TextEncoder().encode(JSON.stringify(metadata[nftIndex - 1])),
+          ],
+          ctype: "application/json",
+        },
+      ],
+      name: String(nftIndex),
+      payload: {
+        data: [],
+        ctype: "",
+      },
     };
   });
 
