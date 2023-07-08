@@ -33,7 +33,7 @@
     "test-br-assets": "ts-node ./backup/test-assets.ts",
     "deploy": "tsx ./deploy/deploy.ts",
     "upgrade-production": "dfx canister --network ic stop production && DFX_MOC_PATH=\"$(vessel bin)/moc\" dfx deploy --network ic production --upgrade-unchanged --argument \"$(cat initArgs.did)\" && dfx canister --network ic start production",
-    "": ""
+    "compare": "tsx ./backup/compareStableState.ts"
   },
   "devDependencies": {
     "@dfinity/agent": "^0.15.0",
