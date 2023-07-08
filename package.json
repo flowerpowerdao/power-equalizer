@@ -6,7 +6,7 @@
     "start": "npm run replica && npm run deploy-local && npm run mint",
     "replica": "dfx stop && rm -rf .dfx && dfx start --clean --background && npm run create-canisters",
     "replica:no-delay": "dfx stop && rm -rf .dfx && dfx start --clean --background --artificial-delay 0 && npm run create-canisters",
-    "create-canisters": "dfx canister create staging --specified-id rrkah-fqaaa-aaaaa-aaaaq-cai && dfx canister create ledger --specified-id ryjl3-tyaaa-aaaaa-aaaba-cai && dfx canister create test --specified-id r7inp-6aaaa-aaaaa-aaabq-cai && dfx canister create assets --specified-id e2ezq-2aaaa-aaaal-aafwa-cai",
+    "create-canisters": "dfx canister create staging --specified-id pk6rk-6aaaa-aaaae-qaazq-cai && dfx canister create ledger --specified-id ryjl3-tyaaa-aaaaa-aaaba-cai && dfx canister create test --specified-id r7inp-6aaaa-aaaaa-aaabq-cai && dfx canister create assets --specified-id e2ezq-2aaaa-aaaal-aafwa-cai",
     "build": "",
     "deploy-local": "npm run deploy:ledger && npm run deploy:staging && dfx deploy assets",
     "deploy-test": "npm run reinstall:ledger -- -qq && npm run reinstall:test -- -qq",

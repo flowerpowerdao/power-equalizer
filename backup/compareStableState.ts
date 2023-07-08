@@ -2,7 +2,7 @@ import { getActor as getBtcflowerActor } from "./btcflowerActor";
 import { getActor } from "./actor";
 import { Listing } from "../declarations/btcflower/btcflower.did";
 
-let powerActor = getActor("local", "rrkah-fqaaa-aaaaa-aaaaq-cai");
+let powerActor = getActor("local", "pk6rk-6aaaa-aaaae-qaazq-cai");
 let legacyActor = getBtcflowerActor("ic");
 
 function serializeBigInt(key, value) {
