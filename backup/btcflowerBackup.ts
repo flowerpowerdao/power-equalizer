@@ -5,7 +5,6 @@ import { StableChunk } from "../declarations/main/staging.did";
 import { marketplace } from "./btcflowerMarketplace";
 import { sale } from "./btcflowerSale";
 import { tokens } from "./btcflowerTokens";
-import { order } from "./btcflowerNFTOrder";
 import { assets } from "./btcflowerAssets";
 
 let file =
@@ -19,11 +18,12 @@ let file =
 export let backup = async ({ file }) => {
   console.log(`Backup file: ${file}`);
 
+
   let backup: StableChunk[] = [
     {
       v1: {
         marketplace: await marketplace(),
-        assets: assets(),
+        assets: await assets(),
         sale: await sale(),
         "disburser": [
           {
@@ -60,7 +60,6 @@ export let backup = async ({ file }) => {
     )
   );
 
-  fs.writeFileSync(`backup/data/order.json`, await order());
 
   console.log(`Backup successfully saved to backup/data/${file}`);
 };

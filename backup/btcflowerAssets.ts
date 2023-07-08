@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
-import { StableChunk__1 } from "../declarations/main/staging.did";
+import { AssetV2, StableChunk__1 } from "../declarations/main/staging.did";
+import { getOrder } from "./btcflowerNFTOrder";
 
 let metadataPath = path.resolve(
   __dirname,
@@ -11,13 +12,8 @@ if (!fs.existsSync(metadataPath)) {
   throw new Error(`File ${metadataPath} not found`);
 }
 
-let orderPath = path.resolve(__dirname, "data", "order.json");
-if (!fs.existsSync(orderPath)) {
-  throw new Error(`File ${orderPath} not found`);
-}
-
-export function assets() {
-  let assetsChunk = getAssets();
+export async function assets() {
+  let assetsChunk = await getAssets();
   const assets: StableChunk__1 = [
     {
       v2: {
@@ -37,11 +33,11 @@ export function assets() {
   return assets;
 }
 
-function getAssets() {
+async function getAssets() {
   let metadata = JSON.parse(fs.readFileSync(metadataPath).toString());
-  let order = JSON.parse(fs.readFileSync(orderPath).toString());
+  let order = await getOrder();
 
-  let assetsChunk = order.map((nftIndex) => {
+  let assetsChunk : AssetV2[] = order.map((nftIndex) => {
     return {
       thumbnail: [],
       payloadUrl: [
