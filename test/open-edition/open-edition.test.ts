@@ -30,7 +30,7 @@ describe('open edition', () => {
   test('try to buy when sale ended', async () => {
     let user = new User;
     let settings = await user.mainActor.salesSettings(user.accountId);
-    let res = await user.mainActor.reserve(settings.price, 1n, user.accountId, new Uint8Array);
+    let res = await user.mainActor.reserve(user.accountId);
     expect(res).toHaveProperty('err');
     expect(res['err']).toContain('sale has ended');
   });

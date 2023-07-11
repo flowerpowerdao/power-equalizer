@@ -19,7 +19,7 @@ export function applyFees(amount: bigint, fees: bigint[]) {
 
 export async function buyFromSale(user: User) {
   let settings = await user.mainActor.salesSettings(user.accountId);
-  let res = await user.mainActor.reserve(settings.price, 1n, user.accountId, new Uint8Array);
+  let res = await user.mainActor.reserve(user.accountId);
 
   expect(res).toHaveProperty('ok');
 
