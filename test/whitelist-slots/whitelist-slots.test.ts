@@ -108,7 +108,7 @@ describe('whitelist slot 2', () => {
     await buyFromSale(user);
   });
 
-  test('user from both tiers did not buy during slot 1 and should be able to buy during slot 2 at tier 2 price', async () => {
+  test('user from both tiers did not buy during slot 1 try to buy at tier 1 price during slot 2', async () => {
     let user = lucky[5];
     await user.mintICP(100_000_000_000n);
 
@@ -127,6 +127,11 @@ describe('whitelist slot 2', () => {
       expect(retrieveRes).toHaveProperty('err');
       expect(retrieveRes['err']).toMatch(/Insufficient funds/i);
     }
+  });
+
+  test('user from both tiers did not buy during slot 1 and should be able to buy during slot 2 at tier 2 price', async () => {
+    let user = lucky[6];
+    await user.mintICP(100_000_000_000n);
 
     // should be tier 2 price
     let settings = await user.mainActor.salesSettings(user.accountId);
