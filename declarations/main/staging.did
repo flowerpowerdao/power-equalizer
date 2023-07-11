@@ -44,11 +44,23 @@ type TransferRequest =
    to: User;
    token: TokenIdentifier;
  };
+type TransactionV2 = 
+ record {
+   buyer: AccountIdentifier__2;
+   buyerFrontend: opt text;
+   price: nat64;
+   seller: principal;
+   sellerFrontend: opt text;
+   time: Time__1;
+   token: TokenIdentifier__1;
+ };
 type Transaction = 
  record {
    buyer: AccountIdentifier__2;
+   buyerFrontend: opt text;
    price: nat64;
    seller: principal;
+   sellerFrontend: opt text;
    time: Time__1;
    token: TokenIdentifier__1;
  };
@@ -176,6 +188,20 @@ type StableChunk__3 =
        transactionCount: nat;
      };
     v1_chunk: record {transactionChunk: vec Transaction;};
+    v2:
+     record {
+       tokenListing: vec record {
+                           TokenIndex__1;
+                           Listing;
+                         };
+       tokenSettlement: vec record {
+                              TokenIndex__1;
+                              Settlement;
+                            };
+       transactionChunk: vec TransactionV2;
+       transactionCount: nat;
+     };
+    v2_chunk: record {transactionChunk: vec TransactionV2;};
   };
 type StableChunk__2 = opt
                        variant {
@@ -706,7 +732,7 @@ type Canister =
    toAccountIdentifier: (text, nat) -> (AccountIdentifier__4) query;
    tokens: (AccountIdentifier__3) -> (Result_1) query;
    tokens_ext: (AccountIdentifier__3) -> (Result) query;
-   transactions: () -> (vec Transaction) query;
+   transactions: () -> (vec TransactionV2) query;
    transfer: (TransferRequest) -> (TransferResponse);
    updateCanistergeekInformation: (UpdateInformationRequest) -> ();
    updateThumb: (text, File) -> (opt nat);
