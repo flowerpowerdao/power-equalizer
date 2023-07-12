@@ -1,6 +1,6 @@
 # used only for unit testing
 [dependencies]
-base = "0.9.3"
+base = "0.8.1"
 cap = "https://github.com/Psychedelic/cap-motoko-library#v1.0.4"
 accountid = "https://github.com/aviate-labs/principal.mo#v0.2.6"
 canistergeek = "https://github.com/usergeek/canistergeek-ic-motoko#v0.0.7"
