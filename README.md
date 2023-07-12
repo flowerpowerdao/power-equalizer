@@ -152,19 +152,25 @@ First, start a local replica
 npm run replica
 ```
 
-To deploy and run all tests
+Deploy and run all unit and e2e tests
 
 ```
 npm run test
 ```
 
-To deploy and run specific tests
+Run only unit tests
 
 ```
-npm run test pending-sale
+npm run test:unit
 ```
 
-To run tests without deployment (useful when writing tests)
+Deploy and run specific e2e tests
+
+```
+npm run test:e2e pending-sale
+```
+
+Run tests without deployment (useful when writing tests)
 
 ```
 npm run vitest
@@ -176,7 +182,7 @@ or
 npm run vitest:watch
 ```
 
-or to run specific test suite
+or run specific test suite
 
 ```
 npm run vitest pending-sale

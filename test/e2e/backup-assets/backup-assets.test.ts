@@ -5,7 +5,7 @@ import { readFileSync } from 'fs';
 import { User } from '../user';
 import { applyEnv } from '../apply-env';
 
-import canisterIds from '../../.dfx/local/canister_ids.json';
+import canisterIds from '../../../.dfx/local/canister_ids.json';
 
 let canisterId = canisterIds.test.local;
 
