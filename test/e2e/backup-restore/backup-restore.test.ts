@@ -76,7 +76,7 @@ describe('restore', () => {
   });
 
   it('compare a.json and b.json', async () => {
-    if (readFileSync(__dirname + '/../../backup/data/a.json').toString() !== readFileSync(__dirname + '/../../backup/data/b.json').toString()) {
+    if (readFileSync(__dirname + '/../../../backup/data/a.json').toString() !== readFileSync(__dirname + '/../../../backup/data/b.json').toString()) {
       throw 'a.json and b.json backups are different!';
     }
   });
