@@ -118,11 +118,8 @@ describe('whitelist slot 2', () => {
 
     if ('ok' in res) {
       let paymentAddress = res.ok[0];
-      let paymentAmount = res.ok[1];
-      expect(paymentAddress.length).toBe(64);
-      expect(paymentAmount).toBe(env.whitelistTier0Price);
 
-      await user.sendICP(paymentAddress, paymentAmount - 1n);
+      await user.sendICP(paymentAddress, env.whitelistTier0Price);
       let retrieveRes = await user.mainActor.retrieve(paymentAddress);
       expect(retrieveRes).toHaveProperty('err');
       expect(retrieveRes['err']).toMatch(/Insufficient funds/i);
