@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import minimist from 'minimist';
 import { Principal } from '@dfinity/principal';
+import { ExecSyncOptions, execSync } from 'child_process';
 
 import { getActor } from './actor';
 import { type StableChunk } from '../declarations/main/staging.did';
@@ -23,6 +24,14 @@ if (!canisterId) {
 let filePath = path.resolve(__dirname, 'data', file);
 if (!fs.existsSync(filePath)) {
   throw new Error(`File ${filePath} not found`);
+}
+
+if (!pemData && network == 'local') {
+  let execOptions = {stdio: ['inherit', 'pipe', 'inherit']} as ExecSyncOptions;
+  let identityName = execSync('dfx identity whoami').toString().trim();
+  if (identityName !== 'anonymous') {
+    pemData = execSync(`dfx identity export ${identityName}`, execOptions).toString();
+  }
 }
 
 let identity = pemData && decode(pemData);
