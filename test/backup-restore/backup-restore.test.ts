@@ -20,14 +20,9 @@ describe('backup', () => {
   });
 
   it('try to restore with restoreEnabled = false', async () => {
-    await expect(user.mainActor.restoreChunk({v1: {
-      marketplace: [],
-      assets: [],
-      sale: [],
-      disburser: [],
-      tokens: [],
-      shuffle: [],
-    }})).rejects.toThrow(/Restore disabled/);
+    expect(() => {
+      execSync(`dfx canister call staging restoreChunk '(variant {v1 = record {}})'`)
+    }).toThrow(/Restore disabled/);
   });
 
   it(`grow up to ${growSize * BigInt(growCount)}`, async () => {
