@@ -41,6 +41,9 @@ module {
 
   public type InitArgs = {
     name : Text;
+    symbol : Text;
+    description : ?Text;
+    image : ?Text;
     sale : {
       #supply: Nat; // fixed collection size
       #duration: Duration; // no definite collection size and can be minted within a given time (starting after 'publicSaleStart')

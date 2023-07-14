@@ -30,6 +30,8 @@ import TokenTypes "Tokens/types";
 import Tokens "Tokens";
 import Disburser "Disburser";
 import DisburserTypes "Disburser/types";
+import ICRC7 "ICRC-7";
+import ICRC7Types "ICRC-7/types";
 import Utils "./utils";
 import Types "./types";
 
@@ -617,109 +619,77 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   };
 
   // ICRC-7
-  type Account = {
-    owner : Principal;
-    subaccount : ?[Nat8];
+  let _ICRC7 = ICRC7.Factory(
+    config,
+    {
+      _Tokens;
+      _Assets;
+      _Marketplace;
+      _Cap;
+    },
+  );
+
+  public query func icrc7_collection_metadata() : async ICRC7Types.CollectionMetadata {
+    _ICRC7.icrc7_collection_metadata();
   };
 
-  type CollectionMetadata = {
-    icrc7_name : Text;
-    icrc7_symbol : Text;
-    icrc7_royalties : ?Nat16;
-    icrc7_royalty_recipient : ?Account;
-    icrc7_description : ?Text;
-    icrc7_image : ?Text;  // The URL of the token logo. The value can contain the actual image if it's a Data URL.
-    icrc7_total_supply : Nat;
-    icrc7_supply_cap : ?Nat;
+  public query func icrc7_name() : async Text {
+    _ICRC7.icrc7_name();
   };
 
-  public query func icrc7_collection_metadata() : CollectionMetadata {
+  public query func icrc7_symbol() : async Text {
+    _ICRC7.icrc7_symbol();
   };
 
-  public query func icrc7_name() : Text {
+  public query func icrc7_royalties() : async ?Nat16 {
+    _ICRC7.icrc7_royalties();
   };
 
-  public query func icrc7_symbol() : Text {
+  public query func icrc7_royalty_recipient() : async ?ICRC7Types.Account {
+    _ICRC7.icrc7_royalty_recipient();
   };
 
-  public query func icrc7_royalties() : ?Nat16 {
+  public query func icrc7_description() : async ?Text {
+    _ICRC7.icrc7_description();
   };
 
-  public query func icrc7_royalty_recipient() : ?Account {
-    null; // there are multiple recipients, so we return null
+  public query func icrc7_image() : async ?Text {
+    _ICRC7.icrc7_image();
   };
 
-  public query func icrc7_description() : ?Text {
+  public query func icrc7_total_supply() : async Nat {
+    _ICRC7.icrc7_total_supply();
   };
 
-  public query func icrc7_image() : ?Text {
+  public query func icrc7_supply_cap() : async ?Nat {
+    _ICRC7.icrc7_supply_cap();
   };
 
-  public query func icrc7_total_supply() : Nat {
+  public query func icrc7_metadata(tokenIndex : Nat) : async [(Text, ICRC7Types.Metadata)] {
+    _ICRC7.icrc7_funcmetadata();
   };
 
-  public query func icrc7_supply_cap() : ?Nat {
+  public query func icrc7_owner_of(tokenIndex : Nat) : async ICRC7Types.Account {
+    _ICRC7.icrc7_owner_of(tokenIndex);
   };
 
-  type Metadata = { #Nat : nat; #Int : int; #Text : text; #Blob : blob };
-
-  public query func icrc7_metadata(tokenIndex : Nat) : [(Text, Metadata)] {
+  public query func icrc7_balance_of(account : Account) : async Nat {
+    _ICRC7.icrc7_balance_of(account);
   };
 
-  public query func icrc7_owner_of(tokenIndex : Nat) : Account {
+  public query func icrc7_tokens_of(account : Account) : async [Nat] {
+    _ICRC7.icrc7_tokens_of(account);
   };
 
-  public query func icrc7_balance_of(account : Account) : Nat {
+  public query func icrc7_transfer(args : ICRC7Types.TransferArgs) : async { #Ok: Nat; #Err: ICRC7Types.TransferError; } {
+    _ICRC7.icrc7_transfer(args);
   };
 
-  public query func icrc7_tokens_of(account : Account) : [Nat] {
-  };
-
-  type TransferArgs = {
-    from : ?Account; /* if supplied and is not caller then is permit transfer, if not supplied defaults to subaccount 0 of the caller principal */
-    to : Account;
-    token_ids : [Nat];
-    // type: leave open for now
-    memo : ?Blob;
-    created_at_time : ?Nat64;
-    is_atomic : ?Bool;
-  };
-
-  type TransferError = {
-    #Unauthorized: { token_ids : [Nat] };
-    #TooOld;
-    #CreatedInFuture : { ledger_time: Nat64 };
-    #Duplicate : { duplicate_of : Nat };
-    #TemporarilyUnavailable;
-    #GenericError : { error_code : Nat; message : Text };
-  };
-
-  public query func icrc7_transfer(args : TransferArgs) : { #Ok: Nat; #Err: TransferError; } {
-  };
-
-  type ApprovalArgs = {
-    from_subaccount : ?Blob;
-    to : principal;
-    tokenIds : ?[Nat]; // if no tokenIds given then approve entire collection
-    expires_at : ?Nat64;
-    memo : ?Blob;
-    created_at : ?Nat64;
-  };
-
-  type ApprovalError = {
-    #Unauthorized : [Nat];
-    #TooOld;
-    #TemporarilyUnavailable;
-    #GenericError : { error_code : Nat; message : Text };
-  };
-
-  public query func icrc7_approve(args : ApprovalArgs) : { #Ok: Nat; #Err: ApprovalError; } {
+  public query func icrc7_approve(args : ICRC7Types.ApprovalArgs) : { #Ok: Nat; #Err: ICRC7Types.ApprovalError; } {
+    _ICRC7.icrc7_approve(args);
   };
 
   public query func icrc7_supported_standards() : [{ name : Text; url : Text }] {
-    [
-      { name = "ICRC-7"; url = "https://github.com/dfinity/ICRC/ICRCs/ICRC-7" }
-    ]
+    _ICRC7.icrc7_supported_standards();
   };
-
 };

@@ -9,6 +9,7 @@ Customize `initArgs.did` before you deploy the canister.
   principal "rrkah-fqaaa-aaaaa-aaaaq-cai", // your canister id
   record {
     name = "Collection Name";
+    symbol = "SYMBOL";
     sale = variant { supply = 10_000 };
     salePrice = 700_000_000; // 7 ICP
     publicSaleStart = 1680696181381000000;
@@ -28,6 +29,30 @@ Customize `initArgs.did` before you deploy the canister.
 ## Name
 ```
 name = "Collection Name";
+```
+
+## Symbol
+```
+symbol = "SYMBOL";
+```
+
+## Description
+*Optional*
+
+```
+description = opt "...";
+```
+
+## Image
+*Optional*
+
+The URL of the token logo. The value can contain the actual image if it's a Data URL.
+```
+image = opt "https://...";
+```
+or
+```
+image = opt "data:image/svg+xml;base64,...";
 ```
 
 

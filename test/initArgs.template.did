@@ -2,6 +2,7 @@
   principal "r7inp-6aaaa-aaaaa-aaabq-cai", // test canister
   record {
     name = $name;
+    symbol = $symbol;
     sale = $sale;
     salePrice = $salePrice;
     publicSaleStart = $publicSaleStart;

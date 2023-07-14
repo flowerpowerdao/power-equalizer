@@ -14,6 +14,7 @@ export default () => {
     royalty1: 750n,
     escrowDelay: 120_000_000_000n, // 120 seconds
     name: "Test Collection",
+    symbol: "TEST",
     sale: 'variant { supply = 7777 }',
 
     marketplace0_name: "entrepot",
