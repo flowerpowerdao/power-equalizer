@@ -21,7 +21,7 @@ describe('backup', () => {
 
   it('try to restore with restoreEnabled = false', async () => {
     expect(() => {
-      execSync(`dfx canister call staging restoreChunk '(variant {v1 = record {}})'`)
+      execSync(`dfx canister call test restoreChunk '(variant {v1 = record {}})'`)
     }).toThrow(/Restore disabled/);
   });
 
