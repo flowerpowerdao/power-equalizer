@@ -494,7 +494,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _Marketplace.details(token);
   };
 
-  public query func transactions() : async [MarketplaceTypes.Transaction] {
+  public query func transactions() : async [MarketplaceTypes.TransactionV2] {
     _Marketplace.transactions();
   };
 

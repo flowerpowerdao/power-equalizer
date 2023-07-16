@@ -111,7 +111,7 @@ export interface Canister {
   'toAccountIdentifier' : ActorMethod<[string, bigint], AccountIdentifier__4>,
   'tokens' : ActorMethod<[AccountIdentifier__3], Result_1>,
   'tokens_ext' : ActorMethod<[AccountIdentifier__3], Result>,
-  'transactions' : ActorMethod<[], Array<Transaction>>,
+  'transactions' : ActorMethod<[], Array<TransactionV2>>,
   'transfer' : ActorMethod<[TransferRequest], TransferResponse>,
   'updateCanistergeekInformation' : ActorMethod<
     [UpdateInformationRequest],
@@ -434,7 +434,16 @@ export type StableChunk__3 = [] | [
         'transactionCount' : bigint,
       }
     } |
-    { 'v1_chunk' : { 'transactionChunk' : Array<Transaction> } }
+    {
+      'v2' : {
+        'tokenSettlement' : Array<[TokenIndex__1, Settlement]>,
+        'tokenListing' : Array<[TokenIndex__1, Listing]>,
+        'transactionChunk' : Array<TransactionV2>,
+        'transactionCount' : bigint,
+      }
+    } |
+    { 'v1_chunk' : { 'transactionChunk' : Array<Transaction> } } |
+    { 'v2_chunk' : { 'transactionChunk' : Array<TransactionV2> } }
 ];
 export type StableChunk__4 = [] | [
   {
@@ -507,9 +516,20 @@ export type TokenIndex__2 = number;
 export type TokenIndex__3 = number;
 export type TokenIndex__4 = number;
 export interface Transaction {
+  'sellerFrontend' : [] | [string],
   'token' : TokenIdentifier__1,
   'time' : Time__1,
   'seller' : Principal,
+  'buyerFrontend' : [] | [string],
+  'buyer' : AccountIdentifier__2,
+  'price' : bigint,
+}
+export interface TransactionV2 {
+  'sellerFrontend' : [] | [string],
+  'token' : TokenIdentifier__1,
+  'time' : Time__1,
+  'seller' : Principal,
+  'buyerFrontend' : [] | [string],
   'buyer' : AccountIdentifier__2,
   'price' : bigint,
 }

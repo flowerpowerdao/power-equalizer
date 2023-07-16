@@ -85,9 +85,20 @@ export const idlFactory = ({ IDL }) => {
   });
   const TokenIdentifier__1 = IDL.Text;
   const Transaction = IDL.Record({
+    'sellerFrontend' : IDL.Opt(IDL.Text),
     'token' : TokenIdentifier__1,
     'time' : Time__1,
     'seller' : IDL.Principal,
+    'buyerFrontend' : IDL.Opt(IDL.Text),
+    'buyer' : AccountIdentifier__2,
+    'price' : IDL.Nat64,
+  });
+  const TransactionV2 = IDL.Record({
+    'sellerFrontend' : IDL.Opt(IDL.Text),
+    'token' : TokenIdentifier__1,
+    'time' : Time__1,
+    'seller' : IDL.Principal,
+    'buyerFrontend' : IDL.Opt(IDL.Text),
     'buyer' : AccountIdentifier__2,
     'price' : IDL.Nat64,
   });
@@ -100,7 +111,14 @@ export const idlFactory = ({ IDL }) => {
         'transactionChunk' : IDL.Vec(Transaction),
         'transactionCount' : IDL.Nat,
       }),
+      'v2' : IDL.Record({
+        'tokenSettlement' : IDL.Vec(IDL.Tuple(TokenIndex__1, Settlement)),
+        'tokenListing' : IDL.Vec(IDL.Tuple(TokenIndex__1, Listing)),
+        'transactionChunk' : IDL.Vec(TransactionV2),
+        'transactionCount' : IDL.Nat,
+      }),
       'v1_chunk' : IDL.Record({ 'transactionChunk' : IDL.Vec(Transaction) }),
+      'v2_chunk' : IDL.Record({ 'transactionChunk' : IDL.Vec(TransactionV2) }),
     })
   );
   const Asset = IDL.Record({
@@ -638,7 +656,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'tokens' : IDL.Func([AccountIdentifier__3], [Result_1], ['query']),
     'tokens_ext' : IDL.Func([AccountIdentifier__3], [Result], ['query']),
-    'transactions' : IDL.Func([], [IDL.Vec(Transaction)], ['query']),
+    'transactions' : IDL.Func([], [IDL.Vec(TransactionV2)], ['query']),
     'transfer' : IDL.Func([TransferRequest], [TransferResponse], []),
     'updateCanistergeekInformation' : IDL.Func(
         [UpdateInformationRequest],
