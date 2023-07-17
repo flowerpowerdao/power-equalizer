@@ -14,7 +14,7 @@ module {
     subaccount : ?[Nat8];
   };
 
-  public type Metadata = { #Nat : nat; #Int : int; #Text : text; #Blob : blob };
+  public type Metadata = { #Nat : Nat; #Int : Int; #Text : Text; #Blob : Blob };
 
   public type CollectionMetadata = {
     icrc7_name : Text;
@@ -48,7 +48,7 @@ module {
 
   public type ApprovalArgs = {
     from_subaccount : ?Blob;
-    to : principal;
+    to : Principal;
     tokenIds : ?[Nat]; // if no tokenIds given then approve entire collection
     expires_at : ?Nat64;
     memo : ?Blob;

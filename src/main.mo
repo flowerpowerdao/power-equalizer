@@ -666,30 +666,30 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   };
 
   public query func icrc7_metadata(tokenIndex : Nat) : async [(Text, ICRC7Types.Metadata)] {
-    _ICRC7.icrc7_funcmetadata();
+    _ICRC7.icrc7_metadata(tokenIndex);
   };
 
   public query func icrc7_owner_of(tokenIndex : Nat) : async ICRC7Types.Account {
     _ICRC7.icrc7_owner_of(tokenIndex);
   };
 
-  public query func icrc7_balance_of(account : Account) : async Nat {
+  public query func icrc7_balance_of(account : ICRC7Types.Account) : async Nat {
     _ICRC7.icrc7_balance_of(account);
   };
 
-  public query func icrc7_tokens_of(account : Account) : async [Nat] {
+  public query func icrc7_tokens_of(account : ICRC7Types.Account) : async [Nat] {
     _ICRC7.icrc7_tokens_of(account);
   };
 
-  public query func icrc7_transfer(args : ICRC7Types.TransferArgs) : async { #Ok: Nat; #Err: ICRC7Types.TransferError; } {
+  public shared func icrc7_transfer(args : ICRC7Types.TransferArgs) : async { #Ok: Nat; #Err: ICRC7Types.TransferError; } {
     _ICRC7.icrc7_transfer(args);
   };
 
-  public query func icrc7_approve(args : ICRC7Types.ApprovalArgs) : { #Ok: Nat; #Err: ICRC7Types.ApprovalError; } {
+  public shared func icrc7_approve(args : ICRC7Types.ApprovalArgs) : async { #Ok: Nat; #Err: ICRC7Types.ApprovalError; } {
     _ICRC7.icrc7_approve(args);
   };
 
-  public query func icrc7_supported_standards() : [{ name : Text; url : Text }] {
+  public query func icrc7_supported_standards() : async [{ name : Text; url : Text }] {
     _ICRC7.icrc7_supported_standards();
   };
 };
