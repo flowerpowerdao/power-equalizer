@@ -7,8 +7,8 @@ import { generateIdentity } from './generate-identity';
 import { createAgent } from './create-agent';
 
 // @ts-ignore
-import { idlFactory as idlFactoryMain } from '../declarations/main/staging.did.js';
-import { _SERVICE as _SERVICE_MAIN } from '../declarations/main/staging.did';
+import { idlFactory as idlFactoryMain } from '../declarations/main/main.did.js';
+import { _SERVICE as _SERVICE_MAIN } from '../declarations/main/main.did';
 
 // @ts-ignore
 import { idlFactory as idlFactoryIcp } from '../declarations/ledger/ledger.did.js';

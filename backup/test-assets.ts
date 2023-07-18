@@ -14,7 +14,7 @@ let test = async () => {
   let chunkSize = 10_020;
 
   console.log('Reinstall');
-  execSync('npm run reinstall:staging -- -qqqq');
+  execSync('npm run reinstall:main -- -qqqq');
 
   // grow marketplace and sale
   await mainActor.grow(2_000n);
@@ -22,14 +22,14 @@ let test = async () => {
   // grow assets
   for (let i = 0; i < assetCount; i++) {
     console.log(`Growing assets to ${i + 1}...`);
-    execSync(`dfx canister call staging addAsset '(record {name = \"asset-${i}\";payload = record {ctype = \"text/html\"; data = vec {blob \"${i}-${'a'.repeat(assetSize / (i + 1) |0)}\"} } })'`)
+    execSync(`dfx canister call main addAsset '(record {name = \"asset-${i}\";payload = record {ctype = \"text/html\"; data = vec {blob \"${i}-${'a'.repeat(assetSize / (i + 1) |0)}\"} } })'`)
   }
 
   console.log('Backup to a.json');
   execSync(`npm run backup -- --canister-id ${canisterId} --file a.json --chunk-size ${chunkSize}`, { stdio: 'inherit' });
 
   console.log('Reinstall');
-  execSync('npm run deploy:staging -- -qqqq');
+  execSync('npm run deploy:main -- -qqqq');
 
   console.log('Restore');
   execSync(`npm run restore -- --canister-id ${canisterId} --file a.json`, { stdio: 'inherit' });
