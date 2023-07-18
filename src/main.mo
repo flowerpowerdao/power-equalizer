@@ -600,10 +600,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _HttpHandler.http_request(request);
   };
 
-  public query func http_request_streaming_callback(token : HttpTypes.HttpStreamingCallbackToken) : async HttpTypes.HttpStreamingCallbackResponse {
-    _HttpHandler.http_request_streaming_callback(token);
-  };
-
   // cycles
   public func acceptCycles() : async () {
     canistergeekMonitor.collectMetrics();

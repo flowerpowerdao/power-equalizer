@@ -57,6 +57,26 @@ let additions = [
   , version = "main"
   , dependencies = ["base"] : List Text
   },
+  { name = "http-parser"
+  , repo = "https://github.com/NatLabs/http-parser.mo"
+  , version = "v0.1.2"
+  , dependencies = ["base"] : List Text
+  },
+  { name = "json"
+  , repo = "https://github.com/aviate-labs/json.mo"
+  , version = "v0.2.1"
+  , dependencies = [ "base", "parser-combinators" ]
+  },
+  { name = "parser-combinators"
+  , repo = "https://github.com/aviate-labs/parser-combinators.mo"
+  , version = "v0.1.0"
+  , dependencies = [ "base" ]
+  },
+  { name = "base"
+  , repo = "https://github.com/dfinity/motoko-base"
+  , version = "moc-0.8.1"
+  , dependencies = [] : List Text
+  },
 ] : List Package
 
 let overrides = [] : List Package
