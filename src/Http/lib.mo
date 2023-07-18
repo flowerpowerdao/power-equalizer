@@ -124,10 +124,10 @@ module {
 
       // Just show index
       var soldValue : Nat = Nat64.toNat(
-        Array.foldLeft<MarketplaceTypes.Transaction, Nat64>(
+        Array.foldLeft<MarketplaceTypes.TransactionV2, Nat64>(
           Buffer.toArray(deps._Marketplace.getTransactions()),
           0,
-          func(b : Nat64, a : MarketplaceTypes.Transaction) : Nat64 {
+          func(b : Nat64, a : MarketplaceTypes.TransactionV2) : Nat64 {
             b + a.price;
           },
         ),

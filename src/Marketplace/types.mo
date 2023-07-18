@@ -10,6 +10,7 @@ import Disburser "../Disburser";
 
 module {
   public type StableChunk = ?{
+    // v1
     #v1: {
       transactionCount : Nat;
       transactionChunk : [Transaction];
@@ -19,6 +20,16 @@ module {
     };
     #v1_chunk: {
       transactionChunk : [Transaction];
+    };
+    // v2
+    #v2: {
+      transactionCount : Nat;
+      transactionChunk : [TransactionV2];
+      tokenSettlement : [(TokenIndex, Settlement)];
+      tokenListing : [(TokenIndex, Listing)];
+    };
+    #v2_chunk: {
+      transactionChunk : [TransactionV2];
     };
   };
 
@@ -41,6 +52,18 @@ module {
     price : Nat64;
     buyer : AccountIdentifier;
     time : Time;
+    sellerFrontend : ?Text;
+    buyerFrontend : ?Text;
+  };
+
+  public type TransactionV2 = {
+    token : TokenIdentifier;
+    seller : Principal;
+    price : Nat64;
+    buyer : AccountIdentifier;
+    time : Time;
+    sellerFrontend : ?Text;
+    buyerFrontend : ?Text;
   };
 
   public type Settlement = {
