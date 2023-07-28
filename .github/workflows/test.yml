@@ -19,6 +19,10 @@ jobs:
         with:
           vessel-version: 0.6.3
           dfx-version: 0.14.1
+      - name: install mops
+        run: npm i -g ic-mops
+      - name: install mops packages
+        run: mops install
       - name: test
         run: |
             dfx identity use anonymous
