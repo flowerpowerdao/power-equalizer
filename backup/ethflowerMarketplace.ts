@@ -45,9 +45,13 @@ async function getTransactions() {
   const transactions = await mainActor.transactions();
   const transactionsV2: TransactionV2[] = transactions.map((transaction) => {
     let newTransaction: TransactionV2 = {
-      ...transaction,
       sellerFrontend: [],
+      token: transaction.token,
+      time: transaction.time,
+      seller: transaction.seller,
       buyerFrontend: [],
+      buyer: transaction.buyer,
+      price: transaction.price,
     };
     return newTransaction;
   });
