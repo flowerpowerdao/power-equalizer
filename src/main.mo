@@ -33,7 +33,7 @@ import DisburserTypes "Disburser/types";
 import Utils "./utils";
 import Types "./types";
 
-shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs : Types.InitArgs) = myCanister {
+shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs : Types.InitArgs) {
   let config = {
     initArgs with
     canister = cid;
@@ -273,8 +273,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
     assert (caller == init_minter);
-    let pid = Principal.fromActor(myCanister);
-    let tokenContractId = Principal.toText(pid);
+    let tokenContractId = Principal.toText(cid);
 
     try {
       rootBucketId := await _Cap.handshake(
@@ -481,6 +480,10 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
 
   public query func transactions() : async [MarketplaceTypes.TransactionV2] {
     _Marketplace.transactions();
+  };
+
+  public query func transactionsPaged(pageIndex : Nat, chunkSize : Nat) : async ([MarketplaceTypes.Transaction], Nat) {
+    Utils.getPage(_Marketplace.transactions(), pageIndex, chunkSize);
   };
 
   public query func settlements() : async [(MarketplaceTypes.TokenIndex, MarketplaceTypes.AccountIdentifier, Nat64)] {
