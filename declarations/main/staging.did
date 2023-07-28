@@ -742,6 +742,7 @@ type Canister =
    tokens: (AccountIdentifier__3) -> (Result_1) query;
    tokens_ext: (AccountIdentifier__3) -> (Result) query;
    transactions: () -> (vec TransactionV2) query;
+   transactionsPaged: (nat, nat) -> (vec Transaction, nat) query;
    transfer: (TransferRequest) -> (TransferResponse);
    updateCanistergeekInformation: (UpdateInformationRequest) -> ();
    updateThumb: (text, File) -> (opt nat);

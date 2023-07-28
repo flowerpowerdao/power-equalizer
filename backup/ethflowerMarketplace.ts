@@ -2,6 +2,7 @@ import {
   Listing,
   Settlement,
   StableChunk__3,
+  TransactionV2,
 } from "../declarations/main/staging.did";
 import { getActor } from "./ethflowerActor";
 let mainActor = getActor("ic");
@@ -10,9 +11,8 @@ export async function marketplace() {
   const transactions = await getTransactions();
   const marketplace: StableChunk__3 = [
     {
-      v1: {
+      v2: {
         tokenSettlement: await getSettlements(),
-        frontends: [],
         tokenListing: await getTokenListing(),
         transactionChunk: transactions,
         transactionCount: BigInt(transactions.length),
@@ -24,24 +24,34 @@ export async function marketplace() {
 
 async function getTokenListing(): Promise<[number, Listing][]> {
   const tokenListing = await mainActor.listings();
-  return tokenListing.map((listing) => {
-    let newListing: [number, Listing] = [
-      listing[0],
-      {
-        sellerFrontend: [],
-        locked: listing[1].locked,
-        seller: listing[1].seller,
-        buyerFrontend: [],
-        price: listing[1].price,
-      },
-    ];
-    return newListing;
-  }).sort((a, b) => a[0] - b[0]);
+  return tokenListing
+    .map((listing) => {
+      let newListing: [number, Listing] = [
+        listing[0],
+        {
+          sellerFrontend: [],
+          locked: listing[1].locked,
+          seller: listing[1].seller,
+          buyerFrontend: [],
+          price: listing[1].price,
+        },
+      ];
+      return newListing;
+    })
+    .sort((a, b) => a[0] - b[0]);
 }
 
 async function getTransactions() {
   const transactions = await mainActor.transactions();
-  return transactions;
+  const transactionsV2: TransactionV2[] = transactions.map((transaction) => {
+    let newTransaction: TransactionV2 = {
+      ...transaction,
+      sellerFrontend: [],
+      buyerFrontend: [],
+    };
+    return newTransaction;
+  });
+  return transactionsV2;
 }
 
 async function getSettlements(): Promise<[number, Settlement][]> {

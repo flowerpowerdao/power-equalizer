@@ -21,7 +21,7 @@ export let backup = async ({ file }) => {
 
   let backup: StableChunk[] = [
     {
-      v1: {
+      v2: {
         marketplace: await marketplace(),
         assets: await assets(),
         sale: await sale(),
@@ -33,7 +33,6 @@ export let backup = async ({ file }) => {
           }
         ],
         tokens: await tokens(),
-        shuffle: [{ v1: { isShuffled: true } }],
       },
     },
   ];

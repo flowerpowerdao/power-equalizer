@@ -103,6 +103,10 @@ export interface Canister {
   'tokens' : ActorMethod<[AccountIdentifier__3], Result_1>,
   'tokens_ext' : ActorMethod<[AccountIdentifier__3], Result>,
   'transactions' : ActorMethod<[], Array<TransactionV2>>,
+  'transactionsPaged' : ActorMethod<
+    [bigint, bigint],
+    [Array<Transaction>, bigint]
+  >,
   'transfer' : ActorMethod<[TransferRequest], TransferResponse>,
   'updateCanistergeekInformation' : ActorMethod<
     [UpdateInformationRequest],

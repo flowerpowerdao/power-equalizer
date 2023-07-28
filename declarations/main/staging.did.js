@@ -655,6 +655,11 @@ export const idlFactory = ({ IDL }) => {
     'tokens' : IDL.Func([AccountIdentifier__3], [Result_1], ['query']),
     'tokens_ext' : IDL.Func([AccountIdentifier__3], [Result], ['query']),
     'transactions' : IDL.Func([], [IDL.Vec(TransactionV2)], ['query']),
+    'transactionsPaged' : IDL.Func(
+        [IDL.Nat, IDL.Nat],
+        [IDL.Vec(Transaction), IDL.Nat],
+        ['query'],
+      ),
     'transfer' : IDL.Func([TransferRequest], [TransferResponse], []),
     'updateCanistergeekInformation' : IDL.Func(
         [UpdateInformationRequest],
