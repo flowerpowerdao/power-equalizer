@@ -9,12 +9,6 @@ export type AccountIdentifier__4 = string;
 export type AccountIdentifier__5 = string;
 export type AccountIdentifier__6 = string;
 export type AccountIdentifier__7 = string;
-export interface Asset {
-  'thumbnail' : [] | [File],
-  'metadata' : [] | [File],
-  'name' : string,
-  'payload' : File,
-}
 export interface AssetV2 {
   'thumbnail' : [] | [File],
   'payloadUrl' : [] | [string],
@@ -108,7 +102,7 @@ export interface Canister {
   'toAccountIdentifier' : ActorMethod<[string, bigint], AccountIdentifier__4>,
   'tokens' : ActorMethod<[AccountIdentifier__3], Result_1>,
   'tokens_ext' : ActorMethod<[AccountIdentifier__3], Result>,
-  'transactions' : ActorMethod<[], Array<Transaction>>,
+  'transactions' : ActorMethod<[], Array<TransactionV2>>,
   'transfer' : ActorMethod<[TransferRequest], TransferResponse>,
   'updateCanistergeekInformation' : ActorMethod<
     [UpdateInformationRequest],
@@ -404,18 +398,34 @@ export type StableChunk = {
       'tokens' : StableChunk__6,
       'shuffle' : StableChunk__5,
     }
+  } |
+  {
+    'v2' : {
+      'marketplace' : StableChunk__3,
+      'assets' : StableChunk__1,
+      'sale' : StableChunk__4,
+      'disburser' : StableChunk__2,
+      'tokens' : StableChunk__6,
+    }
   };
 export type StableChunk__1 = [] | [
-  { 'v1' : { 'assetsChunk' : Array<Asset>, 'assetsCount' : bigint } } |
-    {
+  {
       'v2' : {
         'assetsChunk' : Array<AssetV2>,
         'assetsCount' : bigint,
         'placeholder' : AssetV2,
       }
     } |
-    { 'v1_chunk' : { 'assetsChunk' : Array<Asset> } } |
-    { 'v2_chunk' : { 'assetsChunk' : Array<AssetV2> } }
+    {
+      'v3' : {
+        'assetsChunk' : Array<AssetV2>,
+        'assetsCount' : bigint,
+        'placeholder' : AssetV2,
+        'isShuffled' : boolean,
+      }
+    } |
+    { 'v2_chunk' : { 'assetsChunk' : Array<AssetV2> } } |
+    { 'v3_chunk' : { 'assetsChunk' : Array<AssetV2> } }
 ];
 export type StableChunk__2 = [] | [
   { 'v1' : { 'disbursements' : Array<Disbursement> } }
@@ -430,7 +440,16 @@ export type StableChunk__3 = [] | [
         'transactionCount' : bigint,
       }
     } |
-    { 'v1_chunk' : { 'transactionChunk' : Array<Transaction> } }
+    {
+      'v2' : {
+        'tokenSettlement' : Array<[TokenIndex__1, Settlement]>,
+        'tokenListing' : Array<[TokenIndex__1, Listing]>,
+        'transactionChunk' : Array<TransactionV2>,
+        'transactionCount' : bigint,
+      }
+    } |
+    { 'v1_chunk' : { 'transactionChunk' : Array<Transaction> } } |
+    { 'v2_chunk' : { 'transactionChunk' : Array<TransactionV2> } }
 ];
 export type StableChunk__4 = [] | [
   {
@@ -503,9 +522,20 @@ export type TokenIndex__2 = number;
 export type TokenIndex__3 = number;
 export type TokenIndex__4 = number;
 export interface Transaction {
+  'sellerFrontend' : [] | [string],
   'token' : TokenIdentifier__1,
   'time' : Time__1,
   'seller' : Principal,
+  'buyerFrontend' : [] | [string],
+  'buyer' : AccountIdentifier__2,
+  'price' : bigint,
+}
+export interface TransactionV2 {
+  'sellerFrontend' : [] | [string],
+  'token' : TokenIdentifier__1,
+  'time' : Time__1,
+  'seller' : Principal,
+  'buyerFrontend' : [] | [string],
   'buyer' : AccountIdentifier__2,
   'price' : bigint,
 }

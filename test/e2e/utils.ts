@@ -2,7 +2,7 @@ import { Principal } from "@dfinity/principal";
 import { expect } from "vitest";
 import { User } from "./user";
 
-import canisterIds from '../.dfx/local/canister_ids.json';
+import canisterIds from '../../.dfx/local/canister_ids.json';
 import { AccountIdentifier } from "@dfinity/nns";
 
 export function feeOf(amount: bigint, fee: bigint) {

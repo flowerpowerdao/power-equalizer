@@ -177,7 +177,7 @@ module {
       };
       // shuffle indices
       let seed : Blob = await Random.blob();
-      _tokensForSale := deps._Shuffle.shuffleTokens(_tokensForSale, seed);
+      Utils.shuffleBuffer(_tokensForSale, seed);
     };
 
     public func airdropTokens(caller : Principal) : () {
@@ -380,7 +380,9 @@ module {
           case (?paymentAddress) {
             try {
               ignore (await* retrieve(caller, paymentAddress));
-            } catch (e) {};
+            } catch (e) {
+              break settleLoop;
+            };
           };
           case null break settleLoop;
         };
@@ -421,6 +423,7 @@ module {
             } catch (e) {
               // if the transaction fails for some reason, we add it back to the Buffer
               _failedSales.add(failedSale);
+              break failedSalesLoop;
             };
           };
           case (null) {
