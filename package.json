@@ -29,7 +29,7 @@
     "test:unit": "mops test",
     "test": "npm run test:unit && npm run test:e2e",
     "backup": "tsx ./backup/backup.ts",
-    "btc-backup": "tsx ./backup/btcflowerBackup.ts",
+    "eth-backup": "tsx ./backup/btcflowerBackup.ts",
     "restore": "tsx ./backup/restore.ts",
     "test-br": "npm run deploy-test && tsx ./backup/test.ts",
     "test-br-assets": "tsx ./backup/test-assets.ts",

@@ -1,6 +1,6 @@
-import { SaleTransaction } from "../declarations/btcflower/btcflower.did";
+import { SaleTransaction } from "../declarations/ethflower/ethflower.did";
 import { StableChunk__4 } from "../declarations/main/staging.did";
-import { getActor } from "./btcflowerActor";
+import { getActor } from "./ethflowerActor";
 let mainActor = getActor("ic");
 
 export async function sale() {

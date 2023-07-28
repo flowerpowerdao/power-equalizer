@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { AssetV2, StableChunk__1 } from "../declarations/main/staging.did";
-import { getOrder } from "./btcflowerNFTOrder";
+import { getOrder } from "./ethflowerNFTOrder";
 
 let metadataPath = path.resolve(
   __dirname,

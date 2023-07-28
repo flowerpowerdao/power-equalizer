@@ -7,7 +7,6 @@ export const idlFactory = ({ IDL }) => {
     'thumbnail' : IDL.Opt(File),
     'metadata' : IDL.Opt(File),
     'name' : IDL.Text,
-    'highres' : IDL.Opt(File),
     'payload' : File,
   });
   const SubAccount__1 = IDL.Vec(IDL.Nat8);
@@ -43,7 +42,7 @@ export const idlFactory = ({ IDL }) => {
     'InvalidToken' : TokenIdentifier,
     'Other' : IDL.Text,
   });
-  const Result_7 = IDL.Variant({
+  const Result_5 = IDL.Variant({
     'ok' : AccountIdentifier__1,
     'err' : CommonError,
   });
@@ -53,11 +52,50 @@ export const idlFactory = ({ IDL }) => {
     'seller' : IDL.Principal,
     'price' : IDL.Nat64,
   });
-  const Result_8 = IDL.Variant({
+  const Result_7 = IDL.Variant({
     'ok' : IDL.Tuple(AccountIdentifier__1, IDL.Opt(Listing)),
     'err' : CommonError,
   });
   const Extension = IDL.Text;
+  const MetricsGranularity = IDL.Variant({
+    'hourly' : IDL.Null,
+    'daily' : IDL.Null,
+  });
+  const GetMetricsParameters = IDL.Record({
+    'dateToMillis' : IDL.Nat,
+    'granularity' : MetricsGranularity,
+    'dateFromMillis' : IDL.Nat,
+  });
+  const UpdateCallsAggregatedData = IDL.Vec(IDL.Nat64);
+  const CanisterHeapMemoryAggregatedData = IDL.Vec(IDL.Nat64);
+  const CanisterCyclesAggregatedData = IDL.Vec(IDL.Nat64);
+  const CanisterMemoryAggregatedData = IDL.Vec(IDL.Nat64);
+  const HourlyMetricsData = IDL.Record({
+    'updateCalls' : UpdateCallsAggregatedData,
+    'canisterHeapMemorySize' : CanisterHeapMemoryAggregatedData,
+    'canisterCycles' : CanisterCyclesAggregatedData,
+    'canisterMemorySize' : CanisterMemoryAggregatedData,
+    'timeMillis' : IDL.Int,
+  });
+  const NumericEntity = IDL.Record({
+    'avg' : IDL.Nat64,
+    'max' : IDL.Nat64,
+    'min' : IDL.Nat64,
+    'first' : IDL.Nat64,
+    'last' : IDL.Nat64,
+  });
+  const DailyMetricsData = IDL.Record({
+    'updateCalls' : IDL.Nat64,
+    'canisterHeapMemorySize' : NumericEntity,
+    'canisterCycles' : NumericEntity,
+    'canisterMemorySize' : NumericEntity,
+    'timeMillis' : IDL.Int,
+  });
+  const CanisterMetricsData = IDL.Variant({
+    'hourly' : IDL.Vec(HourlyMetricsData),
+    'daily' : IDL.Vec(DailyMetricsData),
+  });
+  const CanisterMetrics = IDL.Record({ 'data' : CanisterMetricsData });
   const HeaderField = IDL.Tuple(IDL.Text, IDL.Text);
   const HttpRequest = IDL.Record({
     'url' : IDL.Text,
@@ -87,7 +125,7 @@ export const idlFactory = ({ IDL }) => {
     'token' : IDL.Opt(HttpStreamingCallbackToken),
     'body' : IDL.Vec(IDL.Nat8),
   });
-  const Result_4 = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
+  const Result_6 = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
   const ListRequest = IDL.Record({
     'token' : TokenIdentifier__1,
     'from_subaccount' : IDL.Opt(SubAccount__1),
@@ -103,25 +141,7 @@ export const idlFactory = ({ IDL }) => {
     }),
     'nonfungible' : IDL.Record({ 'metadata' : IDL.Opt(IDL.Vec(IDL.Nat8)) }),
   });
-  const Result_6 = IDL.Variant({ 'ok' : Metadata, 'err' : CommonError });
-  const Result_5 = IDL.Variant({
-    'ok' : IDL.Tuple(AccountIdentifier__1, IDL.Nat64),
-    'err' : IDL.Text,
-  });
-  const SaleTransaction = IDL.Record({
-    'time' : Time,
-    'seller' : IDL.Principal,
-    'tokens' : IDL.Vec(TokenIndex),
-    'buyer' : AccountIdentifier__1,
-    'price' : IDL.Nat64,
-  });
-  const Sale = IDL.Record({
-    'expires' : Time,
-    'subaccount' : SubAccount__1,
-    'tokens' : IDL.Vec(TokenIndex),
-    'buyer' : AccountIdentifier__1,
-    'price' : IDL.Nat64,
-  });
+  const Result_4 = IDL.Variant({ 'ok' : Metadata, 'err' : CommonError });
   const Balance__1 = IDL.Nat;
   const Result_2 = IDL.Variant({ 'ok' : Balance__1, 'err' : CommonError });
   const Result_1 = IDL.Variant({
@@ -178,13 +198,16 @@ export const idlFactory = ({ IDL }) => {
       ),
     'availableCycles' : IDL.Func([], [IDL.Nat], ['query']),
     'balance' : IDL.Func([BalanceRequest], [BalanceResponse], ['query']),
-    'bearer' : IDL.Func([TokenIdentifier__1], [Result_7], ['query']),
+    'bearer' : IDL.Func([TokenIdentifier__1], [Result_5], ['query']),
     'clearPayments' : IDL.Func([IDL.Principal, IDL.Vec(SubAccount__1)], [], []),
-    'details' : IDL.Func([TokenIdentifier__1], [Result_8], ['query']),
+    'collectCanisterMetrics' : IDL.Func([], [], []),
+    'details' : IDL.Func([TokenIdentifier__1], [Result_7], ['query']),
+    'disburse' : IDL.Func([], [], []),
+    'endAuction' : IDL.Func([], [], ['oneway']),
     'extensions' : IDL.Func([], [IDL.Vec(Extension)], ['query']),
-    'failedSales' : IDL.Func(
-        [],
-        [IDL.Vec(IDL.Tuple(AccountIdentifier__1, SubAccount__1))],
+    'getCanisterMetrics' : IDL.Func(
+        [GetMetricsParameters],
+        [IDL.Opt(CanisterMetrics)],
         ['query'],
       ),
     'getMinter' : IDL.Func([], [IDL.Principal], ['query']),
@@ -204,7 +227,7 @@ export const idlFactory = ({ IDL }) => {
         [HttpStreamingCallbackResponse],
         ['query'],
       ),
-    'initCap' : IDL.Func([], [Result_4], []),
+    'initCap' : IDL.Func([], [Result_6], []),
     'initMint' : IDL.Func([], [], []),
     'list' : IDL.Func([ListRequest], [Result_3], []),
     'listings' : IDL.Func(
@@ -214,29 +237,11 @@ export const idlFactory = ({ IDL }) => {
       ),
     'lock' : IDL.Func(
         [TokenIdentifier__1, IDL.Nat64, AccountIdentifier__1, SubAccount__1],
-        [Result_7],
-        [],
-      ),
-    'metadata' : IDL.Func([TokenIdentifier__1], [Result_6], ['query']),
-    'payments' : IDL.Func([], [IDL.Opt(IDL.Vec(SubAccount__1))], ['query']),
-    'removePayments' : IDL.Func([IDL.Vec(SubAccount__1)], [], []),
-    'reserve' : IDL.Func(
-        [IDL.Nat64, IDL.Nat64, AccountIdentifier__1, SubAccount__1],
         [Result_5],
         [],
       ),
-    'retreive' : IDL.Func([AccountIdentifier__1], [Result_4], []),
-    'saleTransactions' : IDL.Func([], [IDL.Vec(SaleTransaction)], ['query']),
-    'salesSettlements' : IDL.Func(
-        [],
-        [IDL.Vec(IDL.Tuple(AccountIdentifier__1, Sale))],
-        ['query'],
-      ),
-    'salesStats' : IDL.Func(
-        [AccountIdentifier__1],
-        [Time, IDL.Nat64, IDL.Nat],
-        ['query'],
-      ),
+    'metadata' : IDL.Func([TokenIdentifier__1], [Result_4], ['query']),
+    'payments' : IDL.Func([], [IDL.Opt(IDL.Vec(SubAccount__1))], ['query']),
     'setMinter' : IDL.Func([IDL.Principal], [], []),
     'settle' : IDL.Func([TokenIdentifier__1], [Result_3], []),
     'settlements' : IDL.Func(

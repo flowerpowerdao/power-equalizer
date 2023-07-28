@@ -1,9 +1,9 @@
-import { getActor as getBtcflowerActor } from "./btcflowerActor";
+import { getActor as getEthflowerActor } from "./ethflowerActor";
 import { getActor } from "./actor";
-import { Listing } from "../declarations/btcflower/btcflower.did";
+import { Listing } from "../declarations/ethflower/ethflower.did";
 
 let powerActor = getActor("local", "pk6rk-6aaaa-aaaae-qaazq-cai");
-let legacyActor = getBtcflowerActor("ic");
+let legacyActor = getEthflowerActor("ic");
 
 function serializeBigInt(key, value) {
   if (typeof value === "bigint") {
@@ -125,18 +125,18 @@ async function compareSupply() {
 }
 
 // compare sale transactions
-async function compareSaleTransactions() {
-  const localSaleTransactions = (await powerActor.saleTransactions()).sort();
-  const mainSaleTransactions = (await legacyActor.saleTransactions()).sort();
+// async function compareSaleTransactions() {
+//   const localSaleTransactions = (await powerActor.saleTransactions()).sort();
+//   const mainSaleTransactions = (await legacyActor.saleTransactions()).sort();
 
-  // check if the two arrays are equal
-  if (
-    JSON.stringify(localSaleTransactions, serializeBigInt) !==
-    JSON.stringify(mainSaleTransactions, serializeBigInt)
-  ) {
-    console.warn("Sale transactions are not equal ");
-  }
-}
+//   // check if the two arrays are equal
+//   if (
+//     JSON.stringify(localSaleTransactions, serializeBigInt) !==
+//     JSON.stringify(mainSaleTransactions, serializeBigInt)
+//   ) {
+//     console.warn("Sale transactions are not equal ");
+//   }
+// }
 
 compareRegistry();
 compareTokenToAsset();
@@ -144,4 +144,4 @@ compareOwners();
 compareTokenListing();
 compareTransactions();
 compareSupply();
-compareSaleTransactions();
+// compareSaleTransactions();
