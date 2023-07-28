@@ -2,19 +2,21 @@ import Tokens "../Tokens";
 
 module {
   public type StableChunk = ?{
-    #v1: {
-      assetsCount : Nat;
-      assetsChunk : [Asset];
-    };
-    #v1_chunk: {
-      assetsChunk : [Asset];
-    };
     #v2: {
       placeholder : AssetV2;
       assetsCount : Nat;
       assetsChunk : [AssetV2];
     };
     #v2_chunk: {
+      assetsChunk : [AssetV2];
+    };
+    #v3: {
+      placeholder : AssetV2;
+      assetsCount : Nat;
+      assetsChunk : [AssetV2];
+      isShuffled : Bool;
+    };
+    #v3_chunk: {
       assetsChunk : [AssetV2];
     };
   };

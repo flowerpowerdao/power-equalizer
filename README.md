@@ -140,31 +140,31 @@ So when executing `mintNFT`, the `to` address is taken from `registry.json` and 
 
 Each test suite is deployed with its own env settings.
 
-You need to switch to an anonymous identity to run the tests.
-
-```
-dfx identity use anonymouse
-```
-
 First, start a local replica
 
 ```
 npm run replica
 ```
 
-To deploy and run all tests
+Deploy and run all unit and e2e tests
 
 ```
 npm run test
 ```
 
-To deploy and run specific tests
+Run only unit tests
 
 ```
-npm run test pending-sale
+npm run test:unit
 ```
 
-To run tests without deployment (useful when writing tests)
+Deploy and run specific e2e tests
+
+```
+npm run test:e2e pending-sale
+```
+
+Run tests without deployment (useful when writing tests)
 
 ```
 npm run vitest
@@ -176,7 +176,7 @@ or
 npm run vitest:watch
 ```
 
-or to run specific test suite
+or run specific test suite
 
 ```
 npm run vitest pending-sale

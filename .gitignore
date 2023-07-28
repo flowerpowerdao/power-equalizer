@@ -1,5 +1,6 @@
 .dfx
 .vessel
+.mops
 *.pem
 .venv
 registry.json
@@ -7,7 +8,7 @@ tokens.json
 __pycache__
 node_modules
 backup/data/*
-test/initArgs.did
+test/e2e/initArgs.did
 
 # remove or comment out the lines below in your forked NFT collection repository
 initArgs.did

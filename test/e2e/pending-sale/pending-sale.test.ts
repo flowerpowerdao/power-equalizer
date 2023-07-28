@@ -15,7 +15,6 @@ describe('pending sale', () => {
     expect(res.startTime).toBe(env.whitelistSlot1_start);
     expect(res.whitelistTime).toBe(env.publicSaleStart);
     expect(res.whitelist).toBe(false);
-    expect(res.bulkPricing).toEqual([[1n, env.salePrice]]);
   });
 
   test('check salesSettings price for whitelistTier0 address', async () => {
@@ -57,7 +56,7 @@ describe('pending sale', () => {
 
   test('try to reserve token', async () => {
     let user = new User;
-    let res = await user.mainActor.reserve(1_000_000n, 1n, user.accountId, new Uint8Array);
+    let res = await user.mainActor.reserve(user.accountId);
     expect(res['err']).toContain('sale has not started');
   });
 });

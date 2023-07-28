@@ -29,7 +29,7 @@ let withCyclesArg = argv['with-cycles'] ? `--with-cycles=${argv['with-cycles']}`
 
 let nftCanisterName = network == 'production' ? 'production' : 'staging';
 let assetsDir = path.resolve(__dirname, '../assets');
-let identityName = execSync('dfx identity whoami').toString();
+let identityName = execSync('dfx identity whoami').toString().trim();
 let pemData = execSync(`dfx identity export ${identityName}`, execOptions).toString();
 let identity = decode(pemData);
 let actor = getActor(network, identity);

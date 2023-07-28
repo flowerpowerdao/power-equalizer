@@ -19,6 +19,7 @@ module {
     *********/
 
     var _assets = Buffer.Buffer<Types.AssetV2>(0);
+    var _isShuffled = false;
 
     // placeholder returned instead of asset when there is reveal delay and not yet revealed
     var _placeholder : Types.AssetV2 = {
@@ -56,14 +57,15 @@ module {
       };
 
       if (chunkIndex == 0) {
-        return ?#v2({
+        return ?#v3({
           placeholder = _placeholder;
           assetsCount = _assets.size();
           assetsChunk;
+          isShuffled = _isShuffled;
         });
       }
       else if (chunkIndex < getChunkCount()) {
-        return ?#v2_chunk({ assetsChunk });
+        return ?#v3_chunk({ assetsChunk });
       }
       else {
         null;
@@ -71,35 +73,27 @@ module {
     };
 
     public func loadStableChunk(chunk : Types.StableChunk) {
-      let toV2 = func(assets : [Types.Asset]) : [Types.AssetV2] {
-        Array.map<Types.Asset, Types.AssetV2>(assets, func(asset) {
-          {
-            asset with
-            payloadUrl = null;
-            thumbnailUrl = null;
-          };
-        });
-      };
-
       switch (chunk) {
-        // v1 -> v2
-        case (?#v1(data)) {
-          _assets := Buffer.Buffer<Types.AssetV2>(data.assetsCount);
-          _assets.append(Buffer.fromArray(toV2(data.assetsChunk)));
-          _updateBiggestAssetSize(data.assetsChunk);
-        };
-        case (?#v1_chunk(data)) {
-          _assets.append(Buffer.fromArray(toV2(data.assetsChunk)));
-          _updateBiggestAssetSize(data.assetsChunk);
-        };
-        // v2
+        // v2 -> v3
         case (?#v2(data)) {
+          _assets := Buffer.Buffer<Types.AssetV2>(data.assetsCount);
+          _assets.append(Buffer.fromArray(data.assetsChunk));
+          _updateBiggestAssetSize(data.assetsChunk);
+          _isShuffled := true;
+        };
+        case (?#v2_chunk(data)) {
+          _assets.append(Buffer.fromArray(data.assetsChunk));
+          _updateBiggestAssetSize(data.assetsChunk);
+        };
+        // v3
+        case (?#v3(data)) {
           _placeholder := data.placeholder;
           _assets := Buffer.Buffer<Types.AssetV2>(data.assetsCount);
           _assets.append(Buffer.fromArray(data.assetsChunk));
           _updateBiggestAssetSize(data.assetsChunk);
+          _isShuffled := data.isShuffled;
         };
-        case (?#v2_chunk(data)) {
+        case (?#v3_chunk(data)) {
           _assets.append(Buffer.fromArray(data.assetsChunk));
           _updateBiggestAssetSize(data.assetsChunk);
         };
@@ -216,6 +210,17 @@ module {
     public func addPlaceholder(caller : Principal, asset : Types.AssetV2) {
       assert (caller == config.minter);
       _placeholder := asset;
+    };
+
+    public func shuffleAssets() : async () {
+      assert (Utils.toNanos(config.revealDelay) > 0 and not _isShuffled);
+      let seed : Blob = await Random.blob();
+      Utils.shuffleBuffer(_assets, seed);
+      _isShuffled := true;
+    };
+
+    public func isShuffled() : Bool {
+      _isShuffled;
     };
 
     /*******************
