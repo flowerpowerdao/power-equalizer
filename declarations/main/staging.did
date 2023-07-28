@@ -273,10 +273,6 @@ type SaleTransaction =
  };
 type SaleSettings = 
  record {
-   bulkPricing: vec record {
-                      nat64;
-                      nat64;
-                    };
    endTime: Time__2;
    openEdition: bool;
    price: nat64;
@@ -722,7 +718,7 @@ type Canister =
        disbursements: nat;
        failedSettlements: nat;
      }) query;
-   reserve: (nat64, nat64, AccountIdentifier__5, SubAccount__1) -> (Result_5);
+   reserve: (AccountIdentifier__5) -> (Result_5);
    restoreChunk: (StableChunk) -> ();
    retrieve: (AccountIdentifier__5) -> (Result_4);
    saleTransactions: () -> (vec SaleTransaction) query;

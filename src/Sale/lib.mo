@@ -196,7 +196,7 @@ module {
       _tokensForSale.size();
     };
 
-    public func reserve(amount : Nat64, quantity : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount) : Result.Result<(Types.AccountIdentifier, Nat64), Text> {
+    public func reserve(address : Types.AccountIdentifier) : Result.Result<(Types.AccountIdentifier, Nat64), Text> {
       switch (config.sale) {
         case (#duration(duration)) {
           if (Time.now() > config.publicSaleStart + Utils.toNanos(duration)) {
@@ -220,43 +220,20 @@ module {
       if (availableTokens() == 0) {
         return #err("No more NFTs available right now!");
       };
-      if (availableTokens() < Nat64.toNat(quantity)) {
-        return #err("Not enough NFTs available!");
-      };
-      if (quantity == 0) {
-        return #err("Quantity must be greater than 0");
-      };
-      var total : Nat64 = (getAddressPrice(address) * quantity);
-      var bp = getAddressBulkPrice(address);
-      var lastq : Nat64 = 1;
-      // check the bulk prices available
-      for (a in bp.vals()) {
-        // if there is a precise match, the end price is in the bulk price tuple
-        // and we can replace total
-        if (a.0 == quantity) {
-          total := a.1;
-        };
-        lastq := a.0;
-      };
-      // we check that no one can buy more than specified in the bulk prices
-      if (quantity > lastq) {
-        return #err("Quantity error");
-      };
-      if (total > amount) {
-        return #err("Price mismatch!");
-      };
+
+      let price = getAddressPrice(address);
       let subaccount = getNextSubAccount();
       let paymentAddress : Types.AccountIdentifier = AID.fromPrincipal(config.canister, ?subaccount);
 
       // we only reserve the tokens here, they deducted from the available tokens
       // after payment. otherwise someone could stall the sale by reserving all
       // the tokens without paying for them
-      let tokens : [Types.TokenIndex] = tempNextTokens(quantity);
+      let tokens : [Types.TokenIndex] = tempNextTokens(1);
       _salesSettlements.put(
         paymentAddress,
         {
           tokens = tokens;
-          price = total;
+          price = price;
           subaccount = subaccount;
           buyer = address;
           expires = Time.now() + Utils.toNanos(Option.get(config.escrowDelay, #minutes(2)));
@@ -277,7 +254,7 @@ module {
         case (null) {};
       };
 
-      #ok((paymentAddress, total));
+      #ok((paymentAddress, price));
     };
 
     public func retrieve(caller : Principal, paymentaddress : Types.AccountIdentifier) : async* Result.Result<(), Text> {
@@ -513,7 +490,6 @@ module {
         endTime = endTime;
         whitelistTime = config.publicSaleStart;
         whitelist = isWhitelisted(address);
-        bulkPricing = getAddressBulkPrice(address);
         openEdition = openEdition;
       } : Types.SaleSettings;
     };
@@ -539,12 +515,8 @@ module {
       Array.freeze(Array.init<Types.TokenIndex>(Nat64.toNat(qty), 0));
     };
 
-    func getAddressPrice(address : Types.AccountIdentifier) : Nat64 {
-      getAddressBulkPrice(address)[0].1;
-    };
-
     // Set different price types here
-    func getAddressBulkPrice(address : Types.AccountIdentifier) : [(Nat64, Nat64)] {
+    func getAddressPrice(address : Types.AccountIdentifier) : Nat64 {
       // dutch auction
       switch (config.dutchAuction) {
         case (?dutchAuction) {
@@ -556,7 +528,7 @@ module {
           let publicSale = dutchAuction.target == #publicSale and not isWhitelisted(address);
 
           if (everyone or whitelist or publicSale) {
-            return [(1, getCurrentDutchAuctionPrice(dutchAuction))];
+            return getCurrentDutchAuctionPrice(dutchAuction);
           };
         };
         case (null) {};
@@ -569,12 +541,12 @@ module {
       // is always the first one.
       switch (getEligibleWhitelist(address, true)) {
         case (?whitelist) {
-          return [(1, whitelist.price)];
+          return whitelist.price;
         };
         case (_) {};
       };
 
-      return [(1, config.salePrice)];
+      return config.salePrice;
     };
 
     func getCurrentDutchAuctionPrice(dutchAuction : RootTypes.DutchAuction) : Nat64 {

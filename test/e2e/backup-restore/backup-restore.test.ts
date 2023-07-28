@@ -15,10 +15,6 @@ describe('backup', () => {
   let chunkSize = 1500n;
   let user = new User('');
 
-  it('apply env', async () => {
-    await applyEnv('restore');
-  });
-
   it('try to restore with restoreEnabled = false', async () => {
     await expect(user.mainActor.restoreChunk({v1: {
       marketplace: [],

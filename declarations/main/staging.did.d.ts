@@ -78,10 +78,7 @@ export interface Canister {
     [],
     { 'failedSettlements' : bigint, 'disbursements' : bigint }
   >,
-  'reserve' : ActorMethod<
-    [bigint, bigint, AccountIdentifier__5, SubAccount__1],
-    Result_5
-  >,
+  'reserve' : ActorMethod<[AccountIdentifier__5], Result_5>,
   'restoreChunk' : ActorMethod<[StableChunk], undefined>,
   'retrieve' : ActorMethod<[AccountIdentifier__5], Result_4>,
   'saleTransactions' : ActorMethod<[], Array<SaleTransaction>>,
@@ -363,7 +360,6 @@ export interface SaleSettings {
   'endTime' : Time__2,
   'totalToSell' : bigint,
   'sold' : bigint,
-  'bulkPricing' : Array<[bigint, bigint]>,
   'whitelistTime' : Time__2,
   'salePrice' : bigint,
   'remaining' : bigint,

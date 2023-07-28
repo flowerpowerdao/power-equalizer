@@ -21,7 +21,7 @@ describe('public sale', () => {
     await user.mintICP(1000_000_000n);
 
     let settings = await user.mainActor.salesSettings(user.accountId);
-    let res = await user.mainActor.reserve(settings.price, 1n, user.accountId, new Uint8Array);
+    let res = await user.mainActor.reserve(user.accountId);
 
     expect(res).toHaveProperty('ok');
 

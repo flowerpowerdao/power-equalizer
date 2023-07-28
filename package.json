@@ -25,7 +25,7 @@
     "vitest": "vitest run --threads false --isolate false",
     "vitest:watch": "vitest watch",
     "env": "ts-node ./test/e2e/apply-env.ts",
-    "test:e2e": "dfx build staging && vitest run --threads false --isolate false --reporter verbose",
+    "test:e2e": "dfx build staging && vitest run --threads false --isolate false --reporter verbose --bail 1",
     "test:unit": "mops test",
     "test": "npm run test:unit && npm run test:e2e",
     "backup": "ts-node ./backup/backup.ts",
