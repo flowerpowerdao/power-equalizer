@@ -5,7 +5,7 @@ import { readFileSync } from 'fs';
 import { User } from '../user';
 import { applyEnv } from '../apply-env';
 
-import canisterIds from '../../.dfx/local/canister_ids.json';
+import canisterIds from '../../../.dfx/local/canister_ids.json';
 
 let canisterId = canisterIds.test.local;
 
@@ -35,9 +35,9 @@ describe('backup', () => {
   });
 
   it('check a.json', async () => {
-    let data = JSON.parse(readFileSync(__dirname + '/../../backup/data/a.json').toString());
-    expect(data[0]['v1']['assets'][0]['v2']['assetsChunk']).toHaveLength(7);
-    expect(data[0]['v1']['assets'][0]['v2']['assetsCount']).toBe('###bigint:7');
+    let data = JSON.parse(readFileSync(__dirname + '/../../../backup/data/a.json').toString());
+    expect(data[0]['v2']['assets'][0]['v3']['assetsChunk']).toHaveLength(7);
+    expect(data[0]['v2']['assets'][0]['v3']['assetsCount']).toBe('###bigint:7');
   });
 });
 
@@ -73,7 +73,7 @@ describe('restore', () => {
   });
 
   it('compare a.json and b.json', async () => {
-    if (readFileSync(__dirname + '/../../backup/data/a.json').toString() !== readFileSync(__dirname + '/../../backup/data/b.json').toString()) {
+    if (readFileSync(__dirname + '/../../../backup/data/a.json').toString() !== readFileSync(__dirname + '/../../../backup/data/b.json').toString()) {
       throw 'a.json and b.json backups are different!';
     }
   });

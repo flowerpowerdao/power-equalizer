@@ -45,7 +45,7 @@ module {
         case (?tokenid) {
           // start custom
           // if not revealed yet, return placeholder
-          if (Utils.toNanos(config.revealDelay) > 0 and not deps._Shuffle.isShuffled()) {
+          if (Utils.toNanos(config.revealDelay) > 0 and not deps._Assets.isShuffled()) {
             let placeholder = deps._Assets.getPlaceholder();
             return _processFile("placeholder", placeholder.payload, placeholder.payloadUrl);
           };
@@ -124,10 +124,10 @@ module {
 
       // Just show index
       var soldValue : Nat = Nat64.toNat(
-        Array.foldLeft<MarketplaceTypes.Transaction, Nat64>(
+        Array.foldLeft<MarketplaceTypes.TransactionV2, Nat64>(
           Buffer.toArray(deps._Marketplace.getTransactions()),
           0,
-          func(b : Nat64, a : MarketplaceTypes.Transaction) : Nat64 {
+          func(b : Nat64, a : MarketplaceTypes.TransactionV2) : Nat64 {
             b + a.price;
           },
         ),
