@@ -9,12 +9,6 @@ export type AccountIdentifier__4 = string;
 export type AccountIdentifier__5 = string;
 export type AccountIdentifier__6 = string;
 export type AccountIdentifier__7 = string;
-export interface Asset {
-  'thumbnail' : [] | [File],
-  'metadata' : [] | [File],
-  'name' : string,
-  'payload' : File,
-}
 export interface AssetV2 {
   'thumbnail' : [] | [File],
   'payloadUrl' : [] | [string],
@@ -408,18 +402,34 @@ export type StableChunk = {
       'tokens' : StableChunk__6,
       'shuffle' : StableChunk__5,
     }
+  } |
+  {
+    'v2' : {
+      'marketplace' : StableChunk__3,
+      'assets' : StableChunk__1,
+      'sale' : StableChunk__4,
+      'disburser' : StableChunk__2,
+      'tokens' : StableChunk__6,
+    }
   };
 export type StableChunk__1 = [] | [
-  { 'v1' : { 'assetsChunk' : Array<Asset>, 'assetsCount' : bigint } } |
-    {
+  {
       'v2' : {
         'assetsChunk' : Array<AssetV2>,
         'assetsCount' : bigint,
         'placeholder' : AssetV2,
       }
     } |
-    { 'v1_chunk' : { 'assetsChunk' : Array<Asset> } } |
-    { 'v2_chunk' : { 'assetsChunk' : Array<AssetV2> } }
+    {
+      'v3' : {
+        'assetsChunk' : Array<AssetV2>,
+        'assetsCount' : bigint,
+        'placeholder' : AssetV2,
+        'isShuffled' : boolean,
+      }
+    } |
+    { 'v2_chunk' : { 'assetsChunk' : Array<AssetV2> } } |
+    { 'v3_chunk' : { 'assetsChunk' : Array<AssetV2> } }
 ];
 export type StableChunk__2 = [] | [
   { 'v1' : { 'disbursements' : Array<Disbursement> } }

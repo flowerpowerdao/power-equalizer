@@ -170,4 +170,22 @@ module {
       case (#days(d)) d * 1000_000_000 * 60 * 60 * 24;
     };
   };
+
+  // shuffle buffer in place
+  public func shuffleBuffer<T>(buffer : Buffer.Buffer<T>, seed : Blob) {
+    // use that seed to create random number generator
+    let randGen = prngStrong(seed);
+    // get the number of available tokens
+    var currentIndex : Nat = buffer.size();
+
+    while (currentIndex > 0) {
+      // use a random number to calculate a random index between 0 and currentIndex
+      var randomIndex = randGen.next() % currentIndex;
+      assert (randomIndex < currentIndex);
+      currentIndex -= 1;
+      let temporaryValue = buffer.get(currentIndex);
+      buffer.put(currentIndex, buffer.get(randomIndex));
+      buffer.put(randomIndex, temporaryValue);
+    };
+  };
 };

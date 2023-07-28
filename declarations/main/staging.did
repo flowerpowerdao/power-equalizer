@@ -209,11 +209,6 @@ type StableChunk__2 = opt
 type StableChunk__1 = 
  opt
   variant {
-    v1: record {
-          assetsChunk: vec Asset;
-          assetsCount: nat;
-        };
-    v1_chunk: record {assetsChunk: vec Asset;};
     v2:
      record {
        assetsChunk: vec AssetV2;
@@ -221,17 +216,35 @@ type StableChunk__1 =
        placeholder: AssetV2;
      };
     v2_chunk: record {assetsChunk: vec AssetV2;};
+    v3:
+     record {
+       assetsChunk: vec AssetV2;
+       assetsCount: nat;
+       isShuffled: bool;
+       placeholder: AssetV2;
+     };
+    v3_chunk: record {assetsChunk: vec AssetV2;};
   };
-type StableChunk = variant {
-                     v1:
-                      record {
-                        assets: StableChunk__1;
-                        disburser: StableChunk__2;
-                        marketplace: StableChunk__3;
-                        sale: StableChunk__4;
-                        shuffle: StableChunk__5;
-                        tokens: StableChunk__6;
-                      };};
+type StableChunk = 
+ variant {
+   v1:
+    record {
+      assets: StableChunk__1;
+      disburser: StableChunk__2;
+      marketplace: StableChunk__3;
+      sale: StableChunk__4;
+      shuffle: StableChunk__5;
+      tokens: StableChunk__6;
+    };
+   v2:
+    record {
+      assets: StableChunk__1;
+      disburser: StableChunk__2;
+      marketplace: StableChunk__3;
+      sale: StableChunk__4;
+      tokens: StableChunk__6;
+    };
+ };
 type Settlement = 
  record {
    buyer: AccountIdentifier__2;
@@ -758,13 +771,6 @@ type AssetV2 =
    payloadUrl: opt text;
    thumbnail: opt File;
    thumbnailUrl: opt text;
- };
-type Asset = 
- record {
-   metadata: opt File;
-   name: text;
-   payload: File;
-   thumbnail: opt File;
  };
 type AccountIdentifier__7 = text;
 type AccountIdentifier__6 = text;
