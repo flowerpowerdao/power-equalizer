@@ -99,7 +99,19 @@ async function compareTokenListing() {
 // compare transactions
 async function compareTransactions() {
   const localTransactions = (await powerActor.transactions()).sort();
-  const mainTransactions = (await legacyActor.transactions()).sort();
+  const mainTransactions = (await legacyActor.transactions())
+    .sort()
+    .map((t) => {
+      return {
+        sellerFrontend: [],
+        token: t.token,
+        time: t.time,
+        seller: t.seller,
+        buyerFrontend: [],
+        buyer: t.buyer,
+        price: t.price,
+      };
+    });
 
   // check if the two arrays are equal
   if (
