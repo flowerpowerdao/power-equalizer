@@ -18,10 +18,12 @@ describe('list and buy on different marketplace frontends', async () => {
   let jellyFee = env.marketplace2_fee;
 
   let seller = new User;
-  await seller.mintICP(initialBalance);
-
   let buyer = new User;
-  await buyer.mintICP(initialBalance);
+
+  it('mint ICP', async () => {
+    await seller.mintICP(initialBalance);
+    await buyer.mintICP(initialBalance);
+  });
 
   it('buy from sale', async () => {
     await buyFromSale(seller);

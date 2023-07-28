@@ -124,7 +124,7 @@ module {
     * PUBLIC INTERFACE *
     ********************/
 
-    public func lock(caller : Principal, tokenid : Types.TokenIdentifier, price : Nat64, address : Types.AccountIdentifier, _subaccountNOTUSED : Types.SubAccount, frontendIdentifier : ?Text) : async* Result.Result<Types.AccountIdentifier, Types.CommonError> {
+    public func lock(caller : Principal, tokenid : Types.TokenIdentifier, price : Nat64, address : Types.AccountIdentifier, frontendIdentifier : ?Text) : async* Result.Result<Types.AccountIdentifier, Types.CommonError> {
       if (ExtCore.TokenIdentifier.isPrincipal(tokenid, config.canister) == false) {
         return #err(#InvalidToken(tokenid));
       };

@@ -32,7 +32,7 @@ describe('sale and royalty fees', () => {
 
   it('buy from sale', async () => {
     let settings = await seller.mainActor.salesSettings(seller.accountId);
-    let res = await seller.mainActor.reserve(settings.price, 1n, seller.accountId, new Uint8Array);
+    let res = await seller.mainActor.reserve(seller.accountId);
 
     expect(res).toHaveProperty('ok');
 
