@@ -18,8 +18,11 @@ export function applyFees(amount: bigint, fees: bigint[]) {
 }
 
 export async function buyFromSale(user: User) {
+  console.log(1);
   let settings = await user.mainActor.salesSettings(user.accountId);
+  console.log(2);
   let res = await user.mainActor.reserve(user.accountId);
+  console.log(3);
 
   expect(res).toHaveProperty('ok');
 
@@ -29,7 +32,9 @@ export async function buyFromSale(user: User) {
     expect(paymentAddress.length).toBe(64);
     expect(paymentAmount).toBe(settings.price);
 
+    console.log(4);
     await user.sendICP(paymentAddress, paymentAmount);
+    console.log(5);
     let retrieveRes = await user.mainActor.retrieve(paymentAddress);
     expect(retrieveRes).toHaveProperty('ok');
   }

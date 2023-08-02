@@ -15,6 +15,7 @@ import Time "mo:base/Time";
 import TrieMap "mo:base/TrieMap";
 import Buffer "mo:base/Buffer";
 import Text "mo:base/Text";
+import Debug "mo:base/Debug";
 import { isSome } "mo:base/Option";
 
 import AviateAccountIdentifier "mo:accountid/AccountIdentifier";
@@ -25,6 +26,7 @@ import AID "../toniq-labs/util/AccountIdentifier";
 import Types "types";
 import RootTypes "../types";
 import Utils "../utils";
+import LedgerTypes "../types/ledger-types";
 
 module {
   public class Factory(config : RootTypes.Config, deps : Types.Dependencies) {
@@ -209,11 +211,16 @@ module {
       let inPendingWhitelist = Option.isSome(getEligibleWhitelist(address, true));
       let inOngoingWhitelist = Option.isSome(getEligibleWhitelist(address, false));
 
+      let d = "\ntime: " # (debug_show(Time.now()))
+        # "\npublicSaleStart: " # (debug_show(config.publicSaleStart))
+        # "\ninPendingWhitelist: " # (debug_show(inPendingWhitelist))
+        # "\ninOngoingWhitelist: " # (debug_show(inOngoingWhitelist));
+
       if (Time.now() < config.publicSaleStart) {
         if (inPendingWhitelist and not inOngoingWhitelist) {
-          return #err("The sale has not started yet");
+          return #err("The sale has not started yet.");
         } else if (not isWhitelisted(address)) {
-          return #err("The public sale has not started yet");
+          return #err("The public sale has not started yet" # d);
         };
       };
 
@@ -262,7 +269,11 @@ module {
         return #err("Nothing to settle");
       };
 
+      // let response : Types.Tokens = {e8s = 1000000000};
+      // return #err(Principal.toText(Principal.fromActor(Ledger)));
+
       let response : Types.Tokens = await Ledger.account_balance({
+      // let response : Types.Tokens = await (actor(Principal.toText(Principal.fromActor(Ledger))): LedgerTypes.Service).account_balance({
         account = switch (AviateAccountIdentifier.fromText(paymentaddress)) {
           case (#ok(accountId)) {
             Blob.fromArray(AviateAccountIdentifier.addHash(accountId));
@@ -276,6 +287,8 @@ module {
           };
         };
       });
+
+      return #ok;
 
       // because of the await above, we check again if there is a settlement available for the paymentaddress
       let settlement = switch (_salesSettlements.get(paymentaddress)) {

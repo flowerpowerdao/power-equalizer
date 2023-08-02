@@ -33,6 +33,12 @@ import DisburserTypes "Disburser/types";
 import Utils "./utils";
 import Types "./types";
 
+import Ledger "canister:ledger";
+import Blob "mo:base/Blob";
+import AviateAccountIdentifier "mo:accountid/AccountIdentifier";
+import LedgerTypes "./types/ledger-types";
+
+
 shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs : Types.InitArgs) {
   let config = {
     initArgs with
@@ -382,6 +388,33 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
     _trapIfRestoreEnabled();
     // canistergeekMonitor.collectMetrics();
     _Sale.reserve(address);
+  };
+
+  public query func a() : async Blob {
+    switch (AviateAccountIdentifier.fromText("671870b583170078a4a9abe6b053c59501b2167f712388f81063e548b8c5a46d")) {
+      case (#ok(accountId)) {
+        Blob.fromArray(AviateAccountIdentifier.addHash(accountId));
+      };
+      case (#err(_)) {
+        Debug.trap("err");
+      };
+    };
+  };
+
+  public func b() : async Nat64 {
+    let response : SaleTypes.Tokens = await Ledger.account_balance({
+    // let response : SaleTypes.Tokens = await (actor(Principal.toText(Principal.fromActor(Ledger))): LedgerTypes.Service).account_balance({
+      account = switch (AviateAccountIdentifier.fromText("671870b583170078a4a9abe6b053c59501b2167f712388f81063e548b8c5a46d")) {
+        case (#ok(accountId)) {
+          Blob.fromArray(AviateAccountIdentifier.addHash(accountId));
+        };
+        case (#err(_)) {
+          Debug.trap("err");
+        };
+      };
+    });
+
+    response.e8s;
   };
 
   public shared ({ caller }) func retrieve(paymentaddress : SaleTypes.AccountIdentifier) : async Result.Result<(), Text> {

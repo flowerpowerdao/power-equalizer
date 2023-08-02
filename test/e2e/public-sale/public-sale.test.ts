@@ -22,7 +22,7 @@ describe('public sale', () => {
 
     let settings = await user.mainActor.salesSettings(user.accountId);
     let res = await user.mainActor.reserve(user.accountId);
-
+    console.log(res['err']);
     expect(res).toHaveProperty('ok');
 
     if ('ok' in res) {
@@ -30,14 +30,17 @@ describe('public sale', () => {
       let paymentAmount = res.ok[1];
       expect(paymentAddress.length).toBe(64);
       expect(paymentAmount).toBe(settings.price);
-
+      console.log(11)
       await user.sendICP(paymentAddress, paymentAmount - 1n);
+      console.log(22)
       let retrieveRes = await user.mainActor.retrieve(paymentAddress);
+      console.log(33)
       expect(retrieveRes).toHaveProperty('err');
       expect(retrieveRes['err']).toMatch(/Insufficient funds/i);
     }
 
     let tokensRes = await user.mainActor.tokens(user.accountId);
+    console.log(44)
     expect(tokensRes).toHaveProperty('err');
     expect(tokensRes['err']['Other']).toBe('No tokens');
   });

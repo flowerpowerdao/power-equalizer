@@ -5,7 +5,7 @@
   "scripts": {
     "start": "npm run replica && npm run deploy-local && npm run mint",
     "replica": "dfx stop && rm -rf .dfx && dfx start --clean --background && npm run create-canisters",
-    "lightic": "dfx stop && rm -rf .dfx && lightic --clean --p 4943",
+    "lightic": "dfx stop && rm -rf .dfx && lightic --p 4943",
     "replica:no-delay": "dfx stop && rm -rf .dfx && dfx start --clean --background --artificial-delay 0 && npm run create-canisters",
     "create-canisters": "dfx canister create staging --no-wallet --specified-id rrkah-fqaaa-aaaaa-aaaaq-cai && dfx canister create ledger --no-wallet --specified-id ryjl3-tyaaa-aaaaa-aaaba-cai && dfx canister create test --no-wallet --specified-id r7inp-6aaaa-aaaaa-aaabq-cai && dfx canister create assets --no-wallet --specified-id e2ezq-2aaaa-aaaal-aafwa-cai",
     "build": "",
