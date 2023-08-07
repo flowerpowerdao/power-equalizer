@@ -18,15 +18,15 @@ describe('method calls restricted to admin/minter', () => {
     await expect(user.mainActor.updateThumb('test', { data: [new Uint8Array], ctype: '' })).rejects.toThrow(/assertion failed/);
   });
 
-  test('should try to call addAsset', async () => {
+  test('should try to call addAssets', async () => {
     let user = new User;
-    await expect(user.mainActor.addAsset({
+    await expect(user.mainActor.addAssets([{
       thumbnail: [],
       metadata: [],
       name: 'test',
       payload: { data: [new Uint8Array], ctype: '' },
       payloadUrl: [],
       thumbnailUrl: [],
-    })).rejects.toThrow(/assertion failed/);
+    }])).rejects.toThrow(/assertion failed/);
   });
 });

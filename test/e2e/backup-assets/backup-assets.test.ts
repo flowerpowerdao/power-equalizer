@@ -10,7 +10,6 @@ import canisterIds from '../../../.dfx/local/canister_ids.json';
 let canisterId = canisterIds.test.local;
 
 describe('backup', () => {
-  let assetSize = 20_001; // bytes
   let assetCount = 7;
   let chunkSize = 1500n;
   let user = new User('');
@@ -22,7 +21,7 @@ describe('backup', () => {
   it(`grow assets`, async () => {
     for (let i = 0; i < assetCount; i++) {
       console.log(`Growing assets to ${i + 1}...`);
-      execSync(`dfx canister call test addAsset '(record {name = \"asset-${i}\";payload = record {ctype = \"text/html\"; data = vec {blob \"${i}-${'a'.repeat(assetSize / (i + 1) | 0)}\"} } })'`);
+      execSync(`dfx canister call staging addAssets '(vec {record {name = \"asset-${i}\"; payload = record {ctype = \"\"; data = vec {} }; payloadUrl = opt \"http://localhost/${i}\" } })'`);
     }
   });
 

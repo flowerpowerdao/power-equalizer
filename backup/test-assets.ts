@@ -9,7 +9,6 @@ let canisterId = canister_ids_local.test.local;
 let mainActor = getActor(network, canisterId);
 
 let test = async () => {
-  let assetSize = 20_001; // bytes
   let assetCount = 7;
   let chunkSize = 10_020;
 
@@ -22,7 +21,7 @@ let test = async () => {
   // grow assets
   for (let i = 0; i < assetCount; i++) {
     console.log(`Growing assets to ${i + 1}...`);
-    execSync(`dfx canister call staging addAsset '(record {name = \"asset-${i}\";payload = record {ctype = \"text/html\"; data = vec {blob \"${i}-${'a'.repeat(assetSize / (i + 1) |0)}\"} } })'`)
+    execSync(`dfx canister call staging addAssets '(vec {record {name = \"asset-${i}\"; payload = record {ctype = \"\"; data = vec {} }; payloadUrl = opt \"http://localhost/${i}\" } })'`)
   }
 
   console.log('Backup to a.json');
