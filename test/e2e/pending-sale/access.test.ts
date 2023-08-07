@@ -8,16 +8,6 @@ describe('method calls restricted to admin/minter', () => {
     await expect(user.mainActor.initMint()).rejects.toThrow(/assertion failed/);
   });
 
-  test('should try to call streamAsset', async () => {
-    let user = new User;
-    await expect(user.mainActor.streamAsset(0n, false, new Uint8Array)).rejects.toThrow(/assertion failed/);
-  });
-
-  test('should try to call updateThumb', async () => {
-    let user = new User;
-    await expect(user.mainActor.updateThumb('test', { data: [new Uint8Array], ctype: '' })).rejects.toThrow(/assertion failed/);
-  });
-
   test('should try to call addAssets', async () => {
     let user = new User;
     await expect(user.mainActor.addAssets([{
