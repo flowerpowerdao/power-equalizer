@@ -1,7 +1,6 @@
 import Assets "../CanisterAssets";
 import Marketplace "../Marketplace";
 import Sale "../Sale";
-import Shuffle "../Shuffle";
 import Tokens "../Tokens";
 
 module {
@@ -41,7 +40,6 @@ module {
 
   public type Dependencies = {
     _Assets : Assets.Factory;
-    _Shuffle : Shuffle.Factory;
     _Tokens : Tokens.Factory;
     _Marketplace : Marketplace.Factory;
     _Sale : Sale.Factory;

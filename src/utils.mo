@@ -3,8 +3,9 @@ import Blob "mo:base/Blob";
 import Hash "mo:base/Hash";
 import Int8 "mo:base/Int8";
 import Iter "mo:base/Iter";
-import Nat32 "mo:base/Nat32";
+import Nat "mo:base/Nat";
 import Nat8 "mo:base/Nat8";
+import Nat32 "mo:base/Nat32";
 import Nat64 "mo:base/Nat64";
 import Prim "mo:prim";
 import Principal "mo:base/Principal";
@@ -168,6 +169,48 @@ module {
       case (#minutes(m)) m * 1_000_000_000 * 60;
       case (#hours(h)) h * 1000_000_000 * 60 * 60;
       case (#days(d)) d * 1000_000_000 * 60 * 60 * 24;
+    };
+  };
+
+  func _getPageItems<T>(items : [T], pageIndex : Nat, limit : Nat) : [T] {
+    let start = pageIndex * limit;
+    let end = Nat.min(start + limit, items.size());
+    let size = end - start;
+
+    if (size == 0) {
+      return [];
+    };
+
+    let buf = Buffer.Buffer<T>(size);
+    for (i in Iter.range(start, end - 1)) {
+      buf.add(items[i]);
+    };
+
+    Buffer.toArray(buf);
+  };
+
+  public func getPage<T>(items : [T], pageIndex : Nat, limit : Nat) : ([T], Nat) {
+    (
+      _getPageItems(items, pageIndex, limit),
+      items.size() / limit + (if (items.size() % limit == 0) 0 else 1),
+    );
+  };
+
+  // shuffle buffer in place
+  public func shuffleBuffer<T>(buffer : Buffer.Buffer<T>, seed : Blob) {
+    // use that seed to create random number generator
+    let randGen = prngStrong(seed);
+    // get the number of available tokens
+    var currentIndex : Nat = buffer.size();
+
+    while (currentIndex > 0) {
+      // use a random number to calculate a random index between 0 and currentIndex
+      var randomIndex = randGen.next() % currentIndex;
+      assert (randomIndex < currentIndex);
+      currentIndex -= 1;
+      let temporaryValue = buffer.get(currentIndex);
+      buffer.put(currentIndex, buffer.get(randomIndex));
+      buffer.put(randomIndex, temporaryValue);
     };
   };
 };

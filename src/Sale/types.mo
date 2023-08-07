@@ -3,7 +3,6 @@ import Time "mo:base/Time";
 import Cap "mo:cap/Cap";
 
 import ExtCore "../toniq-labs/ext/Core";
-import Shuffle "../Shuffle";
 import Tokens "../Tokens";
 import Disburser "../Disburser";
 import Types "../types";
@@ -47,7 +46,6 @@ module {
   public type Dependencies = {
     _Cap : Cap.Cap;
     _Tokens : Tokens.Factory;
-    _Shuffle : Shuffle.Factory;
     _Disburser : Disburser.Factory;
   };
 
@@ -102,7 +100,6 @@ module {
     whitelistTime : Time;
     whitelist : Bool;
     totalToSell : Nat;
-    bulkPricing : [(Nat64, Nat64)];
     openEdition : Bool;
   };
 };

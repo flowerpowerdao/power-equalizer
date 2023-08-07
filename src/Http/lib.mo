@@ -31,7 +31,7 @@ module {
         let tokenId = _getParam(request, "tokenid")!;
 
         // if not revealed yet, return placeholder
-        if (Utils.toNanos(config.revealDelay) > 0 and not deps._Shuffle.isShuffled()) {
+        if (Utils.toNanos(config.revealDelay) > 0 and not deps._Assets.isShuffled()) {
           let placeholder = deps._Assets.getPlaceholder();
           switch (placeholder.payloadUrl) {
             case (?payloadUrl) return _redirect(payloadUrl);
@@ -126,10 +126,10 @@ module {
 
     func _collectionInfo() : Types.HttpResponse {
       var soldValue : Nat = Nat64.toNat(
-        Array.foldLeft<MarketplaceTypes.Transaction, Nat64>(
+        Array.foldLeft<MarketplaceTypes.TransactionV2, Nat64>(
           Buffer.toArray(deps._Marketplace.getTransactions()),
           0,
-          func(b : Nat64, a : MarketplaceTypes.Transaction) : Nat64 {
+          func(b : Nat64, a : MarketplaceTypes.TransactionV2) : Nat64 {
             b + a.price;
           },
         ),

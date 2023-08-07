@@ -44,7 +44,7 @@
   "defaults": {
     "build": {
       "packtool": "vessel sources",
-      "args": "--trap-on-call-error"
+      "args": ""
     }
   }
 }

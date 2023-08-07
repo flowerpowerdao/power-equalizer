@@ -44,11 +44,23 @@ type TransferRequest =
    to: User;
    token: TokenIdentifier;
  };
+type TransactionV2 = 
+ record {
+   buyer: AccountIdentifier__2;
+   buyerFrontend: opt text;
+   price: nat64;
+   seller: principal;
+   sellerFrontend: opt text;
+   time: Time__1;
+   token: TokenIdentifier__1;
+ };
 type Transaction = 
  record {
    buyer: AccountIdentifier__2;
+   buyerFrontend: opt text;
    price: nat64;
    seller: principal;
+   sellerFrontend: opt text;
    time: Time__1;
    token: TokenIdentifier__1;
  };
@@ -176,6 +188,20 @@ type StableChunk__3 =
        transactionCount: nat;
      };
     v1_chunk: record {transactionChunk: vec Transaction;};
+    v2:
+     record {
+       tokenListing: vec record {
+                           TokenIndex__1;
+                           Listing;
+                         };
+       tokenSettlement: vec record {
+                              TokenIndex__1;
+                              Settlement;
+                            };
+       transactionChunk: vec TransactionV2;
+       transactionCount: nat;
+     };
+    v2_chunk: record {transactionChunk: vec TransactionV2;};
   };
 type StableChunk__2 = opt
                        variant {
@@ -183,11 +209,6 @@ type StableChunk__2 = opt
 type StableChunk__1 = 
  opt
   variant {
-    v1: record {
-          assetsChunk: vec Asset;
-          assetsCount: nat;
-        };
-    v1_chunk: record {assetsChunk: vec Asset;};
     v2:
      record {
        assetsChunk: vec AssetV2;
@@ -195,17 +216,35 @@ type StableChunk__1 =
        placeholder: AssetV2;
      };
     v2_chunk: record {assetsChunk: vec AssetV2;};
+    v3:
+     record {
+       assetsChunk: vec AssetV2;
+       assetsCount: nat;
+       isShuffled: bool;
+       placeholder: AssetV2;
+     };
+    v3_chunk: record {assetsChunk: vec AssetV2;};
   };
-type StableChunk = variant {
-                     v1:
-                      record {
-                        assets: StableChunk__1;
-                        disburser: StableChunk__2;
-                        marketplace: StableChunk__3;
-                        sale: StableChunk__4;
-                        shuffle: StableChunk__5;
-                        tokens: StableChunk__6;
-                      };};
+type StableChunk = 
+ variant {
+   v1:
+    record {
+      assets: StableChunk__1;
+      disburser: StableChunk__2;
+      marketplace: StableChunk__3;
+      sale: StableChunk__4;
+      shuffle: StableChunk__5;
+      tokens: StableChunk__6;
+    };
+   v2:
+    record {
+      assets: StableChunk__1;
+      disburser: StableChunk__2;
+      marketplace: StableChunk__3;
+      sale: StableChunk__4;
+      tokens: StableChunk__6;
+    };
+ };
 type Settlement = 
  record {
    buyer: AccountIdentifier__2;
@@ -234,10 +273,6 @@ type SaleTransaction =
  };
 type SaleSettings = 
  record {
-   bulkPricing: vec record {
-                      nat64;
-                      nat64;
-                    };
    endTime: Time__2;
    openEdition: bool;
    price: nat64;
@@ -675,7 +710,7 @@ type Canister =
        disbursements: nat;
        failedSettlements: nat;
      }) query;
-   reserve: (nat64, nat64, AccountIdentifier__5, SubAccount__1) -> (Result_5);
+   reserve: (AccountIdentifier__5) -> (Result_5);
    restoreChunk: (StableChunk) -> ();
    retrieve: (AccountIdentifier__5) -> (Result_4);
    saleTransactions: () -> (vec SaleTransaction) query;
@@ -698,7 +733,7 @@ type Canister =
    toAccountIdentifier: (text, nat) -> (AccountIdentifier__4) query;
    tokens: (AccountIdentifier__3) -> (Result_1) query;
    tokens_ext: (AccountIdentifier__3) -> (Result) query;
-   transactions: () -> (vec Transaction) query;
+   transactions: () -> (vec TransactionV2) query;
    transfer: (TransferRequest) -> (TransferResponse);
    updateCanistergeekInformation: (UpdateInformationRequest) -> ();
    updateThumb: (text, File) -> (opt nat);
@@ -724,13 +759,6 @@ type AssetV2 =
    payloadUrl: opt text;
    thumbnail: opt File;
    thumbnailUrl: opt text;
- };
-type Asset = 
- record {
-   metadata: opt File;
-   name: text;
-   payload: File;
-   thumbnail: opt File;
  };
 type AccountIdentifier__7 = text;
 type AccountIdentifier__6 = text;
