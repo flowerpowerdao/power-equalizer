@@ -21,7 +21,7 @@ describe('backup', () => {
   it(`grow assets`, async () => {
     for (let i = 0; i < assetCount; i++) {
       console.log(`Growing assets to ${i + 1}...`);
-      execSync(`dfx canister call staging addAssets '(vec {record {name = \"asset-${i}\"; payload = record {ctype = \"\"; data = vec {} }; payloadUrl = opt \"http://localhost/${i}\" } })'`);
+      execSync(`dfx canister call test addAssets '(vec {record {name = \"asset-${i}\"; payload = record {ctype = \"\"; data = vec {} }; payloadUrl = opt \"http://localhost/${i}\" } })'`);
     }
   });
 
