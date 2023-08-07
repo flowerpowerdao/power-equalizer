@@ -528,7 +528,6 @@ export const idlFactory = ({ IDL }) => {
   });
   const Canister = IDL.Service({
     'acceptCycles' : IDL.Func([], [], []),
-    'addAsset' : IDL.Func([AssetV2], [IDL.Nat], []),
     'addAssets' : IDL.Func([IDL.Vec(AssetV2)], [IDL.Nat], []),
     'addPlaceholder' : IDL.Func([AssetV2], [], []),
     'airdropTokens' : IDL.Func([], [], []),
@@ -635,7 +634,6 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat, IDL.Nat, IDL.Nat],
         ['query'],
       ),
-    'streamAsset' : IDL.Func([IDL.Nat, IDL.Bool, IDL.Vec(IDL.Nat8)], [], []),
     'supply' : IDL.Func([], [Result_2], ['query']),
     'toAccountIdentifier' : IDL.Func(
         [IDL.Text, IDL.Nat],
@@ -645,13 +643,17 @@ export const idlFactory = ({ IDL }) => {
     'tokens' : IDL.Func([AccountIdentifier__3], [Result_1], ['query']),
     'tokens_ext' : IDL.Func([AccountIdentifier__3], [Result], ['query']),
     'transactions' : IDL.Func([], [IDL.Vec(TransactionV2)], ['query']),
+    'transactionsPaged' : IDL.Func(
+        [IDL.Nat, IDL.Nat],
+        [IDL.Vec(Transaction), IDL.Nat],
+        ['query'],
+      ),
     'transfer' : IDL.Func([TransferRequest], [TransferResponse], []),
     'updateCanistergeekInformation' : IDL.Func(
         [UpdateInformationRequest],
         [],
         [],
       ),
-    'updateThumb' : IDL.Func([IDL.Text, File], [IDL.Opt(IDL.Nat)], []),
   });
   return Canister;
 };

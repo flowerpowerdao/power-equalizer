@@ -647,7 +647,6 @@ type CanisterCyclesAggregatedData = vec nat64;
 type Canister = 
  service {
    acceptCycles: () -> ();
-   addAsset: (AssetV2) -> (nat);
    addAssets: (vec AssetV2) -> (nat);
    addPlaceholder: (AssetV2) -> ();
    airdropTokens: () -> ();
@@ -728,15 +727,14 @@ type Canister =
          }) query;
    shuffleTokensForSale: () -> ();
    stats: () -> (nat64, nat64, nat64, nat64, nat, nat, nat) query;
-   streamAsset: (nat, bool, blob) -> ();
    supply: () -> (Result_2) query;
    toAccountIdentifier: (text, nat) -> (AccountIdentifier__4) query;
    tokens: (AccountIdentifier__3) -> (Result_1) query;
    tokens_ext: (AccountIdentifier__3) -> (Result) query;
    transactions: () -> (vec TransactionV2) query;
+   transactionsPaged: (nat, nat) -> (vec Transaction, nat) query;
    transfer: (TransferRequest) -> (TransferResponse);
    updateCanistergeekInformation: (UpdateInformationRequest) -> ();
-   updateThumb: (text, File) -> (opt nat);
  };
 type Balance__2 = nat;
 type Balance__1 = nat;

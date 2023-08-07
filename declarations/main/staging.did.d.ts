@@ -25,7 +25,6 @@ export type Balance__1 = bigint;
 export type Balance__2 = bigint;
 export interface Canister {
   'acceptCycles' : ActorMethod<[], undefined>,
-  'addAsset' : ActorMethod<[AssetV2], bigint>,
   'addAssets' : ActorMethod<[Array<AssetV2>], bigint>,
   'addPlaceholder' : ActorMethod<[AssetV2], undefined>,
   'airdropTokens' : ActorMethod<[], undefined>,
@@ -90,21 +89,20 @@ export interface Canister {
     [],
     [bigint, bigint, bigint, bigint, bigint, bigint, bigint]
   >,
-  'streamAsset' : ActorMethod<
-    [bigint, boolean, Uint8Array | number[]],
-    undefined
-  >,
   'supply' : ActorMethod<[], Result_2>,
   'toAccountIdentifier' : ActorMethod<[string, bigint], AccountIdentifier__4>,
   'tokens' : ActorMethod<[AccountIdentifier__3], Result_1>,
   'tokens_ext' : ActorMethod<[AccountIdentifier__3], Result>,
   'transactions' : ActorMethod<[], Array<TransactionV2>>,
+  'transactionsPaged' : ActorMethod<
+    [bigint, bigint],
+    [Array<Transaction>, bigint]
+  >,
   'transfer' : ActorMethod<[TransferRequest], TransferResponse>,
   'updateCanistergeekInformation' : ActorMethod<
     [UpdateInformationRequest],
     undefined
   >,
-  'updateThumb' : ActorMethod<[string, File], [] | [bigint]>,
 }
 export type CanisterCyclesAggregatedData = BigUint64Array | bigint[];
 export type CanisterHeapMemoryAggregatedData = BigUint64Array | bigint[];
