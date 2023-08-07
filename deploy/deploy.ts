@@ -48,20 +48,10 @@ let filesByName = new Map(files.map((file) => {
   return [path.parse(file).name, file];
 }));
 
-// TODO: remove
-// populate with fake data for cherries
-let assets = JSON.parse(fs.readFileSync(path.resolve(assetsDir, 'metadata.json')).toString());
-for (let i = 0; i < assets.length; i++) {
-  filesByName.set(String(i + 1), `${i + 1}.svg`);
-  filesByName.set(String(i + 1) + '_thumbnail', `${i + 1}_thumbnail.png`);
-}
-filesByName.set('placeholder', 'placeholder.mp4');
-
 let run = async () => {
   deployNftCanister();
   await uploadAssetsMetadata();
   launch();
-  // deployAssetsCanister();
 }
 
 let getAssetUrl = (filename) => {
@@ -86,11 +76,6 @@ let deployNftCanister = () => {
   console.log(`Using init args from ${initArgsFile}`);
   execSync(`dfx deploy ${nftCanisterName} --no-wallet --argument "$(cat ${initArgsFile})" --network ${dfxNetwork} ${modeArg} ${withCyclesArg}`, execOptions);
 }
-
-// let deployAssetsCanister = () => {
-//   console.log(chalk.green('Deploying assets canister...'));
-//   execSync(`dfx deploy assets --no-wallet --network ${dfxNetwork} ${withCyclesArg}`, execOptions);
-// }
 
 let uploadAssetsMetadata = async () => {
   let assets = JSON.parse(fs.readFileSync(path.resolve(assetsDir, 'metadata.json')).toString());

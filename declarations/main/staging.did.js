@@ -31,7 +31,6 @@ export const idlFactory = ({ IDL }) => {
   const InitArgs = IDL.Record({
     'timersInterval' : IDL.Opt(Duration),
     'dutchAuction' : IDL.Opt(DutchAuction),
-    'legacyPlaceholder' : IDL.Opt(IDL.Bool),
     'whitelists' : IDL.Vec(Whitelist),
     'marketplaces' : IDL.Vec(IDL.Tuple(IDL.Text, AccountIdentifier, IDL.Nat64)),
     'name' : IDL.Text,
@@ -442,10 +441,6 @@ export const idlFactory = ({ IDL }) => {
     'streaming_strategy' : IDL.Opt(HttpStreamingStrategy),
     'status_code' : IDL.Nat16,
   });
-  const HttpStreamingCallbackResponse = IDL.Record({
-    'token' : IDL.Opt(HttpStreamingCallbackToken),
-    'body' : IDL.Vec(IDL.Nat8),
-  });
   const Result_4 = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
   const ListRequest = IDL.Record({
     'token' : TokenIdentifier__1,
@@ -533,7 +528,6 @@ export const idlFactory = ({ IDL }) => {
   });
   const Canister = IDL.Service({
     'acceptCycles' : IDL.Func([], [], []),
-    'addAsset' : IDL.Func([AssetV2], [IDL.Nat], []),
     'addAssets' : IDL.Func([IDL.Vec(AssetV2)], [IDL.Nat], []),
     'addPlaceholder' : IDL.Func([AssetV2], [], []),
     'airdropTokens' : IDL.Func([], [], []),
@@ -584,11 +578,6 @@ export const idlFactory = ({ IDL }) => {
       ),
     'grow' : IDL.Func([IDL.Nat], [IDL.Nat], []),
     'http_request' : IDL.Func([HttpRequest], [HttpResponse], ['query']),
-    'http_request_streaming_callback' : IDL.Func(
-        [HttpStreamingCallbackToken],
-        [HttpStreamingCallbackResponse],
-        ['query'],
-      ),
     'initCap' : IDL.Func([], [Result_4], []),
     'initMint' : IDL.Func([], [Result_4], []),
     'list' : IDL.Func([ListRequest], [Result_3], []),
@@ -645,7 +634,6 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat64, IDL.Nat, IDL.Nat, IDL.Nat],
         ['query'],
       ),
-    'streamAsset' : IDL.Func([IDL.Nat, IDL.Bool, IDL.Vec(IDL.Nat8)], [], []),
     'supply' : IDL.Func([], [Result_2], ['query']),
     'toAccountIdentifier' : IDL.Func(
         [IDL.Text, IDL.Nat],
@@ -655,13 +643,17 @@ export const idlFactory = ({ IDL }) => {
     'tokens' : IDL.Func([AccountIdentifier__3], [Result_1], ['query']),
     'tokens_ext' : IDL.Func([AccountIdentifier__3], [Result], ['query']),
     'transactions' : IDL.Func([], [IDL.Vec(TransactionV2)], ['query']),
+    'transactionsPaged' : IDL.Func(
+        [IDL.Nat, IDL.Nat],
+        [IDL.Vec(Transaction), IDL.Nat],
+        ['query'],
+      ),
     'transfer' : IDL.Func([TransferRequest], [TransferResponse], []),
     'updateCanistergeekInformation' : IDL.Func(
         [UpdateInformationRequest],
         [],
         [],
       ),
-    'updateThumb' : IDL.Func([IDL.Text, File], [IDL.Opt(IDL.Nat)], []),
   });
   return Canister;
 };
@@ -698,7 +690,6 @@ export const init = ({ IDL }) => {
   const InitArgs = IDL.Record({
     'timersInterval' : IDL.Opt(Duration),
     'dutchAuction' : IDL.Opt(DutchAuction),
-    'legacyPlaceholder' : IDL.Opt(IDL.Bool),
     'whitelists' : IDL.Vec(Whitelist),
     'marketplaces' : IDL.Vec(IDL.Tuple(IDL.Text, AccountIdentifier, IDL.Nat64)),
     'name' : IDL.Text,

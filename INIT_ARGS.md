@@ -202,15 +202,6 @@ dutchAuction = opt record {
 };
 ```
 
-## Legacy Placeholders
-Default `null`
-
-```candid
-// true - the collection has the placeholder stored at the 0 index of the asset array
-// false - the placeholder has its on stable variable in the canister
-legacyPlaceholder = opt false
-```
-
 ## Restore
 Default `null`
 

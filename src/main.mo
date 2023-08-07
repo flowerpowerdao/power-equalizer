@@ -121,7 +121,7 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   func _getChunkCount(chunkSize : Nat) : Nat {
     var count = Nat.max(1, _Marketplace.getChunkCount(chunkSize));
     count := Nat.max(count, _Sale.getChunkCount(chunkSize));
-    count := Nat.max(count, _Assets.getChunkCount());
+    count := Nat.max(count, _Assets.getChunkCount(chunkSize));
     count;
   };
 
@@ -302,32 +302,11 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   // Assets
   let _Assets = Assets.Factory(config);
 
-  public shared ({ caller }) func streamAsset(id : Nat, isThumb : Bool, payload : Blob) : async () {
-    _trapIfRestoreEnabled();
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    _Assets.streamAsset(caller, id, isThumb, payload);
-  };
-
-  public shared ({ caller }) func updateThumb(name : Text, file : AssetsTypes.File) : async ?Nat {
-    _trapIfRestoreEnabled();
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    _Assets.updateThumb(caller, name, file);
-  };
-
   public shared ({ caller }) func addPlaceholder(asset : AssetsTypes.AssetV2) : async () {
     _trapIfRestoreEnabled();
     canistergeekMonitor.collectMetrics();
     // checks caller == minter
     _Assets.addPlaceholder(caller, asset);
-  };
-
-  public shared ({ caller }) func addAsset(asset : AssetsTypes.AssetV2) : async Nat {
-    _trapIfRestoreEnabled();
-    canistergeekMonitor.collectMetrics();
-    // checks caller == minter
-    _Assets.addAsset(caller, asset);
   };
 
   public shared ({ caller }) func addAssets(assets : [AssetsTypes.AssetV2]) : async Nat {
@@ -585,10 +564,6 @@ shared ({ caller = init_minter }) actor class Canister(cid : Principal, initArgs
   // queries
   public query func http_request(request : HttpTypes.HttpRequest) : async HttpTypes.HttpResponse {
     _HttpHandler.http_request(request);
-  };
-
-  public query func http_request_streaming_callback(token : HttpTypes.HttpStreamingCallbackToken) : async HttpTypes.HttpStreamingCallbackResponse {
-    _HttpHandler.http_request_streaming_callback(token);
   };
 
   // cycles
