@@ -91,12 +91,18 @@ module {
 
       // return metadata
       if (t == "metadata") {
-        let ?metadata = asset.metadata else return _collectionInfo();
-        return {
-          status_code = 200;
-          headers = [("content-type", metadata.ctype)];
-          body = metadata.data[0];
-          streaming_strategy = null;
+        return switch (asset.metadata) {
+          case (?metadata) {
+            {
+              status_code = 200;
+              headers = [("content-type", metadata.ctype)];
+              body = metadata.data[0];
+              streaming_strategy = null;
+            };
+          };
+          case (null) {
+            _collectionInfo();
+          };
         };
       };
 
@@ -109,8 +115,14 @@ module {
       };
 
       // redirect payload or show collection info
-      let ?payloadUrl = asset.payloadUrl else return _collectionInfo();
-      return _redirect(payloadUrl);
+      switch (asset.payloadUrl) {
+        case (?payloadUrl) {
+          _redirect(payloadUrl);
+        };
+        case (null) {
+          _collectionInfo();
+        };
+      };
     };
 
     func _redirect(url : Text) : Types.HttpResponse {
