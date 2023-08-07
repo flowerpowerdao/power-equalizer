@@ -50,8 +50,7 @@ module {
       let count = Nat.min(chunkSize, _transactions.size() - start);
       let transactionChunk = if (_transactions.size() == 0 or count == 0) {
         []
-      }
-      else {
+      } else {
         Buffer.toArray(Buffer.subBuffer(_transactions, start, count));
       };
 

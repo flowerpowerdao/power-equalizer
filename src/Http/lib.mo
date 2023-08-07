@@ -31,7 +31,6 @@ module {
         let tokenId = _getParam(request, "tokenid")!;
 
         // if not revealed yet, return placeholder
-        // only when accessed by tokenid??
         if (Utils.toNanos(config.revealDelay) > 0 and not deps._Shuffle.isShuffled()) {
           let placeholder = deps._Assets.getPlaceholder();
           switch (placeholder.payloadUrl) {
@@ -46,7 +45,7 @@ module {
         return _processAsset(request, asset);
       };
 
-      // by asset id (same as token id??)
+      // by asset id
       // https://.../?asset=<assetId>
       ignore do ? {
         let atext = _getParam(request, "asset")!;
@@ -87,7 +86,7 @@ module {
     func _processAsset(request : Types.HttpRequest, asset : AssetTypes.AssetV2) : Types.HttpResponse {
       let t = switch (_getParam(request, "type")) {
         case (?t) { t };
-        case (null) { ""};
+        case (null) { "" };
       };
 
       // return metadata

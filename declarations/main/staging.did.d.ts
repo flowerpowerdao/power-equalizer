@@ -61,10 +61,6 @@ export interface Canister {
   'getTokens' : ActorMethod<[], Array<[TokenIndex, Metadata__1]>>,
   'grow' : ActorMethod<[bigint], bigint>,
   'http_request' : ActorMethod<[HttpRequest], HttpResponse>,
-  'http_request_streaming_callback' : ActorMethod<
-    [HttpStreamingCallbackToken],
-    HttpStreamingCallbackResponse
-  >,
   'initCap' : ActorMethod<[], Result_4>,
   'initMint' : ActorMethod<[], Result_4>,
   'list' : ActorMethod<[ListRequest], Result_3>,
@@ -241,10 +237,6 @@ export interface HttpResponse {
   'streaming_strategy' : [] | [HttpStreamingStrategy],
   'status_code' : number,
 }
-export interface HttpStreamingCallbackResponse {
-  'token' : [] | [HttpStreamingCallbackToken],
-  'body' : Uint8Array | number[],
-}
 export interface HttpStreamingCallbackToken {
   'key' : string,
   'sha256' : [] | [Uint8Array | number[]],
@@ -260,7 +252,6 @@ export type HttpStreamingStrategy = {
 export interface InitArgs {
   'timersInterval' : [] | [Duration],
   'dutchAuction' : [] | [DutchAuction],
-  'legacyPlaceholder' : [] | [boolean],
   'whitelists' : Array<Whitelist>,
   'marketplaces' : Array<[string, AccountIdentifier, bigint]>,
   'name' : string,

@@ -31,7 +31,6 @@ export const idlFactory = ({ IDL }) => {
   const InitArgs = IDL.Record({
     'timersInterval' : IDL.Opt(Duration),
     'dutchAuction' : IDL.Opt(DutchAuction),
-    'legacyPlaceholder' : IDL.Opt(IDL.Bool),
     'whitelists' : IDL.Vec(Whitelist),
     'marketplaces' : IDL.Vec(IDL.Tuple(IDL.Text, AccountIdentifier, IDL.Nat64)),
     'name' : IDL.Text,
@@ -421,10 +420,6 @@ export const idlFactory = ({ IDL }) => {
     'streaming_strategy' : IDL.Opt(HttpStreamingStrategy),
     'status_code' : IDL.Nat16,
   });
-  const HttpStreamingCallbackResponse = IDL.Record({
-    'token' : IDL.Opt(HttpStreamingCallbackToken),
-    'body' : IDL.Vec(IDL.Nat8),
-  });
   const Result_4 = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
   const ListRequest = IDL.Record({
     'token' : TokenIdentifier__1,
@@ -564,11 +559,6 @@ export const idlFactory = ({ IDL }) => {
       ),
     'grow' : IDL.Func([IDL.Nat], [IDL.Nat], []),
     'http_request' : IDL.Func([HttpRequest], [HttpResponse], ['query']),
-    'http_request_streaming_callback' : IDL.Func(
-        [HttpStreamingCallbackToken],
-        [HttpStreamingCallbackResponse],
-        ['query'],
-      ),
     'initCap' : IDL.Func([], [Result_4], []),
     'initMint' : IDL.Func([], [Result_4], []),
     'list' : IDL.Func([ListRequest], [Result_3], []),
@@ -682,7 +672,6 @@ export const init = ({ IDL }) => {
   const InitArgs = IDL.Record({
     'timersInterval' : IDL.Opt(Duration),
     'dutchAuction' : IDL.Opt(DutchAuction),
-    'legacyPlaceholder' : IDL.Opt(IDL.Bool),
     'whitelists' : IDL.Vec(Whitelist),
     'marketplaces' : IDL.Vec(IDL.Tuple(IDL.Text, AccountIdentifier, IDL.Nat64)),
     'name' : IDL.Text,

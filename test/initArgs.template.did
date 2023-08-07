@@ -55,6 +55,5 @@
     timersInterval = opt variant { seconds = $timersInterval };
     test = opt $test; // must be 'false'
     restoreEnabled = opt $restoreEnabled; // must be 'false' (see backup/README.md for details)
-    legacyPlaceholder = opt $legacyPlaceholder;
   }
 )

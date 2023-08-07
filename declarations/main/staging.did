@@ -394,7 +394,6 @@ type InitArgs =
    airdrop: vec AccountIdentifier;
    dutchAuction: opt DutchAuction;
    escrowDelay: opt Duration;
-   legacyPlaceholder: opt bool;
    marketDelay: opt Duration;
    marketplaces: vec record {
                        text;
@@ -435,11 +434,6 @@ type HttpStreamingCallbackToken =
    index: nat;
    key: text;
    sha256: opt blob;
- };
-type HttpStreamingCallbackResponse = 
- record {
-   body: blob;
-   token: opt HttpStreamingCallbackToken;
  };
 type HttpResponse = 
  record {
@@ -665,8 +659,6 @@ type Canister =
                          }) query;
    grow: (nat) -> (nat);
    http_request: (HttpRequest) -> (HttpResponse) query;
-   http_request_streaming_callback: (HttpStreamingCallbackToken) ->
-    (HttpStreamingCallbackResponse) query;
    initCap: () -> (Result_4);
    initMint: () -> (Result_4);
    list: (ListRequest) -> (Result_3);
