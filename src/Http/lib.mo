@@ -45,7 +45,7 @@ module {
         case (?tokenid) {
           // start custom
           // if not revealed yet, return placeholder
-          if (Utils.toNanos(config.revealDelay) > 0 and not deps._Shuffle.isShuffled()) {
+          if (Utils.toNanos(config.revealDelay) > 0 and not deps._Assets.isShuffled()) {
             let placeholder = deps._Assets.getPlaceholder();
             return _processFile("placeholder", placeholder.payload, placeholder.payloadUrl);
           };

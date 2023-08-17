@@ -121,25 +121,21 @@ export const idlFactory = ({ IDL }) => {
       'v2_chunk' : IDL.Record({ 'transactionChunk' : IDL.Vec(TransactionV2) }),
     })
   );
-  const Asset = IDL.Record({
-    'thumbnail' : IDL.Opt(File),
-    'metadata' : IDL.Opt(File),
-    'name' : IDL.Text,
-    'payload' : File,
-  });
   const StableChunk__1 = IDL.Opt(
     IDL.Variant({
-      'v1' : IDL.Record({
-        'assetsChunk' : IDL.Vec(Asset),
-        'assetsCount' : IDL.Nat,
-      }),
       'v2' : IDL.Record({
         'assetsChunk' : IDL.Vec(AssetV2),
         'assetsCount' : IDL.Nat,
         'placeholder' : AssetV2,
       }),
-      'v1_chunk' : IDL.Record({ 'assetsChunk' : IDL.Vec(Asset) }),
+      'v3' : IDL.Record({
+        'assetsChunk' : IDL.Vec(AssetV2),
+        'assetsCount' : IDL.Nat,
+        'placeholder' : AssetV2,
+        'isShuffled' : IDL.Bool,
+      }),
       'v2_chunk' : IDL.Record({ 'assetsChunk' : IDL.Vec(AssetV2) }),
+      'v3_chunk' : IDL.Record({ 'assetsChunk' : IDL.Vec(AssetV2) }),
     })
   );
   const AccountIdentifier__5 = IDL.Text;
@@ -258,6 +254,13 @@ export const idlFactory = ({ IDL }) => {
       'disburser' : StableChunk__2,
       'tokens' : StableChunk__6,
       'shuffle' : StableChunk__5,
+    }),
+    'v2' : IDL.Record({
+      'marketplace' : StableChunk__3,
+      'assets' : StableChunk__1,
+      'sale' : StableChunk__4,
+      'disburser' : StableChunk__2,
+      'tokens' : StableChunk__6,
     }),
   });
   const TokenIdentifier = IDL.Text;
@@ -481,7 +484,6 @@ export const idlFactory = ({ IDL }) => {
     'endTime' : Time__2,
     'totalToSell' : IDL.Nat,
     'sold' : IDL.Nat,
-    'bulkPricing' : IDL.Vec(IDL.Tuple(IDL.Nat64, IDL.Nat64)),
     'whitelistTime' : Time__2,
     'salePrice' : IDL.Nat64,
     'remaining' : IDL.Nat,
@@ -617,11 +619,7 @@ export const idlFactory = ({ IDL }) => {
         ],
         ['query'],
       ),
-    'reserve' : IDL.Func(
-        [IDL.Nat64, IDL.Nat64, AccountIdentifier__5, SubAccount__1],
-        [Result_5],
-        [],
-      ),
+    'reserve' : IDL.Func([AccountIdentifier__5], [Result_5], []),
     'restoreChunk' : IDL.Func([StableChunk], [], []),
     'retrieve' : IDL.Func([AccountIdentifier__5], [Result_4], []),
     'saleTransactions' : IDL.Func([], [IDL.Vec(SaleTransaction)], ['query']),

@@ -15,13 +15,16 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - uses: aviate-labs/setup-dfx@v0.2.5
+      - uses: aviate-labs/setup-dfx@v0.2.6
         with:
           vessel-version: 0.6.3
           dfx-version: 0.14.1
+      - name: install mops
+        run: npm i -g ic-mops
+      - name: install mops packages
+        run: mops install
       - name: test
         run: |
-            dfx identity use anonymous
             npm install
             npm run replica:no-delay
             npm run test

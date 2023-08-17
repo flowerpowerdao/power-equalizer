@@ -59,7 +59,7 @@ describe('whitelist slot 1', () => {
     let user = lucky[3];
 
     let settings = await user.mainActor.salesSettings(user.accountId);
-    let res = await user.mainActor.reserve(settings.price, 1n, user.accountId, new Uint8Array);
+    let res = await user.mainActor.reserve(user.accountId);
 
     expect(res).toHaveProperty('err');
   });
@@ -67,7 +67,7 @@ describe('whitelist slot 1', () => {
   test('user from slot 2 try to buy during slot 1', async () => {
     let user = whitelistTier1[0];
 
-    let res = await user.mainActor.reserve(env.whitelistTier0Price, 1n, user.accountId, new Uint8Array);
+    let res = await user.mainActor.reserve(user.accountId);
     expect(res).toHaveProperty('err');
   });
 });
@@ -93,7 +93,7 @@ describe('whitelist slot 2', () => {
     let settings = await user.mainActor.salesSettings(user.accountId);
     expect(settings.price).toBe(env.salePrice);
 
-    let res = await user.mainActor.reserve(env.whitelistTier0Price, 1n, user.accountId, new Uint8Array);
+    let res = await user.mainActor.reserve(user.accountId);
     expect(res).toHaveProperty('err');
   });
 
@@ -108,13 +108,27 @@ describe('whitelist slot 2', () => {
     await buyFromSale(user);
   });
 
-  test('user from both tiers did not buy during slot 1 and should be able to buy during slot 2 at tier 2 price', async () => {
+  test('user from both tiers did not buy during slot 1 try to buy at tier 1 price during slot 2', async () => {
     let user = lucky[5];
     await user.mintICP(100_000_000_000n);
 
     // try to buy at tier 1 price
-    let res = await user.mainActor.reserve(env.whitelistTier0Price, 1n, user.accountId, new Uint8Array);
-    expect(res).toHaveProperty('err');
+    let res = await user.mainActor.reserve(user.accountId);
+    expect(res).toHaveProperty('ok');
+
+    if ('ok' in res) {
+      let paymentAddress = res.ok[0];
+
+      await user.sendICP(paymentAddress, env.whitelistTier0Price);
+      let retrieveRes = await user.mainActor.retrieve(paymentAddress);
+      expect(retrieveRes).toHaveProperty('err');
+      expect(retrieveRes['err']).toMatch(/Insufficient funds/i);
+    }
+  });
+
+  test('user from both tiers did not buy during slot 1 and should be able to buy during slot 2 at tier 2 price', async () => {
+    let user = lucky[6];
+    await user.mintICP(100_000_000_000n);
 
     // should be tier 2 price
     let settings = await user.mainActor.salesSettings(user.accountId);
