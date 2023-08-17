@@ -27,7 +27,7 @@ if (dfxNetwork === 'local' && mode === 'reinstall') {
 
 let withCyclesArg = argv['with-cycles'] ? `--with-cycles=${argv['with-cycles']}` : '';
 
-let nftCanisterName = network == 'production' ? 'production' : 'staging';
+let nftCanisterName = network == 'test' ? 'test' : 'main';
 let assetsDir = path.resolve(__dirname, '../assets');
 let identityName = execSync('dfx identity whoami').toString().trim();
 let pemData = execSync(`dfx identity export ${identityName}`, execOptions).toString();
@@ -163,12 +163,12 @@ let uploadAssetsMetadata = async () => {
 
 let launch = () => {
   console.log(chalk.green('Launching...'));
-  if (dfxNetwork === 'ic' && nftCanisterName === 'production') {
+  if (dfxNetwork === 'ic') {
     console.log('initiating CAP ...');
     execSync(`dfx canister --network ${dfxNetwork} call ${nftCanisterName} initCap`, execOptions);
   }
   else {
-    console.log(chalk.yellow('skip CAP init for local network or staging canister'));
+    console.log(chalk.yellow('skip CAP init for local or staging network'));
   }
 
   console.log('initiating mint ...');

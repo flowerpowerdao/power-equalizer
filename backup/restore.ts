@@ -5,7 +5,7 @@ import { Principal } from '@dfinity/principal';
 import { ExecSyncOptions, execSync } from 'child_process';
 
 import { getActor } from './actor';
-import { type StableChunk } from '../declarations/main/staging.did';
+import { type StableChunk } from '../declarations/main/main.did';
 import { decode } from './pem';
 
 let argv = minimist(process.argv.slice(2));

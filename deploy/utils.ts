@@ -3,15 +3,15 @@ import path from 'path';
 import { Actor, HttpAgent } from '@dfinity/agent';
 
 // @ts-ignore
-import { idlFactory } from '../declarations/main/staging.did.js';
-import { _SERVICE } from '../declarations/main/staging.did.js';
+import { idlFactory } from '../declarations/main/main.did.js';
+import { _SERVICE } from '../declarations/main/main.did.js';
 import { Ed25519KeyIdentity } from '@dfinity/identity';
 import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
 
 export let getMainCanisterId = (network: string): string => {
   if (network === 'local') {
     let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../.dfx/local/canister_ids.json')).toString());
-    return ids.staging.local;
+    return ids.main.local;
   }
   else if (network === 'test') {
     let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../.dfx/local/canister_ids.json')).toString());
@@ -19,11 +19,11 @@ export let getMainCanisterId = (network: string): string => {
   }
   else if (network === 'staging') {
     let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../canister_ids.json')).toString());
-    return ids.staging.ic;
+    return ids.main.staging;
   }
   else if (network === 'production') {
     let ids = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../canister_ids.json')).toString());
-    return ids.production.ic;
+    return ids.main.ic;
   }
 };
 
