@@ -2,8 +2,8 @@ import fs from "fs";
 import { Actor, HttpAgent } from "@dfinity/agent";
 
 // @ts-ignore
-import { idlFactory } from "../declarations/ethflower/ethflower.did.js";
-import { _SERVICE } from "../declarations/ethflower/ethflower.did";
+import { idlFactory } from "../declarations/icpflower/icpflower.did.js";
+import { _SERVICE } from "../declarations/icpflower/icpflower.did.js";
 import { Ed25519KeyIdentity } from "@dfinity/identity";
 import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
 

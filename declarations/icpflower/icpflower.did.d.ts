@@ -1,6 +1,10 @@
 import type { Principal } from '@dfinity/principal';
 export type AccountIdentifier = string;
 export type AccountIdentifier__1 = string;
+export type AccountIdentifier__2 = string;
+export type AccountIdentifier__3 = string;
+export type AccountIdentifier__4 = string;
+export type AccountIdentifier__5 = string;
 export interface Asset {
   'thumbnail' : [] | [File],
   'metadata' : [] | [File],
@@ -10,7 +14,7 @@ export interface Asset {
 export type Balance = bigint;
 export interface BalanceRequest { 'token' : TokenIdentifier, 'user' : User }
 export type BalanceResponse = { 'ok' : Balance } |
-  { 'err' : CommonError__1 };
+  { 'err' : CommonError__3 };
 export type Balance__1 = bigint;
 export type CanisterCyclesAggregatedData = Array<bigint>;
 export type CanisterHeapMemoryAggregatedData = Array<bigint>;
@@ -21,6 +25,10 @@ export type CanisterMetricsData = { 'hourly' : Array<HourlyMetricsData> } |
 export type CommonError = { 'InvalidToken' : TokenIdentifier } |
   { 'Other' : string };
 export type CommonError__1 = { 'InvalidToken' : TokenIdentifier } |
+  { 'Other' : string };
+export type CommonError__2 = { 'InvalidToken' : TokenIdentifier } |
+  { 'Other' : string };
+export type CommonError__3 = { 'InvalidToken' : TokenIdentifier } |
   { 'Other' : string };
 export interface DailyMetricsData {
   'updateCalls' : bigint,
@@ -74,7 +82,7 @@ export type HttpStreamingStrategy = {
   };
 export interface ListRequest {
   'token' : TokenIdentifier__1,
-  'from_subaccount' : [] | [SubAccount__1],
+  'from_subaccount' : [] | [SubAccount],
   'price' : [] | [bigint],
 }
 export interface Listing {
@@ -84,6 +92,15 @@ export interface Listing {
 }
 export type Memo = Array<number>;
 export type Metadata = {
+    'fungible' : {
+      'decimals' : number,
+      'metadata' : [] | [Array<number>],
+      'name' : string,
+      'symbol' : string,
+    }
+  } |
+  { 'nonfungible' : { 'metadata' : [] | [Array<number>] } };
+export type Metadata__1 = {
     'fungible' : {
       'decimals' : number,
       'metadata' : [] | [Array<number>],
@@ -102,40 +119,75 @@ export interface NumericEntity {
   'last' : bigint,
 }
 export type Result = {
-    'ok' : Array<[TokenIndex, [] | [Listing], [] | [Array<number>]]>
+    'ok' : Array<[TokenIndex__1, [] | [Listing], [] | [Array<number>]]>
   } |
   { 'err' : CommonError };
-export type Result_1 = { 'ok' : Array<TokenIndex> } |
+export type Result_1 = { 'ok' : Array<TokenIndex__1> } |
   { 'err' : CommonError };
 export type Result_2 = { 'ok' : Balance__1 } |
   { 'err' : CommonError };
 export type Result_3 = { 'ok' : null } |
-  { 'err' : CommonError };
-export type Result_4 = { 'ok' : Metadata } |
-  { 'err' : CommonError };
-export type Result_5 = { 'ok' : AccountIdentifier__1 } |
-  { 'err' : CommonError };
-export type Result_6 = { 'ok' : null } |
+  { 'err' : CommonError__1 };
+export type Result_4 = { 'ok' : null } |
   { 'err' : string };
-export type Result_7 = { 'ok' : [AccountIdentifier__1, [] | [Listing]] } |
+export type Result_5 = { 'ok' : [AccountIdentifier__4, bigint] } |
+  { 'err' : string };
+export type Result_6 = { 'ok' : Metadata } |
   { 'err' : CommonError };
-export interface Settlement {
-  'subaccount' : SubAccount__1,
+export type Result_7 = { 'ok' : AccountIdentifier } |
+  { 'err' : CommonError__1 };
+export type Result_8 = { 'ok' : [AccountIdentifier, [] | [Listing]] } |
+  { 'err' : CommonError__1 };
+export type Result_9 = { 'ok' : AccountIdentifier__5 } |
+  { 'err' : CommonError__2 };
+export interface Sale {
+  'expires' : Time__1,
+  'subaccount' : SubAccount__2,
+  'tokens' : Array<TokenIndex__2>,
+  'buyer' : AccountIdentifier__4,
+  'price' : bigint,
+}
+export interface SaleSettings {
+  'startTime' : Time__1,
+  'whitelist' : boolean,
+  'totalToSell' : bigint,
+  'sold' : bigint,
+  'bulkPricing' : Array<[bigint, bigint]>,
+  'whitelistTime' : Time__1,
+  'salePrice' : bigint,
+  'remaining' : bigint,
+  'price' : bigint,
+}
+export interface SaleTransaction {
+  'time' : Time__1,
   'seller' : Principal,
-  'buyer' : AccountIdentifier__1,
+  'tokens' : Array<TokenIndex__2>,
+  'buyer' : AccountIdentifier__4,
+  'price' : bigint,
+}
+export interface Settlement {
+  'subaccount' : SubAccount,
+  'seller' : Principal,
+  'buyer' : AccountIdentifier,
   'price' : bigint,
 }
 export type SubAccount = Array<number>;
 export type SubAccount__1 = Array<number>;
+export type SubAccount__2 = Array<number>;
 export type Time = bigint;
+export type Time__1 = bigint;
 export type TokenIdentifier = string;
 export type TokenIdentifier__1 = string;
+export type TokenIdentifier__2 = string;
+export type TokenIdentifier__3 = string;
 export type TokenIndex = number;
+export type TokenIndex__1 = number;
+export type TokenIndex__2 = number;
 export interface Transaction {
   'token' : TokenIdentifier__1,
   'time' : Time,
   'seller' : Principal,
-  'buyer' : AccountIdentifier__1,
+  'buyer' : AccountIdentifier,
   'price' : bigint,
 }
 export interface TransferRequest {
@@ -144,65 +196,75 @@ export interface TransferRequest {
   'notify' : boolean,
   'from' : User,
   'memo' : Memo,
-  'subaccount' : [] | [SubAccount],
+  'subaccount' : [] | [SubAccount__1],
   'amount' : Balance,
 }
 export type TransferResponse = { 'ok' : Balance } |
   {
-    'err' : { 'CannotNotify' : AccountIdentifier } |
+    'err' : { 'CannotNotify' : AccountIdentifier__1 } |
       { 'InsufficientBalance' : null } |
       { 'InvalidToken' : TokenIdentifier } |
       { 'Rejected' : null } |
-      { 'Unauthorized' : AccountIdentifier } |
+      { 'Unauthorized' : AccountIdentifier__1 } |
       { 'Other' : string }
   };
 export type UpdateCallsAggregatedData = Array<bigint>;
 export type User = { 'principal' : Principal } |
-  { 'address' : AccountIdentifier };
+  { 'address' : AccountIdentifier__1 };
 export interface _SERVICE {
   'acceptCycles' : () => Promise<undefined>,
   'addAsset' : (arg_0: Asset) => Promise<bigint>,
-  'allPayments' : () => Promise<Array<[Principal, Array<SubAccount__1>]>>,
+  'airdropTokens' : (arg_0: bigint) => Promise<undefined>,
   'allSettlements' : () => Promise<Array<[TokenIndex, Settlement]>>,
   'availableCycles' : () => Promise<bigint>,
   'balance' : (arg_0: BalanceRequest) => Promise<BalanceResponse>,
-  'bearer' : (arg_0: TokenIdentifier__1) => Promise<Result_5>,
-  'clearPayments' : (arg_0: Principal, arg_1: Array<SubAccount__1>) => Promise<
-      undefined
-    >,
+  'bearer' : (arg_0: TokenIdentifier__3) => Promise<Result_9>,
   'collectCanisterMetrics' : () => Promise<undefined>,
-  'details' : (arg_0: TokenIdentifier__1) => Promise<Result_7>,
-  'disburse' : () => Promise<undefined>,
-  'endAuction' : () => Promise<undefined>,
+  'cronDisbursements' : () => Promise<undefined>,
+  'cronFailedSales' : () => Promise<undefined>,
+  'cronSalesSettlements' : () => Promise<undefined>,
+  'cronSettlements' : () => Promise<undefined>,
+  'details' : (arg_0: TokenIdentifier__1) => Promise<Result_8>,
   'extensions' : () => Promise<Array<Extension>>,
+  'failedSales' : () => Promise<Array<[AccountIdentifier__4, SubAccount__2]>>,
   'getCanisterMetrics' : (arg_0: GetMetricsParameters) => Promise<
       [] | [CanisterMetrics]
     >,
   'getMinter' : () => Promise<Principal>,
-  'getRegistry' : () => Promise<Array<[TokenIndex, AccountIdentifier__1]>>,
-  'getTokens' : () => Promise<Array<[TokenIndex, string]>>,
+  'getRegistry' : () => Promise<Array<[TokenIndex__1, AccountIdentifier__2]>>,
+  'getTokenToAssetMapping' : () => Promise<Array<[TokenIndex__1, string]>>,
+  'getTokens' : () => Promise<Array<[TokenIndex__1, Metadata]>>,
   'http_request' : (arg_0: HttpRequest) => Promise<HttpResponse>,
   'http_request_streaming_callback' : (
       arg_0: HttpStreamingCallbackToken,
     ) => Promise<HttpStreamingCallbackResponse>,
-  'initCap' : () => Promise<Result_6>,
+  'initCap' : () => Promise<Result_4>,
   'initMint' : () => Promise<undefined>,
   'list' : (arg_0: ListRequest) => Promise<Result_3>,
-  'listings' : () => Promise<Array<[TokenIndex, Listing, Metadata]>>,
+  'listings' : () => Promise<Array<[TokenIndex, Listing, Metadata__1]>>,
   'lock' : (
       arg_0: TokenIdentifier__1,
       arg_1: bigint,
-      arg_2: AccountIdentifier__1,
-      arg_3: SubAccount__1,
+      arg_2: AccountIdentifier,
+      arg_3: SubAccount,
+    ) => Promise<Result_7>,
+  'metadata' : (arg_0: TokenIdentifier__2) => Promise<Result_6>,
+  'pendingCronJobs' : () => Promise<Array<bigint>>,
+  'reserve' : (
+      arg_0: bigint,
+      arg_1: bigint,
+      arg_2: AccountIdentifier__4,
+      arg_3: SubAccount__2,
     ) => Promise<Result_5>,
-  'metadata' : (arg_0: TokenIdentifier__1) => Promise<Result_4>,
-  'payments' : () => Promise<[] | [Array<SubAccount__1>]>,
-  'setMinter' : (arg_0: Principal) => Promise<undefined>,
+  'retreive' : (arg_0: AccountIdentifier__4) => Promise<Result_4>,
+  'saleTransactions' : () => Promise<Array<SaleTransaction>>,
+  'salesSettings' : (arg_0: AccountIdentifier__3) => Promise<SaleSettings>,
+  'salesSettlements' : () => Promise<Array<[AccountIdentifier__4, Sale]>>,
+  'setTotalToSell' : () => Promise<bigint>,
   'settle' : (arg_0: TokenIdentifier__1) => Promise<Result_3>,
-  'settlements' : () => Promise<
-      Array<[TokenIndex, AccountIdentifier__1, bigint]>
-    >,
+  'settlements' : () => Promise<Array<[TokenIndex, AccountIdentifier, bigint]>>,
   'shuffleAssets' : () => Promise<undefined>,
+  'shuffleTokensForSale' : () => Promise<undefined>,
   'stats' : () => Promise<
       [bigint, bigint, bigint, bigint, bigint, bigint, bigint]
     >,
@@ -212,9 +274,13 @@ export interface _SERVICE {
       arg_2: Array<number>,
     ) => Promise<undefined>,
   'supply' : () => Promise<Result_2>,
-  'tokens' : (arg_0: AccountIdentifier__1) => Promise<Result_1>,
-  'tokens_ext' : (arg_0: AccountIdentifier__1) => Promise<Result>,
+  'toAddress' : (arg_0: string, arg_1: bigint) => Promise<AccountIdentifier__3>,
+  'tokens' : (arg_0: AccountIdentifier__2) => Promise<Result_1>,
+  'tokens_ext' : (arg_0: AccountIdentifier__2) => Promise<Result>,
   'transactions' : () => Promise<Array<Transaction>>,
   'transfer' : (arg_0: TransferRequest) => Promise<TransferResponse>,
   'updateThumb' : (arg_0: string, arg_1: File) => Promise<[] | [bigint]>,
+  'viewDisbursements' : () => Promise<
+      Array<[TokenIndex, AccountIdentifier, SubAccount, bigint]>
+    >,
 }
