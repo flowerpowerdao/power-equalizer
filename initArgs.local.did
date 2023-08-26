@@ -1,5 +1,5 @@
 (
-  principal "dhiaa-ryaaa-aaaae-qabva-cai", // staging canister
+  principal "4ggk4-mqaaa-aaaae-qad6q-cai", // staging canister
   record {
     restoreEnabled = opt true;
     name = "Collection Name";

@@ -2,7 +2,7 @@ import { getActor as getEthflowerActor } from "./ethflowerActor";
 import { getActor } from "./actor";
 import { Listing } from "../declarations/ethflower/ethflower.did";
 
-let localActor = getActor("local", "dhiaa-ryaaa-aaaae-qabva-cai");
+let localActor = getActor("local", "4ggk4-mqaaa-aaaae-qad6q-cai");
 let remoteActor = getEthflowerActor("ic");
 
 function serializeBigInt(key, value) {

@@ -13,7 +13,7 @@ export let getActor = (
 ) => {
   let host = network == "ic" ? "https://ic0.app" : "http://127.0.0.1:4943";
 
-  let canisterId = "dhiaa-ryaaa-aaaae-qabva-cai";
+  let canisterId = "4ggk4-mqaaa-aaaae-qad6q-cai";
 
   let agent = new HttpAgent({ host, identity });
   if (network == "local") {
