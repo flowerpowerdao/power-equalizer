@@ -2,8 +2,8 @@ import { getActor as getEthflowerActor } from "./ethflowerActor";
 import { getActor } from "./actor";
 import { Listing } from "../declarations/ethflower/ethflower.did";
 
-let powerActor = getActor("local", "dhiaa-ryaaa-aaaae-qabva-cai");
-let legacyActor = getEthflowerActor("ic");
+let localActor = getActor("local", "dhiaa-ryaaa-aaaae-qabva-cai");
+let remoteActor = getEthflowerActor("ic");
 
 function serializeBigInt(key, value) {
   if (typeof value === "bigint") {
@@ -14,8 +14,8 @@ function serializeBigInt(key, value) {
 
 // compare registry
 async function compareRegistry() {
-  const localRegistry = (await powerActor.getRegistry()).sort();
-  const mainRegistry = (await legacyActor.getRegistry()).sort();
+  const localRegistry = (await localActor.getRegistry()).sort();
+  const mainRegistry = (await remoteActor.getRegistry()).sort();
 
   // check if the two arrays are equal
   if (JSON.stringify(localRegistry) !== JSON.stringify(mainRegistry)) {
@@ -25,8 +25,8 @@ async function compareRegistry() {
 
 // compare token to asset mapping
 async function compareTokenToAsset() {
-  const localTokens = (await powerActor.getTokenToAssetMapping()).sort();
-  const mainTokens = (await legacyActor.getTokens()).sort();
+  const localTokens = (await localActor.getTokenToAssetMapping()).sort();
+  const mainTokens = (await remoteActor.getTokens()).sort();
 
   // check if the two arrays are equal
   if (JSON.stringify(localTokens) !== JSON.stringify(mainTokens)) {
@@ -36,7 +36,7 @@ async function compareTokenToAsset() {
 
 // compare owners
 async function compareOwners() {
-  const localRegistry = (await powerActor.getRegistry()).sort();
+  const localRegistry = (await localActor.getRegistry()).sort();
   // bin the registry by owners
   const localOwners = localRegistry.reduce((acc, [token, owner]) => {
     if (!acc[owner]) {
@@ -48,8 +48,8 @@ async function compareOwners() {
 
   // for each owner, call call both actors `tokens` method and compare the results
   for (const owner in localOwners) {
-    const localTokens = await powerActor.tokens(owner);
-    const mainTokens = await legacyActor.tokens(owner);
+    const localTokens = await localActor.tokens(owner);
+    const mainTokens = await remoteActor.tokens(owner);
 
     if ("ok" in localTokens && "ok" in mainTokens) {
       // sort the tokens
@@ -69,7 +69,7 @@ async function compareOwners() {
 
 // compare tokenListing
 async function compareTokenListing() {
-  const localTokenListing: [number, Listing][] = (await powerActor.listings())
+  const localTokenListing: [number, Listing][] = (await localActor.listings())
     .map((listing) => {
       return [
         listing[0],
@@ -81,7 +81,7 @@ async function compareTokenListing() {
       ] as [number, Listing];
     })
     .sort();
-  const mainTokenListing: [number, Listing][] = (await legacyActor.listings())
+  const mainTokenListing: [number, Listing][] = (await remoteActor.listings())
     .map((listing) => {
       return [listing[0], listing[1]] as [number, Listing];
     })
@@ -98,8 +98,8 @@ async function compareTokenListing() {
 
 // compare transactions
 async function compareTransactions() {
-  const localTransactions = (await powerActor.transactions()).sort();
-  const mainTransactions = (await legacyActor.transactions())
+  const localTransactions = (await localActor.transactions()).sort();
+  const mainTransactions = (await remoteActor.transactions())
     .sort()
     .map((t) => {
       return {
@@ -124,8 +124,8 @@ async function compareTransactions() {
 
 // compare supply
 async function compareSupply() {
-  const localSupply = await powerActor.supply();
-  const mainSupply = await legacyActor.supply();
+  const localSupply = await localActor.supply();
+  const mainSupply = await remoteActor.supply();
 
   // compare the supply
   if (
@@ -135,6 +135,8 @@ async function compareSupply() {
     console.warn("Supply is not equal ");
   }
 }
+
+// WARNING: there were no sales for ETH Flower!
 
 // compare sale transactions
 // async function compareSaleTransactions() {
