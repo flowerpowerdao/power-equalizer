@@ -1,9 +1,9 @@
-import { getActor as getEthflowerActor } from "./ethflowerActor";
+import { getActor as geticpflowerActor } from "./icpflowerActor";
 import { getActor } from "./actor";
 import { Listing } from "../declarations/icpflower/icpflower.did";
 
 let localActor = getActor("local", "4ggk4-mqaaa-aaaae-qad6q-cai");
-let remoteActor = getEthflowerActor("ic");
+let remoteActor = geticpflowerActor("ic");
 
 function serializeBigInt(key, value) {
   if (typeof value === "bigint") {

@@ -1,9 +1,9 @@
 import fs from "fs";
 import path from "path";
 import { AssetV2, StableChunk__1 } from "../declarations/main/staging.did";
-import { getOrder } from "./ethflowerNFTOrder";
+import { getOrder } from "./icpflowerNFTOrder";
 
-let metadataPath = path.resolve(__dirname, "data", "ethflower.json");
+let metadataPath = path.resolve(__dirname, "data", "icpflower.json");
 if (!fs.existsSync(metadataPath)) {
   throw new Error(`File ${metadataPath} not found`);
 }

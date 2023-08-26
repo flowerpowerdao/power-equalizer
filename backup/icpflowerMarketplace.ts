@@ -4,7 +4,7 @@ import {
   StableChunk__3,
   TransactionV2,
 } from "../declarations/main/staging.did";
-import { getActor } from "./ethflowerActor";
+import { getActor } from "./icpflowerActor";
 let mainActor = getActor("ic");
 
 export async function marketplace() {

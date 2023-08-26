@@ -1,4 +1,4 @@
-import { getActor } from "./ethflowerActor";
+import { getActor } from "./icpflowerActor";
 let mainActor = getActor("ic");
 
 export async function getOrder() {

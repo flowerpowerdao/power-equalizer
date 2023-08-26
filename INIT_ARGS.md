@@ -129,7 +129,7 @@ Place the nearest and cheapest whiteslist first.
 ```candid
 whitelists = vec {
   record {
-    name = "ethflower";
+    name = "icpflower";
     price = 350000000; // 3.5 ICP
     oneTimeOnly = true; // whitelist addresses are removed after purchase
     startTime = 1681992566953000000;

@@ -53,7 +53,7 @@ export default () => {
     dutchAuctionInterval: 60000000000n, // 1 minute
     airdrop: airdrop.map(user => user.accountId),
     // order from lower price to higher price
-    whitelistTier0Name: 'ethflower',
+    whitelistTier0Name: 'icpflower',
     whitelistTier0Price: 350000000n,
     whitelistTier0Whitelist: whitelistTier0.map(user => user.accountId),
     whitelistTier1Name: 'modclub',

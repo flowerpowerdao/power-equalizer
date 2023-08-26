@@ -2,10 +2,10 @@ import fs from "fs";
 import path from "path";
 import { Principal } from "@dfinity/principal";
 import { StableChunk } from "../declarations/main/staging.did";
-import { marketplace } from "./ethflowerMarketplace";
-import { sale } from "./ethflowerSale";
-import { tokens } from "./ethflowerTokens";
-import { assets } from "./ethflowerAssets";
+import { marketplace } from "./icpflowerMarketplace";
+import { sale } from "./icpflowerSale";
+import { tokens } from "./icpflowerTokens";
+import { assets } from "./icpflowerAssets";
 
 let file =
   new Date()
