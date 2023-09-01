@@ -3,7 +3,7 @@ import path from "path";
 import { AssetV2, StableChunk__1 } from "../declarations/main/staging.did";
 import { getOrder } from "./icpflowerNFTOrder";
 
-let metadataPath = path.resolve(__dirname, "data", "icpflower.json");
+let metadataPath = path.resolve(__dirname, "data", "metadata.json");
 if (!fs.existsSync(metadataPath)) {
   throw new Error(`File ${metadataPath} not found`);
 }
