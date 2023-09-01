@@ -26,7 +26,7 @@ async function compareRegistry() {
 // compare token to asset mapping
 async function compareTokenToAsset() {
   const localTokens = (await localActor.getTokenToAssetMapping()).sort();
-  const mainTokens = (await remoteActor.getTokens()).sort();
+  const mainTokens = (await remoteActor.getTokenToAssetMapping()).sort();
 
   // check if the two arrays are equal
   if (JSON.stringify(localTokens) !== JSON.stringify(mainTokens)) {
