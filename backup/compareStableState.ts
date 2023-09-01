@@ -136,21 +136,19 @@ async function compareSupply() {
   }
 }
 
-// WARNING: there were no sales for ETH Flower!
-
 // compare sale transactions
-// async function compareSaleTransactions() {
-//   const localSaleTransactions = (await powerActor.saleTransactions()).sort();
-//   const mainSaleTransactions = (await legacyActor.saleTransactions()).sort();
+async function compareSaleTransactions() {
+  const localSaleTransactions = (await localActor.saleTransactions()).sort();
+  const mainSaleTransactions = (await remoteActor.saleTransactions()).sort();
 
-//   // check if the two arrays are equal
-//   if (
-//     JSON.stringify(localSaleTransactions, serializeBigInt) !==
-//     JSON.stringify(mainSaleTransactions, serializeBigInt)
-//   ) {
-//     console.warn("Sale transactions are not equal ");
-//   }
-// }
+  // check if the two arrays are equal
+  if (
+    JSON.stringify(localSaleTransactions, serializeBigInt) !==
+    JSON.stringify(mainSaleTransactions, serializeBigInt)
+  ) {
+    console.warn("Sale transactions are not equal ");
+  }
+}
 
 compareRegistry();
 compareTokenToAsset();
@@ -158,4 +156,4 @@ compareOwners();
 compareTokenListing();
 compareTransactions();
 compareSupply();
-// compareSaleTransactions();
+compareSaleTransactions();
