@@ -31,17 +31,17 @@ export async function assets() {
 }
 
 async function getAssets() {
-  let metadata: {
-    mint_number: number;
-    background: string;
-    flower: string;
-    coin: string;
-    grave: string;
+  let collectionMetadata: {
+    background: string | null;
+    flower: string | null;
+    grave: string | null;
+    coin: string | null;
+    logo: string | null;
+    unique: string | null;
   }[] = JSON.parse(fs.readFileSync(metadataPath).toString());
   let order = await getOrder();
 
-  let assetsChunk: AssetV2[] = order.map((nftIndex) => {
-    let { mint_number, ...metadataWithoutMintnumber } = metadata[nftIndex - 1];
+  let assetsChunk: AssetV2[] = order.map((nftIndex, index) => {
     return {
       thumbnail: [],
       payloadUrl: [
@@ -52,9 +52,7 @@ async function getAssets() {
       ],
       metadata: [
         {
-          data: [
-            new TextEncoder().encode(JSON.stringify(metadataWithoutMintnumber)),
-          ],
+          data: [new TextEncoder().encode(JSON.stringify(collectionMetadata[index]))],
           ctype: "application/json",
         },
       ],

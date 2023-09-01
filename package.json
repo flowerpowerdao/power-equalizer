@@ -30,6 +30,7 @@
     "test": "npm run test:unit && npm run test:e2e",
     "backup": "tsx ./backup/backup.ts",
     "icp-backup": "tsx ./backup/icpflowerBackup.ts",
+    "icp-metadata" : "tsx ./backup/getMetadata.ts",
     "restore": "tsx ./backup/restore.ts",
     "test-br": "npm run deploy-test && tsx ./backup/test.ts",
     "test-br-assets": "tsx ./backup/test-assets.ts",
@@ -52,5 +53,8 @@
     "typescript": "^4.9.4",
     "vite": "^4.3.9",
     "vitest": "^0.31.1"
+  },
+  "dependencies": {
+    "ext": "github:Toniq-Labs/ext-js"
   }
 }
