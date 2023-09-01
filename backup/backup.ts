@@ -87,7 +87,7 @@ export let backup = async ({ network, file, chunkSize }) => {
   chunks[0].v2.tokens[0].v1.tokenMetadata.sort((a, b) => a[0] - b[0]);
 
   // sort registry by token id
-  chunks[0].v2.tokens[0].v1.registry.sort((a, b) => a[0] - b[0]);
+  // chunks[0].v2.tokens[0].v1.registry.sort((a, b) => a[0] - b[0]);
 
   // sort listings by token id
   if ("v2" in chunks[0].v2.marketplace[0]) {
