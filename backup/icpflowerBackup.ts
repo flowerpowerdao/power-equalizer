@@ -18,19 +18,18 @@ let file =
 export let backup = async ({ file }) => {
   console.log(`Backup file: ${file}`);
 
-
   let backup: StableChunk[] = [
     {
       v2: {
         marketplace: await marketplace(),
         assets: await assets(),
         sale: await sale(),
-        "disburser": [
+        disburser: [
           {
-            "v1": {
-              "disbursements": []
-            }
-          }
+            v1: {
+              disbursements: [],
+            },
+          },
         ],
         tokens: await tokens(),
       },
@@ -58,7 +57,6 @@ export let backup = async ({ file }) => {
       "  "
     )
   );
-
 
   console.log(`Backup successfully saved to backup/data/${file}`);
 };

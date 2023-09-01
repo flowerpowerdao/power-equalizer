@@ -10,9 +10,9 @@ export async function tokens() {
       v1: {
         owners: getOwners(registry),
         tokenMetadata: getTokenMetadata(),
-        supply: 2015n,
+        supply: 2021n,
         registry,
-        nextTokenId: 2015,
+        nextTokenId: 2021,
       },
     },
   ];
@@ -20,7 +20,7 @@ export async function tokens() {
 }
 function getTokenMetadata(): [number, Metadata][] {
   const tokenMetadata: [number, Metadata][] = [];
-  for (let i = 0; i < 2015; i++) {
+  for (let i = 0; i < 2021; i++) {
     let item: [number, Metadata] = [
       i,
       {
